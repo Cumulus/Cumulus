@@ -20,21 +20,13 @@ let init_test_ervice =
     ~path: ["init_test"]
     ~get_params: Eliom_parameters.unit
     (fun () () ->
-        let nb = Eliom_references.eref
-          ~scope: Eliom_common.site
-          ~persistent: "nlink"
-          0
-        and eref = Eliom_references.eref
-          ~scope: Eliom_common.site
-          ~persistent: ("feed_1")
-          None in
-        ignore (Eliom_references.set eref (Some "TEST !") >>= (fun () ->
-          Eliom_references.set nb 1));
+      let table = Ocsipersist.open_table "feeds" in
+      Ocsipersist.add table "1" "TEST !" >>= (fun () ->
         Lwt.return
           (Html.html
              (Html.head (Html.title (Html.pcdata "Hello World")) [])
              (Html.body [])
-          )
+          ))
     )
 
 let test_service =
@@ -50,14 +42,8 @@ let test_service =
                  (Html.head (Html.title (Html.pcdata "Hello World")) [])
                  (Html.body tmp)
               )
-          | [x] -> x >>= (fun maybe_str ->
-            match maybe_str with
-              | None -> f tmp []
-              | (Some str) -> f (tmp @ [Html.p [Html.pcdata str]]) [])
-          | x::xs -> x >>= (fun maybe_str ->
-            match maybe_str with
-              | None -> f tmp xs
-              | (Some str) -> f (tmp @ [Html.p [Html.pcdata str]]) xs) in
+          | [x] -> f (tmp @ [Html.p [Html.pcdata x]]) []
+          | x::xs -> f (tmp @ [Html.p [Html.pcdata x]]) xs in
         f [] feeds)
     )
 

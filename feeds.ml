@@ -1,13 +1,8 @@
-(* Does it need Mutex ??? *)
+(* TODO: Add a mutex *)
 let feeds_new () =
-  let nb = Eliom_references.eref
-    ~scope: Eliom_common.site
-    ~persistent: "nlink"
-    0 in
-  let rec inner n tmp =
-    if n >= 0 then
-      inner (n - 1) (tmp @ [Feed.feed_new n])
-    else
-      tmp
-  and packed_nb = Eliom_references.get nb in
-  packed_nb >>= (fun number -> Lwt.return (inner number []))
+  let table = Ocsipersist.open_table "feeds"
+  and ret = ref [] in
+  Ocsipersist.iter_table (fun a b ->
+    (* FIXME: PLLEEAAASSE I need a non-ugly example for that *)
+    ret := (!ret) @ [Feed.feed_new b];
+    Lwt.return ()) table >>= (fun () -> Lwt.return (!ret))
