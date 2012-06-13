@@ -31,7 +31,6 @@ let test_service =
           | [x] -> x >>= (fun str -> f (tmp @ [str]) [])
           | x::xs -> x >>= (fun str -> f (tmp @ [str]) xs) in
         f [] feeds)
-      )
     )
 
 let main_service =
