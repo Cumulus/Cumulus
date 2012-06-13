@@ -35,6 +35,7 @@ let test_service =
     ~get_params: Eliom_parameters.unit
     (fun () () ->
       Feeds.feeds_new () >>= (fun feeds ->
+        let currify f tmp x = f (tmp @ [Html.p [Html.pcdata x]]) in
         let rec f tmp = function
           | [] ->
             Lwt.return
@@ -42,8 +43,8 @@ let test_service =
                  (Html.head (Html.title (Html.pcdata "Hello World")) [])
                  (Html.body tmp)
               )
-          | [x] -> f (tmp @ [Html.p [Html.pcdata x]]) []
-          | x::xs -> f (tmp @ [Html.p [Html.pcdata x]]) xs in
+          | [x] -> currify f tmp x []
+          | x::xs -> currify f tmp x xs in
         f [] feeds)
     )
 
