@@ -15,6 +15,25 @@ let atom_service =
         )
     )
 
+let test_service =
+  Eliom_output.Html5.register_service
+    ~path: ["test"]
+    ~get_params: Eliom_parameters.unit
+    (fun () () ->
+      Feeds.feeds_new () >>= (fun feeds ->
+        let rec f tmp = function
+          | [] ->
+            Lwt.return
+              (Html.html
+                 (Html.head (Html.title (Html.pcdata "Hello World")) [])
+                 (Html.body tmp)
+              )
+          | [x] -> x >>= (fun str -> f (tmp @ [str]) [])
+          | x::xs -> x >>= (fun str -> f (tmp @ [str]) xs) in
+        f [] feeds)
+      )
+    )
+
 let main_service =
   Eliom_output.Html5.register_service
     ~path: [""]
