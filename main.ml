@@ -15,6 +15,28 @@ let atom_service =
         )
     )
 
+let init_test_ervice =
+  Eliom_output.Html5.register_service
+    ~path: ["init_test"]
+    ~get_params: Eliom_parameters.unit
+    (fun () () ->
+        let nb = Eliom_references.eref
+          ~scope: Eliom_common.site
+          ~persistent: "nlink"
+          0
+        and eref = Eliom_references.eref
+          ~scope: Eliom_common.site
+          ~persistent: ("feed_1")
+          None in
+        ignore (Eliom_references.set eref (Some "TEST !") >>= (fun () ->
+          Eliom_references.set nb 1));
+        Lwt.return
+          (Html.html
+             (Html.head (Html.title (Html.pcdata "Hello World")) [])
+             (Html.body [])
+          )
+    )
+
 let test_service =
   Eliom_output.Html5.register_service
     ~path: ["test"]
