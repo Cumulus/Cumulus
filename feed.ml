@@ -4,6 +4,6 @@ exception FeedError
 let feed_new n =
   let eref = Eliom_references.eref_from_fun
     ~scope: Eliom_common.site
-    ~persistent: (string_of_int n)
-    (fun () -> raise FeedError) in
+    ~persistent: ("feed_" ^ (string_of_int n))
+    (fun () -> None) in
   Eliom_references.get eref

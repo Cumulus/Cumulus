@@ -28,8 +28,14 @@ let test_service =
                  (Html.head (Html.title (Html.pcdata "Hello World")) [])
                  (Html.body tmp)
               )
-          | [x] -> x >>= (fun str -> f (tmp @ [str]) [])
-          | x::xs -> x >>= (fun str -> f (tmp @ [str]) xs) in
+          | [x] -> x >>= (fun maybe_str ->
+            match maybe_str with
+              | None -> f tmp []
+              | (Some str) -> f (tmp @ [Html.p [Html.pcdata str]]) [])
+          | x::xs -> x >>= (fun maybe_str ->
+            match maybe_str with
+              | None -> f tmp xs
+              | (Some str) -> f (tmp @ [Html.p [Html.pcdata str]]) xs) in
         f [] feeds)
     )
 

@@ -6,10 +6,7 @@ let feeds_new () =
     0 in
   let rec inner n tmp =
     if n >= 0 then
-      inner (n - 1) (
-        try (tmp @ [Feed.feed_new n])
-        with Feed.FeedError -> tmp
-      )
+      inner (n - 1) (tmp @ [Feed.feed_new n])
     else
       tmp
   and packed_nb = Eliom_references.get nb in
