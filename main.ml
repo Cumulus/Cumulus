@@ -1,4 +1,4 @@
-module Html = Eliom_content.Html5
+module Html = Eliom_content.Html5.D
 module Xml = Eliom_content_core.Xml
 module Calendar = CalendarLib.Calendar
 
@@ -25,9 +25,9 @@ let init_test_service =
       and table = Ocsipersist.open_table "feeds" in
       Ocsipersist.add table "http://url" ("TEST !", date, "Me") >>= (fun () ->
         Lwt.return
-          (Html.D.html
-             (Html.D.head (Html.D.title (Html.D.pcdata "Hello World")) [])
-             (Html.D.body [])
+          (Html.html
+             (Html.head (Html.title (Html.pcdata "Hello World")) [])
+             (Html.body [])
           ))
     )
 
@@ -45,21 +45,21 @@ let test_service =
     ~get_params: Eliom_parameter.unit
     (fun () () ->
       Feeds.feeds_new () >>= (fun feeds ->
-        let currify f tmp x = f (tmp @ [Html.D.p [
-          Html.D.pcdata ("url: " ^ x.Feed.url);
-          Html.D.br ();
-          Html.D.pcdata ("title: " ^ x.Feed.title);
-          Html.D.br ();
-          Html.D.pcdata ("date: " ^ (string_of_calendar x.Feed.date));
-          Html.D.br ();
-          Html.D.pcdata ("author: " ^ x.Feed.author)
+        let currify f tmp x = f (tmp @ [Html.p [
+          Html.pcdata ("url: " ^ x.Feed.url);
+          Html.br ();
+          Html.pcdata ("title: " ^ x.Feed.title);
+          Html.br ();
+          Html.pcdata ("date: " ^ (string_of_calendar x.Feed.date));
+          Html.br ();
+          Html.pcdata ("author: " ^ x.Feed.author)
         ]]) in
         let rec f tmp = function
           | [] ->
             Lwt.return
-              (Html.D.html
-                 (Html.D.head (Html.D.title (Html.D.pcdata "Hello World")) [])
-                 (Html.D.body tmp)
+              (Html.html
+                 (Html.head (Html.title (Html.pcdata "Hello World")) [])
+                 (Html.body tmp)
               )
           | [x] -> currify f tmp x []
           | x::xs -> currify f tmp x xs in
@@ -72,11 +72,11 @@ let main_service =
     ~get_params: Eliom_parameter.unit
     (fun () () ->
       Lwt.return
-        (Html.D.html
-           (Html.D.head (Html.D.title (Html.D.pcdata "Hello World")) [])
-           (Html.D.body [
-             Html.D.p [
-               Html.D.pcdata "Hello World"
+        (Html.html
+           (Html.head (Html.title (Html.pcdata "Hello World")) [])
+           (Html.body [
+             Html.p [
+               Html.pcdata "Hello World"
              ]
            ])
         )
