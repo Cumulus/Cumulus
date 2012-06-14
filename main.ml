@@ -15,7 +15,7 @@ let atom_service =
         )
     )
 
-let init_test_ervice =
+let init_test_service =
   Eliom_output.Html5.register_service
     ~path: ["init_test"]
     ~get_params: Eliom_parameters.unit
