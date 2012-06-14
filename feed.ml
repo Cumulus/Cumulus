@@ -1,7 +1,9 @@
+module Calendar = CalendarLib.Calendar
+
 type feed = {
   url : string;
   title : string;
-  date : int;
+  date : Calendar.t;
   author : string
 }
 
