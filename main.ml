@@ -20,8 +20,9 @@ let init_test_ervice =
     ~path: ["init_test"]
     ~get_params: Eliom_parameters.unit
     (fun () () ->
-      let table = Ocsipersist.open_table "feeds" in
-      Ocsipersist.add table "1" "TEST !" >>= (fun () ->
+      let date = Calendar.now ()
+      and table = Ocsipersist.open_table "feeds" in
+      Ocsipersist.add table "http://url" ("TEST !", date, "Me") >>= (fun () ->
         Lwt.return
           (Html.html
              (Html.head (Html.title (Html.pcdata "Hello World")) [])
@@ -35,7 +36,15 @@ let test_service =
     ~get_params: Eliom_parameters.unit
     (fun () () ->
       Feeds.feeds_new () >>= (fun feeds ->
-        let currify f tmp x = f (tmp @ [Html.p [Html.pcdata x]]) in
+        let currify f tmp x = f (tmp @ [Html.p [
+          Html.pcdata ("url: " ^ x.Feed.url);
+          Html.br ();
+          Html.pcdata ("title: " ^ x.Feed.title);
+          Html.br ();
+          Html.pcdata ("date: " ^ (string_of_int x.Feed.date));
+          Html.br ();
+          Html.pcdata ("author: " ^ x.Feed.author)
+        ]]) in
         let rec f tmp = function
           | [] ->
             Lwt.return
