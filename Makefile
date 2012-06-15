@@ -6,6 +6,7 @@ DEST = _server
 NAME = $(DEST)/cumulus.cma
 MODULES = utils.ml \
 	  html.ml \
+	  feed.mli \
 	  feed.ml \
 	  feeds.mli \
 	  feeds.ml \

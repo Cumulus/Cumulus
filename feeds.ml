@@ -10,17 +10,9 @@ let feeds_new () =
 
 let to_html self =
   self >>= (fun self ->
-    let content tmp x =
+    let content tmp feed =
       tmp @ [
-        Html.p [
-          Html.pcdata ("url: " ^ x.Feed.url);
-          Html.br ();
-          Html.pcdata ("title: " ^ x.Feed.title);
-          Html.br ();
-          Html.pcdata ("date: " ^ (Utils.string_of_calendar x.Feed.date));
-          Html.br ();
-          Html.pcdata ("author: " ^ x.Feed.author)
-        ]
+        Html.p (Feed.to_html feed)
       ] in
       let rec f tmp = function
         | [] ->
