@@ -16,19 +16,40 @@ let atom_service =
         )
     )
 
+let init_test_service_with_string =
+  Eliom_registration.Html5.register_service
+    ~path: ["init_test"]
+    ~get_params: (Eliom_parameter.string "url")
+    (fun url () ->
+      let date = Calendar.now ()
+      and table = Ocsipersist.open_table "feeds" in
+      Ocsipersist.add table url ("TEST !", date, "Me") >>= (fun () ->
+        Lwt.return
+          (Html.html
+             (Html.head (Html.title (Html.pcdata "Hello World")) [])
+             (Html.body [])
+          )
+      )
+    )
+
 let init_test_service =
   Eliom_registration.Html5.register_service
     ~path: ["init_test"]
     ~get_params: Eliom_parameter.unit
     (fun () () ->
-      let date = Calendar.now ()
-      and table = Ocsipersist.open_table "feeds" in
-      Ocsipersist.add table "http://url" ("TEST !", date, "Me") >>= (fun () ->
-        Lwt.return
-          (Html.html
-             (Html.head (Html.title (Html.pcdata "Hello World")) [])
-             (Html.body [])
-          ))
+      Lwt.return
+        (Html.html
+           (Html.head (Html.title (Html.pcdata "Hello World")) [])
+           (Html.body [
+             Html.get_form
+               init_test_service_with_string
+               (fun string_name -> [
+                 Html.p [
+                   Html.string_input ~input_type: `Text ~name: string_name ();
+                   Html.string_input ~input_type: `Submit ~value: "Send" ()
+                 ]])
+           ])
+        )
     )
 
 let string_of_calendar cal =
