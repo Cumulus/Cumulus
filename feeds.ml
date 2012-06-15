@@ -40,5 +40,13 @@ let to_atom self =
     )
     Feed.to_atom
 
-let append_feed self feed =
-  Feed.write feed (Ocsipersist.add self)
+let append_feed self (url, title) =
+  let feed = Feed.feed_new_from_new url title in
+  Lwt.try_bind
+    (fun () -> Ocsipersist.find self url)
+    (fun _ -> Lwt.return false)
+    (fun _ ->
+      Feed.write feed (Ocsipersist.add self) >>= (fun () ->
+        Lwt.return true
+      )
+    )
