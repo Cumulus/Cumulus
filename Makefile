@@ -1,4 +1,9 @@
 ELIOMC = eliomc
 
+SRC = utils.ml \
+      feed.ml \
+      feeds.ml \
+      main.ml
+
 all:
-	$(ELIOMC) -a *.ml -o _server/cumulus.cma
+	$(ELIOMC) -a $(SRC) -o _server/cumulus.cma
