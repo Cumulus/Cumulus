@@ -1,3 +1,5 @@
+type feeds = (Feed.feed list) Lwt.t
+
 let feeds_new () =
   let table = Ocsipersist.open_table "feeds"
   and ret = ref [] in

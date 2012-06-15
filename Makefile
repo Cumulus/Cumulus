@@ -1,10 +1,29 @@
 ELIOMC = eliomc
+RM = rm -f
 
-SRC = utils.ml \
-      html.ml \
-      feed.ml \
-      feeds.ml \
-      main.ml
+DEST = _server
 
-all:
-	$(ELIOMC) -a $(SRC) -o _server/cumulus.cma
+NAME = $(DEST)/cumulus.cma
+MODULES = utils.ml \
+	  html.ml \
+	  feed.ml \
+	  feeds.mli \
+	  feeds.ml \
+	  main.ml
+
+OBJ := $(patsubst %.ml, $(DEST)/%.cmo, $(MODULES))
+OBJ := $(patsubst %.mli, $(DEST)/%.cmi, $(OBJ))
+
+all: $(OBJ_INTERFACES) $(NAME)
+
+$(NAME): $(OBJ)
+	$(ELIOMC) -a $(filter %.cmo, $^) -o $@
+
+$(DEST)/%.cmo: %.ml
+	$(ELIOMC) $< -o $@
+
+$(DEST)/%.cmi: %.mli
+	$(ELIOMC) $< -o $@
+
+clean:
+	$(RM) $(OBJ) $(NAME)
