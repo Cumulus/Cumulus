@@ -12,11 +12,11 @@ let atom_service =
 let init_test_service_with_string =
   Eliom_registration.Html5.register_service
     ~path: ["init_test"]
-    ~get_params: (Eliom_parameter.string "url")
-    (fun url () ->
+    ~get_params: Eliom_parameter.((string "url") ** (string "title"))
+    (fun (url, title) () ->
       let date = Calendar.now ()
       and table = Ocsipersist.open_table "feeds" in
-      Ocsipersist.add table url ("TEST !", date, "Me") >>= (fun () ->
+      Ocsipersist.add table url (title, date, "Me") >>= (fun () ->
         Lwt.return
           (Html.html
              (Html.head (Html.title (Html.pcdata "Hello World")) [])
@@ -36,9 +36,10 @@ let init_test_service =
            (Html.body [
              Html.get_form
                init_test_service_with_string
-               (fun string_name -> [
+               (fun (url_name, title_name) -> [
                  Html.p [
-                   Html.string_input ~input_type: `Text ~name: string_name ();
+                   Html.string_input ~input_type: `Text ~name: url_name ();
+                   Html.string_input ~input_type: `Text ~name: title_name ();
                    Html.string_input ~input_type: `Submit ~value: "Send" ()
                  ]])
            ])
