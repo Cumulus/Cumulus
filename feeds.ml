@@ -1,18 +1,20 @@
 module Calendar = CalendarLib.Calendar
 module Xml = Eliom_content_core.Xml
 
-type feeds = (Feed.feed list) Lwt.t
+type feeds = Feed.feed_content Ocsipersist.table
 
 let feeds_new () =
-  let table = Ocsipersist.open_table "feeds"
-  and ret = ref [] in
+  Ocsipersist.open_table "feeds"
+
+let get_all self =
+  let ret = ref [] in
   Ocsipersist.iter_table (fun url data ->
     (* FIXME: PLLEEAAASSE I need a non-ugly example for that *)
     ret := (!ret) @ [Feed.feed_new url data];
-    Lwt.return ()) table >>= (fun () -> Lwt.return (!ret))
+    Lwt.return ()) self >>= (fun () -> Lwt.return (!ret))
 
 let to_something self shell entity =
-  self >>= (fun self ->
+  get_all self >>= (fun self ->
     let content tmp feed = tmp @ [entity feed] in
     let rec f tmp = function
       | [] -> Lwt.return (shell tmp)
