@@ -14,9 +14,9 @@ let init_test_service_with_string =
     ~path: ["init_test"]
     ~get_params: Eliom_parameter.((string "url") ** (string "title"))
     (fun (url, title) () ->
-      let date = Calendar.now ()
-      and table = Ocsipersist.open_table "feeds" in
-      Ocsipersist.add table url (title, date, "Me") >>= (fun () ->
+      let feeds = Feeds.feeds_new ()
+      and feed = Feed.feed_new_from_new url title in
+      Feeds.append_feed feeds feed >>= (fun () ->
         Lwt.return
           (Html.html
              (Html.head (Html.title (Html.pcdata "Hello World")) [])

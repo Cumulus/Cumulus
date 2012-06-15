@@ -39,3 +39,6 @@ let to_atom self =
        ~title: (Atom_feed.plain "An Atom flux")
     )
     Feed.to_atom
+
+let append_feed self feed =
+  Feed.write feed (Ocsipersist.add self)
