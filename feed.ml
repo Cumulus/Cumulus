@@ -7,7 +7,6 @@ type feed = {
   author : string
 }
 
-(* TODO: Add a mutex *)
 let feed_new url (title, date, author) =
   {
     url = url;

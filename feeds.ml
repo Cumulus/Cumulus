@@ -1,4 +1,3 @@
-(* TODO: Add a mutex *)
 let feeds_new () =
   let table = Ocsipersist.open_table "feeds"
   and ret = ref [] in
