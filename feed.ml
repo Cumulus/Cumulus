@@ -1,3 +1,5 @@
+module Xml = Eliom_content_core.Xml
+
 type feed = {
   url : string;
   title : string;
@@ -21,3 +23,10 @@ let to_html self = [
   Html.br ();
   Html.pcdata ("author: " ^ self.author)
 ]
+
+let to_atom self =
+  Atom_feed.entry
+    ~updated: self.date
+    ~id: (Xml.uri_of_string self.url)
+    ~title: (Atom_feed.plain self.title)
+    []

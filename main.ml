@@ -1,4 +1,3 @@
-module Xml = Eliom_content_core.Xml
 module Calendar = CalendarLib.Calendar
 
 let atom_service =
@@ -6,13 +5,8 @@ let atom_service =
     ~path: ["atom"]
     ~get_params: Eliom_parameter.unit
     (fun () () ->
-      Lwt.return
-        (Atom_feed.feed
-           ~updated: (Calendar.make 2012 6 9 17 40 30)
-           ~id: (Xml.uri_of_string "http://cumulus.org")
-           ~title: (Atom_feed.plain "An Atom flux")
-           []
-        )
+      let feeds = Feeds.feeds_new () in
+      Feeds.to_atom feeds
     )
 
 let init_test_service_with_string =

@@ -1,3 +1,6 @@
+module Calendar = CalendarLib.Calendar
+module Xml = Eliom_content_core.Xml
+
 type feeds = (Feed.feed list) Lwt.t
 
 let feeds_new () =
@@ -8,19 +11,29 @@ let feeds_new () =
     ret := (!ret) @ [Feed.feed_new url data];
     Lwt.return ()) table >>= (fun () -> Lwt.return (!ret))
 
-let to_html self =
+let to_something self shell entity =
   self >>= (fun self ->
-    let content tmp feed =
-      tmp @ [
-        Html.p (Feed.to_html feed)
-      ] in
-      let rec f tmp = function
-        | [] ->
-          Lwt.return
-            (Html.html
-               (Html.head (Html.title (Html.pcdata "Hello World")) [])
-               (Html.body tmp)
-            )
-        | [x] -> f (content tmp x) []
-        | x::xs -> f (content tmp x) xs in
-      f [] self)
+    let content tmp feed = tmp @ [entity feed] in
+    let rec f tmp = function
+      | [] -> Lwt.return (shell tmp)
+      | [x] -> f (content tmp x) []
+      | x::xs -> f (content tmp x) xs in
+    f [] self)
+
+let to_html self =
+  to_something self
+    (fun tmp ->
+      Html.html
+        (Html.head (Html.title (Html.pcdata "Hello World")) [])
+        (Html.body tmp)
+    )
+    (fun feed -> Html.p (Feed.to_html feed))
+
+let to_atom self =
+  to_something self
+    (Atom_feed.feed
+       ~updated: (Calendar.make 2012 6 9 17 40 30)
+       ~id: (Xml.uri_of_string "http://cumulus.org")
+       ~title: (Atom_feed.plain "An Atom flux")
+    )
+    Feed.to_atom
