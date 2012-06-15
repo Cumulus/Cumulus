@@ -1,6 +1,7 @@
 ELIOMC = eliomc
 
 SRC = utils.ml \
+      html.ml \
       feed.ml \
       feeds.ml \
       main.ml

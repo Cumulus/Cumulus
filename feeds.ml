@@ -1,5 +1,3 @@
-module Html = Eliom_content.Html5.D
-
 let feeds_new () =
   let table = Ocsipersist.open_table "feeds"
   and ret = ref [] in

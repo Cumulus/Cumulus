@@ -1,4 +1,3 @@
-module Html = Eliom_content.Html5.D
 module Xml = Eliom_content_core.Xml
 module Calendar = CalendarLib.Calendar
 
