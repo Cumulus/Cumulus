@@ -1,14 +1,16 @@
-type user = (string option) Eliom_reference.eref
-type user_state = Already_connected | Ok | Bad_password
+type user = {
+  password : string;
+  email : string
+}
+type user_state = Already_connected | Ok | Bad_password | Not_found
+
+let check_password self password = self.password = password
 
 let current_user =
   Eliom_reference.eref ~scope: Eliom_common.session None
 
-let user_new () =
-  current_user
-
-let user_is_connected self =
-  Eliom_reference.get self >>= (fun username ->
+let is_connected () =
+  Eliom_reference.get current_user >>= (fun username ->
     Lwt.return (
       match username with
         | None -> false
@@ -16,19 +18,19 @@ let user_is_connected self =
     )
   )
 
-let user_connect self username password =
-  (* TODO: If passwd match *)
-  user_is_connected self >>= (fun state ->
+let connect username =
+  is_connected () >>= (fun state ->
     match state with
       | true -> Lwt.return Already_connected
-      | false -> Eliom_reference.set self (Some username) >>= (fun () ->
+      | false -> Eliom_reference.set current_user (Some username) >>= (fun () ->
         Lwt.return Ok
       )
   )
 
-let user_disconnect self =
-  user_is_connected self >>= (fun state ->
+let disconnect () =
+  is_connected () >>= (fun state ->
     match state with
-      | true -> Eliom_reference.unset self >>= (fun () -> Lwt.return true)
+      | true -> Eliom_reference.unset current_user >>= (fun () ->
+        Lwt.return true)
       | false -> Lwt.return false
   )
