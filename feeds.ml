@@ -11,33 +11,31 @@ let get_all self =
     Lwt.return (ret @ [Feed.feed_new url data])
   ) self []
 
-let to_something self shell entity =
+let to_something self entity =
   get_all self >>= (fun self ->
     let content tmp feed = tmp @ [entity feed] in
     let rec f tmp = function
-      | [] -> Lwt.return (shell tmp)
+      | [] -> Lwt.return tmp
       | [x] -> f (content tmp x) []
       | x::xs -> f (content tmp x) xs in
     f [] self
   )
 
 let to_html self =
-  to_something self
-    (fun tmp ->
-      Html.html
-        (Html.head (Html.title (Html.pcdata "Hello World")) [])
-        (Html.body tmp)
-    )
-    (fun feed -> Html.p (Feed.to_html feed))
+  to_something self (fun feed ->
+    Html.p (Feed.to_html feed)
+  )
 
 let to_atom self =
-  to_something self
-    (Atom_feed.feed
-       ~updated: (Calendar.make 2012 6 9 17 40 30)
-       ~id: (Xml.uri_of_string "http://cumulus.org")
-       ~title: (Atom_feed.plain "An Atom flux")
+  to_something self Feed.to_atom >>= (fun tmp ->
+    Lwt.return (
+      Atom_feed.feed
+        ~updated: (Calendar.make 2012 6 9 17 40 30)
+        ~id: (Xml.uri_of_string "http://cumulus.org")
+        ~title: (Atom_feed.plain "An Atom flux")
+        tmp
     )
-    Feed.to_atom
+  )
 
 let append_feed self (url, title, author) =
   let feed = Feed.feed_new_from_new url title author in
