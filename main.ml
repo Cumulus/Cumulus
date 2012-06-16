@@ -1,5 +1,3 @@
-module Calendar = CalendarLib.Calendar
-
 let atom_service =
   Eliom_atom.Reg.register_service
     ~path: ["atom"]
