@@ -9,6 +9,11 @@ let check_password self password = self.password = password
 let current_user =
   Eliom_reference.eref ~scope: Eliom_common.session None
 
+let get_username () =
+  Eliom_reference.get current_user >>= (fun username ->
+    Lwt.return username
+  )
+
 let is_connected () =
   Eliom_reference.get current_user >>= (fun username ->
     Lwt.return (

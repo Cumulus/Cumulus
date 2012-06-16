@@ -21,12 +21,12 @@ let feed_new url content = {
   }
 }
 
-let feed_new_from_new url title = {
+let feed_new_from_new url title author = {
   url = url;
   content = {
     title = title;
     date = Calendar.now ();
-    author = "Me"
+    author = author
   }
 }
 

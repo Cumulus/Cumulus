@@ -13,14 +13,28 @@ let init_test_service_with_string =
   Eliom_registration.Html5.register_service
     ~path: ["init_test"]
     ~get_params: Eliom_parameter.((string "url") ** (string "title"))
-    (fun data () ->
-      let feeds = Feeds.feeds_new () in
-      Feeds.append_feed feeds data >>= (fun state ->
-        Lwt.return
-          (Html.html
-             (Html.head (Html.title (Html.pcdata "Hello World")) [])
-             (Html.body [Html.p [Html.pcdata (string_of_bool state)]])
-          )
+    (fun (url, title) () ->
+      User.get_username () >>= (fun username ->
+        match username with
+          | None ->
+            Lwt.return
+              (Html.html
+                 (Html.head (Html.title (Html.pcdata "Hello World")) [])
+                 (Html.body [
+                   Html.p [
+                     Html.pcdata "Vous ne vous etes pas autentifie"
+                   ]
+                 ])
+              )
+          | (Some author) ->
+            let feeds = Feeds.feeds_new () in
+            Feeds.append_feed feeds (url, title, author) >>= (fun state ->
+              Lwt.return
+                (Html.html
+                   (Html.head (Html.title (Html.pcdata "Hello World")) [])
+                   (Html.body [Html.p [Html.pcdata (string_of_bool state)]])
+                )
+            )
       )
     )
 
