@@ -10,6 +10,8 @@ MODULES = utils.ml \
 	  feed.ml \
 	  feeds.mli \
 	  feeds.ml \
+	  user.mli \
+	  user.ml \
 	  main.ml
 
 OBJ := $(patsubst %.ml, $(DEST)/%.cmo, $(MODULES))
