@@ -18,7 +18,8 @@ let to_something self shell entity =
       | [] -> Lwt.return (shell tmp)
       | [x] -> f (content tmp x) []
       | x::xs -> f (content tmp x) xs in
-    f [] self)
+    f [] self
+  )
 
 let to_html self =
   to_something self

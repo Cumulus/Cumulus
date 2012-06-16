@@ -52,7 +52,8 @@ let init_test_service =
                    Html.string_input ~input_type: `Text ~name: url_name ();
                    Html.string_input ~input_type: `Text ~name: title_name ();
                    Html.string_input ~input_type: `Submit ~value: "Send" ()
-                 ]])
+                 ]
+               ])
            ])
         )
     )
