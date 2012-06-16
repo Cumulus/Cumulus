@@ -7,11 +7,9 @@ let feeds_new () =
   Ocsipersist.open_table "feeds"
 
 let get_all self =
-  let ret = ref [] in
-  Ocsipersist.iter_table (fun url data ->
-    (* FIXME: PLLEEAAASSE I need a non-ugly example for that *)
-    ret := (!ret) @ [Feed.feed_new url data];
-    Lwt.return ()) self >>= (fun () -> Lwt.return (!ret))
+  Ocsipersist.fold_table (fun url data ret ->
+    Lwt.return (ret @ [Feed.feed_new url data])
+  ) self []
 
 let to_something self shell entity =
   get_all self >>= (fun self ->
