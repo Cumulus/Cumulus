@@ -22,7 +22,6 @@ let rec main_service_with_string_fun () =
               ]
             ]
             | (Some author) ->
-              let feeds = Feeds.feeds_new () in
               Feeds.append_feed feeds (url, title, author) >>=
                 (fun state -> Lwt.return [
                   Html.p [
