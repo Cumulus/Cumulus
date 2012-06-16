@@ -14,6 +14,7 @@ MODULES = utils.ml \
 	  user.ml \
 	  users.mli \
 	  users.ml \
+	  templates.ml \
 	  main.ml
 
 OBJ := $(patsubst %.ml, $(DEST)/%.cmo, $(MODULES))
