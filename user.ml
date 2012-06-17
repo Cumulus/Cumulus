@@ -4,6 +4,11 @@ type user = {
 }
 type user_state = Already_connected | Ok | Bad_password | Not_found
 
+let user_new password email = {
+  password = password;
+  email = email
+}
+
 let check_password self password = self.password = password
 
 let current_user =

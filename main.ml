@@ -99,8 +99,13 @@ let regs =
       let users = Users.users_new ()
       and feeds = Feeds.feeds_new () in
       Templates.main feeds
-        (* Add an user *)
-        (Lwt.return [])
+        (Users.add_user users username password email >>= (fun state ->
+          if state then
+            Utils.msg "Vous etes bien enregistre"
+          else
+            Utils.msg "L'user exist deja"
+         )
+        )
         append_feed_service
         auth_service
         registration_service

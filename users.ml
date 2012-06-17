@@ -12,3 +12,14 @@ let connect_user self username password =
         | false -> Lwt.return User.Bad_password
     )
     (fun _ -> Lwt.return User.Not_found)
+
+let add_user self username password email =
+  Lwt.try_bind
+    (fun () -> Ocsipersist.find self username)
+    (fun _ -> Lwt.return false)
+    (fun _ ->
+      Ocsipersist.add self username
+        (User.user_new password email) >>= (fun () ->
+          Lwt.return true
+         )
+    )
