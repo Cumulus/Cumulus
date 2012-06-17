@@ -22,12 +22,19 @@ let rec main_service_with_string_fun () =
               ]
             ]
             | (Some author) ->
-              Feeds.append_feed feeds (url, title, author) >>=
-                (fun state -> Lwt.return [
+              if Utils.string_is_empty url || Utils.string_is_empty title then
+                Lwt.return [
                   Html.p [
-                    Html.pcdata (string_of_bool state)
+                    Html.pcdata "L'un des champs est vide"
                   ]
-                ])
+                ]
+              else
+                Feeds.append_feed feeds (url, title, author) >>=
+                  (fun state -> Lwt.return [
+                    Html.p [
+                      Html.pcdata (string_of_bool state)
+                    ]
+                  ])
           )
           (main_service_with_string_fun ())
       )
