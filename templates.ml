@@ -1,4 +1,4 @@
-let main feeds l link_service auth_service =
+let main feeds l link_service auth_service registration_service =
   Feeds.to_html feeds >>= (fun feeds ->
     l >>= (fun l ->
       Lwt.return
@@ -33,7 +33,9 @@ let main feeds l link_service auth_service =
                         ~input_type: `Submit
                         ~value: "Login" ()
                     ]
-                  ]) ()
+                  ]) ();
+                Html.br ();
+                Html.a registration_service [Html.pcdata "registration"] ()
               ])
            )
         )
