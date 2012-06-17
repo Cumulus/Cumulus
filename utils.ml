@@ -17,9 +17,8 @@ let string_is_empty str =
       true in
   inner 0
 
-let msg str =
-  Lwt.return [
-    Html.p [
-      Html.pcdata str
-    ]
+let msg str = [
+  Html.p [
+    Html.pcdata str
   ]
+]

@@ -1,18 +1,18 @@
 module Calendar = CalendarLib.Calendar
 module Xml = Eliom_content_core.Xml
 
-type feeds = Feed.feed_content Ocsipersist.table
+type append_state = Ok | Not_connected | Empty | Already_exist
 
-let feeds_new () =
+let self =
   Ocsipersist.open_table "feeds"
 
-let get_all self =
+let get_all () =
   Ocsipersist.fold_table (fun url data ret ->
     Lwt.return (ret @ [Feed.feed_new url data])
   ) self []
 
-let to_something self entity =
-  get_all self >>= (fun self ->
+let to_something entity =
+  get_all () >>= (fun self ->
     let content tmp feed = tmp @ [entity feed] in
     let rec f tmp = function
       | [] -> Lwt.return tmp
@@ -21,13 +21,13 @@ let to_something self entity =
     f [] self
   )
 
-let to_html self =
-  to_something self (fun feed ->
+let to_html () =
+  to_something (fun feed ->
     Html.p (Feed.to_html feed)
   )
 
-let to_atom self =
-  to_something self Feed.to_atom >>= (fun tmp ->
+let to_atom () =
+  to_something Feed.to_atom >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
         ~updated: (Calendar.make 2012 6 9 17 40 30)
@@ -37,13 +37,21 @@ let to_atom self =
     )
   )
 
-let append_feed self (url, title, author) =
-  let feed = Feed.feed_new_from_new url title author in
-  Lwt.try_bind
-    (fun () -> Ocsipersist.find self url)
-    (fun _ -> Lwt.return false)
-    (fun _ ->
-      Feed.write feed (Ocsipersist.add self) >>= (fun () ->
-        Lwt.return true
-      )
-    )
+let append_feed (url, title) =
+  User.get_username () >>= (fun username ->
+    match username with
+      | None -> Lwt.return Not_connected
+      | (Some author) ->
+        if Utils.string_is_empty url || Utils.string_is_empty title then
+          Lwt.return Empty
+        else
+          let feed = Feed.feed_new_from_new url title author in
+          Lwt.try_bind
+            (fun () -> Ocsipersist.find self url)
+            (fun _ -> Lwt.return Already_exist)
+            (fun _ ->
+              Feed.write feed (Ocsipersist.add self) >>= (fun () ->
+                Lwt.return Ok
+              )
+            )
+  )

@@ -8,10 +8,10 @@ MODULES = html.ml \
 	  utils.ml \
 	  feed.mli \
 	  feed.ml \
-	  feeds.mli \
-	  feeds.ml \
 	  user.mli \
 	  user.ml \
+	  feeds.mli \
+	  feeds.ml \
 	  users.mli \
 	  users.ml \
 	  templates.ml \

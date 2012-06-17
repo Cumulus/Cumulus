@@ -2,10 +2,7 @@ let atom_service_reg =
   Eliom_atom.Reg.register_service
     ~path: ["atom.xml"]
     ~get_params: Eliom_parameter.unit
-    (fun () () ->
-      let feeds = Feeds.feeds_new () in
-      Feeds.to_atom feeds
-    )
+    (fun () () -> Feeds.to_atom ())
 
 let main_service =
   Eliom_service.service
@@ -40,75 +37,59 @@ let registration_service =
     ~get_params: Eliom_parameter.unit
     ()
 
+let apply_services f =
+  f append_feed_service
+    auth_service
+    registration_service
+
 let regs =
   Eliom_registration.Html5.register
     ~service: main_service
     (fun () () ->
-      let feeds = Feeds.feeds_new () in
-      Templates.main feeds (Lwt.return [])
-        append_feed_service
-        auth_service
-        registration_service
+      apply_services (Templates.main [])
     );
   Eliom_registration.Html5.register
     ~service: append_feed_service
-    (fun (url, title) () ->
-      User.get_username () >>= (fun username ->
-        let feeds = Feeds.feeds_new () in
-        Templates.main feeds
-          (match username with
-            | None -> Utils.msg "Vous ne vous etes pas autentifie"
-            | (Some author) ->
-              if Utils.string_is_empty url || Utils.string_is_empty title then
-                Utils.msg "L'un des champs est vide"
-              else
-                Feeds.append_feed feeds (url, title, author) >>=
-                  (fun state -> Utils.msg (
-                    if state then
-                      "Le lien a bien ete ajoute"
-                    else
-                      "Le lien existe deja"
-                   ))
+    (fun data () ->
+      Feeds.append_feed data >>= (fun state ->
+        apply_services
+          (Templates.main
+             (Utils.msg (match state with
+               | Feeds.Not_connected -> "Vous ne vous etes pas autentifie"
+               | Feeds.Empty -> "L'un des champs est vide"
+               | Feeds.Already_exist -> "Le lien existe deja"
+               | Feeds.Ok -> "Le lien a bien ete ajoute"
+              ))
           )
-          append_feed_service
-          auth_service
-          registration_service
       )
     );
   Eliom_registration.Html5.register
     ~service: auth_service
     (fun () (username, password) ->
-      let users = Users.users_new ()
-      and feeds = Feeds.feeds_new () in
-      Templates.main feeds
-        (Users.connect_user users username password >>= (fun state ->
-          match state with
-            | User.Already_connected -> Utils.msg "Deja connecte"
-            | User.Ok -> Utils.msg "Connecte"
-            | User.Bad_password -> Utils.msg "Mauvais mot-de-passe"
-            | User.Not_found -> Utils.msg "Utilisateur non trouve"
-         )
-        )
-        append_feed_service
-        auth_service
-        registration_service
+      Users.connect_user username password >>= (fun state ->
+        apply_services
+          (Templates.main
+            (Utils.msg (match state with
+              | User.Already_connected -> "Deja connecte"
+              | User.Ok -> "Connecte"
+              | User.Bad_password -> "Mauvais mot-de-passe"
+              | User.Not_found -> "Utilisateur non trouve"
+             ))
+          )
+      )
     );
   Eliom_registration.Html5.register
     ~service: add_user_service
     (fun () (username, (password, email)) ->
-      let users = Users.users_new ()
-      and feeds = Feeds.feeds_new () in
-      Templates.main feeds
-        (Users.add_user users username password email >>= (fun state ->
-          if state then
-            Utils.msg "Vous etes bien enregistre"
-          else
-            Utils.msg "L'user exist deja"
-         )
-        )
-        append_feed_service
-        auth_service
-        registration_service
+      (Users.add_user username password email >>= (fun state ->
+        apply_services
+          (Templates.main
+             (Utils.msg (match state with
+               | true ->"Vous etes bien enregistre"
+               | false -> "L'user exist deja"
+              ))
+          )
+         ))
     );
   Eliom_registration.Html5.register
     ~service: registration_service

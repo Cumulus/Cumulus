@@ -1,9 +1,7 @@
-type users = User.user Ocsipersist.table
-
-let users_new () =
+let self =
   Ocsipersist.open_table "users"
 
-let connect_user self username password =
+let connect_user username password =
   Lwt.try_bind
     (fun () -> Ocsipersist.find self username)
     (fun user ->
@@ -13,7 +11,7 @@ let connect_user self username password =
     )
     (fun _ -> Lwt.return User.Not_found)
 
-let add_user self username password email =
+let add_user username password email =
   Lwt.try_bind
     (fun () -> Ocsipersist.find self username)
     (fun _ -> Lwt.return false)
