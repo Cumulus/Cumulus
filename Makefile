@@ -4,8 +4,8 @@ RM = rm -f
 DEST = _server
 
 NAME = $(DEST)/cumulus.cma
-MODULES = utils.ml \
-	  html.ml \
+MODULES = html.ml \
+	  utils.ml \
 	  feed.mli \
 	  feed.ml \
 	  feeds.mli \

@@ -16,3 +16,10 @@ let string_is_empty str =
     else
       true in
   inner 0
+
+let msg str =
+  Lwt.return [
+    Html.p [
+      Html.pcdata str
+    ]
+  ]
