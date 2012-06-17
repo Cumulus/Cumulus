@@ -32,7 +32,12 @@ let rec main_service_with_string_fun () =
                 Feeds.append_feed feeds (url, title, author) >>=
                   (fun state -> Lwt.return [
                     Html.p [
-                      Html.pcdata (string_of_bool state)
+                      Html.pcdata (
+                        if state then
+                          "Le lien a bien ete ajoute"
+                        else
+                          "Le lien existe deja"
+                      )
                     ]
                   ])
           )
