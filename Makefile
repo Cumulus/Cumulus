@@ -14,6 +14,7 @@ MODULES = html.ml \
 	  feeds.ml \
 	  users.mli \
 	  users.ml \
+	  services.ml \
 	  templates.ml \
 	  main.ml
 

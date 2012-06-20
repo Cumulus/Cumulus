@@ -1,11 +1,11 @@
-let main l link_service auth_service registration_service =
+let main l =
   Feeds.to_html () >>= (fun feeds ->
     Lwt.return
       (Html.html
          (Html.head (Html.title (Html.pcdata "Cumulus")) [])
          (Html.body
             (l @ feeds @ [
-              Html.get_form link_service
+              Html.get_form Services.append_feed
                 (fun (url_name, title_name) -> [
                   Html.p [
                     Html.string_input
@@ -19,7 +19,7 @@ let main l link_service auth_service registration_service =
                       ~value: "Send" ()
                   ]
                 ]);
-              Html.post_form auth_service
+              Html.post_form Services.auth
                 (fun (user_name, password_name) -> [
                   Html.p [
                     Html.string_input
@@ -34,7 +34,7 @@ let main l link_service auth_service registration_service =
                   ]
                 ]) ();
               Html.br ();
-              Html.a registration_service [Html.pcdata "registration"] ()
+              Html.a Services.registration [Html.pcdata "registration"] ()
             ])
          )
       )
