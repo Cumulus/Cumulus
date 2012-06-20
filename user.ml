@@ -4,12 +4,15 @@ type user = {
 }
 type user_state = Already_connected | Ok | Bad_password | Not_found
 
+let hash_password password =
+  Cryptokit.hash_string (Cryptokit.Hash.sha256 ()) password
+
 let user_new password email = {
-  password = password;
+  password = hash_password password;
   email = email
 }
 
-let check_password self password = self.password = password
+let check_password self password = self.password = (hash_password password)
 
 let current_user =
   Eliom_reference.eref ~scope: Eliom_common.session None
