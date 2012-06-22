@@ -6,6 +6,9 @@ let _ =
     ~service: Services.main
     (fun () () -> Templates.main []);
   Eliom_registration.Html5.register
+    ~service: Services.author_feed
+    (fun (username) () -> Templates.user [] username);
+  Eliom_registration.Html5.register
     ~service: Services.append_feed
     (fun data () ->
       Feeds.append_feed data >>= (fun state ->

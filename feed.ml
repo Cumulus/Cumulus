@@ -49,3 +49,8 @@ let to_atom self =
 
 let write self f =
   f self.url self.content
+
+let filter_author author = function
+  | self when self.content.author = author -> true
+  | _ -> false
+  

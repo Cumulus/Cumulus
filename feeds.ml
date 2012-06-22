@@ -11,8 +11,20 @@ let get_all () =
     Lwt.return (ret @ [Feed.feed_new url data])
   ) self []
 
-let to_something entity =
+let get_filter_links (data, fu) =
   get_all () >>= (fun self ->
+    let content tmp feed = tmp @ [feed] in
+    let rec f tmp data' = function
+      | [] -> Lwt.return tmp
+      | [x] when fu data' x = true -> f (content tmp x) data' []
+      | [x] -> f tmp data' []
+      | x::xs when fu data' x = true -> f (content tmp x) data' xs
+      | x::xs -> f tmp data' xs in
+    f [] data self
+  )
+
+let to_something entity getter args =
+  getter args  >>= (fun self ->
     let content tmp feed = tmp @ [entity feed] in
     let rec f tmp = function
       | [] -> Lwt.return tmp
@@ -21,13 +33,18 @@ let to_something entity =
     f [] self
   )
 
+let author_to_html username =
+  to_something (fun feed ->
+    Html.p (Feed.to_html feed)
+  ) get_filter_links (username, Feed.filter_author)
+
 let to_html () =
   to_something (fun feed ->
     Html.p (Feed.to_html feed)
-  )
+  ) get_all ()
 
 let to_atom () =
-  to_something Feed.to_atom >>= (fun tmp ->
+  to_something Feed.to_atom get_all () >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
         ~updated: (Calendar.make 2012 6 9 17 40 30)

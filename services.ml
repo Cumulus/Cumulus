@@ -16,6 +16,12 @@ let append_feed =
     ~get_params: Eliom_parameter.((string "url") ** (string "title"))
     ()
 
+let author_feed =
+  Eliom_service.service
+    ~path: [""]
+    ~get_params: Eliom_parameter.((string "username"))
+    ()
+
 let auth =
   (* post_coservice' *)
   Eliom_service.post_service
