@@ -19,7 +19,7 @@ let append_feed =
 let author_feed =
   Eliom_service.service
     ~path: [""]
-    ~get_params: Eliom_parameter.((string "username"))
+    ~get_params: (Eliom_parameter.string "username")
     ()
 
 let auth =
