@@ -45,7 +45,7 @@ let to_atom self =
     ~updated: self.content.date
     ~id: (Xml.uri_of_string self.url)
     ~title: (Atom_feed.plain self.content.title)
-    []
+    [Atom_feed.authors [Atom_feed.author self.content.author]]
 
 let write self f =
   f self.url self.content
