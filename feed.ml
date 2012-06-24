@@ -53,4 +53,3 @@ let write self f =
 let filter_author author = function
   | self when self.content.author = author -> true
   | _ -> false
-  

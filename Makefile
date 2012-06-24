@@ -15,6 +15,7 @@ MODULES = html.ml \
 	  users.mli \
 	  users.ml \
 	  services.ml \
+	  templates.mli \
 	  templates.ml \
 	  main.ml
 
