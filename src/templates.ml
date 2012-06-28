@@ -1,10 +1,10 @@
-let private_main l f =
-  f () >>= (fun feeds ->
+let private_main msg feeds =
+  feeds >>= (fun feeds ->
     Lwt.return
       (Html.html
          (Html.head (Html.title (Html.pcdata "Cumulus")) [])
          (Html.body
-            (l @ feeds @ [
+            (msg @ feeds @ [
               Html.get_form Services.append_feed
                 (fun (url_name, title_name) -> [
                   Html.p [
@@ -40,8 +40,8 @@ let private_main l f =
       )
   )
 
-let main l =
-  private_main l Feeds.to_html
+let main msg =
+  private_main msg (Feeds.to_html ())
 
-let user l username =
-  private_main l (fun () -> Feeds.author_to_html username)
+let user msg username =
+  private_main msg (Feeds.author_to_html username)
