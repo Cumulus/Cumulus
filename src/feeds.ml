@@ -6,22 +6,19 @@ type append_state = Ok | Not_connected | Empty | Already_exist
 let self =
   Ocsipersist.open_table "feeds"
 
-let get_all () =
+let get_filter cmp =
   Ocsipersist.fold_table (fun url data ret ->
-    Lwt.return (ret @ [Feed.feed_new url data])
+    Lwt.return (
+      let feed = Feed.feed_new url data in
+      if cmp feed then
+        ret @ [feed]
+      else
+        ret
+    )
   ) self []
 
-let get_filter_links (data, fu) =
-  get_all () >>= (fun self ->
-    let content tmp feed = tmp @ [feed] in
-    let rec f tmp data' = function
-      | [] -> Lwt.return tmp
-      | [x] when fu data' x = true -> f (content tmp x) data' []
-      | [x] -> f tmp data' []
-      | x::xs when fu data' x = true -> f (content tmp x) data' xs
-      | x::xs -> f tmp data' xs in
-    f [] data self
-  )
+let get_all () =
+  get_filter (fun _ -> true)
 
 let to_something entity getter =
   getter () >>= (fun self ->
@@ -36,7 +33,7 @@ let to_something entity getter =
 let author_to_html username =
   to_something
     (fun feed -> Html.p (Feed.to_html feed))
-    (fun () -> get_filter_links (username, Feed.filter_author))
+    (fun () -> get_filter (Feed.filter_author username))
 
 let to_html () =
   to_something (fun feed ->
