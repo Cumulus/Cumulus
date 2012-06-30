@@ -2,6 +2,7 @@ ELIOMC = eliomc
 ELIOMOPT = eliomopt
 OCAMLOPT = ocamlopt
 RM = rm -f
+CP = cp
 
 DEST = ../_server
 
@@ -53,3 +54,6 @@ $(DEST)/%.cmi: %.mli
 
 clean:
 	$(RM) $(OBJ_BYTE) $(OBJ_OPT) $(NAME_BYTE) $(NAME_OPT)
+
+install:
+	$(CP) $(NAME_BYTE) $(NAME_OPT) $(NAME_STATIC_OPT) ../data/style.css /tmp
