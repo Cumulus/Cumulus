@@ -5,7 +5,7 @@ type feed_content = {
   title : string;
   date : CalendarLib.Calendar.t;
   author : string;
-  tags: string
+  tags: string list
 }
 
 type feed = {
@@ -42,7 +42,7 @@ let to_html self = [
   Html.br ();
   Html.pcdata ("author: " ^ self.content.author);
   Html.br ();
-  Html.pcdata ("tags: " ^ self.content.tags)
+  Html.pcdata ("tags: " ^ (List.fold_left (fun a b -> a ^ " " ^ b) "" self.content.tags))
 ]
 
 let to_atom self =
