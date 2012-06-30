@@ -13,8 +13,8 @@ let main =
 let append_feed =
   Eliom_service.service
     ~path: [""]
-    ~get_params: Eliom_parameter.((string "url") ** 
-                                    (string "title") ** 
+    ~get_params: Eliom_parameter.((string "url") **
+                                    (string "title") **
                                     (string "tags"))
     ()
 
