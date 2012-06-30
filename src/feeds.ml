@@ -51,7 +51,7 @@ let to_atom () =
     )
   )
 
-let append_feed (url, title) =
+let append_feed (url, (title, tags)) =
   User.get_username () >>= (fun username ->
     match username with
       | None -> Lwt.return Not_connected
@@ -59,7 +59,7 @@ let append_feed (url, title) =
         if Utils.string_is_empty url || Utils.string_is_empty title then
           Lwt.return Empty
         else
-          let feed = Feed.feed_new_from_new url title author in
+          let feed = Feed.feed_new_from_new url title author tags in
           Lwt.try_bind
             (fun () -> Ocsipersist.find self url)
             (fun _ -> Lwt.return Already_exist)

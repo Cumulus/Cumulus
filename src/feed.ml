@@ -4,7 +4,8 @@ module Xml = Eliom_content_core.Xml
 type feed_content = {
   title : string;
   date : CalendarLib.Calendar.t;
-  author : string
+  author : string;
+  tags: string
 }
 
 type feed = {
@@ -17,16 +18,18 @@ let feed_new url content = {
   content = {
     title = content.title;
     date = content.date;
-    author = content.author
+    author = content.author;
+    tags = content.tags
   }
 }
 
-let feed_new_from_new url title author = {
+let feed_new_from_new url title author tags = {
   url = url;
   content = {
     title = title;
     date = Calendar.now ();
-    author = author
+    author = author;
+    tags = tags
   }
 }
 
@@ -37,7 +40,9 @@ let to_html self = [
   Html.br ();
   Html.pcdata ("date: " ^ (Utils.string_of_calendar self.content.date));
   Html.br ();
-  Html.pcdata ("author: " ^ self.content.author)
+  Html.pcdata ("author: " ^ self.content.author);
+  Html.br ();
+  Html.pcdata ("tags: " ^ self.content.tags)
 ]
 
 let to_atom self =
