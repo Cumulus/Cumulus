@@ -36,8 +36,8 @@ let _ =
     );
   Eliom_registration.Html5.register
     ~service: Services.add_user
-    (fun () (username, (password, email)) ->
-      Users.add_user username password email >>= (fun state ->
+    (fun () datas ->
+      Users.add_user datas >>= (fun state ->
         Templates.main
           (Utils.msg (match state with
             | true -> "Vous etes bien enregistre"
