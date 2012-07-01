@@ -59,7 +59,7 @@ let append_feed (url, (title, tags)) =
         if Utils.string_is_empty url || Utils.string_is_empty title then
           Lwt.return Empty
         else
-          let feed = Feed.feed_new_from_new url title author 
+          let feed = Feed.feed_new_from_new url title author
                       (Str.split (Str.regexp "[ \t]+") tags) in
           Lwt.try_bind
             (fun () -> Ocsipersist.find self url)

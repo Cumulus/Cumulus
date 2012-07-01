@@ -8,3 +8,9 @@ byte:
 
 opt:
 	$(MAKE) src $@
+
+clean:
+	$(MAKE) src $@
+
+install:
+	$(MAKE) src $@

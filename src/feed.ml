@@ -15,12 +15,7 @@ type feed = {
 
 let feed_new url content = {
   url = url;
-  content = {
-    title = content.title;
-    date = content.date;
-    author = content.author;
-    tags = content.tags
-  }
+  content = content
 }
 
 let feed_new_from_new url title author tags = {
@@ -42,7 +37,8 @@ let to_html self = [
   Html.br ();
   Html.pcdata ("author: " ^ self.content.author);
   Html.br ();
-  Html.pcdata ("tags: " ^ (List.fold_left (fun a b -> a ^ " " ^ b) "" self.content.tags))
+  Html.pcdata
+    ("tags: " ^ (List.fold_left (fun a b -> a ^ " " ^ b) "" self.content.tags))
 ]
 
 let to_atom self =
