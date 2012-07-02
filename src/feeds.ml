@@ -1,5 +1,4 @@
 module Calendar = CalendarLib.Calendar
-module Xml = Eliom_content_core.Xml
 
 type append_state = Ok | Not_connected | Empty | Already_exist
 
@@ -45,7 +44,7 @@ let to_atom () =
     Lwt.return (
       Atom_feed.feed
         ~updated: (Calendar.make 2012 6 9 17 40 30)
-        ~id: (Xml.uri_of_string "http://cumulus.org")
+        ~id: (Html.Xml.uri_of_string "http://cumulus.org")
         ~title: (Atom_feed.plain "An Atom flux")
         tmp
     )

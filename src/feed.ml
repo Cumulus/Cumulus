@@ -1,5 +1,4 @@
 module Calendar = CalendarLib.Calendar
-module Xml = Eliom_content_core.Xml
 
 type feed_content = {
   title : string;
@@ -44,7 +43,7 @@ let to_html self = [
 let to_atom self =
   Atom_feed.entry
     ~updated: self.content.date
-    ~id: (Xml.uri_of_string self.url)
+    ~id: (Html.Xml.uri_of_string self.url)
     ~title: (Atom_feed.plain self.content.title)
     [Atom_feed.authors [Atom_feed.author self.content.author]]
 
