@@ -27,10 +27,12 @@ let feed_new_from_new url title author tags = {
   }
 }
 
-let to_html self = [
-  Html.pcdata ("url: " ^ self.url);
-  Html.br ();
-  Html.pcdata ("title: " ^ self.content.title);
+let to_html self =
+  let url_service =
+    Eliom_service.external_service
+      self.url []
+      Eliom_parameter.unit () in [
+  Html.a url_service [Html.pcdata self.content.title] ();
   Html.br ();
   Html.pcdata ("date: " ^ (Utils.string_of_calendar self.content.date));
   Html.br ();
