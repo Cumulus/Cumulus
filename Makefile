@@ -4,7 +4,8 @@ OCAMLOPT = ocamlopt
 RM = rm -f
 CP = cp
 
-DEST = ../_server
+DEST = dest
+DEST_SERVER = _server
 
 NAME_BYTE = $(DEST)/cumulus.cma
 NAME_OPT = $(DEST)/cumulus.cmxs
@@ -24,10 +25,10 @@ MODULES = html.ml \
 	  templates.ml \
 	  main.ml
 
-OBJ_BYTE := $(patsubst %.ml, $(DEST)/%.cmo, $(MODULES))
-OBJ_BYTE := $(patsubst %.mli, $(DEST)/%.cmi, $(OBJ_BYTE))
-OBJ_OPT := $(patsubst %.ml, $(DEST)/%.cmx, $(MODULES))
-OBJ_OPT := $(patsubst %.mli, $(DEST)/%.cmi, $(OBJ_OPT))
+OBJ_BYTE := $(patsubst %.ml, $(DEST_SERVER)/%.cmo, $(MODULES))
+OBJ_BYTE := $(patsubst %.mli, $(DEST_SERVER)/%.cmi, $(OBJ_BYTE))
+OBJ_OPT := $(patsubst %.ml, $(DEST_SERVER)/%.cmx, $(MODULES))
+OBJ_OPT := $(patsubst %.mli, $(DEST_SERVER)/%.cmi, $(OBJ_OPT))
 
 all: byte opt
 
@@ -43,17 +44,17 @@ $(NAME_OPT): $(NAME_STATIC_OPT)
 $(NAME_STATIC_OPT): $(OBJ_OPT)
 	$(ELIOMOPT) -a $(filter %.cmx, $^) -o $@
 
-$(DEST)/%.cmx: %.ml
-	$(ELIOMOPT) -dir $(DEST) $< -o $@
+$(DEST_SERVER)/%.cmx: %.ml
+	$(ELIOMOPT) -dir $(DEST_SERVER) $< -o $@
 
-$(DEST)/%.cmo: %.ml
-	$(ELIOMC) -dir $(DEST) $< -o $@
+$(DEST_SERVER)/%.cmo: %.ml
+	$(ELIOMC) -dir $(DEST_SERVER) $< -o $@
 
-$(DEST)/%.cmi: %.mli
-	$(ELIOMC) -dir $(DEST) $< -o $@
+$(DEST_SERVER)/%.cmi: %.mli
+	$(ELIOMC) -dir $(DEST_SERVER) $< -o $@
 
 clean:
 	$(RM) $(OBJ_BYTE) $(OBJ_OPT) $(NAME_BYTE) $(NAME_OPT)
 
 install:
-	$(CP) $(NAME_BYTE) $(NAME_OPT) $(NAME_STATIC_OPT) ../data/style.css /tmp
+	$(CP) $(NAME_BYTE) $(NAME_OPT) $(NAME_STATIC_OPT) data/style.css /tmp
