@@ -6,6 +6,9 @@ CP = cp
 
 DEST = dest
 DEST_SERVER = _server
+DEST_CLIENT = _client
+
+STATIC_DIR = /tmp
 
 NAME_BYTE = $(DEST)/cumulus.cma
 NAME_OPT = $(DEST)/cumulus.cmxs
@@ -24,6 +27,7 @@ MODULES = html.ml \
 	  templates.mli \
 	  templates.ml \
 	  main.ml
+CSS_FILES = data/style.css
 
 OBJ_BYTE := $(patsubst %.ml, $(DEST_SERVER)/%.cmo, $(MODULES))
 OBJ_BYTE := $(patsubst %.mli, $(DEST_SERVER)/%.cmi, $(OBJ_BYTE))
@@ -57,4 +61,4 @@ clean:
 	$(RM) $(OBJ_BYTE) $(OBJ_OPT) $(NAME_BYTE) $(NAME_OPT)
 
 install:
-	$(CP) $(NAME_BYTE) $(NAME_OPT) $(NAME_STATIC_OPT) data/style.css /tmp
+	$(CP) $(NAME_BYTE) $(NAME_OPT) $(NAME_STATIC_OPT) $(CSS_FILES) $(STATIC_DIR)
