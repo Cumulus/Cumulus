@@ -16,7 +16,7 @@ let private_main msg feeds =
          (Html.body [
             (Html.div ~a: [Html.a_class ["content"]]
               (msg @ feeds @ [
-                Html.get_form Services.append_feed
+                Html.post_form Services.append_feed
                   (fun (url_name, (title_name, tags_name)) -> [
                     Html.p [
                       Html.string_input
@@ -32,7 +32,7 @@ let private_main msg feeds =
                         ~input_type: `Submit
                         ~value: "Send" ()
                     ]
-                  ]);
+                  ]) ();
                 Html.post_form Services.auth
                   (fun (user_name, password_name) -> [
                     Html.p [

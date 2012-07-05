@@ -10,7 +10,7 @@ let _ =
     (fun username () -> Templates.user [] username);
   Eliom_registration.Html5.register
     ~service: Services.append_feed
-    (fun data () ->
+    (fun () data ->
       Feeds.append_feed data >>= (fun state ->
         Templates.main
           (Utils.msg (match state with

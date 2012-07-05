@@ -11,11 +11,11 @@ let main =
     ()
 
 let append_feed =
-  Eliom_service.service
-    ~path: [""]
-    ~get_params: Eliom_parameter.((string "url") **
-                                    (string "title") **
-                                    (string "tags"))
+  Eliom_service.post_service
+    ~fallback: main
+    ~post_params: Eliom_parameter.((string "url") **
+                                      (string "title") **
+                                      (string "tags"))
     ()
 
 let author_feed =
