@@ -136,4 +136,7 @@ $(STATICDIR):
 	mkdir -p $@
 
 install: all $(STATICDIR)
-	cp $(APP_NAME).js $(STATICDIR)/$(APP_NAME).js
+	cp $(APP_NAME).js $(STATICDIR)
+	cp $(APP_NAME).cma $(STATICDIR)
+	cp $(APP_NAME).cmxs $(STATICDIR)
+	cp data/style.css $(STATICDIR)
