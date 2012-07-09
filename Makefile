@@ -1,64 +1,139 @@
-ELIOMC = eliomc
-ELIOMOPT = eliomopt
-OCAMLOPT = ocamlopt
-RM = rm -f
-CP = cp
+## Sample Makefile for eliom application.
 
-DEST = dest
-DEST_SERVER = _server
-DEST_CLIENT = _client
+APP_NAME := dest/cumulus
 
-STATIC_DIR = /tmp
+## Packages required to build the server part of the application
 
-NAME_BYTE = $(DEST)/cumulus.cma
-NAME_OPT = $(DEST)/cumulus.cmxs
-NAME_STATIC_OPT = $(DEST)/cumulus.cmxa
-MODULES = html.ml \
-	  utils.ml \
-	  feed.mli \
-	  feed.ml \
-	  user.mli \
-	  user.ml \
-	  feeds.mli \
-	  feeds.ml \
-	  users.mli \
-	  users.ml \
-	  services.ml \
-	  templates.mli \
-	  templates.ml \
-	  main.ml
-CSS_FILES = data/style.css
+SERVER_PACKAGES :=
 
-OBJ_BYTE := $(patsubst %.ml, $(DEST_SERVER)/%.cmo, $(MODULES))
-OBJ_BYTE := $(patsubst %.mli, $(DEST_SERVER)/%.cmi, $(OBJ_BYTE))
-OBJ_OPT := $(patsubst %.ml, $(DEST_SERVER)/%.cmx, $(MODULES))
-OBJ_OPT := $(patsubst %.mli, $(DEST_SERVER)/%.cmi, $(OBJ_OPT))
+## Packages to be linked in the client part
+
+CLIENT_PACKAGES :=
+
+## Source files for the server part
+
+SERVER_FILES := html.ml \
+		utils.ml \
+		feed.mli \
+		feed.ml \
+		user.mli \
+		user.ml \
+		feeds.mli \
+		feeds.ml \
+		users.mli \
+		users.ml \
+		services.ml \
+		templates.mli \
+		templates.ml \
+		main.ml
+
+## Source files for the client part
+
+CLIENT_FILES :=
+
+## Required binaries
+
+ELIOMC      := eliomc
+ELIOMOPT    := eliomopt
+ELIOMDEP    := eliomdep
+JS_OF_ELIOM := js_of_eliom
+
+## Where to put intermediate object files.
+## - ELIOM_{SERVER,CLIENT}_DIR must be distinct
+## - ELIOM_CLIENT_DIR mustn't be the local dir.
+## - ELIOM_SERVER_DIR could be ".", but you need to
+##   remove it from the "clean" rules...
+
+export ELIOM_SERVER_DIR := _server
+export ELIOM_CLIENT_DIR := _client
+export ELIOM_TYPE_DIR   := .
+
+#####################################
 
 all: byte opt
+byte:: ${APP_NAME}.cma ${APP_NAME}.js
+opt:: ${APP_NAME}.cmxs ${APP_NAME}.js
 
-byte: $(NAME_BYTE)
-opt: $(NAME_OPT)
+#### Server side compilation #######
 
-$(NAME_BYTE): $(OBJ_BYTE)
-	$(ELIOMC) -a $(filter %.cmo, $^) -o $@
+SERVER_INC  := ${addprefix -package ,${SERVER_PACKAGES}}
 
-$(NAME_OPT): $(NAME_STATIC_OPT)
-	$(OCAMLOPT) -shared -linkall $< -o $@
+SERVER_OBJS := $(patsubst %.eliom,${ELIOM_SERVER_DIR}/%.cmo, ${SERVER_FILES})
+SERVER_OBJS := $(patsubst %.ml,${ELIOM_SERVER_DIR}/%.cmo, ${SERVER_OBJS})
 
-$(NAME_STATIC_OPT): $(OBJ_OPT)
-	$(ELIOMOPT) -a $(filter %.cmx, $^) -o $@
+${APP_NAME}.cma: ${SERVER_OBJS}
+	${ELIOMC} -a -o $@ $(filter %.cmo, $^)
+${APP_NAME}.cmxa: ${SERVER_OBJS:.cmo=.cmx}
+	${ELIOMOPT} -a -o $@ $(filter %.cmx, $^)
 
-$(DEST_SERVER)/%.cmx: %.ml
-	$(ELIOMOPT) -dir $(DEST_SERVER) $< -o $@
+${ELIOM_TYPE_DIR}/%.type_mli: %.eliom
+	${ELIOMC} -infer ${SERVER_INC} $<
 
-$(DEST_SERVER)/%.cmo: %.ml
-	$(ELIOMC) -dir $(DEST_SERVER) $< -o $@
+${ELIOM_SERVER_DIR}/%.cmi: %.mli
+	${ELIOMC} -c ${SERVER_INC} $<
 
-$(DEST_SERVER)/%.cmi: %.mli
-	$(ELIOMC) -dir $(DEST_SERVER) $< -o $@
+${ELIOM_SERVER_DIR}/%.cmo: %.ml
+	${ELIOMC} -c ${SERVER_INC} $<
+${ELIOM_SERVER_DIR}/%.cmo: %.eliom
+	${ELIOMC} -c -noinfer ${SERVER_INC} $<
+
+${ELIOM_SERVER_DIR}/%.cmx: %.ml
+	${ELIOMOPT} -c ${SERVER_INC} $<
+${ELIOM_SERVER_DIR}/%.cmx: %.eliom
+	${ELIOMOPT} -c -noinfer ${SERVER_INC} $<
+
+%.cmxs: %.cmxa
+	$(ELIOMOPT) -shared -linkall -o $@ $<
+
+##### Client side compilation ####
+
+CLIENT_LIBS := ${addprefix -package ,${CLIENT_PACKAGES}}
+CLIENT_INC  := ${addprefix -package ,${CLIENT_PACKAGES}}
+
+CLIENT_OBJS := $(patsubst %.eliom,${ELIOM_CLIENT_DIR}/%.cmo, ${CLIENT_FILES})
+CLIENT_OBJS := $(patsubst %.ml,${ELIOM_CLIENT_DIR}/%.cmo, ${CLIENT_OBJS})
+
+${APP_NAME}.js: ${CLIENT_OBJS}
+	${JS_OF_ELIOM} -o $@ ${CLIENT_LIBS} $(filter %.cmo, $^)
+
+${ELIOM_CLIENT_DIR}/%.cmi: %.mli
+	${JS_OF_ELIOM} -c ${CLIENT_INC} $<
+
+${ELIOM_CLIENT_DIR}/%.cmo: %.eliom
+	${JS_OF_ELIOM} -c ${CLIENT_INC} $<
+${ELIOM_CLIENT_DIR}/%.cmo: %.ml
+	${JS_OF_ELIOM} -c ${CLIENT_INC} $<
+
+############
+
+## Clean up
 
 clean:
-	$(RM) $(OBJ_BYTE) $(OBJ_OPT) $(NAME_BYTE) $(NAME_OPT)
+	-rm -f *.cm[ioax] *.cmxa *.cmxs *.o *.a *.annot
+	-rm -f *.type_mli
+	-rm -f ${APP_NAME}.js
+	-rm -rf ${ELIOM_CLIENT_DIR} ${ELIOM_SERVER_DIR}
 
-install:
-	$(CP) $(NAME_BYTE) $(NAME_OPT) $(NAME_STATIC_OPT) $(CSS_FILES) $(STATIC_DIR)
+distclean: clean.local
+	-rm -f *~ \#* .\#*
+
+## Dependencies
+
+depend: .depend
+.depend: ${SERVER_FILES} ${CLIENT_FILES}
+	$(ELIOMDEP) -server ${SERVER_INC} ${SERVER_FILES} > .depend
+	$(ELIOMDEP) -client ${CLIENT_INC} ${CLIENT_FILES} >> .depend
+
+## Warning: Dependencies towards *.eliom are not handled by eliomdep yet.
+
+include .depend
+
+## installation #########
+
+STATICDIR      := /tmp
+
+$(STATICDIR):
+	mkdir -p $@
+
+install: all $(STATICDIR)
+	cp $(APP_NAME).js $(STATICDIR)/$(APP_NAME).js
