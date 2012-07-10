@@ -1,4 +1,4 @@
-load "str.cma" ;;
+#load "str.cma" ;;
 module Calendar = CalendarLib.Calendar
 
 let string_of_calendar cal =
