@@ -53,14 +53,14 @@ let _ =
            (Html.head (Html.title (Html.pcdata "Cumulus")) [])
            (Html.body [
              Html.post_form Services.add_user
-               (fun (url_name, (title_name, email_name)) -> [
+               (fun (username_name, (password_name, email_name)) -> [
                  Html.p [
                    Html.string_input
                      ~input_type: `Text
-                     ~name: url_name ();
+                     ~name: username_name ();
                    Html.string_input
                      ~input_type: `Text
-                     ~name: title_name ();
+                     ~name: password_name ();
                    Html.string_input
                      ~input_type: `Text
                      ~name: email_name ();
