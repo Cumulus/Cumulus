@@ -14,43 +14,59 @@ let private_main msg feeds =
             ]
          )
          (Html.body [
-            (Html.div ~a: [Html.a_class ["content"]]
+            (Html.div ~a: [Html.a_class ["container"]]
               (msg @ feeds @ [
-                Html.post_form Services.append_feed
+                Html.post_form ~a: [Html.a_class ["well form-inline"]] ~service: Services.append_feed
                   (fun (url_name, (title_name, tags_name)) -> [
                     Html.p [
+                      Html.pcdata  "URL ";
                       Html.string_input
+                        ~a: [Html.a_class ["input-medium search-query"]]
                         ~input_type: `Text
                         ~name: url_name ();
+                      Html.pcdata " Titre du post ";
                       Html.string_input
+                        ~a: [Html.a_class ["input-medium search-query"]]
                         ~input_type: `Text
                         ~name: title_name ();
+                      Html.pcdata " Tags ";
                       Html.string_input
+                        ~a: [Html.a_class ["input-medium search-query"]]
                         ~input_type: `Text
                         ~name: tags_name ();
                       Html.string_input
+                        ~a: [Html.a_class ["btn btn-primary"]]
                         ~input_type: `Submit
                         ~value: "Send" ()
                     ]
                   ]) ();
-                Html.post_form Services.auth
+                Html.post_form ~a: [Html.a_class ["well form-inline"]] ~service: Services.auth
                   (fun (user_name, password_name) -> [
                     Html.p [
+                      Html.pcdata "Nickname ";
                       Html.string_input
+                        ~a: [Html.a_class ["input-small"]]
                         ~input_type: `Text
                         ~name: user_name ();
+                      Html.pcdata " Password ";
                       Html.string_input
-                        ~input_type: `Text
+                        ~a: [Html.a_class ["input-small"]]
+                        ~input_type: `Password
                         ~name: password_name ();
                       Html.string_input
+                        ~a: [Html.a_class ["btn btn-primary"]]
                         ~input_type: `Submit
-                        ~value: "Login" ()
+                        ~value: "Login" ();
+                      Html.pcdata "Pas de compte ? ";
+                      Html.a Services.registration [Html.pcdata "S'inscrire."] ()
                     ]
                   ]) ();
                 Html.br ();
-                Html.a Services.registration [Html.pcdata "registration"] ()
+                Html.footer ~a: [Html.a_class ["footer"]] [
+                Html.pcdata "Cumulus project";
+                ]
               ])
-            )
+            ) 
          ])
       )
   )
