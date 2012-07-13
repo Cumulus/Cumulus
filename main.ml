@@ -67,7 +67,7 @@ let _ =
                      ~input_type: `Password
                      ~name: password_name ();
                    Html.pcdata "Mot de passe: ";
-                   Html.string_input 
+                   Html.string_input
                      ~input_type: `Password
                      ~name: password_check ();
                    Html.br ();
