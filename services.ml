@@ -36,6 +36,7 @@ let add_user =
     ~fallback: main
     ~post_params: Eliom_parameter.((string "username") **
                                       (string "password") **
+                                      (string "password_check") **
                                       (string "email"))
     ()
 
