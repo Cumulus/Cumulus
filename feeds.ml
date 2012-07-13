@@ -1,6 +1,6 @@
 module Calendar = CalendarLib.Calendar
 
-type append_state = Ok | Not_connected | Empty | Already_exist
+type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
 let self =
   Ocsipersist.open_table "feeds"
@@ -57,6 +57,8 @@ let append_feed (url, (title, tags)) =
       | (Some author) ->
         if Utils.string_is_empty url || Utils.string_is_empty title then
           Lwt.return Empty
+        else if Utils.is_invalid_url url then
+          Lwt.return Invalid_url
         else
           let feed = Feed.feed_new_from_new url title author
                       (Str.split (Str.regexp "[ \t]+") tags) in

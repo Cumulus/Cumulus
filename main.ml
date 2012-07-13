@@ -16,6 +16,7 @@ let _ =
           (Utils.msg (match state with
             | Feeds.Not_connected -> "Vous ne vous etes pas autentifie"
             | Feeds.Empty -> "L'un des champs est vide"
+            | Feeds.Invalid_url -> "L'Url entrée est invalide."
             | Feeds.Already_exist -> "Le lien existe deja"
             | Feeds.Ok -> "Le lien a bien ete ajoute"
            ))
@@ -40,8 +41,8 @@ let _ =
       Users.add_user datas >>= (fun state ->
         Templates.main
           (Utils.msg (match state with
-            | true -> "Vous etes bien enregistre"
-            | false -> "L'user exist deja"
+            | true -> "Vous êtes bien enregistré"
+            | false -> "L'user existe deja, ou mot de passe invalide"
            ))
       )
     );
@@ -53,17 +54,28 @@ let _ =
            (Html.head (Html.title (Html.pcdata "Cumulus")) [])
            (Html.body [
              Html.post_form Services.add_user
-               (fun (username_name, (password_name, email_name)) -> [
+               (fun (username_name, (email_name, (password_name,
+               password_check))) -> [
                  Html.p [
+                   Html.pcdata "Nom d'utilisateur: ";
                    Html.string_input
                      ~input_type: `Text
                      ~name: username_name ();
+                   Html.br ();
+                   Html.pcdata "Mot de passe: ";
                    Html.string_input
-                     ~input_type: `Text
+                     ~input_type: `Password
                      ~name: password_name ();
+                   Html.pcdata "Mot de passe: ";
+                   Html.string_input 
+                     ~input_type: `Password
+                     ~name: password_check ();
+                   Html.br ();
+                   Html.pcdata "Email: ";
                    Html.string_input
                      ~input_type: `Text
                      ~name: email_name ();
+                  Html.br ();
                    Html.string_input
                      ~input_type: `Submit
                      ~value: "Send" ()

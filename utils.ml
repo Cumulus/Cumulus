@@ -24,14 +24,14 @@ let msg str = [
   ]
 ]
 
-let is_url input =
+let is_invalid_url input =
   try (
     ignore
       (Neturl.url_of_string
          (Hashtbl.find Neturl.common_url_syntax "http")
          input
       );
-    true
+    false
   )
   with Neturl.Malformed_URL -> (
     try (
@@ -40,9 +40,9 @@ let is_url input =
            (Hashtbl.find Neturl.common_url_syntax "https")
            input
         );
-      true
+      false
     )
-    with Neturl.Malformed_URL -> false
+    with Neturl.Malformed_URL -> true
   )
 
 (*

@@ -1,4 +1,4 @@
-type append_state = Ok | Not_connected | Empty | Already_exist
+type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
 val to_html : unit -> (([> Html5_types.p ] Html.elt) list) Lwt.t
 val author_to_html : string -> (([> Html5_types.p ] Html.elt) list) Lwt.t
