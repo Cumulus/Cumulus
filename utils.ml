@@ -47,7 +47,7 @@ let is_invalid_url input =
 
 (*
   let regexp_match_url =
-    let legit_chars = "[]0-9A-Za-z_~ ().,+=&-]" in
+    let legit_chars = "[]0-9A-Za-z_~ ().,+=&%-]" in
     "^\\(https?\\|ftp\\)://" ^           (* Protocol *)
       "[A-Za-z0-9.]+" ^                  (* domaine name *)
       "\\(/"   ^ legit_chars ^ "*\\)*" ^ (* Arborescence *)
