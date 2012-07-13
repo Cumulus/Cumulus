@@ -19,28 +19,22 @@ let get_filter cmp =
 let get_all () =
   get_filter (fun _ -> true)
 
-let to_something entity getter =
-  getter () >>= (fun self ->
-    let content tmp feed = tmp @ [entity feed] in
-    let rec f tmp = function
-      | [] -> Lwt.return tmp
-      | [x] -> f (content tmp x) []
-      | x::xs -> f (content tmp x) xs in
-    f [] self
-  )
+let to_somthing f data =
+  Lwt_list.map_p
+    (fun feed -> Lwt.return (f feed))
+    data
+
+let private_to_html data =
+  to_somthing (fun feed -> Html.p (Feed.to_html feed)) data
 
 let author_to_html username =
-  to_something
-    (fun feed -> Html.p (Feed.to_html feed))
-    (fun () -> get_filter (Feed.filter_author username))
+  get_filter (Feed.filter_author username) >>= private_to_html
 
 let to_html () =
-  to_something (fun feed ->
-    Html.p (Feed.to_html feed)
-  ) get_all
+  get_all () >>= private_to_html
 
 let to_atom () =
-  to_something Feed.to_atom get_all >>= (fun tmp ->
+  get_all () >>= (to_somthing Feed.to_atom) >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
         ~updated: (Calendar.make 2012 6 9 17 40 30)
