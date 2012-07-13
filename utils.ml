@@ -25,27 +25,6 @@ let msg str = [
 ]
 
 let is_invalid_url input =
-  try (
-    ignore
-      (Neturl.url_of_string
-         (Hashtbl.find Neturl.common_url_syntax "http")
-         input
-      );
-    false
-  )
-  with Neturl.Malformed_URL -> (
-    try (
-      ignore
-        (Neturl.url_of_string
-           (Hashtbl.find Neturl.common_url_syntax "https")
-           input
-        );
-      false
-    )
-    with Neturl.Malformed_URL -> true
-  )
-
-(*
   let regexp_match_url =
     let legit_chars = "[]0-9A-Za-z_~ ().,+=&-]" in
     "^\\(https?\\|ftp\\)://" ^           (* Protocol *)
@@ -53,5 +32,4 @@ let is_invalid_url input =
       "\\(/"   ^ legit_chars ^ "*\\)*" ^ (* Arborescence *)
       "\\(\\?" ^ legit_chars ^ "*\\)?" ^ (* Parameters *)
       "\\(#"   ^ legit_chars ^ "*\\)$"   (* Anchor *) in
-  Str.string_match (Str.regexp regexp_match_url) input 0
-*)
+  not (Str.string_match (Str.regexp regexp_match_url) input 0)
