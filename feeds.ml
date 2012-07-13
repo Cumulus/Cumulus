@@ -55,11 +55,11 @@ let append_feed (url, (title, tags)) =
     match username with
       | None -> Lwt.return Not_connected
       | (Some author) ->
-        if Utils.string_is_empty url || Utils.string_is_empty title then
+        if Utils.string_is_empty title then
           Lwt.return Empty
         else if Utils.is_invalid_url url then
           Lwt.return Invalid_url
-        else
+        else (
           let feed = Feed.feed_new_from_new url title author
                       (Str.split (Str.regexp "[ \t]+") tags) in
           Lwt.try_bind
@@ -70,4 +70,5 @@ let append_feed (url, (title, tags)) =
                 Lwt.return Ok
               )
             )
+        )
   )
