@@ -2,7 +2,7 @@ module Calendar = CalendarLib.Calendar
 
 type feed_content = {
   title : string;
-  date : CalendarLib.Calendar.t;
+  date : Calendar.t;
   author : string;
   tags: string list
 }
