@@ -2,33 +2,30 @@ module Calendar = CalendarLib.Calendar
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
-let self =
-  Ocsipersist.open_table "feeds"
-
-let get_filter cmp =
-  Ocsipersist.fold_table (fun url data ret ->
-    Lwt.return (
-      let feed = Feed.feed_new url data in
-      if cmp feed then
-        ret @ [feed]
-      else
-        ret
-    )
-  ) self []
+let feeds_of_db db =
+  Lwt_list.map_p (fun elm -> Lwt.return (Feed.feed_new elm)) db
 
 let get_all () =
-  get_filter (fun _ -> true)
+  Db.get_feeds () >>= feeds_of_db
+
+let get_with_author author =
+  Db.get_feeds_with_author author >>= feeds_of_db
 
 let to_somthing f data =
   Lwt_list.map_p
-    (fun feed -> Lwt.return (f feed))
+    (fun feed -> f feed)
     data
 
 let private_to_html data =
-  to_somthing (fun feed -> Html.p (Feed.to_html feed)) data
+  to_somthing
+    (fun feed ->
+      Feed.to_html feed >>= (fun elm ->
+        Lwt.return (Html.p elm)
+      )
+    ) data
 
 let author_to_html username =
-  get_filter (Feed.filter_author username) >>= private_to_html
+  get_with_author username >>= private_to_html
 
 let to_html () =
   get_all () >>= private_to_html
@@ -45,8 +42,8 @@ let to_atom () =
   )
 
 let append_feed (url, (title, tags)) =
-  User.get_username () >>= (fun username ->
-    match username with
+  User.get_userid () >>= (fun userid ->
+    match userid with
       | None -> Lwt.return Not_connected
       | (Some author) ->
         if Utils.string_is_empty title then
@@ -54,15 +51,15 @@ let append_feed (url, (title, tags)) =
         else if Utils.is_invalid_url url then
           Lwt.return Invalid_url
         else (
-          let feed = Feed.feed_new_from_new url title author
-                      (Str.split (Str.regexp "[ \t]+") tags) in
-          Lwt.try_bind
-            (fun () -> Ocsipersist.find self url)
-            (fun _ -> Lwt.return Already_exist)
-            (fun _ ->
-              Feed.write feed (Ocsipersist.add self) >>= (fun () ->
-                Lwt.return Ok
+          Db.get_feeds_url () >>= (fun list ->
+            Lwt_list.exists_p
+              (fun elm -> Lwt.return (elm#!url = url))
+              list >>= (function
+                | true -> Lwt.return Already_exist
+                | false -> Db.add_feed url title tags author >>= (fun () ->
+                  Lwt.return Ok
+                )
               )
-            )
+          )
         )
   )

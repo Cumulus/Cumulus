@@ -4,7 +4,7 @@ APP_NAME := dest/cumulus
 
 ## Packages required to build the server part of the application
 
-SERVER_PACKAGES :=
+SERVER_PACKAGES := macaque.syntax
 
 ## Packages to be linked in the client part
 
@@ -13,6 +13,8 @@ CLIENT_PACKAGES :=
 ## Source files for the server part
 
 SERVER_FILES := html.ml \
+		db.mli \
+		db.ml \
 		utils.ml \
 		feed.mli \
 		feed.ml \
