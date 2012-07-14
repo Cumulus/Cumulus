@@ -61,10 +61,11 @@ let get_feeds_with_author author =
     )
   )
 
-(* TODO: To improve... (Called in Feeds.add_feed) *)
-let get_feeds_url () =
+let get_feed_url_with_url url =
   get_db () >>= (fun db ->
-    Lwt_Query.view db (<:view< {f.url} | f in $feeds$ >>)
+    Lwt_Query.view_opt db (<:view< {
+      f.url
+    } | f in $feeds$; f.url = $string:url$ >>)
   )
 
 let add_feed url title tags userid =

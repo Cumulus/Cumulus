@@ -51,15 +51,11 @@ let append_feed (url, (title, tags)) =
         else if Utils.is_invalid_url url then
           Lwt.return Invalid_url
         else (
-          Db.get_feeds_url () >>= (fun list ->
-            Lwt_list.exists_p
-              (fun elm -> Lwt.return (elm#!url = url))
-              list >>= (function
-                | true -> Lwt.return Already_exist
-                | false -> Db.add_feed url title tags author >>= (fun () ->
-                  Lwt.return Ok
-                )
-              )
+          Db.get_feed_url_with_url url >>= (function
+            | (Some _) -> Lwt.return Already_exist
+            | None -> Db.add_feed url title tags author >>= (fun () ->
+              Lwt.return Ok
+            )
           )
         )
   )

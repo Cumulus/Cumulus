@@ -25,8 +25,8 @@ val get_feeds_with_author : string ->
   title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
   url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
     list Lwt.t
-val get_feeds_url : unit ->
+val get_feed_url_with_url : string ->
   < url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
-    list Lwt.t
+    option Lwt.t
 val add_feed : string -> string -> string -> int32 -> unit Lwt.t
 val add_user : string -> string -> string -> unit Lwt.t
