@@ -5,7 +5,7 @@ end
 module Lwt_PGOCaml = PGOCaml_generic.Make(Lwt_thread)
 module Lwt_Query = Query.Make_with_Db(Lwt_thread)(Lwt_PGOCaml)
 
-let get_db () = Lwt_PGOCaml.connect ~database: "cumulus" ~user: "postgres" ()
+let get_db () = Lwt_PGOCaml.connect ~database: "cumulus" ~host: "localhost" (*~port: 5432*) ~user: "root" ()
 
 let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
 
