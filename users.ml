@@ -15,9 +15,10 @@ let add_user (name, (email, (password, password_check))) =
   else (
     Db.get_users_with_name name >>= (function
       | (Some _) -> (Lwt.return false)
-      | None ->
+      | None -> (
         Db.add_user name (User.hash_password password) email >>= (fun () ->
           Lwt.return true
         )
+      )
     )
   )
