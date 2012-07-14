@@ -7,7 +7,7 @@ type user = {
 type user_state = Already_connected | Ok | Bad_password | Not_found
 
 let hash_password password =
-  Cryptokit.hash_string (Cryptokit.Hash.sha256 ()) password
+  Digest.to_hex (Digest.string password)
 
 let user_new data = {
   id = data#!id;
