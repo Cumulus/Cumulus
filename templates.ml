@@ -16,7 +16,9 @@ let private_main msg feeds =
          (Html.body [
             (Html.div ~a: [Html.a_class ["container"]]
               (msg @ feeds @ [
-                Html.post_form ~a: [Html.a_class ["well form-inline"]] ~service: Services.append_feed
+                Html.post_form
+                  ~a: [Html.a_class ["well form-inline"]]
+                  ~service: Services.append_feed
                   (fun (url_name, (title_name, tags_name)) -> [
                     Html.p [
                       Html.pcdata  "URL ";
@@ -40,7 +42,9 @@ let private_main msg feeds =
                         ~value: "Send" ()
                     ]
                   ]) ();
-                Html.post_form ~a: [Html.a_class ["well form-inline"]] ~service: Services.auth
+                Html.post_form
+                  ~a: [Html.a_class ["well form-inline"]]
+                  ~service: Services.auth
                   (fun (user_name, password_name) -> [
                     Html.p [
                       Html.pcdata "Nickname ";
@@ -58,7 +62,9 @@ let private_main msg feeds =
                         ~input_type: `Submit
                         ~value: "Login" ();
                       Html.pcdata "Pas de compte ? ";
-                      Html.a Services.registration [Html.pcdata "S'inscrire."] ()
+                      Html.a
+                        Services.registration
+                        [Html.pcdata "S'inscrire."] ()
                     ]
                   ]) ();
                 Html.br ();
@@ -66,7 +72,7 @@ let private_main msg feeds =
                 Html.pcdata "Cumulus project";
                 ]
               ])
-            ) 
+            )
          ])
       )
   )

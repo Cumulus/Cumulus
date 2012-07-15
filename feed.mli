@@ -1,9 +1,13 @@
-type feed_content
 type feed
 
-val feed_new : string -> feed_content -> feed
-val feed_new_from_new : string -> string -> string -> string list -> feed
-val to_html : feed -> ([> `A of [> `PCDATA ] | `Br | `PCDATA ] Html.elt) list
-val to_atom : feed -> Atom_feed.entry
-val write : feed -> (string -> feed_content -> unit Lwt.t) -> unit Lwt.t
-val filter_author : string -> feed -> bool
+val feed_new :
+  < author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
+  id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
+  tags : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
+  timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t;
+  title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
+  url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
+    -> feed
+val to_html : feed ->
+  (([> `A of [> `PCDATA ] | `Br | `PCDATA ] Html.elt) list) Lwt.t
+val to_atom : feed -> Atom_feed.entry Lwt.t

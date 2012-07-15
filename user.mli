@@ -1,9 +1,15 @@
 type user
 type user_state = Already_connected | Ok | Bad_password | Not_found
 
-val user_new : string -> string -> user
+val user_new :
+  < email : < get : 'a; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
+  id : < get : 'b; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
+  name : < get : 'c; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
+  password : < get : 'd; nul : Sql.non_nullable; t : Sql.string_t > Sql.t; > ->
+  user
+val add : string -> string -> string -> unit Lwt.t
 val check_password : user -> string -> bool
-val get_username : unit -> (string option) Lwt.t
+val get_userid : unit -> (int32 option) Lwt.t
 val is_connected : unit -> bool Lwt.t
-val connect : string -> user_state Lwt.t
+val connect : user -> user_state Lwt.t
 val disconnect : unit -> bool Lwt.t

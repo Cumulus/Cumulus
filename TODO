@@ -25,3 +25,6 @@ principale, par exemple.
 
 Implémenter les commentaires: Pas besoin de faire très compliqué, ceci dit une
 vue par fils de discussions serait très appréciée.
+
+Implement the dynamic feed update on the main page. (jpdeplaix)
+Migrate from Ocsipersist to MaCaQue. (jpdeplaix)

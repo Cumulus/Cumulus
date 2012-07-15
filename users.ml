@@ -1,23 +1,24 @@
-let self =
-  Ocsipersist.open_table "users"
-
 let connect_user username password =
-  Lwt.try_bind
-    (fun () -> Ocsipersist.find self username)
-    (fun user ->
+  Db.get_user_with_name username >>= (function
+    | None -> Lwt.return User.Not_found
+    | (Some user) -> (
+      let user = User.user_new user in
       match User.check_password user password with
-        | true -> User.connect username
+        | true -> User.connect user
         | false -> Lwt.return User.Bad_password
     )
-    (fun _ -> Lwt.return User.Not_found)
+  )
 
-let add_user (username, (email, (password, password_check))) =
-  Lwt.try_bind
-    (fun () -> Ocsipersist.find self username)
-    (fun _ -> Lwt.return false)
-    (fun _ ->
-      Ocsipersist.add self username
-        (User.user_new password email) >>= (fun () ->
+let add_user (name, (email, (password, password_check))) =
+  if password <> password_check then
+    Lwt.return false
+  else (
+    Db.get_user_with_name name >>= (function
+      | (Some _) -> Lwt.return false
+      | None -> (
+        User.add name password email >>= (fun () ->
           Lwt.return true
-         )
+        )
+      )
     )
+  )

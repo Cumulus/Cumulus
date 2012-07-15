@@ -2,45 +2,34 @@ module Calendar = CalendarLib.Calendar
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
-let self =
-  Ocsipersist.open_table "feeds"
-
-let get_filter cmp =
-  Ocsipersist.fold_table (fun url data ret ->
-    Lwt.return (
-      let feed = Feed.feed_new url data in
-      if cmp feed then
-        ret @ [feed]
-      else
-        ret
-    )
-  ) self []
+let feeds_of_db db =
+  Lwt_list.map_p (fun elm -> Lwt.return (Feed.feed_new elm)) db
 
 let get_all () =
-  get_filter (fun _ -> true)
+  Db.get_feeds () >>= feeds_of_db
 
-let to_something entity getter =
-  getter () >>= (fun self ->
-    let content tmp feed = tmp @ [entity feed] in
-    let rec f tmp = function
-      | [] -> Lwt.return tmp
-      | [x] -> f (content tmp x) []
-      | x::xs -> f (content tmp x) xs in
-    f [] self
-  )
+let get_with_author author =
+  Db.get_feeds_with_author author >>= feeds_of_db
+
+let to_somthing f data =
+  Lwt_list.map_p (fun feed -> f feed) data
+
+let private_to_html data =
+  to_somthing
+    (fun feed ->
+      Feed.to_html feed >>= (fun elm ->
+        Lwt.return (Html.p elm)
+      )
+    ) data
 
 let author_to_html username =
-  to_something
-    (fun feed -> Html.p (Feed.to_html feed))
-    (fun () -> get_filter (Feed.filter_author username))
+  get_with_author username >>= private_to_html
 
 let to_html () =
-  to_something (fun feed ->
-    Html.p (Feed.to_html feed)
-  ) get_all
+  get_all () >>= private_to_html
 
 let to_atom () =
-  to_something Feed.to_atom get_all >>= (fun tmp ->
+  get_all () >>= (to_somthing Feed.to_atom) >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
         ~updated: (Calendar.make 2012 6 9 17 40 30)
@@ -51,8 +40,8 @@ let to_atom () =
   )
 
 let append_feed (url, (title, tags)) =
-  User.get_username () >>= (fun username ->
-    match username with
+  User.get_userid () >>= (fun userid ->
+    match userid with
       | None -> Lwt.return Not_connected
       | (Some author) ->
         if Utils.string_is_empty title then
@@ -60,15 +49,11 @@ let append_feed (url, (title, tags)) =
         else if Utils.is_invalid_url url then
           Lwt.return Invalid_url
         else (
-          let feed = Feed.feed_new_from_new url title author
-                      (Str.split (Str.regexp "[ \t]+") tags) in
-          Lwt.try_bind
-            (fun () -> Ocsipersist.find self url)
-            (fun _ -> Lwt.return Already_exist)
-            (fun _ ->
-              Feed.write feed (Ocsipersist.add self) >>= (fun () ->
-                Lwt.return Ok
-              )
+          Db.get_feed_url_with_url url >>= (function
+            | (Some _) -> Lwt.return Already_exist
+            | None -> Db.add_feed url title tags author >>= (fun () ->
+              Lwt.return Ok
             )
+          )
         )
   )
