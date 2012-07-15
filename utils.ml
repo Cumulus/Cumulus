@@ -30,5 +30,5 @@ let is_invalid_url input =
       "[A-Za-z0-9.]+" ^                  (* domaine name *)
       "\\(/"   ^ legit_chars ^ "*\\)*" ^ (* Arborescence *)
       "\\(\\?" ^ legit_chars ^ "*\\)?" ^ (* Parameters *)
-      "\\(#"   ^ legit_chars ^ "*\\)$"   (* Anchor *) in
+      "\\(#"   ^ legit_chars ^ "*\\)?$"   (* Anchor *) in
   not (Str.string_match (Str.regexp regexp_match_url) input 0)
