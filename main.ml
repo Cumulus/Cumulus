@@ -1,4 +1,4 @@
-let _ =
+let () =
   Eliom_atom.Reg.register
     ~service: Services.atom
     (fun () () -> Feeds.to_atom ());
@@ -83,5 +83,4 @@ let _ =
                ]) ()
            ])
         )
-    );
-  ()
+    )
