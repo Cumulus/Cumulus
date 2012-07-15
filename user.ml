@@ -14,7 +14,9 @@ let user_new data = {
 }
 
 let hash_password password =
-  Digest.to_hex (Digest.string password)
+  (* Cryptokit.hash_string (Cryptokit.Hash.sha256 ()) password *)
+  (* Digest.to_hex (Digest.string password) *)
+  Sha512.to_hex (Sha512.string password)
 
 let check_password self password = self.password = (hash_password password)
 
