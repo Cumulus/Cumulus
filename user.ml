@@ -6,9 +6,6 @@ type user = {
 }
 type user_state = Already_connected | Ok | Bad_password | Not_found
 
-let hash_password password =
-  Digest.to_hex (Digest.string password)
-
 let user_new data = {
   id = data#!id;
   name = data#!name;
@@ -16,7 +13,13 @@ let user_new data = {
   email = data#!email
 }
 
+let hash_password password =
+  Digest.to_hex (Digest.string password)
+
 let check_password self password = self.password = (hash_password password)
+
+let add name password email =
+  Db.add_user name (hash_password password) email
 
 let (current_user : (user option) Eliom_reference.eref) =
   Eliom_reference.eref ~scope: Eliom_common.session None

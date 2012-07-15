@@ -23,7 +23,7 @@ let to_html self =
     Eliom_service.external_service
       self.url []
       Eliom_parameter.unit () in
-  Db.get_users_name_with_id self.author >>= (fun author ->
+  Db.get_user_name_with_id self.author >>= (fun author ->
     Lwt.return [
       Html.a url_service [Html.pcdata self.title] ();
       Html.br ();
@@ -36,7 +36,7 @@ let to_html self =
   )
 
 let to_atom self =
-  Db.get_users_name_with_id self.author >>= (fun author ->
+  Db.get_user_name_with_id self.author >>= (fun author ->
     Lwt.return (
       Atom_feed.entry
         ~updated: self.date

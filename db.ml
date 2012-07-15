@@ -5,8 +5,38 @@ end
 module Lwt_PGOCaml = PGOCaml_generic.Make(Lwt_thread)
 module Lwt_Query = Query.Make_with_Db(Lwt_thread)(Lwt_PGOCaml)
 
-(* TODO: Use Lwt_pool instead. For now, it opens a new connection to the database each time it is called *)
-let get_db () = Lwt_PGOCaml.connect ~database: "cumulus" ~host: "localhost" (*~port: 5432*) ~user: "root" ()
+let connect () =
+  Lwt_PGOCaml.connect
+    ~database: "cumulus"
+    ~host: "localhost"
+    (* ~port: 5432 *)
+    ~user: "root" ()
+
+let validate db =
+  Lwt.try_bind
+    (fun () -> Lwt_PGOCaml.ping db)
+    (fun () -> Lwt.return true)
+    (fun _ -> Lwt.return false)
+
+let pool = Lwt_pool.create 16 (* ~validate *) connect
+
+let transate_sql f =
+  Lwt_pool.use pool (fun db ->
+    Lwt_PGOCaml.begin_work db >>= (fun () ->
+      Lwt.try_bind
+        (fun () -> f db)
+        (fun r ->
+          Lwt_PGOCaml.commit db >>= (fun () ->
+            Lwt.return r
+          )
+        )
+        (fun e ->
+          Lwt_PGOCaml.rollback db >>= (fun () ->
+            Lwt.fail e
+          )
+        )
+    )
+  )
 
 let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
 
@@ -28,48 +58,48 @@ let users = (<:table< users (
   email text NOT NULL
 ) >>)
 
-let get_users_id_with_name name =
-  get_db () >>= (fun db ->
+let get_user_id_with_name name =
+  transate_sql (fun db ->
     Lwt_Query.view_one db (<:view< {
       a.id
     } | a in $users$; a.name = $string:name$ >>)
   )
 
-let get_users_name_with_id id =
-  get_db () >>= (fun db ->
+let get_user_name_with_id id =
+  transate_sql (fun db ->
     Lwt_Query.view_one db (<:view< {
       a.name
     } | a in $users$; a.id = $int32:id$ >>)
   )
 
-let get_users_with_name name =
-  get_db () >>= (fun db ->
+let get_user_with_name name =
+  transate_sql (fun db ->
     Lwt_Query.view_opt db (<:view< a |
         a in $users$; a.name = $string:name$ >>)
   )
 
 let get_feeds () =
-  get_db () >>= (fun db ->
+  transate_sql (fun db ->
     Lwt_Query.view db (<:view< f | f in $feeds$ >>)
   )
 
 let get_feeds_with_author author =
-  get_db () >>= (fun db ->
-    get_users_id_with_name author >>= (fun author ->
+  transate_sql (fun db ->
+    get_user_id_with_name author >>= (fun author ->
       Lwt_Query.view db (<:view< f |
           f in $feeds$; f.author = $int32:author#!id$ >>)
     )
   )
 
 let get_feed_url_with_url url =
-  get_db () >>= (fun db ->
+  transate_sql (fun db ->
     Lwt_Query.view_opt db (<:view< {
       f.url
     } | f in $feeds$; f.url = $string:url$ >>)
   )
 
 let add_feed url title tags userid =
-  get_db () >>= (fun db ->
+  transate_sql (fun db ->
     Lwt_Query.query db (<:insert< $feeds$ := {
       id = feeds?id;
       url = $string:url$;
@@ -81,7 +111,7 @@ let add_feed url title tags userid =
   )
 
 let add_user name password email =
-  get_db () >>= (fun db ->
+  transate_sql (fun db ->
     Lwt_Query.query db (<:insert< $users$ := {
       id = users?id;
       name = $string:name$;

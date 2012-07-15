@@ -7,7 +7,7 @@ val user_new :
   name : < get : 'c; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
   password : < get : 'd; nul : Sql.non_nullable; t : Sql.string_t > Sql.t; > ->
   user
-val hash_password : string -> string
+val add : string -> string -> string -> unit Lwt.t
 val check_password : user -> string -> bool
 val get_userid : unit -> (int32 option) Lwt.t
 val is_connected : unit -> bool Lwt.t

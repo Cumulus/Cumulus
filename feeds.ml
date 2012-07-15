@@ -12,9 +12,7 @@ let get_with_author author =
   Db.get_feeds_with_author author >>= feeds_of_db
 
 let to_somthing f data =
-  Lwt_list.map_p
-    (fun feed -> f feed)
-    data
+  Lwt_list.map_p (fun feed -> f feed) data
 
 let private_to_html data =
   to_somthing
