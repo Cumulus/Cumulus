@@ -1,7 +1,7 @@
 type user = {
   id : int32;
   name : string;
-  password : string;
+  password : Bcrypt.hash_t;
   email : string
 }
 type user_state = Already_connected | Ok | Bad_password | Not_found
@@ -9,16 +9,17 @@ type user_state = Already_connected | Ok | Bad_password | Not_found
 let user_new data = {
   id = data#!id;
   name = data#!name;
-  password = data#!password;
+  password = Bcrypt.hash_of_string data#!password;
   email = data#!email
 }
 
 let hash_password password =
   (* Cryptokit.hash_string (Cryptokit.Hash.sha256 ()) password *)
   (* Digest.to_hex (Digest.string password) *)
-  Sha512.to_hex (Sha512.string password)
+  (* Sha512.to_hex (Sha512.string password) *)
+  Bcrypt.string_of_hash (Bcrypt.hash password)
 
-let check_password self password = self.password = (hash_password password)
+let check_password self password = Bcrypt.verify password self.password
 
 let add name password email =
   Db.add_user name (hash_password password) email
