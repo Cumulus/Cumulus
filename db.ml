@@ -10,7 +10,7 @@ let connect () =
     ~database: "cumulus"
     ~host: "localhost"
     (* ~port: 5432 *)
-    ~user: "root" ()
+    ~user: "cumulus" ()
 
 let validate db =
   Lwt.try_bind
