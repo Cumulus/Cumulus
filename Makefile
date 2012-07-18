@@ -61,6 +61,7 @@ opt:: ${APP_NAME}.cmxs ${APP_NAME}.js
 SERVER_INC  := ${addprefix -package ,${SERVER_PACKAGES}}
 
 SERVER_OBJS := $(patsubst %.eliom,${ELIOM_SERVER_DIR}/%.cmo, ${SERVER_FILES})
+SERVER_OBJS := $(patsubst %.mli,${ELIOM_SERVER_DIR}/%.cmi, ${SERVER_OBJS})
 SERVER_OBJS := $(patsubst %.ml,${ELIOM_SERVER_DIR}/%.cmo, ${SERVER_OBJS})
 
 ${APP_NAME}.cma: ${SERVER_OBJS}
