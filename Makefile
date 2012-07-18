@@ -53,8 +53,8 @@ export ELIOM_TYPE_DIR   := .
 #####################################
 
 all: byte opt
-byte:: ${APP_NAME}.cma ${APP_NAME}.js
-opt:: ${APP_NAME}.cmxs ${APP_NAME}.js
+byte:: ${APP_NAME}.cma
+opt:: ${APP_NAME}.cmxs
 
 #### Server side compilation #######
 
