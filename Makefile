@@ -118,7 +118,7 @@ clean:
 	-rm -f ${APP_NAME}.js
 	-rm -rf ${ELIOM_CLIENT_DIR} ${ELIOM_SERVER_DIR}
 
-distclean: clean.local
+distclean:
 	-rm -f *~ \#* .\#*
 
 ## Dependencies
