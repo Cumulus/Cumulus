@@ -1,0 +1,1 @@
+For init the database, just execute initdb.sh with the user postgres.
