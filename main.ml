@@ -48,39 +48,4 @@ let () =
     );
   Eliom_registration.Html5.register
     ~service: Services.registration
-    (fun () () ->
-      Lwt.return
-        (Html.html
-           (Html.head (Html.title (Html.pcdata "Cumulus")) [])
-           (Html.body [
-             Html.post_form Services.add_user
-               (fun (username_name, (email_name, (password_name,
-               password_check))) -> [
-                 Html.p [
-                   Html.pcdata "Nom d'utilisateur: ";
-                   Html.string_input
-                     ~input_type: `Text
-                     ~name: username_name ();
-                   Html.br ();
-                   Html.pcdata "Mot de passe: ";
-                   Html.string_input
-                     ~input_type: `Password
-                     ~name: password_name ();
-                   Html.pcdata "Mot de passe: ";
-                   Html.string_input
-                     ~input_type: `Password
-                     ~name: password_check ();
-                   Html.br ();
-                   Html.pcdata "Email: ";
-                   Html.string_input
-                     ~input_type: `Text
-                     ~name: email_name ();
-                  Html.br ();
-                   Html.string_input
-                     ~input_type: `Submit
-                     ~value: "Send" ()
-                 ]
-               ]) ()
-           ])
-        )
-    )
+    (fun () () -> Templates.register)
