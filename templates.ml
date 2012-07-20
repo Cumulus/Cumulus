@@ -77,8 +77,66 @@ let private_main msg feeds =
       )
   )
 
+let private_register =
+  Lwt.return
+    (Html.html
+      (Html.head
+        (Html.title (Html.pcdata "Cumulus"))
+          [
+            Html.css_link
+              ~uri: (
+                Html.make_uri
+                  ~service: (Eliom_service.static_dir ()) ["style.css"]
+              ) ()
+          ]
+      )
+      (Html.body [
+        (Html.div ~a: [Html.a_class ["container"]]
+           [Html.post_form
+              ~a: [Html.a_class ["well form-inline"]]
+              ~service: Services.add_user
+              (fun (username_name, (email_name, (password_name, password_check))) -> [
+                Html.p [
+                  Html.pcdata "Nom d'utilisateur: ";
+                  Html.string_input
+                    ~a: [Html.a_class ["input-small"]]
+                    ~input_type: `Text
+                    ~name: username_name ();
+                  Html.br ();
+                  Html.pcdata "Mot de passe: ";
+                  Html.string_input
+                    ~a: [Html.a_class ["input-small"]]
+                    ~input_type: `Password 
+                    ~name: password_name ();
+                  Html.br ();
+                  Html.pcdata "Mot de passe: ";
+                  Html.string_input
+                    ~a: [Html.a_class ["input-small"]]
+                    ~input_type: `Password 
+                    ~name: password_check ();
+                  Html.br ();
+                  Html.pcdata "Email: ";
+                  Html.string_input
+                    ~a: [Html.a_class ["input-small"]]
+                    ~input_type: `Text
+                    ~name: email_name ();
+                  Html.br ();
+                  Html.string_input
+                    ~a: [Html.a_class ["btn btn-primary"]]
+                    ~input_type: `Submit
+                    ~value: "Send" ()
+                ]
+              ]) ()
+           ]
+        )
+      ])
+    )
+
 let main msg =
   private_main msg (Feeds.to_html ())
 
 let user msg username =
   private_main msg (Feeds.author_to_html username)
+
+let register =
+  private_register
