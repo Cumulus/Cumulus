@@ -6,16 +6,16 @@ type feed = {
   title : string;
   date : Calendar.t;
   author : int32;
-  tags: string
+  tags: string list
 }
 
-let feed_new data = {
+let feed_new data tags = {
   id = data#!id;
   url = data#!url;
   title = data#!title;
   date = data#!timedate;
   author = data#!author;
-  tags = data#!tags
+  tags = tags
 }
 
 let to_html self =
@@ -31,7 +31,7 @@ let to_html self =
       Html.br ();
       Html.pcdata ("author: " ^ author#!name);
       Html.br ();
-      Html.pcdata ("tags: " ^ self.tags)
+      Html.pcdata ("tags: " ^ (List.fold_left (fun a b -> a ^ " " ^ b) "" self.tags))
     ]
   )
 

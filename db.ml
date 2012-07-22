@@ -45,8 +45,12 @@ let feeds = (<:table< feeds (
   url text NOT NULL,
   title text NOT NULL,
   timedate timestamp NOT NULL DEFAULT(current_timestamp),
-  author integer NOT NULL,
-  tags text NOT NULL
+  author integer NOT NULL
+) >>)
+
+let feeds_tags = (<:table< feeds_tags (
+  tag text NOT NULL,
+  id_feed integer NOT NULL
 ) >>)
 
 let users_id_seq = (<:sequence< serial "users_id_seq" >>)
@@ -78,9 +82,24 @@ let get_user_with_name name =
         a in $users$; a.name = $string:name$ >>)
   )
 
+(* TODO: Hashtlb ? *)
+let get_tags_from_feeds db feeds =
+  Lwt_list.map_p (fun feed ->
+    Lwt.return
+      (feed#!id,
+       Lwt_Query.view db (<:view< {
+         t.tag
+       } | t in $feeds_tags$; t.id_feed = $feed#id$ >>)
+      )
+  ) feeds
+
 let get_feeds () =
   transate_sql (fun db ->
-    Lwt_Query.view db (<:view< f | f in $feeds$ >>)
+    Lwt_Query.view db (<:view< f |
+        f in $feeds$ >>)
+    >>= (fun feeds ->
+      Lwt.return (feeds, get_tags_from_feeds db feeds)
+    )
   )
 
 let get_feeds_with_author author =
@@ -88,6 +107,9 @@ let get_feeds_with_author author =
     get_user_id_with_name author >>= (fun author ->
       Lwt_Query.view db (<:view< f |
           f in $feeds$; f.author = $int32:author#!id$ >>)
+      >>= (fun feeds ->
+        Lwt.return (feeds, get_tags_from_feeds db feeds)
+      )
     )
   )
 
@@ -100,14 +122,21 @@ let get_feed_url_with_url url =
 
 let add_feed url title tags userid =
   transate_sql (fun db ->
-    Lwt_Query.query db (<:insert< $feeds$ := {
-      id = feeds?id;
+    let id_feed = (<:value< feeds?id >>) in
+    let feed = Lwt_Query.query db (<:insert< $feeds$ := {
+      id = $id_feed$;
       url = $string:url$;
       title = $string:title$;
       timedate = feeds?timedate;
-      author = $int32:userid$;
-      tags = $string:tags$
+      author = $int32:userid$
     } >>)
+    and tag = Lwt_list.iter_p
+      (fun tag -> Lwt_Query.query db (<:insert< $feeds_tags$ := {
+        tag = $string:tag$;
+        id_feed = $id_feed$
+       } >>)
+      ) tags in
+    Lwt.join [feed; tag]
   )
 
 let add_user name password email =

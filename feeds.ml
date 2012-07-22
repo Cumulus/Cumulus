@@ -3,7 +3,17 @@ module Calendar = CalendarLib.Calendar
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
 let feeds_of_db db =
-  Lwt_list.map_p (fun elm -> Lwt.return (Feed.feed_new elm)) db
+  Lwt_list.map_p (fun feed ->
+    snd db >>= (fun tags ->
+      let tags = List.find
+        (fun elm -> fst elm = feed#!id)
+        tags in
+      snd tags >>= (fun tags ->
+        let tags = List.map (fun tag -> tag#!tag) tags in
+        Lwt.return (Feed.feed_new feed tags)
+      )
+    )
+  ) (fst db)
 
 let get_all () =
   Db.get_feeds () >>= feeds_of_db
@@ -51,8 +61,14 @@ let append_feed (url, (title, tags)) =
         else (
           Db.get_feed_url_with_url url >>= (function
             | (Some _) -> Lwt.return Already_exist
-            | None -> Db.add_feed url title tags author >>= (fun () ->
-              Lwt.return Ok
+            | None -> (
+              Db.add_feed
+                url
+                title
+                (Str.split (Str.regexp "[ \t]+") tags)
+                author >>= (fun () ->
+                  Lwt.return Ok
+                )
             )
           )
         )

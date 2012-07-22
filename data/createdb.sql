@@ -5,8 +5,12 @@ CREATE TABLE feeds (
     url text NOT NULL,
     title text NOT NULL,
     timedate timestamp NOT NULL,
-    author integer NOT NULL,
-    tags text NOT NULL
+    author integer NOT NULL
+);
+
+CREATE TABLE feeds_tags (
+    tag text NOT NULL,
+    id_feed integer NOT NULL
 );
 
 CREATE TABLE users (
