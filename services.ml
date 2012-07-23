@@ -24,6 +24,12 @@ let author_feed =
     ~get_params: (Eliom_parameter.string "username")
     ()
 
+let tag_feed =
+  Eliom_service.service
+    ~path: [""]
+    ~get_params: (Eliom_parameter.string "tag")
+    ()
+
 let auth =
   (* post_coservice' *)
   Eliom_service.post_service

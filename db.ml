@@ -20,24 +20,6 @@ let validate db =
 
 let pool = Lwt_pool.create 16 ~validate connect
 
-let transate_sql f =
-  Lwt_pool.use pool (fun db ->
-    Lwt_PGOCaml.begin_work db >>= (fun () ->
-      Lwt.try_bind
-        (fun () -> f db)
-        (fun r ->
-          Lwt_PGOCaml.commit db >>= (fun () ->
-            Lwt.return r
-          )
-        )
-        (fun e ->
-          Lwt_PGOCaml.rollback db >>= (fun () ->
-            Lwt.fail e
-          )
-        )
-    )
-  )
-
 let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
 
 let feeds = (<:table< feeds (
@@ -63,84 +45,100 @@ let users = (<:table< users (
 ) >>)
 
 let get_user_id_with_name name =
-  transate_sql (fun db ->
+  Lwt_pool.use pool (fun db ->
     Lwt_Query.view_one db (<:view< {
       a.id
     } | a in $users$; a.name = $string:name$ >>)
   )
 
 let get_user_name_with_id id =
-  transate_sql (fun db ->
+  Lwt_pool.use pool (fun db ->
     Lwt_Query.view_one db (<:view< {
       a.name
     } | a in $users$; a.id = $int32:id$ >>)
   )
 
 let get_user_with_name name =
-  transate_sql (fun db ->
+  Lwt_pool.use pool (fun db ->
     Lwt_Query.view_opt db (<:view< a |
         a in $users$; a.name = $string:name$ >>)
   )
 
 (* TODO: Hashtlb ? *)
-let get_tags_from_feeds db feeds =
+let get_tags_from_feeds feeds =
   Lwt_list.map_p (fun feed ->
-    Lwt.return
-      (feed#!id,
-       Lwt_Query.view db (<:view< {
-         t.tag
-       } | t in $feeds_tags$; t.id_feed = $feed#id$ >>)
+    Lwt_pool.use pool (fun db ->
+      Lwt_Query.view db (<:view< {
+        t.tag
+      } | t in $feeds_tags$; t.id_feed = $int32:feed#!id$ >>) >>= (fun tags ->
+        Lwt.return (feed#!id, tags)
       )
+    )
   ) feeds
 
 let get_feeds () =
-  transate_sql (fun db ->
+  Lwt_pool.use pool (fun db ->
     Lwt_Query.view db (<:view< f |
         f in $feeds$ >>)
     >>= (fun feeds ->
-      Lwt.return (feeds, get_tags_from_feeds db feeds)
+      Lwt.return (feeds, get_tags_from_feeds feeds)
     )
   )
 
 let get_feeds_with_author author =
-  transate_sql (fun db ->
+  Lwt_pool.use pool (fun db ->
     get_user_id_with_name author >>= (fun author ->
       Lwt_Query.view db (<:view< f |
           f in $feeds$; f.author = $int32:author#!id$ >>)
       >>= (fun feeds ->
-        Lwt.return (feeds, get_tags_from_feeds db feeds)
+        Lwt.return (feeds, get_tags_from_feeds feeds)
       )
     )
   )
 
+let get_feeds_with_tag tag =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.view db (<:view< f |
+        f in $feeds$; t in $feeds_tags$; f.id = t.id_feed >>)
+    >>= (fun feeds ->
+      Lwt.return (feeds, get_tags_from_feeds feeds)
+    )
+  )
+
 let get_feed_url_with_url url =
-  transate_sql (fun db ->
+  Lwt_pool.use pool (fun db ->
     Lwt_Query.view_opt db (<:view< {
       f.url
     } | f in $feeds$; f.url = $string:url$ >>)
   )
 
 let add_feed url title tags userid =
-  transate_sql (fun db ->
-    let id_feed = (<:value< feeds?id >>) in
-    let feed = Lwt_Query.query db (<:insert< $feeds$ := {
-      id = $id_feed$;
-      url = $string:url$;
-      title = $string:title$;
-      timedate = feeds?timedate;
-      author = $int32:userid$
-    } >>)
-    and tag = Lwt_list.iter_p
-      (fun tag -> Lwt_Query.query db (<:insert< $feeds_tags$ := {
-        tag = $string:tag$;
-        id_feed = $id_feed$
-       } >>)
-      ) tags in
-    Lwt.join [feed; tag]
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.value db (<:value< feeds?id >>) >>= (fun id_feed ->
+      let feed = Lwt_pool.use pool (fun db ->
+        Lwt_Query.query db (<:insert< $feeds$ := {
+          id = $int32:id_feed$;
+          url = $string:url$;
+          title = $string:title$;
+          timedate = feeds?timedate;
+          author = $int32:userid$
+        } >>)
+      )
+      and tag = Lwt_list.iter_s
+        (fun tag ->
+          Lwt_pool.use pool (fun db ->
+            Lwt_Query.query db (<:insert< $feeds_tags$ := {
+              tag = $string:tag$;
+              id_feed = $int32:id_feed$
+            } >>)
+          )
+        ) tags in
+      Lwt.join [feed; tag]
+    )
   )
 
 let add_user name password email =
-  transate_sql (fun db ->
+  Lwt_pool.use pool (fun db ->
     Lwt_Query.query db (<:insert< $users$ := {
       id = users?id;
       name = $string:name$;

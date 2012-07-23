@@ -11,10 +11,6 @@ de passe, sans se tromper. Du client-side est envisageable.
 Améliorer la gestion des states: Afficher par exemple sous quel user on est
 connecté, masquer la barre d'identification ... ect.
 
-Implémenter la recherche (par tag, par auteur.) (c'est donc plus ou moins lié à
-    l'implémentation de la vue par URL: la recherche pourrait mener à des liens
-    menants à ces vues là.)
-
 Implémenter la page utilisateur (se servir de gravatar pour la gestion des
 avatars serait chouette.)
 

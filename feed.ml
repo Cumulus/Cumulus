@@ -18,21 +18,27 @@ let feed_new data tags = {
   tags = tags
 }
 
+let links_of_tags tags =
+  List.fold_left (fun acc tag ->
+    let link = Html.a Services.tag_feed [Html.pcdata (" " ^ tag)] tag in
+    acc @ [link]
+  ) [] tags
+
 let to_html self =
   let url_service =
     Eliom_service.external_service
       self.url []
       Eliom_parameter.unit () in
   Db.get_user_name_with_id self.author >>= (fun author ->
-    Lwt.return [
+    Lwt.return ([
       Html.a url_service [Html.pcdata self.title] ();
       Html.br ();
       Html.pcdata ("date: " ^ (Utils.string_of_calendar self.date));
       Html.br ();
       Html.pcdata ("author: " ^ author#!name);
       Html.br ();
-      Html.pcdata ("tags: " ^ (List.fold_left (fun a b -> a ^ " " ^ b) "" self.tags))
-    ]
+      Html.pcdata "tags:"
+    ] @ links_of_tags self.tags)
   )
 
 let to_atom self =

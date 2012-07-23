@@ -16,6 +16,7 @@ SERVER_FILES := html.ml \
 		db.mli \
 		db.ml \
 		utils.ml \
+		services.ml \
 		feed.mli \
 		feed.ml \
 		user.mli \
@@ -24,7 +25,6 @@ SERVER_FILES := html.ml \
 		feeds.ml \
 		users.mli \
 		users.ml \
-		services.ml \
 		templates.mli \
 		templates.ml \
 		main.ml

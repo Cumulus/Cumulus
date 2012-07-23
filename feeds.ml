@@ -3,23 +3,15 @@ module Calendar = CalendarLib.Calendar
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
 let feeds_of_db db =
-  Lwt_list.map_p (fun feed ->
+  Lwt_list.map_s (fun feed ->
     snd db >>= (fun tags ->
       let tags = List.find
         (fun elm -> fst elm = feed#!id)
         tags in
-      snd tags >>= (fun tags ->
-        let tags = List.map (fun tag -> tag#!tag) tags in
-        Lwt.return (Feed.feed_new feed tags)
-      )
+      let tags = List.map (fun tag -> tag#!tag) (snd tags) in
+      Lwt.return (Feed.feed_new feed tags)
     )
   ) (fst db)
-
-let get_all () =
-  Db.get_feeds () >>= feeds_of_db
-
-let get_with_author author =
-  Db.get_feeds_with_author author >>= feeds_of_db
 
 let to_somthing f data =
   Lwt_list.map_p (fun feed -> f feed) data
@@ -32,14 +24,19 @@ let private_to_html data =
       )
     ) data
 
-let author_to_html username =
-  get_with_author username >>= private_to_html
+let author_to_html author =
+  Db.get_feeds_with_author author >>= feeds_of_db >>= private_to_html
+
+let tag_to_html tag =
+  Db.get_feeds_with_tag tag >>= feeds_of_db >>= (fun x ->
+    private_to_html x
+  )
 
 let to_html () =
-  get_all () >>= private_to_html
+  Db.get_feeds () >>= feeds_of_db >>= private_to_html
 
 let to_atom () =
-  get_all () >>= (to_somthing Feed.to_atom) >>= (fun tmp ->
+  Db.get_feeds () >>= feeds_of_db >>= (to_somthing Feed.to_atom) >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
         ~updated: (Calendar.make 2012 6 9 17 40 30)

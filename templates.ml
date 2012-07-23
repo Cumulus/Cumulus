@@ -127,5 +127,8 @@ let main msg =
 let user msg username =
   private_main msg (Feeds.author_to_html username)
 
+let tag msg tag =
+  private_main msg (Feeds.tag_to_html tag)
+
 let register =
   private_register

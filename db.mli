@@ -16,7 +16,7 @@ val get_feeds : unit ->
      list *
      (int32 *
       < tag : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
-        list Lwt.t)
+        list)
      list Lwt.t)
     Lwt.t
 val get_feeds_with_author : string ->
@@ -28,7 +28,19 @@ val get_feeds_with_author : string ->
      list  *
      (int32 *
       < tag : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
-        list Lwt.t)
+        list)
+     list Lwt.t)
+    Lwt.t
+val get_feeds_with_tag : string ->
+  (< author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
+   id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
+   timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t;
+   title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
+   url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
+     list *
+     (int32 *
+      < tag : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
+        list)
      list Lwt.t)
     Lwt.t
 val get_feed_url_with_url : string ->
