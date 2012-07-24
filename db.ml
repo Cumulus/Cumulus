@@ -98,9 +98,13 @@ let get_feeds_with_author author =
 
 let get_feeds_with_tag tag =
   Lwt_pool.use pool (fun db ->
-    Lwt_Query.view db (<:view< f |
-        f in $feeds$; t in $feeds_tags$; f.id = t.id_feed >>)
-    >>= (fun feeds ->
+    Lwt_Query.view db (<:view< group {} by { (* SELECT DISTINCT *)
+      f.id;
+      f.url;
+      f.title;
+      f.timedate;
+      f.author
+    } | f in $feeds$; t in $feeds_tags$; t.tag = $string:tag$; f.id = t.id_feed >>) >>= (fun feeds ->
       Lwt.return (feeds, get_tags_from_feeds feeds)
     )
   )
