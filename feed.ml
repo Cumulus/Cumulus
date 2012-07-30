@@ -20,8 +20,8 @@ let feed_new data tags = {
 
 let links_of_tags tags =
   List.fold_left (fun acc tag ->
-    let link = Html.a Services.tag_feed [Html.pcdata (" " ^ tag)] tag in
-    acc @ [link]
+    let link = Html.a Services.tag_feed [Html.pcdata (tag)] tag in
+    acc @ [Html.pcdata " "; link]
   ) [] tags
 
 let to_html self =
