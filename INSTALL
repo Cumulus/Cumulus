@@ -1,1 +1,4 @@
 For init the database, just execute initdb.sh with the user postgres.
+And add the following line in /etc/postgresql/<maybe sub-dir>/pg_hba.conf:
+
+local cumulus cumulus password
