@@ -1,3 +1,4 @@
+GRANT ALL PRIVILEGES ON DATABASE cumulus TO cumulus;
 SET client_encoding = 'UTF8';
 
 CREATE TABLE feeds (
