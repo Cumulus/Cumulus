@@ -78,7 +78,7 @@ let get_tags_from_feeds feeds =
 
 let get_feeds () =
   Lwt_pool.use pool (fun db ->
-    Lwt_Query.view db (<:view< f |
+    Lwt_Query.view db (<:view< f order by f.id desc |
         f in $feeds$ >>)
     >>= (fun feeds ->
       Lwt.return (feeds, get_tags_from_feeds feeds)
@@ -88,7 +88,7 @@ let get_feeds () =
 let get_feeds_with_author author =
   Lwt_pool.use pool (fun db ->
     get_user_id_with_name author >>= (fun author ->
-      Lwt_Query.view db (<:view< f |
+      Lwt_Query.view db (<:view< f order by f.id desc |
           f in $feeds$; f.author = $int32:author#!id$ >>)
       >>= (fun feeds ->
         Lwt.return (feeds, get_tags_from_feeds feeds)
@@ -104,7 +104,7 @@ let get_feeds_with_tag tag =
       f.title;
       f.timedate;
       f.author
-    } | f in $feeds$; t in $feeds_tags$; t.tag = $string:tag$; f.id = t.id_feed >>) >>= (fun feeds ->
+    } order by f.id desc | f in $feeds$; t in $feeds_tags$; t.tag = $string:tag$; f.id = t.id_feed >>) >>= (fun feeds ->
       Lwt.return (feeds, get_tags_from_feeds feeds)
     )
   )
