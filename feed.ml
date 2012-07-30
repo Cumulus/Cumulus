@@ -35,7 +35,8 @@ let to_html self =
       Html.br ();
       Html.pcdata ("date: " ^ (Utils.string_of_calendar self.date));
       Html.br ();
-      Html.pcdata ("author: " ^ author#!name);
+      Html.pcdata ("author: ");
+      Html.a Services.author_feed [Html.pcdata (author#!name)] author#!name;
       Html.br ();
       Html.pcdata "tags:"
     ] @ links_of_tags self.tags)
