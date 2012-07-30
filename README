@@ -1,7 +1,7 @@
 Build Requirements
 ==================
 
- * Ocsigen with Lwt >= 2.4.0
+ * Ocsigen
  * OCaml-safepass >= 1.0
  * MaCaQue
 
