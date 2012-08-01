@@ -51,10 +51,10 @@ let get_user_id_with_name name =
     } | a in $users$; a.name = $string:name$ >>)
   )
 
-let get_user_name_with_id id =
+let get_user_name_and_email_with_id id =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.view_one db (<:view< {
-      a.name
+      a.name; a.email
     } | a in $users$; a.id = $int32:id$ >>)
   )
 
