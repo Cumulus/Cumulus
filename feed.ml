@@ -20,7 +20,7 @@ let feed_new data tags = {
 
 let links_of_tags tags =
   List.fold_left (fun acc tag ->
-    let link = Html.a Services.tag_feed [Html.pcdata (tag)] tag in
+    let link = Html.a Services.tag_feed [Html.pcdata tag] (None, tag) in
     acc @ [Html.pcdata " "; link]
   ) [] tags
 
@@ -40,7 +40,7 @@ let to_html self =
       Html.pcdata ("date: " ^ (Utils.string_of_calendar self.date));
       Html.br ();
       Html.pcdata ("author: ");
-      Html.a Services.author_feed [Html.pcdata (author#!name)] author#!name;
+      Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
       Html.br ();
       Html.pcdata "tags:"
     ] @ links_of_tags self.tags)

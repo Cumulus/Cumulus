@@ -46,7 +46,7 @@ let user_form state =
             Services.registration
             [Html.pcdata "S'inscrire."] ()
         ]
-      ]) ()
+      ]) None
   ]
   else [
   ]
@@ -81,7 +81,7 @@ let private_main msg feeds =
                   ~input_type: `Submit
                   ~value: "Send" ()
               ]
-            ]) ()
+            ]) None
          ] @ (user_form state) @ [
           Html.br ();
           Html.footer ~a: [Html.a_class ["footer"]] [
@@ -127,17 +127,21 @@ let private_register =
               ~input_type: `Submit
               ~value: "Send" ()
           ]
-        ]) ()
+        ]) None
     ]
 
-let main msg =
-  private_main msg (Feeds.to_html ())
+(* TODO [1] *)
+let main ?(page=0) msg =
+  let starting = Int32.of_int (page * 20) in
+  private_main msg (Feeds.to_html ~starting:starting ())
 
-let user msg username =
-  private_main msg (Feeds.author_to_html username)
+let user ?(page=0) msg username =
+  let starting = Int32.of_int (page * 20) in
+  private_main msg (Feeds.author_to_html ~starting:starting username)
 
-let tag msg tag =
-  private_main msg (Feeds.tag_to_html tag)
+let tag ?(page=0) msg tag =
+  let starting = Int32.of_int (page * 20) in
+  private_main msg (Feeds.tag_to_html ~starting:starting tag)
 
 let register =
   private_register

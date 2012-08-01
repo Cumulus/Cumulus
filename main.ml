@@ -4,15 +4,15 @@ let () =
     (fun () () -> Feeds.to_atom ());
   Eliom_registration.Html5.register
     ~service: Services.main
-    (fun () () -> Templates.main []);
+    (fun page () -> Templates.main ?page []);
   Eliom_registration.Html5.register
     ~service: Services.author_feed
-    (fun username () -> Templates.user [] username);
+    (fun (page, username) () -> Templates.user ?page [] username);
   Eliom_registration.Html5.register
     ~service: Services.append_feed
-    (fun () data ->
+    (fun page data ->
       Feeds.append_feed data >>= (fun state ->
-        Templates.main
+        Templates.main ?page
           (Utils.msg (match state with
             | Feeds.Not_connected -> "Vous ne vous etes pas autentifie"
             | Feeds.Empty -> "L'un des champs est vide"
@@ -24,9 +24,9 @@ let () =
     );
   Eliom_registration.Html5.register
     ~service: Services.auth
-    (fun () (username, password) ->
+    (fun page (username, password) ->
       Users.connect_user username password >>= (fun state ->
-        Templates.main
+        Templates.main ?page
           (Utils.msg (match state with
             | User.Already_connected -> "Deja connecte"
             | User.Ok -> "Connecte"
@@ -37,9 +37,9 @@ let () =
     );
   Eliom_registration.Html5.register
     ~service: Services.add_user
-    (fun () datas ->
+    (fun page datas ->
       Users.add_user datas >>= (fun state ->
-        Templates.main
+        Templates.main ?page
           (Utils.msg (match state with
             | true -> "Vous êtes bien enregistré"
             | false -> "L'user existe deja, ou mot de passe invalide"
@@ -51,4 +51,4 @@ let () =
     (fun () () -> Templates.register);
   Eliom_registration.Html5.register
     ~service: Services.tag_feed
-    (fun tag () -> Templates.tag [] tag)
+    (fun (page, tag) () -> Templates.tag ?page [] tag)

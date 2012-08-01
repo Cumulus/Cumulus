@@ -8,7 +8,7 @@ val get_user_with_name : string ->
   name : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
   password : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
     option Lwt.t
-val get_feeds : unit ->
+val get_feeds : ?starting:int32 -> ?number:int32 -> unit ->
   (< author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
    id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
    timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t;
@@ -20,7 +20,7 @@ val get_feeds : unit ->
         list)
      list Lwt.t)
     Lwt.t
-val get_feeds_with_author : string ->
+val get_feeds_with_author : ?starting:int32 -> ?number:int32 -> string ->
   (< author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
    id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
    timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t;
@@ -32,7 +32,7 @@ val get_feeds_with_author : string ->
         list)
      list Lwt.t)
     Lwt.t
-val get_feeds_with_tag : string ->
+val get_feeds_with_tag : ?starting:int32 -> ?number:int32 -> string ->
   (< author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
    id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
    timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t;

@@ -1,7 +1,7 @@
 Choses importantes à faire dans Cumulus:
 
-Implémenter le multi-pages: L'accueil n'afficherait que les 50 derniers liens,
-  on pourrait accéder aux autres via des pages « 50 précédents. » ect.
+[1] Implémenter le multi-pages (suite) : autoriser les utilisateurs à configurer le
+  nombre de liens par page.
 
 Implémenter le check des mots de passe à l'inscription: Pour l'instant, on entre
 le mot de passe deux fois à l'inscription, mais rien n'est vérifié. Il faut donc
