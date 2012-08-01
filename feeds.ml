@@ -72,7 +72,7 @@ let append_feed (url, (title, tags)) =
               Db.add_feed
                 url
                 title
-                (Str.split (Str.regexp "[ \t]+") tags)
+                (Str.split (Str.regexp "[,]+") tags)
                 author >>= (fun () ->
                   Lwt.return Ok
                 )

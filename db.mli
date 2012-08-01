@@ -1,5 +1,6 @@
-val get_user_name_with_id : int32 ->
-  < name : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
+val get_user_name_and_email_with_id : int32 ->
+  < email : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
+    name : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
     Lwt.t
 val get_user_with_name : string ->
   < email : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;

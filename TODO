@@ -12,7 +12,7 @@ Améliorer la gestion des states: Afficher par exemple sous quel user on est
 connecté, masquer la barre d'identification ... ect.
 
 Implémenter la page utilisateur (se servir de gravatar pour la gestion des
-avatars serait chouette.)
+avatars serait chouette - dinosaure)
 
 Implémenter la vue par URL, en vue d'implémenter les commentaires: Une telle vue
 regrouperais donc: l'URL et son résumé, en dessous, le thread de commentaires.
