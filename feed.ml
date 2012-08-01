@@ -29,8 +29,12 @@ let to_html self =
     Eliom_service.external_service
       self.url []
       Eliom_parameter.unit () in
-  Db.get_user_name_with_id self.author >>= (fun author ->
+  Db.get_user_name_and_email_with_id self.author >>= (fun author ->
     Lwt.return ([
+      Html.img
+        ~alt: (author#!name)
+        ~src: (Html.make_uri ~service: (Utils.get_gravatar (author#!name)) (80, "identicon"))
+      ();
       Html.a url_service [Html.pcdata self.title] ();
       Html.br ();
       Html.pcdata ("date: " ^ (Utils.string_of_calendar self.date));
@@ -43,7 +47,7 @@ let to_html self =
   )
 
 let to_atom self =
-  Db.get_user_name_with_id self.author >>= (fun author ->
+  Db.get_user_name_and_email_with_id self.author >>= (fun author ->
     Lwt.return (
       Atom_feed.entry
         ~updated: self.date
