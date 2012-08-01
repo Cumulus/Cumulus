@@ -26,13 +26,15 @@ let msg str = [
 let is_invalid_url input =
   let regexp_match_url =
     let legit_chars = "[]0-9A-Za-z_~().,+=&%-]" in
-    "^\\(https?\\|ftp\\)://" ^              (* Protocol *)
-      "\\(" ^ legit_chars ^ "*?" ^          (* Username *)
-      "\\(:" ^legit_chars ^ "*\\)?@\\)?" ^  (* Password *)
-      "[A-Za-z0-9.]+" ^                     (* Domain name *)
-      "\\(/"   ^ legit_chars ^ "*\\)*" ^    (* Arborescence *)
-      "\\(\\?" ^ legit_chars ^ "*\\)?" ^    (* Parameters *)
-      "\\(#"   ^ legit_chars ^ "*\\)?$"     (* Anchor *) in
+    let num = "[0-9]?" in
+    "^\\(https?\\|ftp\\)://" ^                         (* Protocol *)
+      "\\(" ^ legit_chars ^ "*?" ^                     (* Username *)
+      "\\(:" ^legit_chars ^ "*\\)?@\\)?" ^             (* Password *)
+      "[A-Za-z0-9.]+" ^                                (* Domain name *)
+      "\\(:" ^ num ^ num ^ num ^ num ^ num ^ "\\)?" ^  (* Port *)
+      "\\(/"   ^ legit_chars ^ "*\\)*" ^               (* Arborescence *)
+      "\\(\\?" ^ legit_chars ^ "*\\)?" ^               (* Parameters *)
+      "\\(#"   ^ legit_chars ^ "*\\)?$"                (* Anchor *) in
   not (Str.string_match (Str.regexp regexp_match_url) input 0)
 
 let get_gravatar email =
