@@ -7,7 +7,7 @@ let atom =
 let main =
   Eliom_service.service
     ~path: [""]
-    ~get_params: Eliom_parameter.unit
+    ~get_params: (Eliom_parameter.opt (Eliom_parameter.int "page"))
     ()
 
 let append_feed =
@@ -21,13 +21,13 @@ let append_feed =
 let author_feed =
   Eliom_service.service
     ~path: [""]
-    ~get_params: (Eliom_parameter.string "username")
+    ~get_params: Eliom_parameter.(opt (int "page") ** string "username")
     ()
 
 let tag_feed =
   Eliom_service.service
     ~path: [""]
-    ~get_params: (Eliom_parameter.string "tag")
+    ~get_params: Eliom_parameter.(opt (int "page") ** string "tag")
     ()
 
 let auth =

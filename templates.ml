@@ -46,7 +46,7 @@ let user_form state =
             Services.registration
             [Html.pcdata "S'inscrire."] ()
         ]
-      ]) ()
+      ]) None
   ]
   else [
   ]
@@ -81,7 +81,7 @@ let private_main msg feeds =
                   ~input_type: `Submit
                   ~value: "Send" ()
               ]
-            ]) ()
+            ]) None
          ] @ (user_form state) @ [
           Html.br ();
           Html.footer ~a: [Html.a_class ["footer"]] [
