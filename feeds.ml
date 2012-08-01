@@ -24,19 +24,29 @@ let private_to_html data =
       )
     ) data
 
-let author_to_html author =
-  Db.get_feeds_with_author author >>= feeds_of_db >>= private_to_html
+let author_to_html ~starting author =
+  Db.get_feeds_with_author ~starting:starting author
+  >>= feeds_of_db
+  >>= private_to_html
 
-let tag_to_html tag =
-  Db.get_feeds_with_tag tag >>= feeds_of_db >>= (fun x ->
+let tag_to_html ~starting tag =
+  Db.get_feeds_with_tag ~starting:starting tag
+  >>= feeds_of_db
+  >>= (fun x ->
     private_to_html x
   )
 
-let to_html () =
-  Db.get_feeds () >>= feeds_of_db >>= private_to_html
+let to_html ~starting () =
+  Db.get_feeds ~starting:starting ()
+  >>= feeds_of_db
+  >>= private_to_html
 
+(* FIXME? should atom feed return only a limited number of links ? *)
 let to_atom () =
-  Db.get_feeds () >>= feeds_of_db >>= (to_somthing Feed.to_atom) >>= (fun tmp ->
+  Db.get_feeds ~number:100l ()
+  >>= feeds_of_db
+  >>= to_somthing Feed.to_atom
+  >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
         ~updated: (Calendar.make 2012 6 9 17 40 30)
