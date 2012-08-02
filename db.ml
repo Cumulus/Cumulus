@@ -5,6 +5,13 @@ end
 module Lwt_PGOCaml = PGOCaml_generic.Make(Lwt_thread)
 module Lwt_Query = Query.Make_with_Db(Lwt_thread)(Lwt_PGOCaml)
 
+type feed =
+  < author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
+    id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
+    timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t;
+    title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
+    url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
+
 let connect () =
   Lwt_PGOCaml.connect
     ~database: "cumulus"
@@ -119,6 +126,19 @@ let get_feed_url_with_url url =
     Lwt_Query.view_opt db (<:view< {
       f.url
     } | f in $feeds$; f.url = $string:url$ >>)
+  )
+
+let get_feed_with_id id =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.view db (
+      <:view< {
+        f.url;
+        f.id;
+        f.title;
+        f.timedate;
+        f.author
+      } | f in $feeds$; f.id = $int32:id$ >>)
+    >>= fun feeds -> Lwt.return (feeds, get_tags_from_feeds feeds)
   )
 
 let add_feed url title tags userid =
