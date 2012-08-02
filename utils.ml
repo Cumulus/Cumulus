@@ -42,3 +42,13 @@ let get_gravatar email =
   in Eliom_service.external_service
     "http://www.gravatar.com" [ "avatar"; md5_email ]
     Eliom_parameter.((int "s") ** (string "d")) ()
+
+(* Conversion d'un titre d'URL en une chaîne acceptable pour le service
+ * view_feed *)
+let url_of_title s =
+  let s' = String.copy s in
+  let n = String.length s in
+  for i = 0 to n-1 do
+    if s'.[i] = ' ' then s'.[i] <- '-'
+  done;
+  s'

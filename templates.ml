@@ -130,7 +130,14 @@ let private_register =
         ]) None
     ]
 
-(* TODO [1] *)
+let feed feeds =
+  feeds >>= fun feeds ->
+    User.is_connected () >>= fun state ->
+      main_style
+        (feeds)
+
+
+(* see TODO [1] *)
 let main ?(page=0) msg =
   let starting = Int32.of_int (page * 20) in
   private_main msg (Feeds.to_html ~starting:starting ())
@@ -142,6 +149,11 @@ let user ?(page=0) msg username =
 let tag ?(page=0) msg tag =
   let starting = Int32.of_int (page * 20) in
   private_main msg (Feeds.tag_to_html ~starting:starting tag)
+
+(* Shows a specific link (TODO: and its comments) *)
+let view_feed id =
+  let id = Int32.of_int id in
+  feed (Feeds.feed_id_to_html id)
 
 let register =
   private_register

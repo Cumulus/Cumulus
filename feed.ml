@@ -42,6 +42,12 @@ let to_html self =
       Html.pcdata ("author: ");
       Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
       Html.br ();
+      (* TODO : afficher "n commentaire(s)" *)
+      Html.a
+        Services.view_feed
+        [Html.pcdata "commentaires"]
+        (Int32.to_int self.id, Utils.url_of_title self.title);
+      Html.br ();
       Html.pcdata "tags:"
     ] @ links_of_tags self.tags)
   )
