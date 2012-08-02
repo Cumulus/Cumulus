@@ -33,7 +33,7 @@ let to_html self =
     Lwt.return ([
       Html.img
         ~alt: (author#!name)
-        ~src: (Html.make_uri ~service: (Utils.get_gravatar (author#!name)) (80, "identicon"))
+        ~src: (Html.make_uri ~service: (Utils.get_gravatar (author#!email)) (80, "identicon"))
       ();
       Html.a url_service [Html.pcdata self.title] ();
       Html.br ();
