@@ -80,3 +80,8 @@ let append_feed (url, (title, tags)) =
           )
         )
   )
+
+let feed_id_to_html id =
+  Db.get_feed_with_id id
+  >>= feeds_of_db
+  >>= private_to_html

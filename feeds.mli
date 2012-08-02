@@ -8,3 +8,4 @@ val tag_to_html :
   starting:int32 -> string -> (([> Html5_types.p ] Html.elt) list) Lwt.t
 val to_atom : unit -> Atom_feed.feed Lwt.t
 val append_feed : (string * (string * string)) -> append_state Lwt.t
+val feed_id_to_html : int32 -> (([> Html5_types.p ] Html.elt) list) Lwt.t

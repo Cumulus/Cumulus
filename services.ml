@@ -10,6 +10,12 @@ let main =
     ~get_params: (Eliom_parameter.opt (Eliom_parameter.int "page"))
     ()
 
+let view_feed =
+  Eliom_service.service
+    ~path:["view"]
+    ~get_params: Eliom_parameter.(suffix (int "id" ** string "name"))
+    ()
+
 let append_feed =
   Eliom_service.post_service
     ~fallback: main

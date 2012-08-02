@@ -36,6 +36,10 @@ let () =
       )
     );
   Eliom_registration.Html5.register
+    ~service: Services.view_feed
+    (fun (id, name) () ->
+      Templates.view_feed id);
+  Eliom_registration.Html5.register
     ~service: Services.add_user
     (fun page datas ->
       Users.add_user datas >>= (fun state ->
