@@ -38,7 +38,7 @@ let is_invalid_url input =
   not (Str.string_match (Str.regexp regexp_match_url) input 0)
 
 let get_gravatar email =
-  let md5_email = Digest.to_hex (Digest.string email)
+  let md5_email = Digest.to_hex (Digest.string (String.lowercase email))
   in Eliom_service.external_service
     "http://www.gravatar.com" [ "avatar"; md5_email ]
     Eliom_parameter.((int "s") ** (string "d")) ()
