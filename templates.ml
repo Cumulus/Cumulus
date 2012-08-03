@@ -41,7 +41,7 @@ let user_form state =
             ~a: [Html.a_class ["btn btn-primary"]]
             ~input_type: `Submit
             ~value: "Login" ();
-          Html.pcdata "Pas de compte ? ";
+          Html.pcdata " Pas de compte ? ";
           Html.a
             Services.registration
             [Html.pcdata "S'inscrire."] ()
@@ -55,42 +55,42 @@ let private_main msg feeds =
   feeds >>= (fun feeds ->
     User.is_connected () >>= (fun state ->
       main_style
-        (msg @ feeds @ [
-          Html.post_form
-            ~a: [Html.a_class ["well form-inline"]]
-            ~service: Services.append_feed
-            (fun (url_name, (title_name, tags_name)) -> [
-              Html.p [
-                Html.pcdata "URL ";
-                Html.string_input
-                  ~a: [Html.a_class ["input-medium search-query"]]
-                  ~input_type: `Text
-                  ~name: url_name ();
-                Html.pcdata " Titre du post ";
-                Html.string_input
-                  ~a: [Html.a_class ["input-medium search-query"]]
-                  ~input_type: `Text
-                  ~name: title_name ();
-                Html.pcdata " Tags ";
-                Html.string_input
-                  ~a: [Html.a_class ["input-medium search-query"]]
-                  ~input_type: `Text
-                  ~name: tags_name ();
-                Html.string_input
-                  ~a: [Html.a_class ["btn btn-primary"]]
-                  ~input_type: `Submit
-                  ~value: "Send" ()
+        ((user_form state) @
+            [Html.post_form
+                ~a: [Html.a_class ["well form-inline"]]
+                ~service: Services.append_feed
+                (fun (url_name, (title_name, tags_name)) -> [
+                  Html.p [
+                    Html.pcdata "URL ";
+                    Html.string_input
+                      ~a: [Html.a_class ["input-medium search-query"]]
+                      ~input_type: `Text
+                      ~name: url_name ();
+                    Html.pcdata " Titre du post ";
+                    Html.string_input
+                      ~a: [Html.a_class ["input-medium search-query"]]
+                      ~input_type: `Text
+                      ~name: title_name ();
+                    Html.pcdata " Tags ";
+                    Html.string_input
+                      ~a: [Html.a_class ["input-medium search-query"]]
+                      ~input_type: `Text
+                      ~name: tags_name ();
+                    Html.string_input
+                      ~a: [Html.a_class ["btn btn-primary"]]
+                      ~input_type: `Submit
+                      ~value: "Send" ()
+                  ]
+                ]) None
+            ] @ msg @ feeds @ [
+              Html.br ();
+              Html.footer ~a: [Html.a_class ["footer"]] [
+                Html.pcdata "Cumulus project";
               ]
-            ]) None
-         ] @ (user_form state) @ [
-          Html.br ();
-          Html.footer ~a: [Html.a_class ["footer"]] [
-            Html.pcdata "Cumulus project";
-          ]
-        ])
+            ])
     )
   )
-
+    
 let private_register =
   main_style
     [Html.post_form
