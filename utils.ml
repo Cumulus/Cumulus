@@ -52,3 +52,7 @@ let url_of_title s =
     if s'.[i] = ' ' then s'.[i] <- '-'
   done;
   s'
+
+let strip str = 
+  let str = Str.replace_first (Str.regexp "^[ ]+") "" str in
+  Str.replace_first (Str.regexp "[ ]+$") "" str
