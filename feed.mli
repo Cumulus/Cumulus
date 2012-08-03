@@ -1,5 +1,6 @@
 type feed
 
+(* Shall we use the syntax: class type feed_db = object .. end instead ? *)
 type feed_db =
   < author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
   id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
