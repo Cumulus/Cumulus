@@ -17,12 +17,13 @@ val get_user_with_name : string ->
   password : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
     option Lwt.t
 val get_feeds : ?starting:int32 -> ?number:int32 -> unit ->
-  (feed list *
-     (int32 *
-      < tag : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
-        list)
-     list Lwt.t)
-    Lwt.t
+  < author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
+  id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
+  tag : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
+  timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t;
+  title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
+  url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
+    list Lwt.t
 val get_feeds_with_author : ?starting:int32 -> ?number:int32 -> string ->
   (feed list *
      (int32 *

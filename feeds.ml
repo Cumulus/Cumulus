@@ -9,9 +9,29 @@ let feeds_of_db db =
         (fun elm -> fst elm = feed#!id)
         tags in
       let tags = List.map (fun tag -> tag#!tag) (snd tags) in
-      Lwt.return (Feed.feed_new feed tags)
+      Lwt.return
+        (Feed.feed_new (feed :> Feed.feed_db) tags)
     )
   ) (fst db)
+
+let feeds_of_db' feeds =
+  let feeds =
+    List.fold_right (fun feed acc ->
+      (Feed.feed_new (feed :> Feed.feed_db)
+         (List.fold_right
+            (fun elm acc -> (elm#!tag) :: acc)
+            (List.filter (fun elm -> elm#!id = feed#!id) feeds) []
+         )
+      ) :: acc
+    ) feeds [] in
+  Lwt.return (
+    List.fold_right (fun feed acc ->
+      if List.mem feed acc then
+        acc
+      else
+        feed :: acc
+    ) feeds []
+  )
 
 let to_somthing f data =
   Lwt_list.map_p (fun feed -> f feed) data
@@ -38,13 +58,13 @@ let tag_to_html ~starting tag =
 
 let to_html ~starting () =
   Db.get_feeds ~starting:starting ()
-  >>= feeds_of_db
+  >>= feeds_of_db'
   >>= private_to_html
 
 (* FIXME? should atom feed return only a limited number of links ? *)
 let to_atom () =
   Db.get_feeds ~number:100l ()
-  >>= feeds_of_db
+  >>= feeds_of_db'
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (

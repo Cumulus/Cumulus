@@ -86,11 +86,15 @@ let get_tags_from_feeds feeds =
 let get_feeds ?(starting=0l) ?(number=20l) () =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.view db (
-      <:view< f order by f.id desc limit $int32:number$ offset $int32:starting$ |
-        f in $feeds$ >>)
-    >>= (fun feeds ->
-      Lwt.return (feeds, get_tags_from_feeds feeds)
-    )
+      <:view< {
+        f.id;
+        f.url;
+        f.title;
+        f.timedate;
+        f.author;
+        t.tag;
+      } order by f.id desc limit $int32:number$ offset $int32:starting$ |
+        f in $feeds$; t in $feeds_tags$; t.id_feed = f.id >>)
   )
 
 let get_feeds_with_author ?(starting=0l) ?(number=20l) author =
@@ -153,7 +157,7 @@ let add_feed url title tags userid =
           author = $int32:userid$
         } >>)
       )
-      and tag = Lwt_list.iter_s
+      and tag = Lwt_list.iter_s (* Lwt_list.iter_p ? *)
         (fun tag ->
           Lwt_pool.use pool (fun db ->
             Lwt_Query.query db (<:insert< $feeds_tags$ := {
