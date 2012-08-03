@@ -25,19 +25,22 @@ let private_to_html data =
     ) data
 
 let author_to_html ~starting author =
-  Db.get_feeds_with_author ~starting:starting author
+  Db.get_feeds_with_author ~starting author
   >>= feeds_of_db
   >>= private_to_html
 
 let tag_to_html ~starting tag =
-  Db.get_feeds_with_tag ~starting:starting tag
+  Db.get_feeds_with_tag ~starting tag
   >>= feeds_of_db
-  >>= (fun x ->
-    private_to_html x
-  )
+  >>= private_to_html
 
 let to_html ~starting () =
-  Db.get_feeds ~starting:starting ()
+  Db.get_feeds ~starting ()
+  >>= feeds_of_db
+  >>= private_to_html
+
+let feed_id_to_html id =
+  Db.get_feed_with_id id
   >>= feeds_of_db
   >>= private_to_html
 
@@ -80,8 +83,3 @@ let append_feed (url, (title, tags)) =
           )
         )
   )
-
-let feed_id_to_html id =
-  Db.get_feed_with_id id
-  >>= feeds_of_db
-  >>= private_to_html

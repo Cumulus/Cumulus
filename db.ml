@@ -25,6 +25,7 @@ let validate db =
     (fun () -> Lwt.return true)
     (fun _ -> Lwt.return false)
 
+(* ~validate is only for releases. Require Lwt >= 2.4.0 *)
 let pool = Lwt_pool.create 16 (*~validate*) connect
 
 let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
