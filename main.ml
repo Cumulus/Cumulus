@@ -55,4 +55,7 @@ let () =
     (fun () () -> Templates.register);
   Eliom_registration.Html5.register
     ~service: Services.tag_feed
-    (fun (page, tag) () -> Templates.tag ?page [] tag)
+    (fun (page, tag) () -> Templates.tag ?page [] tag);
+    Eliom_registration.Html5.register
+    ~service: Services.preferences
+    (fun () () -> Templates.preferences ())

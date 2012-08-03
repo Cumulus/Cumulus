@@ -17,6 +17,7 @@ let connect () =
     ~database: "cumulus"
     ~host: "localhost"
     (* ~port: 5432 *)
+    ~password: "mdp"
     ~user: "cumulus" ()
 
 let validate db =

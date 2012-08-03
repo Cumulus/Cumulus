@@ -57,3 +57,9 @@ let registration =
     ~path: ["registration"]
     ~get_params: Eliom_parameter.unit
     ()
+
+let preferences =
+  Eliom_service.service
+    ~path: ["preferences"]
+    ~get_params: Eliom_parameter.unit
+   ()

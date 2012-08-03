@@ -136,6 +136,15 @@ let feed feeds =
       main_style
         (feeds)
 
+let private_preferences () =
+  User.is_connected () >>= (fun state ->
+    main_style (
+      if not state then
+        [Html.pcdata "mais t'es pas connecte toi."]
+      else 
+        [Html.pcdata "c'est la fete ici."])
+  )
+
 
 (* see TODO [1] *)
 let main ?(page=0) msg =
@@ -157,3 +166,6 @@ let view_feed id =
 
 let register =
   private_register
+
+let preferences () =
+  private_preferences ()
