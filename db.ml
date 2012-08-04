@@ -177,3 +177,13 @@ let add_user name password email =
       email = $string:email$
     } >>)
   )
+
+let update_user name password email =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.query db (<:insert< $users$ := {
+      id = users?id;
+      name = $string:name$;
+      password = $string:password$;
+      email = $string:email$
+    } >>)
+  )

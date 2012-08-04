@@ -90,7 +90,7 @@ let private_main msg feeds =
             ])
     )
   )
-    
+
 let private_register =
   main_style
     [Html.post_form
@@ -140,9 +140,38 @@ let private_preferences () =
   User.is_connected () >>= (fun state ->
     main_style (
       if not state then
-        [Html.pcdata "mais t'es pas connecte toi."]
-      else 
-        [Html.pcdata "c'est la fete ici."])
+        [Html.pcdata "Veuillez vous connecter pour acceder aux preferences."]
+      else
+        [Html.post_form
+            ~a: [Html.a_class ["well form-inline"]]
+            ~service: Services.update_user
+            (fun ((email_name, (password_name, password_check))) -> [
+              Html.p [
+                Html.pcdata "Mot de passe: ";
+                Html.string_input
+                  ~a: [Html.a_class ["input-small"]]
+                  ~input_type: `Password
+                  ~name: password_name ();
+                Html.br ();
+                Html.pcdata "Mot de passe: ";
+                Html.string_input
+                  ~a: [Html.a_class ["input-small"]]
+                  ~input_type: `Password
+                  ~name: password_check ();
+                Html.br ();
+                Html.pcdata "Email: ";
+                Html.string_input
+                  ~a: [Html.a_class ["input-small"]]
+                  ~input_type: `Text
+                  ~name: email_name ();
+                Html.br ();
+                Html.string_input
+                  ~a: [Html.a_class ["btn btn-primary"]]
+                  ~input_type: `Submit
+                  ~value: "Send" ()
+              ]
+            ]) None
+        ])
   )
 
 
@@ -167,5 +196,5 @@ let view_feed id =
 let register =
   private_register
 
-let preferences () =
-  private_preferences ()
+let preferences msg =
+  private_preferences msg

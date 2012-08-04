@@ -51,6 +51,17 @@ let () =
       )
     );
   Eliom_registration.Html5.register
+    ~service: Services.update_user
+    (fun page datas ->
+      Users.update_user datas >>= (fun state ->
+        Templates.main ?page
+          (Utils.msg (match state with
+            | true -> "Vous êtes bien enregistré"
+            | false -> "L'user existe deja, ou mot de passe invalide"
+           ))
+      )
+    );
+  Eliom_registration.Html5.register
     ~service: Services.registration
     (fun () () -> Templates.register);
   Eliom_registration.Html5.register

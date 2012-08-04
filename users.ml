@@ -22,3 +22,17 @@ let add_user (name, (email, (password, password_check))) =
       )
     )
   )
+
+let update_user (email, (password, password_check)) =
+  (* if password <> password_check then *)
+    Lwt.return false
+  (* else ( *)
+  (*   Db.get_user_with_name name >>= (function *)
+  (*     | (Some _) -> Lwt.return false *)
+  (*     | None -> ( *)
+  (*       User.add name password email >>= (fun () -> *)
+  (*         Lwt.return true *)
+  (*       ) *)
+  (*     ) *)
+  (*   ) *)
+  (* ) *)

@@ -23,3 +23,11 @@ Implémenter les commentaires: Pas besoin de faire très compliqué, ceci dit un
 vue par fils de discussions serait très appréciée.
 
 Implement the dynamic feed update on the main page. (jpdeplaix)
+
+liens next et prev. Afficher le nom de l'utilisteur quand on est
+   log. Un bouton delog...
+
+Dans le formulaire de preferences, separer le mot de passe et
+   l'email. Rajouter un bouton preferences.
+
+Un formulaire de recuperation de mots de passe.
