@@ -91,7 +91,7 @@ let private_main msg feeds =
     )
   )
 
-let private_register =
+let private_register = (* WHY A FUCKING VALUE ??? *)
   main_style
     [Html.post_form
         ~a: [Html.a_class ["well form-inline"]]
@@ -132,9 +132,8 @@ let private_register =
 
 let feed feeds =
   feeds >>= fun feeds ->
-    User.is_connected () >>= fun state ->
-      main_style
-        (feeds)
+  User.is_connected () >>= fun state ->
+  main_style feeds
 
 let private_preferences () =
   User.is_connected () >>= (fun state ->
@@ -174,8 +173,7 @@ let private_preferences () =
         ])
   )
 
-
-(* see TODO [1] *)
+(* see TODO [1] *) (* WTF IS TODO[1] ??? *)
 let main ?(page=0) msg =
   let starting = Int32.of_int (page * 20) in
   private_main msg (Feeds.to_html ~starting:starting ())
@@ -193,8 +191,8 @@ let view_feed id =
   let id = Int32.of_int id in
   feed (Feeds.feed_id_to_html id)
 
-let register =
+let register = (* WHY ???? *)
   private_register
 
-let preferences msg =
+let preferences msg = (* WHY ????? (See previous WHY) *)
   private_preferences msg

@@ -53,6 +53,6 @@ let url_of_title s =
   done;
   s
 
-let strip str = 
+let strip str =
   let str = Str.replace_first (Str.regexp "^[ ]+") "" str in
   Str.replace_first (Str.regexp "[ ]+$") "" str
