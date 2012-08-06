@@ -91,7 +91,7 @@ let private_main msg feeds =
     )
   )
 
-let private_register () = (* WHY A FUCKING VALUE ??? *)
+let private_register () =
   main_style
     [Html.post_form
         ~a: [Html.a_class ["well form-inline"]]
