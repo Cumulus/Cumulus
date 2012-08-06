@@ -91,7 +91,7 @@ let private_main msg feeds =
     )
   )
 
-let private_register = (* WHY A FUCKING VALUE ??? *)
+let private_register () = (* WHY A FUCKING VALUE ??? *)
   main_style
     [Html.post_form
         ~a: [Html.a_class ["well form-inline"]]
@@ -191,8 +191,8 @@ let view_feed id =
   let id = Int32.of_int id in
   feed (Feeds.feed_id_to_html id)
 
-let register = (* WHY ???? *)
-  private_register
+let register () = (* WHY ???? *)
+  private_register ()
 
 let preferences msg = (* WHY ????? (See previous WHY) *)
   private_preferences msg
