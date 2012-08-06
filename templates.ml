@@ -173,7 +173,7 @@ let private_preferences () =
         ])
   )
 
-(* see TODO [1] *) (* WTF IS TODO[1] ??? *)
+(* see TODO [1] *)
 let main ?(page=0) msg =
   let starting = Int32.of_int (page * 20) in
   private_main msg (Feeds.to_html ~starting:starting ())
@@ -191,8 +191,8 @@ let view_feed id =
   let id = Int32.of_int id in
   feed (Feeds.feed_id_to_html id)
 
-let register () = (* WHY ???? *)
+let register () =
   private_register ()
 
-let preferences msg = (* WHY ????? (See previous WHY) *)
+let preferences msg =
   private_preferences msg
