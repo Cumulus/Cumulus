@@ -52,45 +52,44 @@ let user_form state =
   ]
 
 let private_main msg feeds =
-  feeds >>= (fun feeds ->
-    User.is_connected () >>= (fun state ->
-      User.get_login_state () >>= fun login_state ->
-      main_style
-        ((user_form state) @
-            [Html.post_form
-                ~a: [Html.a_class ["well form-inline"]]
-                ~service: Services.append_feed
-                (fun (url_name, (title_name, tags_name)) -> [
-                  Html.p [
-                    Html.pcdata "URL ";
-                    Html.string_input
-                      ~a: [Html.a_class ["input-medium search-query"]]
-                      ~input_type: `Text
-                      ~name: url_name ();
-                    Html.pcdata " Titre du post ";
-                    Html.string_input
-                      ~a: [Html.a_class ["input-medium search-query"]]
-                      ~input_type: `Text
-                      ~name: title_name ();
-                    Html.pcdata " Tags ";
-                    Html.string_input
-                      ~a: [Html.a_class ["input-medium search-query"]]
-                      ~input_type: `Text
-                      ~name: tags_name ();
-                    Html.string_input
-                      ~a: [Html.a_class ["btn btn-primary"]]
-                      ~input_type: `Submit
-                      ~value: "Send" ()
+  feeds >>= fun feeds ->
+  User.is_connected () >>= fun state ->
+  User.get_login_state () >>= fun login_state ->
+  main_style
+    ((user_form state) @
+        [Html.post_form
+            ~a: [Html.a_class ["well form-inline"]]
+            ~service: Services.append_feed
+            (fun (url_name, (title_name, tags_name)) -> [
+              Html.p [
+                Html.pcdata "URL ";
+                Html.string_input
+                  ~a: [Html.a_class ["input-medium search-query"]]
+                  ~input_type: `Text
+                  ~name: url_name ();
+                Html.pcdata " Titre du post ";
+                Html.string_input
+                  ~a: [Html.a_class ["input-medium search-query"]]
+                  ~input_type: `Text
+                  ~name: title_name ();
+                Html.pcdata " Tags ";
+                Html.string_input
+                  ~a: [Html.a_class ["input-medium search-query"]]
+                  ~input_type: `Text
+                  ~name: tags_name ();
+                Html.string_input
+                  ~a: [Html.a_class ["btn btn-primary"]]
+                  ~input_type: `Submit
+                  ~value: "Send" ()
                   ]
-                ]) None
-            ] @ msg @ (Utils.msg login_state) @ feeds @ [
-              Html.br ();
-              Html.footer ~a: [Html.a_class ["footer"]] [
-                Html.pcdata "Cumulus project";
-              ]
-            ])
+            ]) None
+        ] @ msg @ (Utils.msg login_state) @ feeds @ [
+          Html.br ();
+          Html.footer ~a: [Html.a_class ["footer"]] [
+            Html.pcdata "Cumulus project";
+          ]
+        ]
     )
-  )
 
 let private_register () =
   main_style
@@ -137,41 +136,41 @@ let feed feeds =
   main_style feeds
 
 let private_preferences () =
-  User.is_connected () >>= (fun state ->
-    main_style (
-      if not state then
-        [Html.pcdata "Veuillez vous connecter pour acceder aux preferences."]
-      else
-        [Html.post_form
-            ~a: [Html.a_class ["well form-inline"]]
-            ~service: Services.update_user
-            (fun ((email_name, (password_name, password_check))) -> [
-              Html.p [
-                Html.pcdata "Mot de passe: ";
-                Html.string_input
-                  ~a: [Html.a_class ["input-small"]]
-                  ~input_type: `Password
-                  ~name: password_name ();
-                Html.br ();
-                Html.pcdata "Mot de passe: ";
-                Html.string_input
-                  ~a: [Html.a_class ["input-small"]]
-                  ~input_type: `Password
-                  ~name: password_check ();
-                Html.br ();
-                Html.pcdata "Email: ";
-                Html.string_input
-                  ~a: [Html.a_class ["input-small"]]
-                  ~input_type: `Text
-                  ~name: email_name ();
-                Html.br ();
-                Html.string_input
-                  ~a: [Html.a_class ["btn btn-primary"]]
-                  ~input_type: `Submit
-                  ~value: "Send" ()
-              ]
-            ]) None
-        ])
+  User.is_connected () >>= fun state ->
+  main_style (
+    if not state then
+      [Html.pcdata "Veuillez vous connecter pour acceder aux preferences."]
+    else
+      [Html.post_form
+          ~a: [Html.a_class ["well form-inline"]]
+          ~service: Services.update_user
+          (fun ((email_name, (password_name, password_check))) -> [
+            Html.p [
+              Html.pcdata "Mot de passe: ";
+              Html.string_input
+                ~a: [Html.a_class ["input-small"]]
+                ~input_type: `Password
+                ~name: password_name ();
+              Html.br ();
+              Html.pcdata "Mot de passe: ";
+              Html.string_input
+                ~a: [Html.a_class ["input-small"]]
+                ~input_type: `Password
+                ~name: password_check ();
+              Html.br ();
+              Html.pcdata "Email: ";
+              Html.string_input
+                ~a: [Html.a_class ["input-small"]]
+                ~input_type: `Text
+                ~name: email_name ();
+              Html.br ();
+              Html.string_input
+                ~a: [Html.a_class ["btn btn-primary"]]
+                ~input_type: `Submit
+                ~value: "Send" ()
+            ]
+          ]) None
+      ]
   )
 
 (* see TODO [1] *)

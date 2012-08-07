@@ -155,28 +155,27 @@ let get_feed_with_id id =
 
 let add_feed url title tags userid =
   Lwt_pool.use pool (fun db ->
-    Lwt_Query.value db (<:value< feeds?id >>) >>= (fun id_feed ->
-      let feed = Lwt_pool.use pool (fun db ->
-        Lwt_Query.query db (<:insert< $feeds$ := {
-          id = $int32:id_feed$;
-          url = $string:url$;
-          title = $string:title$;
-          timedate = feeds?timedate;
-          author = $int32:userid$
-        } >>)
-      )
-      and tag = Lwt_list.iter_s (* Lwt_list.iter_p ? *)
-        (fun tag ->
-          Lwt_pool.use pool (fun db ->
-            Lwt_Query.query db (<:insert< $feeds_tags$ := {
-              id = feeds_tags?id;
-              tag = $string:tag$;
-              id_feed = $int32:id_feed$
-            } >>)
-          )
-        ) tags in
-      Lwt.join [feed; tag]
+    Lwt_Query.value db (<:value< feeds?id >>) >>= fun id_feed ->
+    let feed = Lwt_pool.use pool (fun db ->
+      Lwt_Query.query db (<:insert< $feeds$ := {
+        id = $int32:id_feed$;
+        url = $string:url$;
+        title = $string:title$;
+        timedate = feeds?timedate;
+        author = $int32:userid$
+      } >>)
     )
+    and tag = Lwt_list.iter_s (* Lwt_list.iter_p ? *)
+      (fun tag ->
+        Lwt_pool.use pool (fun db ->
+          Lwt_Query.query db (<:insert< $feeds_tags$ := {
+            id = feeds_tags?id;
+            tag = $string:tag$;
+            id_feed = $int32:id_feed$
+          } >>)
+        )
+      ) tags in
+    Lwt.join [feed; tag]
   )
 
 let add_user name password email =

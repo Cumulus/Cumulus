@@ -37,36 +37,34 @@ let to_html self =
     Eliom_service.external_service
       self.url []
       Eliom_parameter.unit () in
-  Db.get_user_name_and_email_with_id self.author >>= (fun author ->
-    Lwt.return ([
-      Html.img
-        ~alt: (author#!name)
-        ~src: (Html.make_uri ~service: (Utils.get_gravatar (author#!email)) (80, "identicon"))
+  Db.get_user_name_and_email_with_id self.author >>= fun author ->
+  Lwt.return ([
+    Html.img
+      ~alt: (author#!name)
+      ~src: (Html.make_uri ~service: (Utils.get_gravatar (author#!email)) (80, "identicon"))
       ();
-      Html.a url_service [Html.pcdata self.title] ();
-      Html.br ();
-      Html.pcdata ("date: " ^ (Utils.string_of_calendar self.date));
-      Html.br ();
-      Html.pcdata ("author: ");
-      Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
-      Html.br ();
-      (* TODO : afficher "n commentaire(s)" *)
-      Html.a
-        Services.view_feed
-        [Html.pcdata "commentaires"]
-        (Int32.to_int self.id, Utils.url_of_title self.title);
-      Html.br ();
-      Html.pcdata "tags:"
-    ] @ links_of_tags self.tags)
-  )
+    Html.a url_service [Html.pcdata self.title] ();
+    Html.br ();
+    Html.pcdata ("date: " ^ (Utils.string_of_calendar self.date));
+    Html.br ();
+    Html.pcdata ("author: ");
+    Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
+    Html.br ();
+    (* TODO : afficher "n commentaire(s)" *)
+    Html.a
+      Services.view_feed
+      [Html.pcdata "commentaires"]
+      (Int32.to_int self.id, Utils.url_of_title self.title);
+    Html.br ();
+    Html.pcdata "tags:"
+  ] @ links_of_tags self.tags)
 
 let to_atom self =
-  Db.get_user_name_and_email_with_id self.author >>= (fun author ->
-    Lwt.return (
-      Atom_feed.entry
-        ~updated: self.date
-        ~id: (Html.Xml.uri_of_string self.url)
-        ~title: (Atom_feed.plain self.title)
-        [Atom_feed.authors [Atom_feed.author author#!name]]
-    )
+  Db.get_user_name_and_email_with_id self.author >>= fun author ->
+  Lwt.return (
+    Atom_feed.entry
+      ~updated: self.date
+      ~id: (Html.Xml.uri_of_string self.url)
+      ~title: (Atom_feed.plain self.title)
+      [Atom_feed.authors [Atom_feed.author author#!name]]
   )

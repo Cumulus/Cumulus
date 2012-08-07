@@ -68,26 +68,21 @@ let to_atom () =
   )
 
 let append_feed (url, (title, tags)) =
-  User.get_userid () >>= (fun userid ->
-    match userid with
-      | None -> Lwt.return Not_connected
-      | (Some author) ->
-        if Utils.string_is_empty title then
-          Lwt.return Empty
-        else if Utils.is_invalid_url url then
-          Lwt.return Invalid_url
-        else (
-          Db.get_feed_url_with_url url >>= (function
-            | (Some _) -> Lwt.return Already_exist
-            | None -> (
-              Db.add_feed
-                url
-                title
-                (List.map Utils.strip (Str.split (Str.regexp "[,]+") tags))
-                author >>= (fun () ->
-                  Lwt.return Ok
-                )
-            )
-          )
-        )
-  )
+  User.get_userid () >>= fun userid ->
+  match userid with
+    | None -> Lwt.return Not_connected
+    | (Some author) ->
+      if Utils.string_is_empty title then
+        Lwt.return Empty
+      else if Utils.is_invalid_url url then
+        Lwt.return Invalid_url
+      else
+        Db.get_feed_url_with_url url >>= function
+          | (Some _) -> Lwt.return Already_exist
+          | None ->
+            Db.add_feed
+              url
+              title
+              (List.map Utils.strip (Str.split (Str.regexp "[,]+") tags))
+              author >>= fun () ->
+            Lwt.return Ok

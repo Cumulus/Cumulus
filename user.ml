@@ -33,41 +33,30 @@ let login_state =
   Eliom_reference.eref ~scope: Eliom_common.session default_login_state
 
 let get_userid () =
-  Eliom_reference.get current_user >>= (function
+  Eliom_reference.get current_user >>= function
     | None -> Lwt.return None
     | (Some user) -> Lwt.return (Some user.id)
-  )
 
 let is_connected () =
-  Eliom_reference.get current_user >>= (fun userid ->
-    Lwt.return (
-      match userid with
-        | None -> false
-        | _ -> true
-    )
-  )
+  Eliom_reference.get current_user >>= function
+    | None -> Lwt.return false
+    | _ -> Lwt.return true
 
 let connect user password =
-  if check_password user password then (
-    is_connected () >>= (function
+  if check_password user password then
+    is_connected () >>= function
       | true -> Lwt.return Already_connected
-      | false -> (
-        Eliom_reference.set current_user (Some user) >>= (fun () ->
-          Lwt.return Ok
-        )
-      )
-    )
-  )
+      | false ->
+        Eliom_reference.set current_user (Some user) >>= fun () ->
+        Lwt.return Ok
   else
     Lwt.return Bad_password
 
 let disconnect () =
-  is_connected () >>= (fun state ->
-    match state with
-      | true -> Eliom_reference.unset current_user >>= (fun () ->
-        Lwt.return true)
-      | false -> Lwt.return false
-  )
+  is_connected () >>= function
+    | true -> Eliom_reference.unset current_user >>= (fun () ->
+      Lwt.return true)
+    | false -> Lwt.return false
 
 let get_login_state () =
   Eliom_reference.get login_state >>= fun ret ->
