@@ -22,18 +22,11 @@ let () =
            ))
       )
     );
-  Eliom_registration.Html5.register
+  Eliom_registration.Action.register
     ~service: Services.auth
-    (fun page (username, password) ->
-      Users.connect_user username password >>= (fun state ->
-        Templates.main ?page
-          (Utils.msg (match state with
-            | User.Already_connected -> "Deja connecte"
-            | User.Ok -> "Connecte"
-            | User.Bad_password -> "Mauvais mot-de-passe"
-            | User.Not_found -> "Utilisateur non trouve"
-           ))
-      )
+    (fun () (username, password) ->
+      Users.connect_user username password >>=
+        User.set_login_state
     );
   Eliom_registration.Html5.register
     ~service: Services.view_feed

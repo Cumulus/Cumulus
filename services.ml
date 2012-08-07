@@ -37,9 +37,7 @@ let tag_feed =
     ()
 
 let auth =
-  (* post_coservice' *)
-  Eliom_service.post_service
-    ~fallback: main
+  Eliom_service.post_coservice'
     ~post_params: Eliom_parameter.((string "username") ** (string "password"))
     ()
 

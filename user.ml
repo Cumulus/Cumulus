@@ -27,6 +27,9 @@ let add name password email =
 let (current_user : (user option) Eliom_reference.eref) =
   Eliom_reference.eref ~scope: Eliom_common.session None
 
+let login_state =
+  Eliom_reference.eref ~scope: Eliom_common.session ""
+
 let get_userid () =
   Eliom_reference.get current_user >>= (function
     | None -> Lwt.return None
@@ -42,15 +45,19 @@ let is_connected () =
     )
   )
 
-let connect user =
-  is_connected () >>= (fun state ->
-    match state with
+let connect user password =
+  if check_password user password then (
+    is_connected () >>= (function
       | true -> Lwt.return Already_connected
-      | false -> Eliom_reference.set
-        current_user (Some user) >>= (fun () ->
+      | false -> (
+        Eliom_reference.set current_user (Some user) >>= (fun () ->
           Lwt.return Ok
         )
+      )
+    )
   )
+  else
+    Lwt.return Bad_password
 
 let disconnect () =
   is_connected () >>= (fun state ->
@@ -59,3 +66,15 @@ let disconnect () =
         Lwt.return true)
       | false -> Lwt.return false
   )
+
+let get_login_state () =
+  Eliom_reference.get login_state
+
+let set_login_state state =
+  Eliom_reference.set login_state
+    (match state with
+      | Already_connected -> "Deja connecte"
+      | Ok -> "Connecte"
+      | Bad_password -> "Mauvais mot-de-passe"
+      | Not_found -> "Utilisateur non trouve"
+    )

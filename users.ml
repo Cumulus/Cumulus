@@ -3,9 +3,7 @@ let connect_user username password =
     | None -> Lwt.return User.Not_found
     | (Some user) -> (
       let user = User.user_new user in
-      match User.check_password user password with
-        | true -> User.connect user
-        | false -> Lwt.return User.Bad_password
+      User.connect user password
     )
   )
 

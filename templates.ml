@@ -46,7 +46,7 @@ let user_form state =
             Services.registration
             [Html.pcdata "S'inscrire."] ()
         ]
-      ]) None
+      ]) ()
   ]
   else [
   ]
@@ -54,6 +54,7 @@ let user_form state =
 let private_main msg feeds =
   feeds >>= (fun feeds ->
     User.is_connected () >>= (fun state ->
+      User.get_login_state () >>= fun login_state ->
       main_style
         ((user_form state) @
             [Html.post_form
@@ -82,7 +83,7 @@ let private_main msg feeds =
                       ~value: "Send" ()
                   ]
                 ]) None
-            ] @ msg @ feeds @ [
+            ] @ msg @ (Utils.msg login_state) @ feeds @ [
               Html.br ();
               Html.footer ~a: [Html.a_class ["footer"]] [
                 Html.pcdata "Cumulus project";
