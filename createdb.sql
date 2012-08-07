@@ -10,6 +10,7 @@ CREATE TABLE feeds (
 );
 
 CREATE TABLE feeds_tags (
+    id integer NOT NULL,
     tag text NOT NULL,
     id_feed integer NOT NULL
 );
@@ -23,3 +24,4 @@ CREATE TABLE users (
 
 CREATE SEQUENCE users_id_seq;
 CREATE SEQUENCE feeds_id_seq;
+CREATE SEQUENCE feeds_tags_id_seq;

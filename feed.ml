@@ -1,5 +1,12 @@
 module Calendar = CalendarLib.Calendar
 
+type feed_db =
+  < author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
+  id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
+  timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t;
+  title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
+  url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
+
 type feed = {
   id : int32;
   url : string;
