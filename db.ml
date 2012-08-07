@@ -5,13 +5,14 @@ end
 module Lwt_PGOCaml = PGOCaml_generic.Make(Lwt_thread)
 module Lwt_Query = Query.Make_with_Db(Lwt_thread)(Lwt_PGOCaml)
 
-type feed =
-  < author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
-    id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
-    tag : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
-    timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t;
-    title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
-    url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
+class type feed = object
+  method author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
+  method id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
+  method tag : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
+  method timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t
+  method title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
+  method url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
+end
 
 let connect () =
   Lwt_PGOCaml.connect

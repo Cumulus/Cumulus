@@ -1,12 +1,12 @@
 type feed
 
-(* Shall we use the syntax: class type feed_db = object .. end instead ? *)
-type feed_db =
-  < author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
-  id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
-  timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t;
-  title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
-  url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
+class type feed_db = object
+  method author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
+  method id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
+  method timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t
+  method title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
+  method url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
+end
 
 val feed_new : feed_db -> string list -> feed
 val to_html : feed ->
