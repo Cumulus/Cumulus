@@ -64,6 +64,11 @@ let registration =
     ~get_params: Eliom_parameter.unit
     ()
 
+let disconnect =
+  Eliom_service.post_coservice'
+    ~post_params: Eliom_parameter.unit
+    ()
+
 let preferences =
   Eliom_service.service
     ~path: ["preferences"]
