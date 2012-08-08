@@ -20,8 +20,8 @@ let main_style data =
         ])
     )
 
-let user_form state =
-  if not state then [
+let user_form () =
+  [
     Html.post_form
       ~a: [Html.a_class ["well form-inline"]]
       ~service: Services.auth
@@ -48,15 +48,20 @@ let user_form state =
         ]
       ]) ()
   ]
-  else [
+
+let user_information user = 
+  [
+    Html.div
+      ~a: [Html.a_class ["container"]]
+      [ Html.pcdata user#!name ]
   ]
 
 let private_main msg feeds =
   feeds >>= fun feeds ->
-  User.is_connected () >>= fun state ->
   User.get_login_state () >>= fun login_state ->
+  User.to_html user_information user_form >>= fun user ->
   main_style
-    ((user_form state) @
+    (user @
         [Html.post_form
             ~a: [Html.a_class ["well form-inline"]]
             ~service: Services.append_feed
