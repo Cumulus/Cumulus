@@ -24,7 +24,12 @@ let () =
   Eliom_registration.Action.register
     ~service: Services.auth
     (fun () (username, password) ->
-      Users.connect_user username password >>= User.set_login_state
+      Users.connect_user username password >>= User.set_login_state_from_user_state
+    );
+  Eliom_registration.Action.register
+    ~service: Services.disconnect
+    (fun () () -> 
+      User.disconnect () >>= User.set_login_state_from_disconnect
     );
   Eliom_registration.Html5.register
     ~service: Services.view_feed
