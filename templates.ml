@@ -53,7 +53,25 @@ let user_information user =
   [
     Html.div
       ~a: [Html.a_class ["container"]]
-      [ Html.pcdata user#!name ]
+      [
+        Html.post_form
+          ~a: [Html.a_class ["well form-inline"]]
+          ~service: Services.disconnect 
+          (fun () ->
+          [
+            Html.img
+              ~alt: (user#!name)
+              ~src: (Html.make_uri ~service: (Utils.get_gravatar (user#!email)) (30, "identicon")) ();
+            Html.pcdata ("Hi, " ^ user#!name);
+            Html.br ();
+            Html.string_input 
+              ~a: [Html.a_class ["btn btn-primary"]]
+              ~input_type: `Submit 
+              ~value: "Deconnexion" 
+              ()
+          ])
+          ()
+      ]
   ]
 
 let private_main msg feeds =
