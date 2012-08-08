@@ -71,7 +71,14 @@ let get_login_state () =
   Eliom_reference.set login_state default_login_state >>= fun () ->
   Lwt.return ret
 
-let set_login_state state =
+let set_login_state_from_disconnect state =
+  Eliom_reference.set login_state
+    (match state with
+      | true -> "Deconnecte"
+      | false -> "wait ... WHAT !?"
+    )
+
+let set_login_state_from_user_state state =
   Eliom_reference.set login_state
     (match state with
       | Already_connected -> "Deja connecte"

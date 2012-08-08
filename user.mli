@@ -13,7 +13,8 @@ val is_connected : unit -> bool Lwt.t
 val connect : user -> string -> user_state Lwt.t
 val disconnect : unit -> bool Lwt.t
 val get_login_state : unit -> string Lwt.t
-val set_login_state : user_state -> unit Lwt.t
+val set_login_state_from_user_state : user_state -> unit Lwt.t
+val set_login_state_from_disconnect : bool -> unit Lwt.t
 val to_html : (< email: < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
                  name : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
               -> 'a) -> (unit -> 'a) -> 'a Lwt.t
