@@ -49,7 +49,7 @@ let user_form () =
       ]) ()
   ]
 
-let user_information user = 
+let user_information user =
   [
     Html.div
       ~a: [Html.a_class ["container"]]
