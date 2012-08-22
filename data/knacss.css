@@ -1,0 +1,341 @@
+/*
+KNACSS.com V1.2 @author : Raphael Goetter, Alsacreations
+Licence CC-BY http://creativecommons.org/licenses/by/3.0/fr/
+*/
+
+
+/* ----------------------------- */
+/* summary */
+/* ----------------------------- */
+/*
+1- colors
+2- reset
+3- layout and modules
+4- header
+5- sidebar
+6- footer
+7- forms
+8- main
+9- iefix
+10- print
+11- mobile
+*/
+
+/* ----------------------------- */
+/* ==colors */
+/* ----------------------------- */
+
+
+/* ----------------------------- */
+/* ==reset */
+/* ----------------------------- */
+
+/* base font-size corresponds to 10px */
+html {font-size: 62.5%;}
+body {
+    background-color: #fff;
+    color: #000;
+    font-family: "Century Gothic", arial, helvetica, sans-serif;
+    line-height: 1.5; /* adapt to your design */
+}
+
+/* HTML5 tags */
+article, aside, details, figcaption, figure, footer, header, hgroup, nav, section {display: block;}
+
+/* soft reset */
+html, body, blockquote, ul, ol, form {margin: 0; padding: 0;}
+ul, ol {padding-left: 2em}
+.mreset {margin: 0;}
+.preset {padding: 0;}
+
+/* font-sizing for content */
+p, li, td, th, textarea, caption, pre {font-size: 1.4em;}
+li li, li p, td p, th p, li h1, li h2, li h3, li h4, li h5, li h6, button, input, select {font-size: 100%;}
+h1, .h1-like {font-size: 2.4em; } /* 24 pixels */
+h2, .h2-like {font-size: 2.0em; } /* 20 pixels */
+h3, .h3-like {font-size: 1.8em; } /* 18 pixels */
+h4, .h4-like {font-size: 1.6em; } /* 16 pixels */
+h5, .h5-like {font-size: 1.4em; } /* 14 pixels */
+
+/* alternate font-sizing */
+.smallest {font-size: .7em;}
+.smaller {font-size: .8em;}
+.small {font-size: .9em;}
+.big {font-size: 1.07em;} /* 15 pixels */
+.bigger {font-size: 1.14em;} /* 16 pixels */
+.biggest {font-size: 1.28em;} /* 18 pixels */
+
+/* avoid collapsing margins */
+h1:first-child, h2:first-child, h3:first-child, h4:first-child, h5:first-child, p:first-child {
+    margin-top: 0;
+}
+
+/* avoid last paragraph bottom margin */
+p:last-child {margin-bottom: 0;}
+
+/* styling headings */
+h1, .h1-like {}
+h2, .h2-like {}
+h3, .h3-like {}
+h4, .h4-like {}
+h5, .h5-like {}
+h6, .h6-like {}
+
+/* max values */
+img, table, td, blockquote, code, pre, textarea, input, iframe, object, embed, video {
+    max-width: 100%; height: auto;
+}
+
+/* you shall not pass */
+textarea, table, td, th, code, pre, samp, div, p {
+    word-wrap: break-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    -o-hyphens: auto;
+    hyphens: auto;
+}
+code, pre, samp {
+    white-space: pre-wrap;
+}
+
+/* links */
+a img {border: 0;}
+
+/* gradients */
+/* http://www.colorzilla.com/gradient-editor/ */
+
+
+/* ----------------------------- */
+/* ==layout and modules */
+/* ----------------------------- */
+
+/* switching box model for all elements */
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+/* float layout */
+/* ----------- */
+
+/* block that can contains several .mod , can contains floats */
+.line {}
+
+/* module, contains floats */
+.mod {padding: 1em}
+
+/* generaly inside .mod, can contains .item */
+.items {}
+
+/* fluid, contains floats, can be placed next to a float */
+.item {overflow: hidden;}
+
+/* table layout */
+/* ------------------ */
+.row {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+}
+.row > *, .col {
+    display: table-cell;
+    padding: 1em;
+}
+
+/* blocks that needs to be placed under floats */
+.clear, .line, .row {clear: both}
+
+/* blocks that can contains floats */
+.clearfix:before, .clearfix:after,
+.line:before, .line:after,
+.mod:before, .mod:after {
+    content: ""; display: table;
+}
+.clearfix:after, .line:after, .mod:after {
+    clear: both;
+}
+
+/* alignments (blocks and inline) */
+/* ----------------------------- */
+
+/* left elements */
+.left {float: left; margin-right: 1em}
+.mod.left, .col.left {margin-right: 0}
+
+/* right elements */
+.right {float: right; margin-left: 1em}
+.mod.right, .col.right {margin-left: 0}
+
+.center {margin: auto}
+.txtleft {text-align: left}
+.txtright {text-align: right}
+.txtcenter {text-align: center}
+
+/* 1em gutter between elements if parent is .gut */
+.row.gut > * + * {
+    border-left: 1em solid #fff; /* must be color of parent background */
+}
+.line.gut > .left {margin-right: 1em}
+.line.gut > .right {margin-left: 1em}
+
+/* "multicolumns" with % gutter */
+.line.gut2 > * {width: 49%}
+.line.gut2 > * + * {margin-left: 2%}
+.line.gut3 > * {width: 32.333%}
+.line.gut3 > * + * {margin-left: 1.5%}
+.line.gut4 > * {width: 24%}
+.line.gut4 > * + * {margin-left: 1.333%}
+
+/* juste inline-block */
+.inbl {display: inline-block;}
+
+/* blocks widths (percentage and pixels) */
+.w10 {width: 10%}
+.w20 {width: 20%}
+.w25 {width: 25%}
+.w30 {width: 30%}
+.w33 {width: 33.333%}
+.w40 {width: 40%}
+.w50 {width: 50%}
+.w60 {width: 60%}
+.w66 {width: 66.666%}
+.w70 {width: 70%}
+.w75 {width: 75%}
+.w80 {width: 80%}
+.w90 {width: 90%}
+.w100 {width: 100%}
+
+.w50p {width: 50px}
+.w100p {width: 100px}
+.w150p {width: 150px}
+.w200p {width: 200px}
+.w300p {width: 300px}
+.w400p {width: 400px}
+.w500p {width: 500px}
+.w600p {width: 600px}
+.w700p {width: 700px}
+.w800p {width: 800px}
+.w960p {width: 960px}
+.mw960p {max-width: 960px}
+
+/* margins */
+.mt1 {margin-top: 1em}
+.mt2 {margin-top: 2em}
+.mr1 {margin-right: 1em}
+.mr2 {margin-right: 2em}
+.mb1 {margin-bottom: 1em}
+.mb2 {margin-bottom: 2em}
+.ml1 {margin-left: 1em}
+.ml2 {margin-left: 2em}
+
+/* hiding content */
+.visually-hidden { /* always hidden for screens */
+    position: absolute; left:-7000px; text-indent:-7000px; overflow: hidden
+}
+.desktop-hidden {display: none} /* hidden on desktop */
+.mobile-hidden {} /* hidden on mobile */
+.tablet-hidden {} /* hidden on tablets */
+.phone-hidden {} /* hidden on smartphones */
+
+/* ----------------------------- */
+/* ==header */
+/* ----------------------------- */
+
+/* ----------------------------- */
+/* ==sidebar */
+/* ----------------------------- */
+
+/* ----------------------------- */
+/* ==footer */
+/* ----------------------------- */
+
+/* ----------------------------- */
+/* ==forms */
+/* ----------------------------- */
+
+form, fieldset {border: none}
+input, button, select {
+  vertical-align: middle; /* @bugfix alignment */
+}
+
+/* ----------------------------- */
+/* ==main */
+/* ----------------------------- */
+
+/* ----------------------------- */
+/* ==iefix */
+/* ----------------------------- */
+
+/* haslayout for IE6/IE7 */
+.ie7 .clearfix,.ie7 .line, .ie7 .mod, .ie7 .row, .ie7 .col {
+    zoom: 1;
+}
+
+/* inline-block and table-cell for IE6/IE7 */
+/* warning : .col needs width on IE6/IE7 */
+.ie7 .btn, .ie7 .col, .ie7 .inbl {
+    display: inline;
+    zoom: 1;
+}
+.ie8 img {width: auto} /* @bugfix for IE8 */
+/* box-sizing for IE6/IE7 */
+/* https://github.com/Schepp/box-sizing-polyfill
+.ie7 * {
+behavior: url(/js/boxsizing.htc);
+}
+*/
+
+/* ----------------------------- */
+/* ==print */
+/* ----------------------------- */
+
+/* quick print reset */
+@media print {
+    p, blockquote {orphans: 2; widows: 2;}
+    blockquote, ul, ol {page-break-inside: avoid;}
+    h1, h2, h3, caption { page-break-after: avoid;}
+}
+
+/* ----------------------------- */
+/* ==mobile */
+/* ----------------------------- */
+
+/* quick tablet reset */
+@media (max-width: 768px) {
+    .tablet-hidden {display: none}
+    [class*="mw"], [class*="w9"], [class*="w8"],
+    [class*="w7"], [class*="w6"] {
+        width: auto;
+    }
+}
+
+/* quick smartphone reset */
+@media (max-width: 640px) {
+    .phone-hidden {display: none}
+    .mod, .col, label, fieldset {
+     display: block !important;
+     margin: 0 !important;
+     border: 0 !important;
+     float: none !important;
+     width: auto !important;
+    }
+    [class*="w5"], [class*="w4"], [class*="w3"] {
+        width: auto;
+    }
+    .row {width: 100% !important}
+}
+
+/* corrects retina iOS orientation zoom */
+@media (max-device-width:768px) and (orientation:landscape) and (-webkit-min-device-pixel-ratio:2) {
+    html {-webkit-text-size-adjust:66%}
+}
+
+header {
+  background: #000;
+}
+
+img {
+  margin: 5px;
+}

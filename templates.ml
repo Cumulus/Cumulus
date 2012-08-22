@@ -8,8 +8,13 @@ let main_style data =
             Html.css_link
               ~uri: (Html.make_uri
                        ~service: (Eliom_service.static_dir ())
-                       ["style.css"]
-              ) ()
+                       ["knacss.css"]
+              ) ();
+            Html.css_link
+              ~uri: (Html.make_uri
+                       ~service: (Eliom_service.static_dir ())
+                       ["forms.css"]
+              ) ();
           ]
        )
        (Html.body [
@@ -51,23 +56,22 @@ let user_form () =
 
 let user_information user =
   [
-    Html.div
+    Html.header
       ~a: [Html.a_class ["container"]]
       [
         Html.post_form
           ~a: [Html.a_class ["well form-inline"]]
-          ~service: Services.disconnect 
+          ~service: Services.disconnect
           (fun () ->
           [
             Html.img
               ~alt: (user#!name)
               ~src: (Html.make_uri ~service: (Utils.get_gravatar (user#!email)) (30, "identicon")) ();
             Html.pcdata ("Hi, " ^ user#!name);
-            Html.br ();
-            Html.string_input 
+            Html.string_input
               ~a: [Html.a_class ["btn btn-primary"]]
-              ~input_type: `Submit 
-              ~value: "Deconnexion" 
+              ~input_type: `Submit
+              ~value: "Deconnexion"
               ()
           ])
           ()
