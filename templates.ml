@@ -189,7 +189,7 @@ let private_preferences msg =
                 ~input_type: `Submit
                 ~value: "Send" ()
             ]
-          ]) None
+          ]) ()
       ]
       @
         [Html.post_form
@@ -208,7 +208,7 @@ let private_preferences msg =
                   ~input_type: `Submit
                   ~value: "Send" ()
               ]
-            ]) None
+            ]) ()
         ]
   )
 

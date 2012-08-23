@@ -51,14 +51,12 @@ let add_user =
     ()
 
 let update_user_mail =
-  Eliom_service.post_service
-    ~fallback: main
+  Eliom_service.post_coservice'
     ~post_params: Eliom_parameter.((string "email"))
     ()
 
 let update_user_password =
-  Eliom_service.post_service
-    ~fallback: main
+  Eliom_service.post_coservice'
     ~post_params: Eliom_parameter.((string "password") **
                                       (string "password_check"))
     ()
