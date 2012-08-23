@@ -54,8 +54,7 @@ let update_user =
   Eliom_service.post_service
     ~fallback: main
     ~post_params: Eliom_parameter.((string "password") **
-                                      (string "password_check") **
-                                      (string "email"))
+                                      (string "password_check"))
     ()
 
 let registration =
