@@ -50,7 +50,7 @@ let () =
     ~service: Services.update_user_mail
     (fun page datas ->
       Users.update_user_mail datas >>= fun state ->
-      Templates.main ?page
+      Templates.preferences
         (Utils.msg (match state with
           | true -> "Modification de l'adresse mail effectuee"
           | false -> "Adresse invalide"
@@ -60,7 +60,7 @@ let () =
     ~service: Services.update_user_password
     (fun page datas ->
       Users.update_user_password datas >>= fun state ->
-      Templates.main ?page
+      Templates.preferences
         (Utils.msg (match state with
           | true -> "Mot de passe change."
           | false -> "Les mots de passe sont invalides ou ne correspondent pas."
@@ -74,4 +74,4 @@ let () =
     (fun (page, tag) () -> Templates.tag ?page [] tag);
   Eliom_registration.Html5.register
     ~service: Services.preferences
-    (fun () () -> Templates.preferences ())
+    (fun () () -> Templates.preferences [])

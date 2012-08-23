@@ -159,11 +159,11 @@ let feed feeds =
   User.is_connected () >>= fun state ->
   main_style feeds
 
-let private_preferences () =
+let private_preferences msg =
   User.is_connected () >>= fun state ->
   User.to_html user_information user_form >>= fun user ->
   main_style (
-    user @
+    user @ msg @
     if not state then
       [Html.pcdata "Veuillez vous connecter pour acceder aux preferences."]
     else
@@ -233,5 +233,5 @@ let view_feed id =
 let register () =
   private_register ()
 
-let preferences () =
-  private_preferences ()
+let preferences msg =
+  private_preferences msg
