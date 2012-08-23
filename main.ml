@@ -47,13 +47,23 @@ let () =
          ))
     );
   Eliom_registration.Html5.register
-    ~service: Services.update_user
+    ~service: Services.update_user_mail
     (fun page datas ->
-      Users.update_user datas >>= fun state ->
+      Users.update_user_mail datas >>= fun state ->
       Templates.main ?page
         (Utils.msg (match state with
-          | true -> "Vous êtes bien enregistré"
-          | false -> "L'user existe deja, ou mot de passe invalide"
+          | true -> "Modification de l'adresse mail effectuee"
+          | false -> "Adresse invalide"
+         ))
+    );
+  Eliom_registration.Html5.register
+    ~service: Services.update_user_password
+    (fun page datas ->
+      Users.update_user_password datas >>= fun state ->
+      Templates.main ?page
+        (Utils.msg (match state with
+          | true -> "Mot de passe change."
+          | false -> "Les mots de passe sont invalides ou ne correspondent pas."
          ))
     );
   Eliom_registration.Html5.register

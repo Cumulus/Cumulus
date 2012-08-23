@@ -16,7 +16,7 @@ let add_user (name, (email, (password, password_check))) =
         Lwt.return true
 
 
-let update_user ((password, password_check)) =
+let update_user_password ((password, password_check)) =
   (* if password <> password_check then *)
     Lwt.return false
   (* else ( *)
@@ -29,3 +29,6 @@ let update_user ((password, password_check)) =
   (*     ) *)
   (*   ) *)
   (* ) *)
+
+let update_user_mail (email) =
+  Lwt.return false

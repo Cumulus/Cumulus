@@ -169,7 +169,7 @@ let private_preferences () =
     else
       [Html.post_form
           ~a: [Html.a_class ["well form-inline"]]
-          ~service: Services.update_user
+          ~service: Services.update_user_password
           (fun ((password_name, password_check)) -> [
             Html.p [
               Html.pcdata "Mot de passe: ";
@@ -184,12 +184,6 @@ let private_preferences () =
                 ~input_type: `Password
                 ~name: password_check ();
               Html.br ();
-              (* Html.pcdata "Email: "; *)
-              (* Html.string_input *)
-              (*   ~a: [Html.a_class ["input-small"]] *)
-              (*   ~input_type: `Text *)
-              (*   ~name: email_name (); *)
-              (* Html.br (); *)
               Html.string_input
                 ~a: [Html.a_class ["btn btn-primary"]]
                 ~input_type: `Submit
@@ -197,6 +191,25 @@ let private_preferences () =
             ]
           ]) None
       ]
+      @
+        [Html.post_form
+            ~a: [Html.a_class ["well form-inline"]]
+            ~service: Services.update_user_mail
+            (fun ((email)) -> [
+              Html.p [
+              Html.pcdata "Email: ";
+              Html.string_input
+                ~a: [Html.a_class ["input-small"]]
+                ~input_type: `Text
+                ~name: email ();
+              Html.br ();
+                Html.string_input
+                  ~a: [Html.a_class ["btn btn-primary"]]
+                  ~input_type: `Submit
+                  ~value: "Send" ()
+              ]
+            ]) None
+        ]
   )
 
 (* see TODO [1] *)
