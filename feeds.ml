@@ -28,7 +28,7 @@ let private_to_html data =
   to_somthing
     (fun feed ->
       Feed.to_html feed >>= (fun elm ->
-        Lwt.return (Html.p elm)
+        Lwt.return (Html.div ~a: [Html.a_class ["line post"]] elm)
       )
     ) data
 

@@ -105,11 +105,65 @@ textarea,
 button,
 input[type="button"],
 input[type="reset"] {
-	min-width: 300px;
-	padding: .2em 0 .2em .2em;
+
+	min-width: 100px;
+	padding: .3em 0 .3em .3em;
 	border: 1px solid #ccc;
 }
 input[type="submit"] {
 	padding: .5em 1em;
 	border: 1px solid #ccc;
+	font-size: 12px;
+}
+
+header input[type="text"]{
+  width: 130px;
+  height: 31px;
+}
+
+header input[type="password"]{
+  width: 130px;
+  height: 31px;
+}
+
+header input[type="submit"] {
+  padding: 8px 1.5em;
+  border: 1px solid #ccc;
+  font-size: 12px;
+  margin-right: 8px;
+  background-color: #333;
+  border-color: #222;
+  color: #d1d1d1;
+}
+
+.dash input[type="submit"] {
+  padding: 1px 1.2em;
+  border: 1px solid #ccc;
+  font-size: 12px;
+  margin-left: 5px;
+  background-color: #bbb;
+  border-color: #aaa;
+  color: #111;
+}
+
+.dash input[type="submit"]:hover {
+  background-color: #aaa;
+}
+
+.nav {
+  padding: 8px 1.5em;
+  border: 1px solid #ccc;
+  font-size: 12px;
+  margin-right: 8px;
+  background-color: #333;
+  border-color: #222;
+  color: #d1d1d1;
+}
+
+header a {
+  text-decoration: none;
+}
+
+header p {
+  margin-top: 0px;
 }

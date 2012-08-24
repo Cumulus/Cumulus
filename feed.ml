@@ -40,23 +40,21 @@ let to_html self =
   Db.get_user_name_and_email_with_id self.author >>= fun author ->
   Lwt.return ([
     Html.img
+      ~a: [Html.a_class ["left"]]
       ~alt: (author#!name)
-      ~src: (Html.make_uri ~service: (Utils.get_gravatar (author#!email)) (80, "identicon"))
+      ~src: (Html.make_uri ~service: (Utils.get_gravatar (author#!email)) (40, "identicon"))
       ();
-    Html.a url_service [Html.pcdata self.title] ();
+    Html.a ~a: [Html.a_class ["postitle"]] ~service: url_service [Html.pcdata self.title] ();
     Html.br ();
-    Html.pcdata ("date: " ^ (Utils.string_of_calendar self.date));
-    Html.br ();
-    Html.pcdata ("author: ");
+    Html.pcdata ("Published on " ^ (Utils.string_of_calendar self.date) ^ " by ");
     Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
     Html.br ();
     (* TODO : afficher "n commentaire(s)" *)
     Html.a
       Services.view_feed
-      [Html.pcdata "commentaires"]
+      [Html.pcdata "n commentaires "]
       (Int32.to_int self.id, Utils.url_of_title self.title);
-    Html.br ();
-    Html.pcdata "tags:"
+    Html.pcdata " tags: "
   ] @ links_of_tags self.tags)
 
 let to_atom self =

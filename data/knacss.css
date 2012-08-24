@@ -33,14 +33,26 @@ Licence CC-BY http://creativecommons.org/licenses/by/3.0/fr/
 /* base font-size corresponds to 10px */
 html {font-size: 62.5%;}
 body {
-    background-color: #fff;
+    background-color: #f1f1f1;
     color: #000;
     font-family: "Century Gothic", arial, helvetica, sans-serif;
-    line-height: 1.5; /* adapt to your design */
+    line-height: 15px; /* adapt to your design */
+}
+
+header img {
+  margin-bottom: 0px;
+  margin-top: 0px;
+  float: right;
+}
+
+header .btn {
+  margin-bottom: 0px;
 }
 
 /* HTML5 tags */
 article, aside, details, figcaption, figure, footer, header, hgroup, nav, section {display: block;}
+
+@import url(http://fonts.googleapis.com/css?family=Alike+Angular);
 
 /* soft reset */
 html, body, blockquote, ul, ol, form {margin: 0; padding: 0;}
@@ -67,7 +79,7 @@ h5, .h5-like {font-size: 1.4em; } /* 14 pixels */
 
 /* avoid collapsing margins */
 h1:first-child, h2:first-child, h3:first-child, h4:first-child, h5:first-child, p:first-child {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 /* avoid last paragraph bottom margin */
@@ -83,20 +95,20 @@ h6, .h6-like {}
 
 /* max values */
 img, table, td, blockquote, code, pre, textarea, input, iframe, object, embed, video {
-    max-width: 100%; height: auto;
+  max-width: 100%; height: auto;
 }
 
 /* you shall not pass */
 textarea, table, td, th, code, pre, samp, div, p {
-    word-wrap: break-word;
-    -webkit-hyphens: auto;
-    -moz-hyphens: auto;
-    -ms-hyphens: auto;
-    -o-hyphens: auto;
-    hyphens: auto;
+  word-wrap: break-word;
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
+  -ms-hyphens: auto;
+  -o-hyphens: auto;
+  hyphens: auto;
 }
 code, pre, samp {
-    white-space: pre-wrap;
+  white-space: pre-wrap;
 }
 
 /* links */
@@ -112,9 +124,9 @@ a img {border: 0;}
 
 /* switching box model for all elements */
 * {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 /* float layout */
@@ -135,13 +147,13 @@ a img {border: 0;}
 /* table layout */
 /* ------------------ */
 .row {
-    display: table;
-    table-layout: fixed;
-    width: 100%;
+  display: table;
+  table-layout: fixed;
+  width: 100%;
 }
 .row > *, .col {
-    display: table-cell;
-    padding: 1em;
+  display: table-cell;
+  padding: 1em;
 }
 
 /* blocks that needs to be placed under floats */
@@ -151,10 +163,10 @@ a img {border: 0;}
 .clearfix:before, .clearfix:after,
 .line:before, .line:after,
 .mod:before, .mod:after {
-    content: ""; display: table;
+  content: ""; display: table;
 }
 .clearfix:after, .line:after, .mod:after {
-    clear: both;
+  clear: both;
 }
 
 /* alignments (blocks and inline) */
@@ -175,7 +187,7 @@ a img {border: 0;}
 
 /* 1em gutter between elements if parent is .gut */
 .row.gut > * + * {
-    border-left: 1em solid #fff; /* must be color of parent background */
+  border-left: 1em solid #fff; /* must be color of parent background */
 }
 .line.gut > .left {margin-right: 1em}
 .line.gut > .right {margin-left: 1em}
@@ -232,7 +244,7 @@ a img {border: 0;}
 
 /* hiding content */
 .visually-hidden { /* always hidden for screens */
-    position: absolute; left:-7000px; text-indent:-7000px; overflow: hidden
+  position: absolute; left:-7000px; text-indent:-7000px; overflow: hidden
 }
 .desktop-hidden {display: none} /* hidden on desktop */
 .mobile-hidden {} /* hidden on mobile */
@@ -270,14 +282,14 @@ input, button, select {
 
 /* haslayout for IE6/IE7 */
 .ie7 .clearfix,.ie7 .line, .ie7 .mod, .ie7 .row, .ie7 .col {
-    zoom: 1;
+  zoom: 1;
 }
 
 /* inline-block and table-cell for IE6/IE7 */
 /* warning : .col needs width on IE6/IE7 */
 .ie7 .btn, .ie7 .col, .ie7 .inbl {
-    display: inline;
-    zoom: 1;
+  display: inline;
+  zoom: 1;
 }
 .ie8 img {width: auto} /* @bugfix for IE8 */
 /* box-sizing for IE6/IE7 */
@@ -285,7 +297,7 @@ input, button, select {
 .ie7 * {
 behavior: url(/js/boxsizing.htc);
 }
-*/
+ */
 
 /* ----------------------------- */
 /* ==print */
@@ -293,9 +305,9 @@ behavior: url(/js/boxsizing.htc);
 
 /* quick print reset */
 @media print {
-    p, blockquote {orphans: 2; widows: 2;}
-    blockquote, ul, ol {page-break-inside: avoid;}
-    h1, h2, h3, caption { page-break-after: avoid;}
+  p, blockquote {orphans: 2; widows: 2;}
+  blockquote, ul, ol {page-break-inside: avoid;}
+  h1, h2, h3, caption { page-break-after: avoid;}
 }
 
 /* ----------------------------- */
@@ -304,38 +316,82 @@ behavior: url(/js/boxsizing.htc);
 
 /* quick tablet reset */
 @media (max-width: 768px) {
-    .tablet-hidden {display: none}
-    [class*="mw"], [class*="w9"], [class*="w8"],
-    [class*="w7"], [class*="w6"] {
-        width: auto;
-    }
+  .tablet-hidden {display: none}
+  [class*="mw"], [class*="w9"], [class*="w8"],
+  [class*="w7"], [class*="w6"] {
+    width: auto;
+  }
 }
 
 /* quick smartphone reset */
 @media (max-width: 640px) {
-    .phone-hidden {display: none}
-    .mod, .col, label, fieldset {
-     display: block !important;
-     margin: 0 !important;
-     border: 0 !important;
-     float: none !important;
-     width: auto !important;
-    }
-    [class*="w5"], [class*="w4"], [class*="w3"] {
-        width: auto;
-    }
-    .row {width: 100% !important}
+  .phone-hidden {display: none}
+  .mod, .col, label, fieldset {
+    display: block !important;
+    margin: 0 !important;
+    border: 0 !important;
+    float: none !important;
+    width: auto !important;
+  }
+  [class*="w5"], [class*="w4"], [class*="w3"] {
+    width: auto;
+  }
+  .row {width: 100% !important}
 }
 
 /* corrects retina iOS orientation zoom */
 @media (max-device-width:768px) and (orientation:landscape) and (-webkit-min-device-pixel-ratio:2) {
-    html {-webkit-text-size-adjust:66%}
+  html {-webkit-text-size-adjust:66%}
 }
 
 header {
   background: #000;
+  color: #fff;
+}
+
+.name {
+  font-size: 10px;
+  float: left;
+  padding: 0px;
+
+}
+
+.post {
+  margin-left: 10%;
+  margin-right: 10%;
+  margin-bottom: 5px;
+  padding: 10px;
+  background: #e1e1e1;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #d1d1d1;
+  color: #777;
+  font-size: 130%;
+  font-family: Helvetica, serif;
+}
+
+.post a {
+  padding-bottom: 45px;
+  color: #555;
+  text-decoration: none;
+}
+
+.postitle {
+  font-size: 1.4em;
+  color: #222;
+  font-family: Helvetica, serif;
+  text-decoration: none;
+}
+
+.postitle  {
+  color: #555;
 }
 
 img {
-  margin: 5px;
+  margin: 0px;
+}
+
+.dash {
+  background: #ccc;
+  padding: 5px;
 }

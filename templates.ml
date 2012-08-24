@@ -15,6 +15,11 @@ let main_style data =
                        ~service: (Eliom_service.static_dir ())
                        ["forms.css"]
               ) ();
+            Html.css_link
+              ~uri: (Html.make_uri
+                       ~service: (Eliom_service.static_dir ())
+                       ["nav.css"]
+              ) ();
           ]
        )
        (Html.body [
@@ -27,51 +32,68 @@ let main_style data =
 
 let user_form () =
   [
-    Html.post_form
-      ~a: [Html.a_class ["well form-inline"]]
-      ~service: Services.auth
-      (fun (user_name, password_name) -> [
-        Html.p [
-          Html.pcdata "Nickname ";
-          Html.string_input
-            ~a: [Html.a_class ["input-small"]]
-            ~input_type: `Text
-            ~name: user_name ();
-          Html.pcdata " Password ";
-          Html.string_input
-            ~a: [Html.a_class ["input-small"]]
-            ~input_type: `Password
-            ~name: password_name ();
-          Html.string_input
-            ~a: [Html.a_class ["btn btn-primary"]]
-            ~input_type: `Submit
-            ~value: "Login" ();
-          Html.pcdata " Pas de compte ? ";
-          Html.a
-            Services.registration
-            [Html.pcdata "S'inscrire."] ()
-        ]
-      ]) ()
+    Html.header
+      ~a: [Html.a_class ["line";"mod"]]
+      [
+        Html.div
+          ~a: [Html.a_class ["line";"left"]][
+       (* Html.a
+          ~a: [Html.a_class ["name"]]
+          ~service: Services.registration
+          [Html.pcdata "Cumulus project"] ();
+          ];*)];
+	Html.div
+	  ~a: [Html.a_class ["line";"right"]][
+	    Html.post_form
+	      ~a: [Html.a_class ["right"]]
+	      ~service: Services.auth
+	      (fun (user_name, password_name) -> [
+		  Html.string_input
+		    ~a: [Html.a_placeholder "Nickname"]
+		    ~input_type: `Text
+		    ~name: user_name ();
+		  Html.string_input
+		    ~a: [Html.a_placeholder "Password"]
+		    ~input_type: `Password
+		    ~name: password_name ();
+		  Html.string_input
+		    ~input_type: `Submit
+		    ~value: "Login" ();
+		  Html.a
+                    ~a: [Html.a_class ["nav"]]
+		    ~service: Services.registration
+                  [Html.pcdata "Register"] ();
+		]
+	      ) ()
+	  ]
+      ]
   ]
 
 let user_information user =
   [
     Html.header
-      ~a: [Html.a_class ["container"]]
+      ~a: [Html.a_class ["line mod"]]
       [
-        Html.post_form
-          ~a: [Html.a_class ["well form-inline"]]
-          ~service: Services.disconnect
-          (fun () ->
-          [
-            Html.img
-              ~alt: (user#!name)
-              ~src: (Html.make_uri ~service: (Utils.get_gravatar (user#!email)) (30, "identicon")) ();
-            Html.pcdata ("Hi, ");
-            Html.a Services.preferences [Html.pcdata (user#!name)] ();
-            Html.br ();
-          ])
-          ()
+        Html.div
+          ~a: [Html.a_class ["line";"right"]][
+            Html.post_form
+              ~a: [Html.a_class ["right"]]
+              ~service: Services.disconnect
+              (fun () ->
+		[
+		  Html.p [
+		    Html.a ~a: [Html.a_class ["nav"]] ~service: Services.preferences [Html.pcdata "Preferences"] ();
+		    Html.string_input
+		      ~input_type: `Submit
+		      ~value: "Deconnexion"
+		      ();
+		    Html.img
+		      ~alt: (user#!name)
+		      ~src: (Html.make_uri ~service: (Utils.get_gravatar (user#!email))
+			       (30, "identicon")) ();
+		  ]])
+              ()
+	  ]
       ]
   ]
 
@@ -81,33 +103,29 @@ let private_main msg feeds =
   User.to_html user_information user_form >>= fun user ->
   main_style
     (user @
-        [Html.post_form
-            ~a: [Html.a_class ["well form-inline"]]
+        [ Html.div
+          ~a: [Html.a_class ["dash"]][
+          Html.post_form
             ~service: Services.append_feed
             (fun (url_name, (title_name, tags_name)) -> [
-              Html.p [
-                Html.pcdata "URL ";
                 Html.string_input
-                  ~a: [Html.a_class ["input-medium search-query"]]
+                  ~a: [Html.a_placeholder "URL"]
                   ~input_type: `Text
                   ~name: url_name ();
-                Html.pcdata " Titre du post ";
                 Html.string_input
-                  ~a: [Html.a_class ["input-medium search-query"]]
+                  ~a: [Html.a_placeholder "Title"]
                   ~input_type: `Text
                   ~name: title_name ();
-                Html.pcdata " Tags ";
                 Html.string_input
-                  ~a: [Html.a_class ["input-medium search-query"]]
+                  ~a: [Html.a_placeholder "Tags"]
                   ~input_type: `Text
                   ~name: tags_name ();
                 Html.string_input
                   ~a: [Html.a_class ["btn btn-primary"]]
                   ~input_type: `Submit
-                  ~value: "Send" ()
-                  ]
+                  ~value: "Post it !" ()
             ]) None
-        ] @ msg @ (Utils.msg login_state) @ feeds @ [
+        ]] @ msg @ (Utils.msg login_state) @ feeds @ [
           Html.br ();
           Html.footer ~a: [Html.a_class ["footer"]] [
             Html.pcdata "Cumulus project";
@@ -147,7 +165,7 @@ let private_register () =
               ~name: email_name ();
             Html.br ();
             Html.string_input
-              ~a: [Html.a_class ["btn btn-primary"]]
+              ~a: [Html.a_class ["btn"]]
               ~input_type: `Submit
               ~value: "Send" ()
           ]
