@@ -33,6 +33,7 @@ Licence CC-BY http://creativecommons.org/licenses/by/3.0/fr/
 /* base font-size corresponds to 10px */
 html {font-size: 62.5%;}
 body {
+    outline: none;
     background-color: #f1f1f1;
     color: #000;
     font-family: "Century Gothic", arial, helvetica, sans-serif;
@@ -40,6 +41,7 @@ body {
 }
 
 header img {
+  outline: none;
   margin-bottom: 0px;
   margin-top: 0px;
   float: right;
@@ -394,4 +396,18 @@ img {
 .dash {
   background: #ccc;
   padding: 5px;
+}
+
+.message {
+  margin-left: 25%;
+  margin-right: 25%;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #e1e1e1;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #d1d1d1;
+  color: #777;
+  font-size: 130%;
+  font-family: Helvetica, serif;
 }

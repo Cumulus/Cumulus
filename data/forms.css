@@ -128,12 +128,20 @@ header input[type="password"]{
 
 header input[type="submit"] {
   padding: 8px 1.5em;
-  border: 1px solid #ccc;
+  border: 1px solid #333;
   font-size: 12px;
   margin-right: 8px;
   background-color: #333;
-  border-color: #222;
   color: #d1d1d1;
+}
+
+
+header input[type="submit"]:hover {
+  background-color: #444;
+}
+
+header .nav:hover {
+  background-color: #444;
 }
 
 .dash input[type="submit"] {
