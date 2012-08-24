@@ -117,14 +117,19 @@ input[type="submit"] {
 }
 
 header input[type="text"]{
-  width: 130px;
-  height: 31px;
-}
+    padding: 8px 0.5em;
+      border: 1px solid #333;
+        font-size: 12px;
+	  width: 130px;
+	}
 
 header input[type="password"]{
+  padding: 8px 0.5em;
+  border: 1px solid #333;
+  font-size: 12px;
   width: 130px;
-  height: 31px;
 }
+
 
 header input[type="submit"] {
   padding: 8px 1.5em;
@@ -160,11 +165,10 @@ header .nav:hover {
 
 .nav {
   padding: 8px 1.5em;
-  border: 1px solid #ccc;
+  border: 2px solid #333;
   font-size: 12px;
   margin-right: 8px;
   background-color: #333;
-  border-color: #222;
   color: #d1d1d1;
 }
 
