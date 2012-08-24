@@ -50,12 +50,15 @@ let add_user =
                                       (string "email"))
     ()
 
-let update_user =
-  Eliom_service.post_service
-    ~fallback: main
+let update_user_mail =
+  Eliom_service.post_coservice'
+    ~post_params: Eliom_parameter.((string "email"))
+    ()
+
+let update_user_password =
+  Eliom_service.post_coservice'
     ~post_params: Eliom_parameter.((string "password") **
-                                      (string "password_check") **
-                                      (string "email"))
+                                      (string "password_check"))
     ()
 
 let registration =

@@ -67,12 +67,9 @@ let user_information user =
             Html.img
               ~alt: (user#!name)
               ~src: (Html.make_uri ~service: (Utils.get_gravatar (user#!email)) (30, "identicon")) ();
-            Html.pcdata ("Hi, " ^ user#!name);
-            Html.string_input
-              ~a: [Html.a_class ["btn btn-primary"]]
-              ~input_type: `Submit
-              ~value: "Deconnexion"
-              ()
+            Html.pcdata ("Hi, ");
+            Html.a Services.preferences [Html.pcdata (user#!name)] ();
+            Html.br ();
           ])
           ()
       ]
@@ -162,16 +159,18 @@ let feed feeds =
   User.is_connected () >>= fun state ->
   main_style feeds
 
-let private_preferences () =
+let private_preferences msg =
   User.is_connected () >>= fun state ->
+  User.to_html user_information user_form >>= fun user ->
   main_style (
+    user @ msg @
     if not state then
       [Html.pcdata "Veuillez vous connecter pour acceder aux preferences."]
     else
       [Html.post_form
           ~a: [Html.a_class ["well form-inline"]]
-          ~service: Services.update_user
-          (fun ((email_name, (password_name, password_check))) -> [
+          ~service: Services.update_user_password
+          (fun ((password_name, password_check)) -> [
             Html.p [
               Html.pcdata "Mot de passe: ";
               Html.string_input
@@ -179,25 +178,38 @@ let private_preferences () =
                 ~input_type: `Password
                 ~name: password_name ();
               Html.br ();
-              Html.pcdata "Mot de passe: ";
+              Html.pcdata "Confirmer le mot de passe: ";
               Html.string_input
                 ~a: [Html.a_class ["input-small"]]
                 ~input_type: `Password
                 ~name: password_check ();
-              Html.br ();
-              Html.pcdata "Email: ";
-              Html.string_input
-                ~a: [Html.a_class ["input-small"]]
-                ~input_type: `Text
-                ~name: email_name ();
               Html.br ();
               Html.string_input
                 ~a: [Html.a_class ["btn btn-primary"]]
                 ~input_type: `Submit
                 ~value: "Send" ()
             ]
-          ]) None
+          ]) ()
       ]
+      @
+        [Html.post_form
+            ~a: [Html.a_class ["well form-inline"]]
+            ~service: Services.update_user_mail
+            (fun ((email)) -> [
+              Html.p [
+              Html.pcdata "Email: ";
+              Html.string_input
+                ~a: [Html.a_class ["input-small"]]
+                ~input_type: `Text
+                ~name: email ();
+              Html.br ();
+                Html.string_input
+                  ~a: [Html.a_class ["btn btn-primary"]]
+                  ~input_type: `Submit
+                  ~value: "Send" ()
+              ]
+            ]) ()
+        ]
   )
 
 (* see TODO [1] *)
