@@ -28,7 +28,7 @@ let () =
     );
   Eliom_registration.Action.register
     ~service: Services.disconnect
-    (fun () () -> 
+    (fun () () ->
       User.disconnect () >>= User.set_login_state_from_disconnect
     );
   Eliom_registration.Html5.register
