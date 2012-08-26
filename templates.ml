@@ -31,69 +31,73 @@ let main_style data =
     )
 
 let user_form () = Lwt.return [
-    Html.header
-      ~a: [Html.a_class ["line";"mod"]]
-      [
-        Html.div
-          ~a: [Html.a_class ["line";"left"]][
+  Html.header
+    ~a: [Html.a_class ["line";"mod"]]
+    [
+      Html.div
+        ~a: [Html.a_class ["line";"left"]] [
        (* Html.a
-          ~a: [Html.a_class ["name"]]
-          ~service: Services.registration
-          [Html.pcdata "Cumulus project"] ();
-          ];*)];
-	Html.div
-	  ~a: [Html.a_class ["line";"right"]][
-	    Html.post_form
-	      ~a: [Html.a_class ["right"]]
-	      ~service: Services.auth
-	      (fun (user_name, password_name) -> [
-		  Html.string_input
-		    ~a: [Html.a_placeholder "Nickname"]
-		    ~input_type: `Text
-		    ~name: user_name ();
-		  Html.string_input
-		    ~a: [Html.a_placeholder "Password"]
-		    ~input_type: `Password
-		    ~name: password_name ();
-		  Html.string_input
-		    ~input_type: `Submit
-		    ~value: "Login" ();
-		  Html.a
-                    ~a: [Html.a_class ["nav"]]
-		    ~service: Services.registration
-                  [Html.pcdata "Register"] ();
-		]
-	      ) ()
-	  ]
-      ]
-  ]
+            ~a: [Html.a_class ["name"]]
+            ~service: Services.registration
+            [Html.pcdata "Cumulus project"] ();*)
+        ];
+      Html.div
+        ~a: [Html.a_class ["line";"right"]][
+          Html.post_form
+            ~a: [Html.a_class ["right"]]
+            ~service: Services.auth
+            (fun (user_name, password_name) -> [
+              Html.string_input
+                ~a: [Html.a_placeholder "Nickname"]
+                ~input_type: `Text
+                ~name: user_name ();
+              Html.string_input
+                ~a: [Html.a_placeholder "Password"]
+                ~input_type: `Password
+                ~name: password_name ();
+              Html.string_input
+                ~input_type: `Submit
+                ~value: "Login" ();
+              Html.a
+                ~a: [Html.a_class ["nav"]]
+                ~service: Services.registration
+                [Html.pcdata "Register"] ();
+             ]
+            ) ()
+        ]
+    ]
+]
 
 let user_information user = Lwt.return [
-    Html.header
-      ~a: [Html.a_class ["line mod"]]
-      [
-        Html.div
-          ~a: [Html.a_class ["line";"right"]][
-            Html.post_form
-              ~a: [Html.a_class ["right"]]
-              ~service: Services.disconnect
-              (fun () ->
-		[
-		  Html.p [
-		    Html.a ~a: [Html.a_class ["nav"]] ~service: Services.preferences [Html.pcdata "Preferences"] ();
-		    Html.string_input
-		      ~input_type: `Submit
-		      ~value: "Deconnexion"
-		      ();
-		    Html.img
-		      ~alt: (user#!name)
-		      ~src: (Html.make_uri ~service: (Utils.get_gravatar (user#!email))
-			       (30, "identicon")) ();
-		  ]])
-              ()
-	  ]
-      ]
-  ]
+  Html.header
+    ~a: [Html.a_class ["line mod"]]
+    [
+      Html.div
+        ~a: [Html.a_class ["line";"right"]][
+          Html.post_form
+            ~a: [Html.a_class ["right"]]
+            ~service: Services.disconnect
+            (fun () ->
+              [
+                Html.p [
+                  Html.a ~a: [Html.a_class ["nav"]]
+                    ~service: Services.preferences
+                    [Html.pcdata "Preferences"] ();
+                  Html.string_input
+                    ~input_type: `Submit
+                    ~value: "Deconnexion"
+                    ();
+                  Html.img
+                    ~alt: (user#!name)
+                    ~src: (
+                      Html.make_uri
+                        ~service: (Utils.get_gravatar (user#!email))
+                        (30, "identicon")) ();
+                ]])
+            ()
+        ]
+    ]
+]
 
 let user_info () =
   User.get_user_and_email () >>= function
@@ -106,34 +110,34 @@ let private_main msg feeds =
   user_info () >>= fun user ->
   main_style
     (user @
-        [ Html.div
-          ~a: [Html.a_class ["dash"]][
-          Html.post_form
-            ~service: Services.append_feed
-            (fun (url_name, (title_name, tags_name)) -> [
-                Html.string_input
-                  ~a: [Html.a_placeholder "URL"]
+       [ Html.div
+           ~a: [Html.a_class ["dash"]][
+             Html.post_form
+               ~service: Services.append_feed
+               (fun (url_name, (title_name, tags_name)) -> [
+                 Html.string_input
+                   ~a: [Html.a_placeholder "URL"]
+                   ~input_type: `Text
+                   ~name: url_name ();
+                 Html.string_input
+                   ~a: [Html.a_placeholder "Title"]
                   ~input_type: `Text
-                  ~name: url_name ();
-                Html.string_input
-                  ~a: [Html.a_placeholder "Title"]
-                  ~input_type: `Text
-                  ~name: title_name ();
-                Html.string_input
-                  ~a: [Html.a_placeholder "Tags"]
-                  ~input_type: `Text
-                  ~name: tags_name ();
-                Html.string_input
-                  ~a: [Html.a_class ["btn btn-primary"]]
-                  ~input_type: `Submit
-                  ~value: "Post it !" ()
-            ]) None
-        ]] @ msg @ (Utils.msg login_state) @ feeds @ [
-          Html.br ();
-          Html.footer ~a: [Html.a_class ["footer"]] [
-            Html.pcdata "Cumulus project";
-          ]
-        ]
+                   ~name: title_name ();
+                 Html.string_input
+                   ~a: [Html.a_placeholder "Tags"]
+                   ~input_type: `Text
+                   ~name: tags_name ();
+                 Html.string_input
+                   ~a: [Html.a_class ["btn btn-primary"]]
+                   ~input_type: `Submit
+                   ~value: "Post it !" ()
+               ]) None
+           ]] @ msg @ (Utils.msg login_state) @ feeds @ [
+         Html.br ();
+         Html.footer ~a: [Html.a_class ["footer"]] [
+           Html.pcdata "Cumulus project";
+         ]
+       ]
     )
 
 let private_register () =
@@ -185,45 +189,26 @@ let private_preferences msg =
   user_info () >>= fun user ->
   main_style (
     user @ msg @
-    if not state then
-      [Html.pcdata "Veuillez vous connecter pour acceder aux preferences."]
-    else
-      [Html.post_form
-          ~a: [Html.a_class ["well form-inline"]]
-          ~service: Services.update_user_password
-          (fun ((password_name, password_check)) -> [
-            Html.p [
-              Html.pcdata "Mot de passe: ";
-              Html.string_input
-                ~a: [Html.a_class ["input-small"]]
-                ~input_type: `Password
-                ~name: password_name ();
-              Html.br ();
-              Html.pcdata "Confirmer le mot de passe: ";
-              Html.string_input
-                ~a: [Html.a_class ["input-small"]]
-                ~input_type: `Password
-                ~name: password_check ();
-              Html.br ();
-              Html.string_input
-                ~a: [Html.a_class ["btn btn-primary"]]
-                ~input_type: `Submit
-                ~value: "Send" ()
-            ]
-          ]) ()
-      ]
-      @
+      if not state then
+        [Html.pcdata "Veuillez vous connecter pour acceder aux preferences."]
+      else
         [Html.post_form
             ~a: [Html.a_class ["well form-inline"]]
-            ~service: Services.update_user_mail
-            (fun ((email)) -> [
+            ~service: Services.update_user_password
+            (fun ((password_name, password_check)) -> [
               Html.p [
-              Html.pcdata "Email: ";
-              Html.string_input
-                ~a: [Html.a_class ["input-small"]]
-                ~input_type: `Text
-                ~name: email ();
-              Html.br ();
+                Html.pcdata "Mot de passe: ";
+                Html.string_input
+                  ~a: [Html.a_class ["input-small"]]
+                  ~input_type: `Password
+                  ~name: password_name ();
+                Html.br ();
+                Html.pcdata "Confirmer le mot de passe: ";
+                Html.string_input
+                  ~a: [Html.a_class ["input-small"]]
+                  ~input_type: `Password
+                  ~name: password_check ();
+                Html.br ();
                 Html.string_input
                   ~a: [Html.a_class ["btn btn-primary"]]
                   ~input_type: `Submit
@@ -231,6 +216,25 @@ let private_preferences msg =
               ]
             ]) ()
         ]
+        @
+          [Html.post_form
+              ~a: [Html.a_class ["well form-inline"]]
+              ~service: Services.update_user_mail
+              (fun ((email)) -> [
+                Html.p [
+                  Html.pcdata "Email: ";
+                  Html.string_input
+                    ~a: [Html.a_class ["input-small"]]
+                    ~input_type: `Text
+                    ~name: email ();
+                  Html.br ();
+                  Html.string_input
+                    ~a: [Html.a_class ["btn btn-primary"]]
+                    ~input_type: `Submit
+                    ~value: "Send" ()
+                ]
+              ]) ()
+          ]
   )
 
 (* see TODO [1] *)

@@ -42,9 +42,13 @@ let to_html self =
     Html.img
       ~a: [Html.a_class ["left"]]
       ~alt: (author#!name)
-      ~src: (Html.make_uri ~service: (Utils.get_gravatar (author#!email)) (40, "identicon"))
+      ~src: (
+        Html.make_uri
+          ~service: (Utils.get_gravatar (author#!email)) (40, "identicon")
+      )
       ();
-    Html.a ~a: [Html.a_class ["postitle"]] ~service: url_service [Html.pcdata self.title] ();
+    Html.a ~a: [Html.a_class ["postitle"]] ~service: url_service
+      [Html.pcdata self.title] ();
     Html.br ();
     Html.pcdata ("Published on " ^ (Utils.string_of_calendar self.date) ^ " by ");
     Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
