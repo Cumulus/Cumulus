@@ -72,7 +72,7 @@ let append_feed (url, (title, tags)) =
   match userid with
     | None -> Lwt.return Not_connected
     | (Some author) ->
-      if Utils.string_is_empty title then
+      if (Utils.string_is_empty title || Utils.string_is_empty tags) then
         Lwt.return Empty
       else if Utils.is_invalid_url url then
         Lwt.return Invalid_url
