@@ -12,3 +12,5 @@ Files purposes:
 
 Coding style:
  - No end-line spaces is telerated (to check them, please use: grep -P " +$" *)
+ - No tabs. Use spaces instead.
+ - Please refere to the tuareg-mode indent style.
