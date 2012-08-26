@@ -30,8 +30,7 @@ let main_style data =
         ])
     )
 
-let user_form () =
-  [
+let user_form () = Lwt.return [
     Html.header
       ~a: [Html.a_class ["line";"mod"]]
       [
@@ -69,8 +68,7 @@ let user_form () =
       ]
   ]
 
-let user_information user =
-  [
+let user_information user = Lwt.return [
     Html.header
       ~a: [Html.a_class ["line mod"]]
       [
@@ -97,10 +95,15 @@ let user_information user =
       ]
   ]
 
+let user_info () =
+  User.get_user_and_email () >>= function
+    | Some user -> user_information user
+    | None -> user_form ()
+
 let private_main msg feeds =
   feeds >>= fun feeds ->
   User.get_login_state () >>= fun login_state ->
-  User.to_html user_information user_form >>= fun user ->
+  user_info () >>= fun user ->
   main_style
     (user @
         [ Html.div
@@ -179,7 +182,7 @@ let feed feeds =
 
 let private_preferences msg =
   User.is_connected () >>= fun state ->
-  User.to_html user_information user_form >>= fun user ->
+  user_info () >>= fun user ->
   main_style (
     user @ msg @
     if not state then

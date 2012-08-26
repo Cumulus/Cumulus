@@ -52,13 +52,13 @@ let connect user password =
   else
     Lwt.return Bad_password
 
-let to_html is_connected is_disconnected =
-  get_userid () >>= (fun userid ->
-    match userid with
-      | None -> Lwt.return (is_disconnected ())
-      | Some id -> Db.get_user_name_and_email_with_id id
-                   >>= (fun user -> Lwt.return (is_connected user))
-  )
+let get_user_and_email () =
+  get_userid () >>= fun userid ->
+  match userid with
+    | None -> Lwt.return None
+    | Some id ->
+      Db.get_user_name_and_email_with_id id >>= fun user ->
+      Lwt.return (Some user)
 
 let disconnect () =
   is_connected () >>= function

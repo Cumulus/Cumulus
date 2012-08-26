@@ -7,4 +7,3 @@ val tag : ?page:int -> [< Html5_types.div_content_fun > `Br `Div `Footer `Header
 val register : unit -> [> `Html ] Html.elt Lwt.t
 val view_feed : int -> [> `Html ] Html.elt Lwt.t
 val preferences : [< Html5_types.div_content_fun > `Form `Header `PCDATA ] Html.elt list -> [> `Html ] Html.elt Lwt.t
-val user_form : unit -> [> `Header ] Html.elt list
