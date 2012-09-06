@@ -140,4 +140,4 @@ $(STATICDIR):
 	mkdir -p $@
 
 install: all $(STATICDIR)
-	cp data/style.css $(STATICDIR)
+	cp data/* $(STATICDIR)
