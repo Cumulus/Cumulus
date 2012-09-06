@@ -104,7 +104,7 @@ let user_info () =
     | Some user -> user_information user
     | None -> user_form ()
 
-let private_main msg feeds =
+let private_main ~page ~link msg feeds =
   feeds >>= fun feeds ->
   User.get_login_state () >>= fun login_state ->
   user_info () >>= fun user ->
@@ -133,6 +133,10 @@ let private_main msg feeds =
                    ~value: "Post it !" ()
                ]) None
            ]] @ msg @ (Utils.msg login_state) @ feeds @ [
+         Html.br ();
+         link "précédant" (Some (page - 1));
+         Html.br ();
+         link "suivant" (Some (page + 1));
          Html.br ();
          Html.footer ~a: [Html.a_class ["footer"]] [
            Html.pcdata "Cumulus project";
@@ -240,15 +244,30 @@ let private_preferences msg =
 (* see TODO [1] *)
 let main ?(page=0) msg =
   let starting = Int32.of_int (page * 20) in
-  private_main msg (Feeds.to_html ~starting:starting ())
+  private_main ~page
+    ~link:(fun name param ->
+      Html.a ~service:Services.main [
+        Html.pcdata name
+      ] param
+    ) msg (Feeds.to_html ~starting:starting ())
 
 let user ?(page=0) msg username =
   let starting = Int32.of_int (page * 20) in
-  private_main msg (Feeds.author_to_html ~starting:starting username)
+  private_main ~page
+    ~link:(fun name param ->
+      Html.a ~service:Services.author_feed [
+        Html.pcdata name
+      ] (param, username)
+    ) msg (Feeds.author_to_html ~starting:starting username)
 
 let tag ?(page=0) msg tag =
   let starting = Int32.of_int (page * 20) in
-  private_main msg (Feeds.tag_to_html ~starting:starting tag)
+  private_main ~page
+    ~link:(fun name param ->
+      Html.a ~service:Services.tag_feed [
+        Html.pcdata name
+      ] (param, tag)
+    ) msg (Feeds.tag_to_html ~starting:starting tag)
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =
