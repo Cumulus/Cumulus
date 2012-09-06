@@ -15,11 +15,6 @@ let main_style data =
                        ~service: (Eliom_service.static_dir ())
                        ["forms.css"]
               ) ();
-            Html.css_link
-              ~uri: (Html.make_uri
-                       ~service: (Eliom_service.static_dir ())
-                       ["nav.css"]
-              ) ();
           ]
        )
        (Html.body [
