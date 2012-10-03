@@ -38,28 +38,38 @@ let to_html self =
       self.url []
       Eliom_parameter.unit () in
   Db.get_user_name_and_email_with_id self.author >>= fun author ->
-  Lwt.return ([
-    Html.img
-      ~a: [Html.a_class ["left"]]
-      ~alt: (author#!name)
-      ~src: (
-        Html.make_uri
-          ~service: (Utils.get_gravatar (author#!email)) (40, "identicon")
-      )
-      ();
-    Html.a ~a: [Html.a_class ["postitle"]] ~service: url_service
-      [Html.pcdata self.title] ();
-    Html.br ();
-    Html.pcdata ("Published on " ^ (Utils.string_of_calendar self.date) ^ " by ");
-    Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
-    Html.br ();
-    (* TODO : afficher "n commentaire(s)" *)
-    Html.a
-      Services.view_feed
-      [Html.pcdata "n commentaires "]
-      (Int32.to_int self.id, Utils.url_of_title self.title);
-    Html.pcdata " tags: "
-  ] @ links_of_tags self.tags)
+  User.is_connected () >>= fun is_connected ->
+  Lwt.return (
+    List.flatten [
+      [Html.img
+          ~a: [Html.a_class ["left"]]
+          ~alt: (author#!name)
+          ~src: (
+            Html.make_uri
+              ~service: (Utils.get_gravatar (author#!email)) (40, "identicon")
+          )
+          ();
+       Html.a ~a: [Html.a_class ["postitle"]] ~service: url_service
+         [Html.pcdata self.title] ();
+       Html.br ();
+       Html.pcdata ("Published on " ^ (Utils.string_of_calendar self.date) ^ " by ");
+       Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
+      ];
+      (if is_connected then
+          [Html.a Services.delete_feed [Html.pcdata "Delete"] self.id]
+       else []
+      );
+      [Html.br ();
+       (* TODO : afficher "n commentaire(s)" *)
+       Html.a
+         Services.view_feed
+         [Html.pcdata "n commentaires "]
+         (Int32.to_int self.id, Utils.url_of_title self.title);
+       Html.pcdata " tags: "
+      ];
+      links_of_tags self.tags;
+    ]
+  )
 
 let to_atom self =
   Db.get_user_name_and_email_with_id self.author >>= fun author ->

@@ -77,3 +77,8 @@ let preferences =
     ~path: ["preferences"]
     ~get_params: Eliom_parameter.unit
    ()
+
+let delete_feed =
+  Eliom_service.coservice'
+    ~get_params:(Eliom_parameter.int32 "id")
+    ()

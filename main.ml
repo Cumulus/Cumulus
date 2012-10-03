@@ -74,4 +74,11 @@ let () =
     (fun (page, tag) () -> Templates.tag ?page [] tag);
   Eliom_registration.Html5.register
     ~service: Services.preferences
-    (fun () () -> Templates.preferences [])
+    (fun () () -> Templates.preferences []);
+  Eliom_registration.Action.register
+    ~service:Services.delete_feed
+    (fun feed () ->
+      User.get_userid () >>= function
+        | None -> Lwt.return ()
+        | Some userid -> Db.delete_feed feed userid
+    )

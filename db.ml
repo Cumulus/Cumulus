@@ -197,3 +197,18 @@ let update_user name password email =
       email = $string:email$
     } >>)
   )
+
+let delete_feed feed userid =
+  Lwt_pool.use pool (fun db ->
+    (* Check is the current user have the right to delete *)
+    Lwt_Query.view_one db (<:view< f |
+        f in $feeds$;
+        f.id = $int32:feed$;
+        f.author = $int32:userid$; >>)
+    >>= fun _ ->
+    Lwt_Query.query db (<:delete< f in $feeds$ |
+        f.id = $int32:feed$; >>)
+    >>= fun () ->
+    Lwt_Query.query db (<:delete< f in $feeds_tags$ |
+        f.id_feed = $int32:feed$ >>)
+  )
