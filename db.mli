@@ -31,4 +31,5 @@ val get_feed_with_id : int32 ->
 val add_feed : string -> string -> string list -> int32 -> unit Lwt.t
 val add_user : string -> string -> string -> unit Lwt.t
 
+val is_feed_author : int32 -> int32 -> bool Lwt.t
 val delete_feed : int32 -> int32 -> unit Lwt.t

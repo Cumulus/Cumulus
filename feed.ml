@@ -38,7 +38,11 @@ let to_html self =
       self.url []
       Eliom_parameter.unit () in
   Db.get_user_name_and_email_with_id self.author >>= fun author ->
-  User.is_connected () >>= fun is_connected ->
+  User.get_userid () >>= (function
+    | None -> Lwt.return false
+    | Some userid -> Db.is_feed_author self.id userid
+  )
+  >>= fun is_author ->
   Lwt.return (
     List.flatten [
       [Html.img
@@ -55,7 +59,7 @@ let to_html self =
        Html.pcdata ("Published on " ^ (Utils.string_of_calendar self.date) ^ " by ");
        Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
       ];
-      (if is_connected then
+      (if is_author then
           [Html.a Services.delete_feed [Html.pcdata "Delete"] self.id]
        else []
       );

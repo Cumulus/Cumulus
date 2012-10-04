@@ -198,17 +198,30 @@ let update_user name password email =
     } >>)
   )
 
-let delete_feed feed userid =
-  Lwt_pool.use pool (fun db ->
-    (* Check is the current user have the right to delete *)
-    Lwt_Query.view_one db (<:view< f |
+let is_feed_author feed userid =
+  try_lwt begin
+    Lwt_pool.use pool (fun db ->
+      Lwt_Query.view_one db (<:view< f |
         f in $feeds$;
         f.id = $int32:feed$;
         f.author = $int32:userid$; >>)
+    )
     >>= fun _ ->
-    Lwt_Query.query db (<:delete< f in $feeds$ |
-        f.id = $int32:feed$; >>)
-    >>= fun () ->
-    Lwt_Query.query db (<:delete< f in $feeds_tags$ |
-        f.id_feed = $int32:feed$ >>)
-  )
+    Lwt.return true
+  end
+  with exn ->
+    Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
+    Lwt.return false
+
+let delete_feed feed userid =
+  is_feed_author feed userid >>= function
+    | true ->
+        Lwt_pool.use pool (fun db ->
+          Lwt_Query.query db (<:delete< f in $feeds$ |
+              f.id = $int32:feed$; >>)
+          >>= fun () ->
+          Lwt_Query.query db (<:delete< f in $feeds_tags$ |
+              f.id_feed = $int32:feed$ >>)
+        )
+    | false ->
+        Lwt.return ()
