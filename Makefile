@@ -17,10 +17,10 @@ SERVER_FILES := html.ml \
 		db.ml \
 		utils.ml \
 		services.ml \
-		feed.mli \
-		feed.ml \
 		user.mli \
 		user.ml \
+		feed.mli \
+		feed.ml \
 		feeds.mli \
 		feeds.ml \
 		users.mli \
