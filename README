@@ -2,7 +2,7 @@ Build Requirements
 ==================
 
  * Ocsigen >= 2.2
- * OCaml-safepass >= 1.0 (1.0.1 on x86)
+ * OCaml-safepass >= 1.2
  * MaCaQue
 
 Run Requirements
