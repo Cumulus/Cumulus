@@ -28,7 +28,7 @@ let feed_new data tags = {
 
 let links_of_tags tags =
   List.fold_left (fun acc tag ->
-    let link = Html.a Services.tag_feed [Html.pcdata tag] (None, tag) in
+    let link = Html.a ~a: [Html.a_class ["tags"]] ~service: Services.tag_feed [Html.pcdata tag] (None, tag) in
     acc @ [Html.pcdata " "; link]
   ) [] tags
 
@@ -59,19 +59,19 @@ let to_html self =
        Html.pcdata ("Published on " ^ (Utils.string_of_calendar self.date) ^ " by ");
        Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
       ];
-      (if is_author then
-          [Html.a Services.delete_feed [Html.pcdata "Delete"] self.id]
-       else []
-      );
       [Html.br ();
        (* TODO : afficher "n commentaire(s)" *)
        Html.a
          Services.view_feed
          [Html.pcdata "n commentaires "]
          (Int32.to_int self.id, Utils.url_of_title self.title);
-       Html.pcdata " tags: "
+       Html.pcdata "Tags: "
       ];
       links_of_tags self.tags;
+      (if is_author then
+          [Html.a Services.delete_feed [Html.pcdata "(delete ?)"] self.id]
+       else []
+      );
     ]
   )
 

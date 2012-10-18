@@ -22,7 +22,7 @@ let main_style data =
             ~a: [Html.a_class ["container"]]
             data
          )
-        ])
+       ])
     )
 
 let user_form () = Lwt.return [
@@ -30,14 +30,12 @@ let user_form () = Lwt.return [
     ~a: [Html.a_class ["line";"mod"]]
     [
       Html.div
-        ~a: [Html.a_class ["line";"left"]] [
-       (* Html.a
-            ~a: [Html.a_class ["name"]]
-            ~service: Services.registration
-            [Html.pcdata "Cumulus project"] ();*)
-        ];
+        ~a: [Html.a_class ["mod left"]] [
+          Html.div
+            ~a: [Html.a_class ["title"]][
+              Html.pcdata "Cumulus Project"]];
       Html.div
-        ~a: [Html.a_class ["line";"right"]][
+        ~a: [Html.a_class ["mod";"right"]][
           Html.post_form
             ~a: [Html.a_class ["right"]]
             ~service: Services.auth
@@ -68,7 +66,13 @@ let user_information user = Lwt.return [
     ~a: [Html.a_class ["line mod"]]
     [
       Html.div
-        ~a: [Html.a_class ["line";"right"]][
+        ~a: [Html.a_class ["mod left"]] [
+          Html.div
+            ~a: [Html.a_class ["title"]][
+              Html.pcdata "Cumulus Project"]
+        ];
+      Html.div
+        ~a: [Html.a_class ["mod";"right"]][
           Html.post_form
             ~a: [Html.a_class ["right"]]
             ~service: Services.disconnect
@@ -116,7 +120,7 @@ let private_main ~page ~link msg feeds =
                    ~name: url_name ();
                  Html.string_input
                    ~a: [Html.a_placeholder "Title"]
-                  ~input_type: `Text
+                   ~input_type: `Text
                    ~name: title_name ();
                  Html.string_input
                    ~a: [Html.a_placeholder "Tags"]
@@ -128,55 +132,55 @@ let private_main ~page ~link msg feeds =
                    ~value: "Post it !" ()
                ]) None
            ]] @ msg @ (Utils.msg login_state) @ feeds @ [
-         Html.br ();
-         link "précédant" (Some (page - 1));
-         Html.br ();
-         link "suivant" (Some (page + 1));
-         Html.br ();
-         Html.footer ~a: [Html.a_class ["footer"]] [
-           Html.pcdata "Cumulus project";
+         Html.div ~a: [Html.a_class ["footer"]][
+           link "Previous" (Some (page - 1));
+           link "Next" (Some (page + 1));
+           Html.br ();
+           Html.br ();
+           Html.pcdata "(not so) Proudly propulsed by the inglorious Cumulus Project, love, and the OCaml web Framework Ocsigen"
          ]
        ]
     )
 
 let private_register () =
-  main_style
-    [Html.post_form
-        ~a: [Html.a_class ["well form-inline"]]
-        ~service: Services.add_user
-        (fun (username_name, (email_name, (password_name, password_check))) -> [
-          Html.p [
-            Html.pcdata "Nom d'utilisateur: ";
-            Html.string_input
-              ~a: [Html.a_class ["input-small"]]
-              ~input_type: `Text
-              ~name: username_name ();
-            Html.br ();
-            Html.pcdata "Mot de passe: ";
-            Html.string_input
-              ~a: [Html.a_class ["input-small"]]
-              ~input_type: `Password
-              ~name: password_name ();
-            Html.br ();
-            Html.pcdata "Mot de passe: ";
-            Html.string_input
-              ~a: [Html.a_class ["input-small"]]
-              ~input_type: `Password
-              ~name: password_check ();
-            Html.br ();
-            Html.pcdata "Email: ";
-            Html.string_input
-              ~a: [Html.a_class ["input-small"]]
-              ~input_type: `Text
-              ~name: email_name ();
-            Html.br ();
-            Html.string_input
-              ~a: [Html.a_class ["btn"]]
-              ~input_type: `Submit
-              ~value: "Send" ()
-          ]
-        ]) None
-    ]
+     User.is_connected () >>= fun state ->
+  user_info () >>= fun user ->
+  main_style (
+    user @
+      [Html.post_form
+          ~a: [Html.a_class ["box"]]
+          ~service: Services.add_user
+          (fun (username_name, (email_name, (password_name, password_check))) -> [
+            Html.h1 [Html.pcdata "Register"];
+            Html.p [
+              Html.string_input
+                ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Username"]
+                ~input_type: `Text
+                ~name: username_name ();
+              Html.br ();
+              Html.string_input
+                ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Password"]
+                ~input_type: `Password
+                ~name: password_name ();
+              Html.br ();
+              Html.string_input
+                ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Confirm password"]
+                ~input_type: `Password
+                ~name: password_check ();
+              Html.br ();
+              Html.string_input
+                ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Email"]
+                ~input_type: `Text
+                ~name: email_name ();
+              Html.br ();
+              Html.string_input
+                ~a: [Html.a_class ["btn-box"]]
+                ~input_type: `Submit
+                ~value: "Send" ()
+            ]
+          ]) None
+      ]
+  )
 
 let feed feeds =
   feeds >>= fun feeds ->
@@ -191,25 +195,25 @@ let private_preferences msg =
       if not state then
         [Html.pcdata "Veuillez vous connecter pour acceder aux preferences."]
       else
-        [Html.post_form
-            ~a: [Html.a_class ["well form-inline"]]
+        [
+          Html.post_form
+            ~a: [Html.a_class ["box"]]
             ~service: Services.update_user_password
             (fun ((password_name, password_check)) -> [
+              Html.h1 [Html.pcdata "Change password"] ;
               Html.p [
-                Html.pcdata "Mot de passe: ";
                 Html.string_input
-                  ~a: [Html.a_class ["input-small"]]
+                  ~a: [Html.a_class ["input-box"]; Html.a_placeholder "New password"]
                   ~input_type: `Password
                   ~name: password_name ();
                 Html.br ();
-                Html.pcdata "Confirmer le mot de passe: ";
                 Html.string_input
-                  ~a: [Html.a_class ["input-small"]]
+                  ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Confirm new password"]
                   ~input_type: `Password
                   ~name: password_check ();
                 Html.br ();
                 Html.string_input
-                  ~a: [Html.a_class ["btn btn-primary"]]
+                  ~a: [Html.a_class ["btn-box"]]
                   ~input_type: `Submit
                   ~value: "Send" ()
               ]
@@ -217,18 +221,18 @@ let private_preferences msg =
         ]
         @
           [Html.post_form
-              ~a: [Html.a_class ["well form-inline"]]
+              ~a: [Html.a_class ["box"]]
               ~service: Services.update_user_mail
               (fun ((email)) -> [
+                Html.h1 [Html.pcdata "Change mail"];
                 Html.p [
-                  Html.pcdata "Email: ";
                   Html.string_input
-                    ~a: [Html.a_class ["input-small"]]
+                    ~a: [Html.a_class ["input-box"]; Html.a_placeholder "New Mail"]
                     ~input_type: `Text
                     ~name: email ();
                   Html.br ();
                   Html.string_input
-                    ~a: [Html.a_class ["btn btn-primary"]]
+                    ~a: [Html.a_class ["btn-box"]]
                     ~input_type: `Submit
                     ~value: "Send" ()
                 ]
@@ -274,3 +278,4 @@ let register () =
 
 let preferences msg =
   private_preferences msg
+

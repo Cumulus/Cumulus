@@ -31,10 +31,14 @@ Licence CC-BY http://creativecommons.org/licenses/by/3.0/fr/
 /* ----------------------------- */
 
 /* base font-size corresponds to 10px */
+a {
+  overflow: hidden;
+}
+
 html {font-size: 62.5%;}
 body {
     outline: none;
-    background-color: #f1f1f1;
+    background-color: #ffffff;
     color: #000;
     font-family: "Century Gothic", arial, helvetica, sans-serif;
     line-height: 15px; /* adapt to your design */
@@ -175,7 +179,7 @@ a img {border: 0;}
 /* ----------------------------- */
 
 /* left elements */
-.left {float: left; margin-right: 1em}
+.left {float: left; margin-right: 1em;}
 .mod.left, .col.left {margin-right: 0}
 
 /* right elements */
@@ -347,8 +351,8 @@ behavior: url(/js/boxsizing.htc);
 }
 
 header {
-  background: #000;
-  color: #fff;
+  background: #2B2B2B;
+  color: #000;
 }
 
 .name {
@@ -363,51 +367,133 @@ header {
   margin-right: 10%;
   margin-bottom: 5px;
   padding: 10px;
-  background: #e1e1e1;
+  background: #f1f1f1;
   border-style: solid;
   border-width: 1px;
-  border-color: #d1d1d1;
+  border-color: #f9f9f9;
   color: #777;
   font-size: 130%;
   font-family: Helvetica, serif;
 }
 
-.post a {
-  padding-bottom: 45px;
-  color: #555;
+.box {
+  margin: 20px 30%;
+  padding: 10px;
+  background: #f1f1f1;
+  color: #777;
+}
+
+a {
+  color: #777;
   text-decoration: none;
 }
 
+.post:hover a {
+  color: #fff;
+}
+
 .postitle {
-  font-size: 1.4em;
-  color: #222;
+  font-size: 1.3em;
   font-family: Helvetica, serif;
   text-decoration: none;
 }
 
-.postitle  {
-  color: #555;
+/*.postitle  {
+  color: #fff;
 }
+
+.postitle:hover {
+  color: #fff;
+  background-color: #108BDE;
+  border-radius: 2px;
+  padding: 0px 3px;
+}*/
 
 img {
   margin: 0px;
 }
 
 .dash {
-  background: #ccc;
+  background-color: #ddd;
   padding: 5px;
 }
 
 .message {
+  text-shadow: 0px 1px 1px #000;
   margin-left: 25%;
   margin-right: 25%;
   margin-bottom: 10px;
   padding: 10px;
-  background: #e1e1e1;
+  background: #ffffff;
   border-style: solid;
   border-width: 1px;
-  border-color: #d1d1d1;
+  border-color: #e9e9e9;
   color: #777;
   font-size: 130%;
   font-family: Helvetica, serif;
+}
+
+.post:hover {
+  background-color: #108BDE;
+  color: #fff;
+}
+
+.title {
+  font-family: "Helvetica";
+  text-decoration: none;
+  padding-top: 0.3em;
+  font-size: 2.5em;
+}
+
+.title  {
+  color: #fff;
+}
+
+a:focus {
+  outline: 0px;
+}
+
+/*.tags:hover {
+  background-color: #108BDE;
+  color: #fff;
+  padding: 0px 3px;
+  margin-left: 2px;
+  overflow: hidden;
+}
+
+.tags {
+  padding: 0px 2px;
+}*/
+
+.footer {
+  padding: 15px 10%;
+  font-size: 10px;
+  font-style: italic;
+  color: #aaa;
+}
+
+.footer a {
+  padding: 8px 1.5em;
+  border: 2px solid #e9e9e9;
+  font-size: 12px;
+  margin-right: 8px;
+  background-color: #e9e9e9;
+  font-style: normal;
+  color: #777;
+}
+
+.footer a:hover {
+  border-color: #108BDE;
+  background-color: #108BDE;
+  color: #fff;
+}
+
+.btn-box:hover {
+  border-color: #108BDE;
+  background-color: #108BDE;
+  color: #fff;
+}
+
+.input-box {
+  margin-bottom: 5px;
 }

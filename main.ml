@@ -43,7 +43,7 @@ let () =
       Templates.main ?page
         (Utils.msg (match state with
           | true -> "Vous êtes bien enregistré"
-          | false -> "L'user existe deja, ou mot de passe invalide"
+          | false -> "L'utilisateur existe deja, ou le mot de passe est invalide"
          ))
     );
   Eliom_registration.Html5.register
@@ -52,7 +52,7 @@ let () =
       Users.update_user_mail datas >>= fun state ->
       Templates.preferences
         (Utils.msg (match state with
-          | true -> "Modification de l'adresse mail effectuee"
+          | true -> "Modification de l'adresse mail effectuée"
           | false -> "Adresse invalide"
          ))
     );
@@ -62,7 +62,7 @@ let () =
       Users.update_user_password datas >>= fun state ->
       Templates.preferences
         (Utils.msg (match state with
-          | true -> "Mot de passe change."
+          | true -> "Mot de passe changé."
           | false -> "Les mots de passe sont invalides ou ne correspondent pas."
          ))
     );

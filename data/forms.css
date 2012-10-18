@@ -112,12 +112,13 @@ input[type="reset"] {
 }
 input[type="submit"] {
 	padding: .5em 1em;
-	border: 1px solid #ccc;
+	border: 1px solid #eee;
 	font-size: 12px;
 }
 
 header input[type="text"]{
     padding: 8px 0.5em;
+    margin-right: 5px;
       border: 1px solid #333;
         font-size: 12px;
 	  width: 130px;
@@ -125,6 +126,7 @@ header input[type="text"]{
 
 header input[type="password"]{
   padding: 8px 0.5em;
+  margin-right: 5px;
   border: 1px solid #333;
   font-size: 12px;
   width: 130px;
@@ -135,9 +137,9 @@ header input[type="submit"] {
   padding: 8px 1.5em;
   border: 1px solid #333;
   font-size: 12px;
-  margin-right: 8px;
+  margin-right: 5px;
   background-color: #333;
-  color: #d1d1d1;
+  color: #ccc;
 }
 
 
@@ -151,16 +153,16 @@ header .nav:hover {
 
 .dash input[type="submit"] {
   padding: 1px 1.2em;
-  border: 1px solid #ccc;
+  border: 1px solid #eee;
   font-size: 12px;
   margin-left: 5px;
-  background-color: #bbb;
-  border-color: #aaa;
+  background-color: #eee;
+  border-color: #eee;
   color: #111;
 }
 
 .dash input[type="submit"]:hover {
-  background-color: #aaa;
+  background-color: #ddd;
 }
 
 .nav {
@@ -172,9 +174,7 @@ header .nav:hover {
   color: #d1d1d1;
 }
 
-header a {
-  text-decoration: none;
-}
+
 
 header p {
   margin-top: 0px;
