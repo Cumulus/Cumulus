@@ -55,7 +55,8 @@ let users = (<:table< users (
   id integer NOT NULL DEFAULT(nextval $users_id_seq$),
   name text NOT NULL,
   password text NOT NULL,
-  email text NOT NULL
+  email text NOT NULL,
+  is_admin boolean NOT NULL DEFAULT(false)
 ) >>)
 
 let get_user_id_with_name name =
@@ -184,7 +185,8 @@ let add_user name password email =
       id = users?id;
       name = $string:name$;
       password = $string:password$;
-      email = $string:email$
+      email = $string:email$;
+      is_admin = users?is_admin;
     } >>)
   )
 

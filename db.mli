@@ -15,7 +15,8 @@ val get_user_with_name : string ->
   < email : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
   id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;
   name : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
-  password : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
+  password : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
+  is_admin : < get : unit; nul : Sql.non_nullable; t : Sql.bool_t > Sql.t >
     option Lwt.t
 val get_feeds : ?starting:int32 -> ?number:int32 -> unit -> feed list Lwt.t
 val get_feeds_with_author : ?starting:int32 -> ?number:int32 -> string ->

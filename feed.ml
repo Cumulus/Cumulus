@@ -40,7 +40,12 @@ let to_html self =
   Db.get_user_name_and_email_with_id self.author >>= fun author ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
-    | Some userid -> Db.is_feed_author self.id userid
+    | Some userid ->
+        Db.is_feed_author self.id userid
+        >>= fun x ->
+        User.is_admin ()
+        >>= fun y ->
+        Lwt.return (x || y)
   )
   >>= fun is_author ->
   Lwt.return (

@@ -2,7 +2,8 @@ type user = {
   id : int32;
   name : string;
   password : Bcrypt.hash_t;
-  email : string
+  email : string;
+  is_admin : bool;
 }
 type user_state = Already_connected | Ok | Bad_password | Not_found
 
@@ -10,7 +11,8 @@ let user_new data = {
   id = data#!id;
   name = data#!name;
   password = Bcrypt.hash_of_string data#!password;
-  email = data#!email
+  email = data#!email;
+  is_admin = data#!is_admin;
 }
 
 let hash_password password =
@@ -41,6 +43,12 @@ let is_connected () =
   Eliom_reference.get current_user >>= function
     | None -> Lwt.return false
     | _ -> Lwt.return true
+
+let is_admin () =
+  Eliom_reference.get current_user
+  >>= function
+    | None -> Lwt.return false
+    | Some user -> Lwt.return user.is_admin
 
 let connect user password =
   if check_password user password then
