@@ -2,6 +2,8 @@ module Calendar = CalendarLib.Calendar
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
+let (>>=) = Lwt.(>>=)
+
 let feeds_of_db feeds =
   let feeds =
     List.fold_right (fun feed acc ->
@@ -61,7 +63,7 @@ let to_atom () =
     Lwt.return (
       Atom_feed.feed
         ~updated: (Calendar.make 2012 6 9 17 40 30)
-        ~id: (Html.Xml.uri_of_string "http://cumulus.org")
+        ~id:"http://cumulus.org"
         ~title: (Atom_feed.plain "An Atom flux")
         tmp
     )

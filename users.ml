@@ -1,3 +1,5 @@
+let (>>=) = Lwt.(>>=)
+
 let connect_user username password =
   Db.get_user_with_name username >>= function
     | None -> Lwt.return User.Not_found

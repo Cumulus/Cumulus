@@ -7,6 +7,8 @@ type user = {
 }
 type user_state = Already_connected | Ok | Bad_password | Not_found
 
+let (>>=) = Lwt.(>>=)
+
 let user_new data = {
   id = data#!id;
   name = data#!name;
@@ -27,12 +29,12 @@ let add name password email =
   Db.add_user name (hash_password password) email
 
 let (current_user : (user option) Eliom_reference.eref) =
-  Eliom_reference.eref ~scope: Eliom_common.session None
+  Eliom_reference.eref ~scope: Eliom_common.default_session_scope None
 
 let default_login_state = ""
 
 let login_state =
-  Eliom_reference.eref ~scope: Eliom_common.session default_login_state
+  Eliom_reference.eref ~scope: Eliom_common.default_session_scope default_login_state
 
 let get_userid () =
   Eliom_reference.get current_user >>= function

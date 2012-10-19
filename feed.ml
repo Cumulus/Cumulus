@@ -17,6 +17,8 @@ type feed = {
   tags: string list
 }
 
+let (>>=) = Lwt.(>>=)
+
 let feed_new data tags = {
   id = data#!id;
   url = data#!url;
@@ -85,7 +87,7 @@ let to_atom self =
   Lwt.return (
     Atom_feed.entry
       ~updated: self.date
-      ~id: (Html.Xml.uri_of_string self.url)
+      ~id:self.url
       ~title: (Atom_feed.plain self.title)
       [Atom_feed.authors [Atom_feed.author author#!name]]
   )

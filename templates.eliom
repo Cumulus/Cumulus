@@ -1,3 +1,7 @@
+{shared{
+  let (>>=) = Lwt.(>>=)
+}}
+
 let main_style data =
   Lwt.return
     (Html.html
@@ -112,7 +116,7 @@ let link_footer ~link min max page = match page with
       else []
 
 let reload_feeds service =
-  Eliom_service.onload {{
+  {unit{
     let service = %service in
     let bus = %Feeds.bus in
     let stream = Eliom_bus.stream bus in

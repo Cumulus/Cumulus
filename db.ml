@@ -14,6 +14,8 @@ class type feed = object
   method url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
 end
 
+let (>>=) = Lwt.(>>=)
+
 let connect () =
   Lwt_PGOCaml.connect
     ~database: "cumulus"
