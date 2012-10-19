@@ -148,7 +148,7 @@ let private_main ~page ~link msg feeds =
     )
 
 let private_register () =
-     User.is_connected () >>= fun state ->
+  User.is_connected () >>= fun state ->
   user_info () >>= fun user ->
   main_style (
     user @
@@ -275,8 +275,10 @@ let tag ?(page=0) msg tag =
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =
-  let id = Int32.of_int id in
-  feed (Feeds.feed_id_to_html id)
+  User.get_login_state () >>= fun login_state ->
+  user_info () >>= fun user ->
+  Feeds.feed_id_to_html (Int32.of_int id) >>= fun feed -> 
+    main_style (user @ feed)
 
 let register () =
   private_register ()
