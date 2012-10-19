@@ -154,6 +154,12 @@ let get_feed_with_id id =
         f.id = t.id_feed >>)
   )
 
+let count_feeds () =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.view_one db (<:view< group { n = count[f] } | f in $feeds$ >>
+    )
+  )
+
 let add_feed url title tags userid =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.value db (<:value< feeds?id >>) >>= fun id_feed ->

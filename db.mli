@@ -29,6 +29,8 @@ val get_feed_url_with_url : string ->
 val get_feed_with_id : int32 ->
   feed list Lwt.t
 
+val count_feeds : unit -> <n: <get: unit; nul: Sql.non_nullable; t: Sql.int64_t> Sql.t> Lwt.t
+
 val add_feed : string -> string -> string list -> int32 -> unit Lwt.t
 val add_user : string -> string -> string -> unit Lwt.t
 
