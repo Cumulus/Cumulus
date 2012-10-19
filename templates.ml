@@ -113,6 +113,7 @@ let private_main ~page ~link msg feeds =
   feeds >>= fun feeds ->
   User.get_login_state () >>= fun login_state ->
   user_info () >>= fun user ->
+  Db.count_feeds () >>= fun count ->
   main_style
     (user @
        [ Html.div
@@ -139,7 +140,7 @@ let private_main ~page ~link msg feeds =
                ]) None
            ]] @ msg @ (Utils.msg login_state) @ feeds @ [
         (* TODO: récupérer le maximum de page *)
-         Html.div ~a: [Html.a_class ["footer"]] ((link_footer link 0 10 page) @ [
+         Html.div ~a: [Html.a_class ["footer"]] ((link_footer link 0 ((Int64.to_int count#!n) / 10) page) @ [
            Html.br ();
            Html.br ();
            Html.pcdata "(not so) Proudly propulsed by the inglorious Cumulus Project, love, and the OCaml web Framework Ocsigen"
@@ -247,7 +248,7 @@ let private_preferences msg =
 
 (* see TODO [1] *)
 let main ?(page=0) msg =
-  let starting = Int32.of_int (page * 20) in
+  let starting = Int32.of_int (page * 10) in
   private_main ~page
     ~link:(fun name param ->
       Html.a ~service:Services.main [
