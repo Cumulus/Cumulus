@@ -104,8 +104,8 @@ let user_info () =
     | None -> user_form ()
 
 let link_footer ~link min max page = match page with
-  | n when n = min -> [ link "Next" (Some (page + 1)) ]
-  | n when n = max -> [ link "Previous" (Some (page - 1)) ]
+  | n when n = min && n < max -> [ link "Next" (Some (page + 1)) ]
+  | n when n = max && n > min -> [ link "Previous" (Some (page - 1)) ]
   | n -> if n > min && n < max then [ link "Previous" (Some (page - 1)); link "Next" (Some (page + 1)) ]
          else []
 
