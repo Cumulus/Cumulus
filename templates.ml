@@ -139,7 +139,6 @@ let private_main ~page ~link msg feeds =
                    ~value: "Post it !" ()
                ]) None
            ]] @ msg @ (Utils.msg login_state) @ feeds @ [
-        (* TODO: récupérer le maximum de page *)
          Html.div ~a: [Html.a_class ["footer"]] ((link_footer link 0 ((Int64.to_int count#!n) / 10) page) @ [
            Html.br ();
            Html.br ();
