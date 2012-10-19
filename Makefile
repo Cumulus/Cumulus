@@ -53,8 +53,8 @@ export ELIOM_TYPE_DIR   := .
 #####################################
 
 all: byte opt
-byte:: ${APP_NAME}.cma
-opt:: ${APP_NAME}.cmxs
+byte:: ${APP_NAME}.cma ${APP_NAME}.js
+opt:: ${APP_NAME}.cmxs ${APP_NAME}.js
 
 #### Server side compilation #######
 
@@ -141,3 +141,4 @@ $(STATICDIR):
 
 install: all $(STATICDIR)
 	cp data/* $(STATICDIR)
+	cp ${APP_NAME}.js $(STATICDIR)
