@@ -103,6 +103,12 @@ let user_info () =
     | Some user -> user_information user
     | None -> user_form ()
 
+let link_footer ~link min max page = match page with
+  | n when n = min -> [ link "Next" (Some (page + 1)) ]
+  | n when n = max -> [ link "Previous" (Some (page - 1)) ]
+  | n -> if n > min && n < max then [ link "Previous" (Some (page - 1)); link "Next" (Some (page + 1)) ]
+         else []
+
 let private_main ~page ~link msg feeds =
   feeds >>= fun feeds ->
   User.get_login_state () >>= fun login_state ->
@@ -132,13 +138,12 @@ let private_main ~page ~link msg feeds =
                    ~value: "Post it !" ()
                ]) None
            ]] @ msg @ (Utils.msg login_state) @ feeds @ [
-         Html.div ~a: [Html.a_class ["footer"]][
-           link "Previous" (Some (page - 1));
-           link "Next" (Some (page + 1));
+        (* TODO: récupérer le maximum de page *)
+         Html.div ~a: [Html.a_class ["footer"]] ((link_footer link 0 10 page) @ [
            Html.br ();
            Html.br ();
            Html.pcdata "(not so) Proudly propulsed by the inglorious Cumulus Project, love, and the OCaml web Framework Ocsigen"
-         ]
+         ])
        ]
     )
 
