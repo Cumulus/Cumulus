@@ -1,3 +1,16 @@
+let reload_feeds service =
+  Eliom_client.onload {{
+    let service = %service in
+    let callback =
+      Js.wrap_callback
+        (fun () ->
+          Lwt.ignore_result
+            (Eliom_client.change_page ~service () ())
+        )
+    in
+    ignore (Dom_html.window##setTimeout (callback, 100_000.)) (* All 100 secs *)
+  }}
+
 module Cumulus_appl = Eliom_registration.App (struct
   let application_name = "cumulus"
 end)
@@ -8,10 +21,22 @@ let () =
     (fun () () -> Feeds.to_atom ());
   Cumulus_appl.register
     ~service: Services.main
-    (fun page () -> Templates.main ?page []);
+    (fun page () ->
+      let service =
+        Eliom_service.preapply ~service:Services.main page
+      in
+      ignore (reload_feeds service);
+      Templates.main ?page []
+    );
   Cumulus_appl.register
     ~service: Services.author_feed
-    (fun (page, username) () -> Templates.user ?page [] username);
+    (fun (page, username) () ->
+      let service =
+        Eliom_service.preapply ~service:Services.author_feed (page, username)
+      in
+      ignore (reload_feeds service);
+      Templates.user ?page [] username
+    );
   Cumulus_appl.register
     ~service: Services.append_feed
     (fun page data ->
@@ -75,7 +100,13 @@ let () =
     (fun () () -> Templates.register ());
   Cumulus_appl.register
     ~service: Services.tag_feed
-    (fun (page, tag) () -> Templates.tag ?page [] tag);
+    (fun (page, tag) () ->
+      let service =
+        Eliom_service.preapply ~service:Services.tag_feed (page, tag)
+      in
+      ignore (reload_feeds service);
+      Templates.tag ?page [] tag
+    );
   Cumulus_appl.register
     ~service: Services.preferences
     (fun () () -> Templates.preferences []);

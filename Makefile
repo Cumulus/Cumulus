@@ -27,11 +27,11 @@ SERVER_FILES := html.ml \
 		users.ml \
 		templates.mli \
 		templates.ml \
-		main.ml
+		main.eliom
 
 ## Source files for the client part
 
-CLIENT_FILES :=
+CLIENT_FILES := main.eliom
 
 ## Required binaries
 
