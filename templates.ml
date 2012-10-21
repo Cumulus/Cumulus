@@ -41,20 +41,20 @@ let user_form () = Lwt.return [
             ~service: Services.auth
             (fun (user_name, password_name) -> [
               Html.string_input
-                ~a: [Html.a_placeholder "Nickname"]
+                ~a: [Html.a_placeholder "Pseudo"]
                 ~input_type: `Text
                 ~name: user_name ();
               Html.string_input
-                ~a: [Html.a_placeholder "Password"]
+                ~a: [Html.a_placeholder "Mot de passe"]
                 ~input_type: `Password
                 ~name: password_name ();
               Html.string_input
                 ~input_type: `Submit
-                ~value: "Login" ();
+                ~value: "Connexion" ();
               Html.a
                 ~a: [Html.a_class ["nav"]]
                 ~service: Services.registration
-                [Html.pcdata "Register"] ();
+                [Html.pcdata "Inscription"] ();
              ]
             ) ()
         ]
@@ -81,10 +81,10 @@ let user_information user = Lwt.return [
                 Html.p [
                   Html.a ~a: [Html.a_class ["nav"]]
                     ~service: Services.preferences
-                    [Html.pcdata "Preferences"] ();
+                    [Html.pcdata "Préférences"] ();
                   Html.string_input
                     ~input_type: `Submit
-                    ~value: "Deconnexion"
+                    ~value: "Déconnexion"
                     ();
                   Html.img
                     ~alt: (user#!name)
@@ -104,9 +104,9 @@ let user_info () =
     | None -> user_form ()
 
 let link_footer ~link min max page = match page with
-  | n when n = min && n < max -> [ link "Next" (Some (page + 1)) ]
-  | n when n = max && n > min -> [ link "Previous" (Some (page - 1)) ]
-  | n -> if n > min && n < max then [ link "Previous" (Some (page - 1)); link "Next" (Some (page + 1)) ]
+  | n when n = min && n < max -> [ link "Suivant" (Some (page + 1)) ]
+  | n when n = max && n > min -> [ link "Précédent" (Some (page - 1)) ]
+  | n -> if n > min && n < max then [ link "Précédent" (Some (page - 1)); link "Suivant" (Some (page + 1)) ]
          else []
 
 let private_main ~page ~link msg feeds =
@@ -126,7 +126,7 @@ let private_main ~page ~link msg feeds =
                    ~input_type: `Text
                    ~name: url_name ();
                  Html.string_input
-                   ~a: [Html.a_placeholder "Title"]
+                   ~a: [Html.a_placeholder "Titre"]
                    ~input_type: `Text
                    ~name: title_name ();
                  Html.string_input
@@ -136,7 +136,7 @@ let private_main ~page ~link msg feeds =
                  Html.string_input
                    ~a: [Html.a_class ["btn btn-primary"]]
                    ~input_type: `Submit
-                   ~value: "Post it !" ()
+                   ~value: "Envoyer !" ()
                ]) None
            ]] @ msg @ (Utils.msg login_state) @ feeds @ [
          Html.div ~a: [Html.a_class ["footer"]] ((link_footer link 0 ((Int64.to_int count#!n) / 10) page) @ [
@@ -156,20 +156,20 @@ let private_register () =
           ~a: [Html.a_class ["box"]]
           ~service: Services.add_user
           (fun (username_name, (email_name, (password_name, password_check))) -> [
-            Html.h1 [Html.pcdata "Register"];
+            Html.h1 [Html.pcdata "Inscription"];
             Html.p [
               Html.string_input
-                ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Username"]
+                ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Pseudo"]
                 ~input_type: `Text
                 ~name: username_name ();
               Html.br ();
               Html.string_input
-                ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Password"]
+                ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Mot de passe"]
                 ~input_type: `Password
                 ~name: password_name ();
               Html.br ();
               Html.string_input
-                ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Confirm password"]
+                ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Confirmation"]
                 ~input_type: `Password
                 ~name: password_check ();
               Html.br ();
@@ -181,7 +181,7 @@ let private_register () =
               Html.string_input
                 ~a: [Html.a_class ["btn-box"]]
                 ~input_type: `Submit
-                ~value: "Send" ()
+                ~value: "Valider" ()
             ]
           ]) None
       ]
@@ -198,29 +198,29 @@ let private_preferences msg =
   main_style (
     user @ msg @
       if not state then
-        [Html.pcdata "Veuillez vous connecter pour acceder aux preferences."]
+        [Html.pcdata "Veuillez vous connecter pour accéder aux préférences."]
       else
         [
           Html.post_form
             ~a: [Html.a_class ["box"]]
             ~service: Services.update_user_password
             (fun ((password_name, password_check)) -> [
-              Html.h1 [Html.pcdata "Change password"] ;
+              Html.h1 [Html.pcdata "Modifier le mot de passe"] ;
               Html.p [
                 Html.string_input
-                  ~a: [Html.a_class ["input-box"]; Html.a_placeholder "New password"]
+                  ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Nouveau mot de passe"]
                   ~input_type: `Password
                   ~name: password_name ();
                 Html.br ();
                 Html.string_input
-                  ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Confirm new password"]
+                  ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Confirmer le nouveau mot de passe"]
                   ~input_type: `Password
                   ~name: password_check ();
                 Html.br ();
                 Html.string_input
                   ~a: [Html.a_class ["btn-box"]]
                   ~input_type: `Submit
-                  ~value: "Send" ()
+                  ~value: "Valider" ()
               ]
             ]) ()
         ]
@@ -229,17 +229,17 @@ let private_preferences msg =
               ~a: [Html.a_class ["box"]]
               ~service: Services.update_user_mail
               (fun ((email)) -> [
-                Html.h1 [Html.pcdata "Change mail"];
+                Html.h1 [Html.pcdata "Changer d'adresse mail"];
                 Html.p [
                   Html.string_input
-                    ~a: [Html.a_class ["input-box"]; Html.a_placeholder "New Mail"]
+                    ~a: [Html.a_class ["input-box"]; Html.a_placeholder "Nouvelle adresse"]
                     ~input_type: `Text
                     ~name: email ();
                   Html.br ();
                   Html.string_input
                     ~a: [Html.a_class ["btn-box"]]
                     ~input_type: `Submit
-                    ~value: "Send" ()
+                    ~value: "Valider" ()
                 ]
               ]) ()
           ]
@@ -285,4 +285,3 @@ let register () =
 
 let preferences msg =
   private_preferences msg
-
