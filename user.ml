@@ -82,15 +82,15 @@ let get_login_state () =
 let set_login_state_from_disconnect state =
   Eliom_reference.set login_state
     (match state with
-      | true -> "Deconnecte"
-      | false -> "wait ... WHAT !?"
+      | true -> "Déconnecté"
+      | false -> "Quoi la baise ?"
     )
 
 let set_login_state_from_user_state state =
   Eliom_reference.set login_state
     (match state with
-      | Already_connected -> "Deja connecte"
-      | Ok -> "Connecte"
-      | Bad_password -> "Mauvais mot-de-passe"
-      | Not_found -> "Utilisateur non trouve"
+      | Already_connected -> "Déjà connecté"
+      | Ok -> "Connecté"
+      | Bad_password -> "Mauvais mot de passe"
+      | Not_found -> "Utilisateur non trouvé"
     )

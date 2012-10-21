@@ -61,7 +61,7 @@ let to_html self =
        Html.a ~a: [Html.a_class ["postitle"]] ~service: url_service
          [Html.pcdata self.title] ();
        Html.br ();
-       Html.pcdata ("Published on " ^ (Utils.string_of_calendar self.date) ^ " by ");
+       Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
        Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
       ];
       [Html.br ();
@@ -74,7 +74,7 @@ let to_html self =
       ];
       links_of_tags self.tags;
       (if is_author then
-          [Html.a Services.delete_feed [Html.pcdata "(delete ?)"] self.id]
+          [Html.a Services.delete_feed [Html.pcdata " (supprimer ?)"] self.id]
        else []
       );
     ]
