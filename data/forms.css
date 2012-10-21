@@ -167,7 +167,7 @@ header .nav:hover {
 
 .nav {
   padding: 8px 1.5em;
-  border: 2px solid #333;
+  border: 0px solid #333;
   font-size: 12px;
   margin-right: 8px;
   background-color: #333;
