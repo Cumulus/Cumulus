@@ -1,5 +1,5 @@
 let reload_feeds service =
-  Eliom_client.onload {{
+  Eliom_service.onload {{
     let service = %service in
     let bus = %Feeds.bus in
     Lwt.ignore_result
