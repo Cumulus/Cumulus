@@ -1,14 +1,16 @@
 let reload_feeds service =
   Eliom_client.onload {{
     let service = %service in
-    let callback =
-      Js.wrap_callback
-        (fun () ->
-          Lwt.ignore_result
-            (Eliom_client.change_page ~service () ())
-        )
-    in
-    ignore (Dom_html.window##setTimeout (callback, 100_000.)) (* All 100 secs *)
+    let bus = %Feeds.bus in
+    Lwt.ignore_result
+      (let stream = Eliom_bus.original_stream bus in
+       Lwt_stream.iter
+         (fun () ->
+           Lwt.ignore_result
+             (Eliom_client.change_page ~service () ())
+         )
+         stream
+      )
   }}
 
 module Cumulus_appl = Eliom_registration.App (struct

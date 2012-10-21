@@ -67,6 +67,8 @@ let to_atom () =
     )
   )
 
+let bus = Eliom_bus.create Json.t<unit>
+
 let append_feed (url, (title, tags)) =
   User.get_userid () >>= fun userid ->
   match userid with
@@ -85,4 +87,5 @@ let append_feed (url, (title, tags)) =
               title
               (List.map Utils.strip (Str.split (Str.regexp "[,]+") tags))
               author >>= fun () ->
+            Eliom_bus.write bus ();
             Lwt.return Ok
