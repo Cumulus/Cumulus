@@ -7,8 +7,6 @@ class type feed = object
   method url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
 end
 
-val get_offset : unit -> int
-
 val get_user_name_and_email_with_id : int32 ->
   < email : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t;
     name : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
