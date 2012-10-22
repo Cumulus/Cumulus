@@ -3,7 +3,7 @@ let reload_feeds service =
     let service = %service in
     let bus = %Feeds.bus in
     Lwt.ignore_result
-      (let stream = Eliom_bus.original_stream bus in
+      (let stream = Eliom_bus.stream bus in
        Lwt_stream.iter
          (fun () ->
            Lwt.ignore_result
