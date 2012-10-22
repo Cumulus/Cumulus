@@ -13,9 +13,9 @@ CLIENT_PACKAGES :=
 ## Source files for the server part
 
 SERVER_FILES := html.ml \
+		utils.ml \
 		db.mli \
 		db.ml \
-		utils.ml \
 		services.ml \
 		user.mli \
 		user.ml \
