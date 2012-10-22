@@ -1,9 +1,10 @@
 Build Requirements
 ==================
 
- * Ocsigen >= 2.2
+ * Eliom >= 2.2
+ * Lwt >= 2.4
  * OCaml-safepass >= 1.2
- * MaCaQue
+ * MaCaQue >= 0.6
 
 Run Requirements
 ================
