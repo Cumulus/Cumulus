@@ -139,7 +139,9 @@ let private_main ~page ~link msg feeds =
                    ~value: "Post it !" ()
                ]) None
            ]] @ msg @ (Utils.msg login_state) @ feeds @ [
-         Html.div ~a: [Html.a_class ["footer"]] ((link_footer link 0 ((Int64.to_int count#!n) / 10) page) @ [
+         Html.div ~a: [Html.a_class ["footer"]]
+           ((let n = Int64.to_int count#!n 
+             in (link_footer link 0 ((n / 10) - (if n mod 10 = 0 then 1 else 0)) page)) @ [
            Html.br ();
            Html.br ();
            Html.pcdata "(not so) Proudly propulsed by the inglorious Cumulus Project, love, and the OCaml web Framework Ocsigen"
@@ -256,7 +258,7 @@ let main ?(page=0) msg =
     ) msg (Feeds.to_html ~starting:starting ())
 
 let user ?(page=0) msg username =
-  let starting = Int32.of_int (page * 20) in
+  let starting = Int32.of_int (page * 10) in
   private_main ~page
     ~link:(fun name param ->
       Html.a ~service:Services.author_feed [
@@ -265,7 +267,7 @@ let user ?(page=0) msg username =
     ) msg (Feeds.author_to_html ~starting:starting username)
 
 let tag ?(page=0) msg tag =
-  let starting = Int32.of_int (page * 20) in
+  let starting = Int32.of_int (page * 10) in
   private_main ~page
     ~link:(fun name param ->
       Html.a ~service:Services.tag_feed [
