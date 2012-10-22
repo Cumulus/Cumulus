@@ -30,7 +30,7 @@ let is_invalid_url input =
     "^\\(https?\\|ftp\\)://" ^                         (* Protocol *)
       "\\(" ^ legit_chars ^ "*?" ^                     (* Username *)
       "\\(:" ^legit_chars ^ "*\\)?@\\)?" ^             (* Password *)
-      "[A-Za-z0-9.]+" ^                                (* Domain name *)
+      "[A-Za-z0-9._-]+" ^                              (* Domain name *)
       "\\(:" ^ num ^ num ^ num ^ num ^ num ^ "\\)?" ^  (* Port *)
       "\\(/"   ^ legit_chars ^ "*\\)*" ^               (* Arborescence *)
       "\\(\\?" ^ legit_chars ^ "*\\)?" ^               (* Parameters *)
