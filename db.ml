@@ -14,6 +14,8 @@ class type feed = object
   method url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
 end
 
+let get_offset = (fun x -> fun () -> x) 10
+
 let connect () =
   Lwt_PGOCaml.connect
     ~database: "cumulus"
@@ -79,7 +81,7 @@ let get_user_with_name name =
         a in $users$; a.name = $string:name$ >>)
   )
 
-let get_feeds ?(starting=0l) ?(number=10l) () =
+let get_feeds ?(starting=0l) ?(number=Int32.of_int (get_offset ())) () =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.view db (
       <:view< {
@@ -93,7 +95,7 @@ let get_feeds ?(starting=0l) ?(number=10l) () =
         f in $feeds$; t in $feeds_tags$; t.id_feed = f.id >>)
   )
 
-let get_feeds_with_author ?(starting=0l) ?(number=10l) author =
+let get_feeds_with_author ?(starting=0l) ?(number=Int32.of_int (get_offset ())) author =
   Lwt_pool.use pool (fun db ->
     get_user_id_with_name author >>= (fun author ->
       Lwt_Query.view db (
@@ -110,7 +112,7 @@ let get_feeds_with_author ?(starting=0l) ?(number=10l) author =
     )
   )
 
-let get_feeds_with_tag ?(starting=0l) ?(number=10l) tag =
+let get_feeds_with_tag ?(starting=0l) ?(number=Int32.of_int (get_offset ())) tag =
   let rec in' value = function
     | [] -> (<:value< false >>)
     | [x] -> (<:value< $x#id_feed$ = $value$ || $in' value []$ >>)
