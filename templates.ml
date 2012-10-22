@@ -141,7 +141,7 @@ let private_main ~page ~link msg feeds =
            ]] @ msg @ (Utils.msg login_state) @ feeds @ [
          Html.div ~a: [Html.a_class ["footer"]]
            ((let n = Int64.to_int count#!n 
-             in (link_footer link 0 ((n / 10) - (if n mod 10 = 0 then 1 else 0)) page)) @ [
+             in (link_footer link 0 ((n / Db.get_offset ()) - (if n mod Db.get_offset () = 0 then 1 else 0)) page)) @ [
            Html.br ();
            Html.br ();
            Html.pcdata "(not so) Proudly propulsed by the inglorious Cumulus Project, love, and the OCaml web Framework Ocsigen"
@@ -249,7 +249,7 @@ let private_preferences msg =
 
 (* see TODO [1] *)
 let main ?(page=0) msg =
-  let starting = Int32.of_int (page * 10) in
+  let starting = Int32.of_int (page * Db.get_offset ()) in
   private_main ~page
     ~link:(fun name param ->
       Html.a ~service:Services.main [
@@ -258,7 +258,7 @@ let main ?(page=0) msg =
     ) msg (Feeds.to_html ~starting:starting ())
 
 let user ?(page=0) msg username =
-  let starting = Int32.of_int (page * 10) in
+  let starting = Int32.of_int (page * Db.get_offset ()) in
   private_main ~page
     ~link:(fun name param ->
       Html.a ~service:Services.author_feed [
@@ -267,7 +267,7 @@ let user ?(page=0) msg username =
     ) msg (Feeds.author_to_html ~starting:starting username)
 
 let tag ?(page=0) msg tag =
-  let starting = Int32.of_int (page * 10) in
+  let starting = Int32.of_int (page * Db.get_offset ()) in
   private_main ~page
     ~link:(fun name param ->
       Html.a ~service:Services.tag_feed [
