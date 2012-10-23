@@ -1,6 +1,6 @@
 module Calendar = CalendarLib.Calendar
 
-let offset = 10
+let offset = 10l
 
 let string_of_calendar cal =
   (string_of_int (Calendar.day_of_month cal)) ^ "/" ^

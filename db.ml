@@ -78,7 +78,7 @@ let get_user_with_name name =
         a in $users$; a.name = $string:name$ >>)
   )
 
-let get_feeds ?(starting=0l) ?(number=Int32.of_int Utils.offset) () =
+let get_feeds ?(starting=0l) ?(number=Utils.offset) () =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.view db (
       <:view< {
@@ -92,7 +92,7 @@ let get_feeds ?(starting=0l) ?(number=Int32.of_int Utils.offset) () =
         f in $feeds$; t in $feeds_tags$; t.id_feed = f.id >>)
   )
 
-let get_feeds_with_author ?(starting=0l) ?(number=Int32.of_int Utils.offset) author =
+let get_feeds_with_author ?(starting=0l) ?(number=Utils.offset) author =
   Lwt_pool.use pool (fun db ->
     get_user_id_with_name author >>= (fun author ->
       Lwt_Query.view db (
@@ -109,7 +109,7 @@ let get_feeds_with_author ?(starting=0l) ?(number=Int32.of_int Utils.offset) aut
     )
   )
 
-let get_feeds_with_tag ?(starting=0l) ?(number=Int32.of_int Utils.offset) tag =
+let get_feeds_with_tag ?(starting=0l) ?(number=Utils.offset) tag =
   let rec in' value = function
     | [] -> (<:value< false >>)
     | [x] -> (<:value< $x#id_feed$ = $value$ || $in' value []$ >>)
