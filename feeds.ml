@@ -85,7 +85,7 @@ let append_feed (url, (title, tags)) =
             Db.add_feed
               url
               title
-              (List.map Utils.strip (Str.split (Str.regexp "[,]+") tags))
+              (List.map (fun x -> String.lowercase (Utils.strip x)) (Str.split (Str.regexp "[,]+") tags))
               author >>= fun () ->
             Eliom_bus.write bus ();
             Lwt.return Ok
