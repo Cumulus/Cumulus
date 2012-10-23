@@ -10,8 +10,9 @@ class type feed = object
   method id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
   method tag : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
   method timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t
-  method title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
-  method url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
+  method description : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
+  method url : < get : unit; nul : Sql.nullable; t : Sql.string_t > Sql.t
+  method parent : < get : unit; nul : Sql.nullable; t : Sql.int32_t > Sql.t
 end
 
 let connect () =
@@ -34,10 +35,11 @@ let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
 
 let feeds = (<:table< feeds (
   id integer NOT NULL DEFAULT(nextval $feeds_id_seq$),
-  url text NOT NULL,
-  title text NOT NULL,
+  url text,
+  description text NOT NULL,
   timedate timestamp NOT NULL DEFAULT(current_timestamp),
-  author integer NOT NULL
+  author integer NOT NULL,
+  parent integer
 ) >>)
 
 let feeds_tags_id_seq = (<:sequence< serial "feeds_tags_id_seq" >>)
@@ -84,9 +86,10 @@ let get_feeds ?(starting=0l) ?(number=Utils.offset) () =
       <:view< {
         f.id;
         f.url;
-        f.title;
+        f.description;
         f.timedate;
         f.author;
+        f.parent;
         t.tag;
       } order by f.id desc limit $int32:number$ offset $int32:starting$ |
         f in $feeds$; t in $feeds_tags$; t.id_feed = f.id >>)
@@ -99,9 +102,10 @@ let get_feeds_with_author ?(starting=0l) ?(number=Utils.offset) author =
         <:view< {
           f.id;
           f.url;
-          f.title;
+          f.description;
           f.timedate;
           f.author;
+          f.parent;
           t.tag;
         } order by f.id desc limit $int32:number$ offset $int32:starting$ |
           f in $feeds$; t in $feeds_tags$; f.author = $int32:author#!id$;
@@ -124,9 +128,10 @@ let get_feeds_with_tag ?(starting=0l) ?(number=Utils.offset) tag =
       <:view< {
         f.id;
         f.url;
-        f.title;
+        f.description;
         f.timedate;
         f.author;
+        f.parent;
         t.tag;
       } order by f.id desc limit $int32:number$ offset $int32:starting$ |
         f in $feeds$; t in $feeds_tags$; $in'$ f.id $ids$; t.id_feed = f.id >>)
@@ -145,9 +150,10 @@ let get_feed_with_id id =
       <:view< {
         f.id;
         f.url;
-        f.title;
+        f.description;
         f.timedate;
         f.author;
+        f.parent;
         t.tag;
       } | f in $feeds$; t in $feeds_tags$; f.id = $int32:id$;
         f.id = t.id_feed >>)
@@ -166,9 +172,10 @@ let add_feed url title tags userid =
       Lwt_Query.query db (<:insert< $feeds$ := {
         id = $int32:id_feed$;
         url = $string:url$;
-        title = $string:title$;
+        description = $string:title$;
         timedate = feeds?timedate;
-        author = $int32:userid$
+        author = $int32:userid$;
+        parent = null
       } >>)
     )
     and tag = Lwt_list.iter_s (* Lwt_list.iter_p ? *)

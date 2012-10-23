@@ -4,25 +4,28 @@ class type feed_db = object
   method author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
   method id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
   method timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t
-  method title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
-  method url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
+  method description : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
+  method url : < get : unit; nul : Sql.nullable; t : Sql.string_t > Sql.t
+  method parent : < get : unit; nul : Sql.nullable; t : Sql.int32_t > Sql.t
 end
 
 type feed = {
   id : int32;
-  url : string;
-  title : string;
+  url : string option;
+  description : string;
   date : Calendar.t;
   author : int32;
+  parent : int32 option;
   tags: string list
 }
 
 let feed_new data tags = {
   id = data#!id;
-  url = data#!url;
-  title = data#!title;
+  url = data#?url;
+  description = data#!description;
   date = data#!timedate;
   author = data#!author;
+  parent = data#?parent;
   tags = tags
 }
 
@@ -33,10 +36,14 @@ let links_of_tags tags =
   ) [] tags
 
 let to_html self =
-  let url_service =
-    Eliom_service.external_service
-      self.url []
-      Eliom_parameter.unit () in
+  let content = match self.url with
+    | Some l -> let url_service =
+                  Eliom_service.external_service
+                    l []
+                    Eliom_parameter.unit () in
+                Html.a ~a: [Html.a_class ["postitle"]] ~service: url_service
+                  [Html.pcdata self.description] ()
+    | None -> Html.pcdata self.description in
   Db.get_user_name_and_email_with_id self.author >>= fun author ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
@@ -58,8 +65,7 @@ let to_html self =
               ~service: (Utils.get_gravatar (author#!email)) (40, "identicon")
           )
           ();
-       Html.a ~a: [Html.a_class ["postitle"]] ~service: url_service
-         [Html.pcdata self.title] ();
+       content;
        Html.br ();
        Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
        Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
@@ -69,7 +75,8 @@ let to_html self =
        Html.a
          Services.view_feed
          [Html.pcdata "n commentaires "]
-         (Int32.to_int self.id, Utils.url_of_title self.title);
+         (* it's trap *)
+         (Int32.to_int self.id, Utils.url_of_title self.description);
        Html.pcdata "Tags: "
       ];
       links_of_tags self.tags;
@@ -82,10 +89,15 @@ let to_html self =
 
 let to_atom self =
   Db.get_user_name_and_email_with_id self.author >>= fun author ->
-  Lwt.return (
-    Atom_feed.entry
-      ~updated: self.date
-      ~id: (Html.Xml.uri_of_string self.url)
-      ~title: (Atom_feed.plain self.title)
-      [Atom_feed.authors [Atom_feed.author author#!name]]
+  Lwt.return (match self.url with
+    | Some l -> Atom_feed.entry
+                  ~updated: self.date
+                  ~id: (Html.Xml.uri_of_string l)
+                  ~title: (Atom_feed.plain self.description)
+                [Atom_feed.authors [Atom_feed.author author#!name]]
+    | None -> Atom_feed.entry
+                  ~updated: self.date
+                  ~id: (Html.Xml.uri_of_string (Int32.to_string self.id)) (* OLOL *)
+                  ~title: (Atom_feed.plain self.description)
+                [Atom_feed.authors [Atom_feed.author author#!name]]
   )

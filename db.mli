@@ -3,8 +3,9 @@ class type feed = object
   method id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
   method tag : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
   method timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t
-  method title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
-  method url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
+  method description : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
+  method url : < get : unit; nul : Sql.nullable; t : Sql.string_t > Sql.t
+  method parent : < get : unit; nul : Sql.nullable; t : Sql.int32_t > Sql.t
 end
 
 val get_user_name_and_email_with_id : int32 ->
@@ -24,7 +25,7 @@ val get_feeds_with_author : ?starting:int32 -> ?number:int32 -> string ->
 val get_feeds_with_tag : ?starting:int32 -> ?number:int32 -> string ->
   feed list Lwt.t
 val get_feed_url_with_url : string ->
-  < url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t >
+  < url : < get : unit; nul : Sql.nullable; t : Sql.string_t > Sql.t >
     option Lwt.t
 val get_feed_with_id : int32 ->
   feed list Lwt.t
