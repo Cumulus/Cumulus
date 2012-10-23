@@ -175,7 +175,6 @@ let private_main ~page ~link ~service feeds =
       )
   }}
   in
-  let n = Int64.to_int (Sql.get count#n) in
   main_style
     (user @
        [ Html.div
@@ -198,7 +197,7 @@ let private_main ~page ~link ~service feeds =
      @ feeds
      @ [
        Html.div ~a: [Html.a_class ["footer"]]
-         ((let n = Int64.to_int count#!n in
+         ((let n = Int64.to_int (Sql.get count#n) in
            let offset = Int32.to_int Utils.offset in
            (link_footer link 0
               ((n / offset) - (if n mod offset = 0 then 1 else 0)) page)) @ [
