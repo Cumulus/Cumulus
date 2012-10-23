@@ -26,12 +26,13 @@ SERVER_FILES := html.ml \
 		users.mli \
 		users.ml \
 		templates.mli \
-		templates.ml \
-		main.eliom
+		templates.eliom \
+		main.ml
 
 ## Source files for the client part
 
-CLIENT_FILES := main.eliom
+CLIENT_FILES := templates.client_mli \
+		templates.eliom
 
 ## Required binaries
 
@@ -94,13 +95,13 @@ CLIENT_LIBS := ${addprefix -package ,${CLIENT_PACKAGES}}
 CLIENT_INC  := ${addprefix -package ,${CLIENT_PACKAGES}}
 
 CLIENT_OBJS := $(patsubst %.eliom,${ELIOM_CLIENT_DIR}/%.cmo, ${CLIENT_FILES})
-CLIENT_OBJS := $(patsubst %.mli,${ELIOM_CLIENT_DIR}/%.cmi, ${CLIENT_OBJS})
+CLIENT_OBJS := $(patsubst %.client_mli,${ELIOM_CLIENT_DIR}/%.cmi, ${CLIENT_OBJS})
 CLIENT_OBJS := $(patsubst %.ml,${ELIOM_CLIENT_DIR}/%.cmo, ${CLIENT_OBJS})
 
 ${APP_NAME}.js: ${CLIENT_OBJS}
 	${JS_OF_ELIOM} -o $@ ${CLIENT_LIBS} $(filter %.cmo, $^)
 
-${ELIOM_CLIENT_DIR}/%.cmi: %.mli
+${ELIOM_CLIENT_DIR}/%.cmi: %.client_mli
 	${JS_OF_ELIOM} -c ${CLIENT_INC} $<
 
 ${ELIOM_CLIENT_DIR}/%.cmo: %.eliom
