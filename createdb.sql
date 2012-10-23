@@ -3,10 +3,11 @@ SET client_encoding = 'UTF8';
 
 CREATE TABLE feeds (
     id integer NOT NULL,
-    url text NOT NULL,
-    title text NOT NULL,
+    url textL,
+    description text NOT NULL,
     timedate timestamp NOT NULL,
-    author integer NOT NULL
+    author integer NOT NULL,
+	parent integer
 );
 
 CREATE TABLE feeds_tags (
