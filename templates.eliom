@@ -148,7 +148,7 @@ let private_main ~page ~link ~service feeds =
       ~input_type:`Text
       ()
   in
-  let submit = {{ fun _ ->
+  let submit = {{
     let url_field =
       Eliom_content.Html5.To_dom.of_input %url_field
     and title_field =
@@ -231,7 +231,7 @@ let private_register () =
       ~input_type:`Text
       ()
   in
-  let submit = {{ fun _ ->
+  let submit = {{
     let username_field =
       Eliom_content.Html5.To_dom.of_input %username_field
     and password_field =
@@ -308,7 +308,7 @@ let private_preferences () =
       ~input_type:`Text
       ()
   in
-  let submit_password = {{ fun _ ->
+  let submit_password = {{
     let password_field =
       Eliom_content.Html5.To_dom.of_input %password_field
     and password_check_field =
@@ -326,7 +326,7 @@ let private_preferences () =
        Lwt.return ()
       )
   }}
-  and submit_email = {{ fun _ ->
+  and submit_email = {{
     let email_field =
       Eliom_content.Html5.To_dom.of_input %email_field
     in
