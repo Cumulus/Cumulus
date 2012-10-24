@@ -62,7 +62,7 @@ opt:: ${APP_NAME}.cmxs ${APP_NAME}.js
 SERVER_INC  := ${addprefix -package ,${SERVER_PACKAGES}}
 
 SERVER_OBJS := $(patsubst %.eliom,${ELIOM_SERVER_DIR}/%.cmo, ${SERVER_FILES})
-SERVER_OBJS := $(patsubst %.eliomi,${ELIOM_SERVER_DIR}/%.cmi, ${SERVER_FILES})
+SERVER_OBJS := $(patsubst %.eliomi,${ELIOM_SERVER_DIR}/%.cmi, ${SERVER_OBJS})
 SERVER_OBJS := $(patsubst %.mli,${ELIOM_SERVER_DIR}/%.cmi, ${SERVER_OBJS})
 SERVER_OBJS := $(patsubst %.ml,${ELIOM_SERVER_DIR}/%.cmo, ${SERVER_OBJS})
 
@@ -98,7 +98,7 @@ CLIENT_LIBS := ${addprefix -package ,${CLIENT_PACKAGES}}
 CLIENT_INC  := ${addprefix -package ,${CLIENT_PACKAGES}}
 
 CLIENT_OBJS := $(patsubst %.eliom,${ELIOM_CLIENT_DIR}/%.cmo, ${CLIENT_FILES})
-CLIENT_OBJS := $(patsubst %.eliomi,${ELIOM_CLIENT_DIR}/%.cmi, ${CLIENT_FILES})
+CLIENT_OBJS := $(patsubst %.eliomi,${ELIOM_CLIENT_DIR}/%.cmi, ${CLIENT_OBJS})
 CLIENT_OBJS := $(patsubst %.mli,${ELIOM_CLIENT_DIR}/%.cmi, ${CLIENT_OBJS})
 CLIENT_OBJS := $(patsubst %.ml,${ELIOM_CLIENT_DIR}/%.cmo, ${CLIENT_OBJS})
 
