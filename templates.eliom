@@ -31,9 +31,11 @@ let user_form () = Lwt.return [
     [
       Html.div
         ~a: [Html.a_class ["mod left"]] [
-          Html.div
-            ~a: [Html.a_class ["title"]][
-              Html.pcdata "Cumulus Project"]];
+          Html.a
+            ~a: [Html.a_class ["title"]]
+            ~service: Services.main
+            [Html.pcdata "Cumulus Project"] None;
+        ];
       Html.div
         ~a: [Html.a_class ["mod";"right"]][
           Html.post_form
@@ -67,9 +69,10 @@ let user_information user = Lwt.return [
     [
       Html.div
         ~a: [Html.a_class ["mod left"]] [
-          Html.div
-            ~a: [Html.a_class ["title"]][
-              Html.pcdata "Cumulus Project"]
+          Html.a
+            ~a: [Html.a_class ["title"]]
+            ~service: Services.main
+            [Html.pcdata "Cumulus Project"] None;
         ];
       Html.div
         ~a: [Html.a_class ["mod";"right"]][
