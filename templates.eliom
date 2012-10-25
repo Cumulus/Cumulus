@@ -347,7 +347,10 @@ let private_preferences () =
   main_style (
     user @
       if not state then
-        [Html.pcdata "Veuillez vous connecter pour accéder aux préférences."]
+        [Html.div
+            ~a:[Html.a_class ["box"]]
+            [Html.pcdata "Veuillez vous connecter pour accéder aux préférences."]
+        ]
       else
         [ Html.div
             ~a:[Html.a_class ["box"]] [
