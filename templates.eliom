@@ -1,3 +1,26 @@
+let error_frame = Eliom_content.Html5.D.p []
+
+{client{
+  let display_error error_frame error =
+    let error_frame = Eliom_content.Html5.To_dom.of_p error_frame in
+    error_frame##innerHTML <- Js.string error;
+    let id_timeout = ref None in
+    id_timeout := Some
+      (Dom_html.window##setTimeout
+         (Js.wrap_callback
+            (fun () ->
+              error_frame##innerHTML <- Js.string "";
+              match !id_timeout with
+                | None -> () (* It cannot happen *)
+                | Some id ->
+                    Dom_html.window##clearTimeout (id)
+            ),
+          5_000.
+         )
+      );
+    Lwt.return ()
+}}
+
 let main_style data =
   Lwt.return
     (Html.html
@@ -168,9 +191,7 @@ let private_main ~page ~link ~service feeds =
              Js.to_string tags_field##value
            )
          )
-       >>= fun message ->
-       Dom_html.window##alert (Js.string message);
-       Lwt.return ()
+       >>= display_error %error_frame
       )
   }}
   in
@@ -190,7 +211,8 @@ let private_main ~page ~link ~service feeds =
                  ~value: "Envoyer !"
                  ()
              ]
-           ]
+           ];
+         error_frame;
        ]
      @ Utils.msg login_state
      @ feeds
@@ -255,9 +277,7 @@ let private_register () =
              )
            )
          )
-       >>= fun message ->
-       Dom_html.window##alert (Js.string message);
-       Lwt.return ()
+       >>= display_error %error_frame
       )
   }}
   in
@@ -324,9 +344,7 @@ let private_preferences () =
          ( Js.to_string password_field##value,
            Js.to_string password_check_field##value
          )
-       >>= fun message ->
-       Dom_html.window##alert (Js.string message);
-       Lwt.return ()
+       >>= display_error %error_frame
       )
   }}
   and submit_email = {{
@@ -338,9 +356,7 @@ let private_preferences () =
          ~service:%Services.update_user_mail
          ()
          (Js.to_string email_field##value)
-       >>= fun message ->
-       Dom_html.window##alert (Js.string message);
-       Lwt.return ()
+       >>= display_error %error_frame
       )
   }}
   in
