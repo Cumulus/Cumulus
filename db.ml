@@ -165,6 +165,12 @@ let count_feeds () =
     )
   )
 
+let count_comments parent =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.view_one db (<:view< group { n = count[f] } | f in $feeds$; f.parent = $int32:parent$ >>
+    )
+  )
+
 let add_feed url description tags userid =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.value db (<:value< feeds?id >>) >>= fun id_feed ->
