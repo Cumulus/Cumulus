@@ -12,14 +12,25 @@ let feeds_of_db feeds =
          )
       ) :: acc
     ) feeds [] in
+  let feeds1 = List.fold_right (fun feed acc -> if List.mem feed acc then acc else feed :: acc) feeds [] in
+  Ocsigen_messages.warning ("list.length feeds " ^ (string_of_int (List.length feeds)));
   Lwt.return (
+    feeds1
+(*
     List.fold_right (fun feed acc ->
       if List.mem feed acc then
         acc
       else
         feed :: acc
     ) feeds []
+*)
   )
+
+(* WARNING: le traitement présent dans feeds1 est la cause à l'affichage de
+  * moins de 10 liens sur la page d'accueil. J'ai faim, pas envie de traiter le
+  * bug mais il est là. En tout cas, pourquoi il y a se traitement, pourquoi il
+  * y a des doublons dans les feeds (car apparament, c'est le cas), comment
+  * éviter les doublons tout en affichant 10 liens ? *)
 
 let to_somthing f data =
   Lwt_list.map_p (fun feed -> f feed) data
