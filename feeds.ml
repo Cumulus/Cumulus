@@ -12,18 +12,13 @@ let feeds_of_db feeds =
          )
       ) :: acc
     ) feeds [] in
-  let feeds1 = List.fold_right (fun feed acc -> if List.mem feed acc then acc else feed :: acc) feeds [] in
-  Ocsigen_messages.warning ("list.length feeds " ^ (string_of_int (List.length feeds)));
   Lwt.return (
-    feeds1
-(*
     List.fold_right (fun feed acc ->
       if List.mem feed acc then
         acc
       else
         feed :: acc
     ) feeds []
-*)
   )
 
 (* WARNING: le traitement présent dans feeds1 est la cause à l'affichage de
