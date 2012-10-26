@@ -2,6 +2,29 @@
   let (>>=) = Lwt.(>>=)
 }}
 
+let error_frame = Eliom_content.Html5.D.p []
+
+{client{
+  let display_error error =
+    let error_frame = Eliom_content.Html5.To_dom.of_p %error_frame in
+    error_frame##innerHTML <- Js.string error;
+    let id_timeout = ref None in
+    id_timeout := Some
+      (Dom_html.window##setTimeout
+         (Js.wrap_callback
+            (fun () ->
+              error_frame##innerHTML <- Js.string "";
+              match !id_timeout with
+                | None -> () (* It cannot happen *)
+                | Some id ->
+                    Dom_html.window##clearTimeout (id)
+            ),
+          5_000.
+         )
+      );
+    Lwt.return ()
+}}
+
 let main_style data =
   Lwt.return
     (Html.html
@@ -35,9 +58,11 @@ let user_form () = Lwt.return [
     [
       Html.div
         ~a: [Html.a_class ["mod left"]] [
-          Html.div
-            ~a: [Html.a_class ["title"]][
-              Html.pcdata "Cumulus Project"]];
+          Html.a
+            ~a: [Html.a_class ["title"]]
+            ~service: Services.main
+            [Html.pcdata "Cumulus Project"] None;
+        ];
       Html.div
         ~a: [Html.a_class ["mod";"right"]][
           Html.post_form
@@ -71,9 +96,10 @@ let user_information user = Lwt.return [
     [
       Html.div
         ~a: [Html.a_class ["mod left"]] [
-          Html.div
-            ~a: [Html.a_class ["title"]][
-              Html.pcdata "Cumulus Project"]
+          Html.a
+            ~a: [Html.a_class ["title"]]
+            ~service: Services.main
+            [Html.pcdata "Cumulus Project"] None;
         ];
       Html.div
         ~a: [Html.a_class ["mod";"right"]][
@@ -152,7 +178,7 @@ let private_main ~page ~link ~service feeds =
       ~input_type:`Text
       ()
   in
-  let submit = {{ fun _ ->
+  let submit = {{
     let url_field =
       Eliom_content.Html5.To_dom.of_input %url_field
     and title_field =
@@ -169,9 +195,7 @@ let private_main ~page ~link ~service feeds =
              Js.to_string tags_field##value
            )
          )
-       >>= fun message ->
-       Dom_html.window##alert (Js.string message);
-       Lwt.return ()
+       >>= display_error
       )
   }}
   in
@@ -191,7 +215,8 @@ let private_main ~page ~link ~service feeds =
                  ~value: "Envoyer !"
                  ()
              ]
-           ]
+           ];
+         error_frame;
        ]
      @ Utils.msg login_state
      @ feeds
@@ -235,7 +260,7 @@ let private_register () =
       ~input_type:`Text
       ()
   in
-  let submit = {{ fun _ ->
+  let submit = {{
     let username_field =
       Eliom_content.Html5.To_dom.of_input %username_field
     and password_field =
@@ -256,9 +281,7 @@ let private_register () =
              )
            )
          )
-       >>= fun message ->
-       Dom_html.window##alert (Js.string message);
-       Lwt.return ()
+       >>= display_error
       )
   }}
   in
@@ -312,7 +335,7 @@ let private_preferences () =
       ~input_type:`Text
       ()
   in
-  let submit_password = {{ fun _ ->
+  let submit_password = {{
     let password_field =
       Eliom_content.Html5.To_dom.of_input %password_field
     and password_check_field =
@@ -325,12 +348,10 @@ let private_preferences () =
          ( Js.to_string password_field##value,
            Js.to_string password_check_field##value
          )
-       >>= fun message ->
-       Dom_html.window##alert (Js.string message);
-       Lwt.return ()
+       >>= display_error
       )
   }}
-  and submit_email = {{ fun _ ->
+  and submit_email = {{
     let email_field =
       Eliom_content.Html5.To_dom.of_input %email_field
     in
@@ -339,16 +360,17 @@ let private_preferences () =
          ~service:%Services.update_user_mail
          ()
          (Js.to_string email_field##value)
-       >>= fun message ->
-       Dom_html.window##alert (Js.string message);
-       Lwt.return ()
+       >>= display_error
       )
   }}
   in
   main_style (
     user @
       if not state then
-        [Html.pcdata "Veuillez vous connecter pour accéder aux préférences."]
+        [Html.div
+            ~a:[Html.a_class ["box"]]
+            [Html.pcdata "Veuillez vous connecter pour accéder aux préférences."]
+        ]
       else
         [ Html.div
             ~a:[Html.a_class ["box"]] [
