@@ -75,12 +75,12 @@ let to_atom () =
 
 let bus = Eliom_bus.create Json.t<unit>
 
-let append_feed (url, (title, tags)) =
+let append_feed (url, (description, tags)) =
   User.get_userid () >>= fun userid ->
   match userid with
     | None -> Lwt.return Not_connected
     | (Some author) ->
-      if (Utils.string_is_empty title || Utils.string_is_empty tags) then
+      if (Utils.string_is_empty description || Utils.string_is_empty tags) then
         Lwt.return Empty
       else if Utils.is_invalid_url url then
         Lwt.return Invalid_url
@@ -90,7 +90,7 @@ let append_feed (url, (title, tags)) =
           | None ->
             Db.add_feed
               url
-              title
+              description
               (List.map (fun x -> String.lowercase (Utils.strip x)) (Str.split (Str.regexp "[,]+") tags))
               author >>= fun () ->
             Eliom_bus.write bus ();

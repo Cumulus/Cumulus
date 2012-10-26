@@ -19,7 +19,7 @@ let view_feed =
 let append_feed =
   Eliom_service.post_coservice'
     ~post_params: Eliom_parameter.((string "url") **
-                                      (string "title") **
+                                      (string "desc") **
                                       (string "tags"))
     ()
 

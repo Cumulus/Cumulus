@@ -46,7 +46,7 @@ let get_gravatar email =
     Eliom_parameter.((int "s") ** (string "d")) ()
 
 (* Conversion d'un titre d'URL en une chaîne acceptable pour le service
- * view_feed *)
+ * view_feed - url_of_title of url_of_description ? [dinosaure] *)
 let url_of_title s =
   let s = String.copy s in
   let n = String.length s in

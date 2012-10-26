@@ -165,14 +165,14 @@ let count_feeds () =
     )
   )
 
-let add_feed url title tags userid =
+let add_feed url description tags userid =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.value db (<:value< feeds?id >>) >>= fun id_feed ->
     let feed = Lwt_pool.use pool (fun db ->
       Lwt_Query.query db (<:insert< $feeds$ := {
         id = $int32:id_feed$;
         url = $string:url$;
-        description = $string:title$;
+        description = $string:description$;
         timedate = feeds?timedate;
         author = $int32:userid$;
         parent = null

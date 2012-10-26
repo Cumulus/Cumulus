@@ -75,7 +75,7 @@ let to_html self =
        Html.a
          Services.view_feed
          [Html.pcdata "n commentaires "]
-         (* it's trap *)
+         (* url_of_title or url_of_desc ? *)
          (Int32.to_int self.id, Utils.url_of_title self.description);
        Html.pcdata "Tags: "
       ];
@@ -93,11 +93,11 @@ let to_atom self =
     | Some l -> Atom_feed.entry
                   ~updated: self.date
                   ~id: (Html.Xml.uri_of_string l)
-                  ~title: (Atom_feed.plain self.description)
+                  ~title: (Atom_feed.plain self.description) (* title is description ? *)
                 [Atom_feed.authors [Atom_feed.author author#!name]]
     | None -> Atom_feed.entry
                   ~updated: self.date
-                  ~id: (Html.Xml.uri_of_string (Int32.to_string self.id)) (* OLOL *)
-                  ~title: (Atom_feed.plain self.description)
+                  ~id: (Html.Xml.uri_of_string (Int32.to_string self.id))
+                  ~title: (Atom_feed.plain self.description) (* title is description ? *)
                 [Atom_feed.authors [Atom_feed.author author#!name]]
   )
