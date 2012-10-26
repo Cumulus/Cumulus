@@ -21,6 +21,12 @@ let feeds_of_db feeds =
     ) feeds []
   )
 
+(* WARNING: le traitement présent dans feeds1 est la cause à l'affichage de
+  * moins de 10 liens sur la page d'accueil. J'ai faim, pas envie de traiter le
+  * bug mais il est là. En tout cas, pourquoi il y a se traitement, pourquoi il
+  * y a des doublons dans les feeds (car apparament, c'est le cas), comment
+  * éviter les doublons tout en affichant 10 liens ? *)
+
 let to_somthing f data =
   Lwt_list.map_p (fun feed -> f feed) data
 
@@ -85,7 +91,7 @@ let append_feed (url, (title, tags)) =
             Db.add_feed
               url
               title
-              (List.map Utils.strip (Str.split (Str.regexp "[,]+") tags))
+              (List.map (fun x -> String.lowercase (Utils.strip x)) (Str.split (Str.regexp "[,]+") tags))
               author >>= fun () ->
             Eliom_bus.write bus ();
             Lwt.return Ok

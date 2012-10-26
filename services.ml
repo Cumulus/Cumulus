@@ -17,8 +17,7 @@ let view_feed =
     ()
 
 let append_feed =
-  Eliom_service.post_service
-    ~fallback: main
+  Eliom_service.post_coservice'
     ~post_params: Eliom_parameter.((string "url") **
                                       (string "title") **
                                       (string "tags"))
@@ -42,8 +41,7 @@ let auth =
     ()
 
 let add_user =
-  Eliom_service.post_service
-    ~fallback: main
+  Eliom_service.post_coservice'
     ~post_params: Eliom_parameter.((string "username") **
                                       (string "password") **
                                       (string "password_check") **
