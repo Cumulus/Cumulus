@@ -28,6 +28,9 @@ let feed_new data tags = {
   tags = tags
 }
 
+let exists self feeds =
+  List.exists (fun x -> x.id = self.id) feeds
+
 let links_of_tags tags =
   List.fold_left (fun acc tag ->
     let link = Html.a ~a: [Html.a_class ["tags"]] ~service: Services.tag_feed [Html.pcdata tag] (None, tag) in
