@@ -55,6 +55,7 @@ let to_html self =
         Lwt.return (x || y)
   )
   >>= fun is_author ->
+  Db.count_comments self.id >>= fun comments ->
   Lwt.return (
     List.flatten [
       [Html.img
@@ -74,7 +75,12 @@ let to_html self =
        (* TODO : afficher "n commentaire(s)" *)
        Html.a
          Services.view_feed
-         [Html.pcdata "n commentaires "]
+         (let n = Int64.to_int comments#!n
+         in match n with
+           | 0
+           | 1 -> [Html.pcdata ((string_of_int n) ^ " commentaire ")]
+           | n -> [Html.pcdata ((string_of_int n) ^ " commentaires ")])
+         (* [Html.pcdata (string_to_int (Int64.to_int comments)) " commentaires "] *)
          (* url_of_title or url_of_desc ? *)
          (Int32.to_int self.id, Utils.url_of_title self.description);
        Html.pcdata "Tags: "
