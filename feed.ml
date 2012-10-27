@@ -71,7 +71,7 @@ let to_html self =
        Html.a
          Services.view_feed
          [Html.pcdata "n commentaires "]
-         (Int32.to_int self.id, Utils.url_of_title self.title);
+         (Int32.to_int self.id, self.title);
        Html.pcdata "Tags: "
       ];
       links_of_tags self.tags;
