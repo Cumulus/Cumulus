@@ -21,33 +21,6 @@ let error_frame = Eliom_content.Html5.D.p []
     Lwt.return ()
 }}
 
-let main_style data =
-  Lwt.return
-    (Html.html
-       (Html.head
-          (Html.title
-             (Html.pcdata "Cumulus")
-          ) [
-            Html.css_link
-              ~uri: (Html.make_uri
-                       ~service: (Eliom_service.static_dir ())
-                       ["knacss.css"]
-              ) ();
-            Html.css_link
-              ~uri: (Html.make_uri
-                       ~service: (Eliom_service.static_dir ())
-                       ["forms.css"]
-              ) ();
-          ]
-       )
-       (Html.body [
-         (Html.div
-            ~a: [Html.a_class ["container"]]
-            data
-         )
-       ])
-    )
-
 let user_form () = Lwt.return [
   Html.header
     ~a: [Html.a_class ["line";"mod"]]
@@ -129,34 +102,7 @@ let user_info () =
     | Some user -> user_information user
     | None -> user_form ()
 
-let link_footer ~link min max page = match page with
-  | n when n = min && n < max -> [ link "Suivant" (Some (page + 1)) ]
-  | n when n = max && n > min -> [ link "Précédent" (Some (page - 1)) ]
-  | n ->
-      if n > min && n < max then
-        [ link "Précédent" (Some (page - 1)); link "Suivant" (Some (page + 1)) ]
-      else []
-
-let reload_feeds service =
-  Eliom_service.onload {{
-    let service = %service in
-    let event = %Feeds.event in
-    let stream = Lwt_react.E.to_stream event in
-    Lwt.ignore_result
-      (Lwt_stream.iter
-         (fun () ->
-           Lwt.ignore_result
-             (Eliom_client.change_page ~service () ())
-         )
-         stream
-      )
-  }}
-
-let private_main ~page ~link ~service feeds count =
-  ignore (reload_feeds service);
-  feeds >>= fun feeds ->
-  count >>= fun count ->
-  User.get_login_state () >>= fun login_state ->
+let main_style content =
   user_info () >>= fun user ->
   let url_field =
     Eliom_content.Html5.D.string_input
@@ -195,46 +141,100 @@ let private_main ~page ~link ~service feeds count =
       )
   }}
   in
+  Lwt.return
+    (Html.html
+       (Html.head
+          (Html.title
+             (Html.pcdata "Cumulus")
+          )
+          [ Html.css_link
+              ~uri: (Html.make_uri
+                       ~service: (Eliom_service.static_dir ())
+                       ["knacss.css"]
+              ) ();
+            Html.css_link
+              ~uri: (Html.make_uri
+                       ~service: (Eliom_service.static_dir ())
+                       ["forms.css"]
+              ) ();
+          ]
+       )
+       (Html.body
+         [ Html.div
+             ~a: [Html.a_class ["container"]]
+             (user
+              @ [ Html.div
+                    ~a:[Html.a_class ["dash"]]
+                    [ Html.div
+                        [ url_field;
+                          title_field;
+                          tags_field;
+                          Html.string_input
+                            ~a:[ Html.a_class ["btn btn-primary"];
+                                 Html.a_onclick submit;
+                               ]
+                            ~input_type:`Submit
+                            ~value: "Envoyer !"
+                            ()
+                        ]
+                    ];
+                  error_frame;
+                ]
+              @ content
+              @ [Html.br ();
+                 Html.br ();
+                 Html.pcdata "(not so) Proudly propulsed by the inglorious \
+                              Cumulus Project, love, and the OCaml web \
+                              Framework Ocsigen";
+                ]
+             )
+         ]
+       )
+    )
+
+let link_footer ~link min max page = match page with
+  | n when n = min && n < max -> [ link "Suivant" (Some (page + 1)) ]
+  | n when n = max && n > min -> [ link "Précédent" (Some (page - 1)) ]
+  | n ->
+      if n > min && n < max then
+        [ link "Précédent" (Some (page - 1)); link "Suivant" (Some (page + 1)) ]
+      else []
+
+let reload_feeds service =
+  Eliom_service.onload {{
+    let service = %service in
+    let event = %Feeds.event in
+    let stream = Lwt_react.E.to_stream event in
+    Lwt.ignore_result
+      (Lwt_stream.iter
+         (fun () ->
+           Lwt.ignore_result
+             (Eliom_client.change_page ~service () ())
+         )
+         stream
+      )
+  }}
+
+let private_main ~page ~link ~service feeds count =
+  ignore (reload_feeds service);
+  feeds >>= fun feeds ->
+  count >>= fun count ->
+  User.get_login_state () >>= fun login_state ->
   main_style
-    (user @
-       [ Html.div
-           ~a: [Html.a_class ["dash"]][
-             Html.div [
-               url_field;
-               title_field;
-               tags_field;
-               Html.string_input
-                 ~a:[Html.a_class ["btn btn-primary"];
-                     Html.a_onclick submit;
-                    ]
-                 ~input_type:`Submit
-                 ~value: "Envoyer !"
-                 ()
-             ]
-           ];
-         error_frame;
-       ]
-     @ Utils.msg login_state
+    (Utils.msg login_state
      @ feeds
      @ [
        Html.div ~a: [Html.a_class ["footer"]]
-         ((let n = Int64.to_int (Sql.get count#n) in
-           let offset = Int32.to_int Utils.offset in
-           (link_footer link 0
-              ((n / offset) - (if n mod offset = 0 then 1 else 0)) page)) @ [
-           Html.br ();
-           Html.br ();
-           Html.pcdata "(not so) Proudly propulsed by the inglorious \
-                        Cumulus Project, love, and the OCaml web \
-                        Framework Ocsigen"
-          ]
+         (let n = Int64.to_int (Sql.get count#n) in
+          let offset = Int32.to_int Utils.offset in
+          link_footer link 0
+            ((n / offset) - (if n mod offset = 0 then 1 else 0)) page
          )
      ]
     )
 
 let private_register () =
   User.is_connected () >>= fun state ->
-  user_info () >>= fun user ->
   let username_field =
     Eliom_content.Html5.D.string_input
       ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Pseudo"]
@@ -281,29 +281,27 @@ let private_register () =
       )
   }}
   in
-  main_style (
-    user @
-      [Html.div
-          ~a:[Html.a_class ["box"]]
-          [ Html.h1 [Html.pcdata "Inscription"];
-            Html.p [
-              username_field;
-              Html.br ();
-              password_field;
-              Html.br ();
-              password_check_field;
-              Html.br ();
-              email_field;
-              Html.br ();
-              Html.string_input
-                ~a:[Html.a_class ["btn-box"]; Html.a_onclick submit]
-                ~input_type:`Submit
-                ~value:"Valider"
-                ()
-            ]
+  main_style
+    [Html.div
+        ~a:[Html.a_class ["box"]]
+        [ Html.h1 [Html.pcdata "Inscription"];
+          Html.p [
+            username_field;
+            Html.br ();
+            password_field;
+            Html.br ();
+            password_check_field;
+            Html.br ();
+            email_field;
+            Html.br ();
+            Html.string_input
+              ~a:[Html.a_class ["btn-box"]; Html.a_onclick submit]
+              ~input_type:`Submit
+              ~value:"Valider"
+              ()
           ]
-      ]
-  )
+        ]
+    ]
 
 let feed feeds =
   feeds >>= fun feeds ->
@@ -312,7 +310,6 @@ let feed feeds =
 
 let private_preferences () =
   User.is_connected () >>= fun state ->
-  user_info () >>= fun user ->
   let password_field =
     Eliom_content.Html5.D.string_input
       ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Nouveau mot de passe"]
@@ -360,9 +357,8 @@ let private_preferences () =
       )
   }}
   in
-  main_style (
-    user @
-      if not state then
+  main_style
+    ( if not state then
         [Html.div
             ~a:[Html.a_class ["box"]]
             [Html.pcdata "Veuillez vous connecter pour accéder aux préférences."]
@@ -397,7 +393,7 @@ let private_preferences () =
               ]
             ]
         ]
-  )
+    )
 
 (* see TODO [1] *)
 let main ?(page=0) ~service () =
@@ -439,9 +435,8 @@ let tag ?(page=0) ~service tag =
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =
   User.get_login_state () >>= fun login_state ->
-  user_info () >>= fun user ->
   Feeds.feed_id_to_html (Int32.of_int id) >>= fun feed ->
-  main_style (user @ feed)
+  main_style feed
 
 let register () =
   private_register ()
