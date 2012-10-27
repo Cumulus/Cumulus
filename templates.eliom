@@ -23,6 +23,10 @@ let error_frame = Eliom_content.Html5.D.p []
          )
       );
     Lwt.return ()
+
+  let input_value field =
+    let input = Eliom_content.Html5.To_dom.of_input field in
+    Js.to_string input##value
 }}
 
 let user_form () = Lwt.return [
@@ -125,20 +129,13 @@ let main_style content =
       ()
   in
   let submit = {{ fun _ ->
-    let url_field =
-      Eliom_content.Html5.To_dom.of_input %url_field
-    and title_field =
-      Eliom_content.Html5.To_dom.of_input %title_field
-    and tags_field =
-      Eliom_content.Html5.To_dom.of_input %tags_field
-    in
     Lwt.ignore_result
       (Eliom_client.call_caml_service
          ~service:%Services.append_feed
          ()
-         ( Js.to_string url_field##value,
-           ( Js.to_string title_field##value,
-             Js.to_string tags_field##value
+         ( input_value %url_field,
+           ( input_value %title_field,
+             input_value %tags_field
            )
          )
        >>= display_error
@@ -261,23 +258,14 @@ let private_register () =
       ()
   in
   let submit = {{ fun _ ->
-    let username_field =
-      Eliom_content.Html5.To_dom.of_input %username_field
-    and password_field =
-      Eliom_content.Html5.To_dom.of_input %password_field
-    and password_check_field =
-      Eliom_content.Html5.To_dom.of_input %password_check_field
-    and email_field =
-      Eliom_content.Html5.To_dom.of_input %email_field
-    in
     Lwt.ignore_result
       (Eliom_client.call_caml_service
          ~service:%Services.add_user
          ()
-         ( Js.to_string username_field##value,
-           ( Js.to_string email_field##value,
-             ( Js.to_string password_field##value,
-               Js.to_string password_check_field##value
+         ( input_value %username_field,
+           ( input_value %email_field,
+             ( input_value %password_field,
+               input_value %password_check_field
              )
            )
          )
@@ -333,30 +321,22 @@ let private_preferences () =
       ()
   in
   let submit_password = {{ fun _ ->
-    let password_field =
-      Eliom_content.Html5.To_dom.of_input %password_field
-    and password_check_field =
-      Eliom_content.Html5.To_dom.of_input %password_check_field
-    in
     Lwt.ignore_result
       (Eliom_client.call_caml_service
          ~service:%Services.update_user_password
          ()
-         ( Js.to_string password_field##value,
-           Js.to_string password_check_field##value
+         ( input_value %password_field,
+           input_value %password_check_field
          )
        >>= display_error
       )
   }}
   and submit_email = {{ fun _ ->
-    let email_field =
-      Eliom_content.Html5.To_dom.of_input %email_field
-    in
     Lwt.ignore_result
       (Eliom_client.call_caml_service
          ~service:%Services.update_user_mail
          ()
-         (Js.to_string email_field##value)
+         (input_value %email_field)
        >>= display_error
       )
   }}
