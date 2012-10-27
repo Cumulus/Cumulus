@@ -152,12 +152,12 @@ let reload_feeds service =
       )
   }}
 
-let private_main ~page ~link ~service feeds =
+let private_main ~page ~link ~service feeds count =
   ignore (reload_feeds service);
   feeds >>= fun feeds ->
+  count >>= fun count ->
   User.get_login_state () >>= fun login_state ->
   user_info () >>= fun user ->
-  Db.count_feeds () >>= fun count ->
   let url_field =
     Eliom_content.Html5.D.string_input
       ~a:[Html.a_placeholder "URL"]
@@ -410,6 +410,7 @@ let main ?(page=0) ~service () =
     )
     ~service
     (Feeds.to_html ~starting ())
+    (Db.count_feeds ())
 
 let user ?(page=0) ~service username =
   let starting = Int32.mul (Int32.of_int page) Utils.offset in
@@ -421,6 +422,7 @@ let user ?(page=0) ~service username =
     )
     ~service
     (Feeds.author_to_html ~starting username)
+    (Db.count_feeds_with_author username)
 
 let tag ?(page=0) ~service tag =
   let starting = Int32.mul (Int32.of_int page) Utils.offset in
@@ -432,6 +434,7 @@ let tag ?(page=0) ~service tag =
     )
     ~service
     (Feeds.tag_to_html ~starting tag)
+    (Db.count_feeds_with_tag tag)
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =

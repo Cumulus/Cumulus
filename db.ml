@@ -110,6 +110,12 @@ let get_feeds ?(starting=0l) ?(number=Utils.offset) () =
     Lwt.return (feeds, tags)
   )
 
+let count_feeds () =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.view_one db (<:view< group { n = count[f] } | f in $feeds$ >>
+    )
+  )
+
 let get_feeds_with_author ?(starting=0l) ?(number=Utils.offset) author =
   Lwt_pool.use pool (fun db ->
     get_user_id_with_name author
@@ -135,6 +141,16 @@ let get_feeds_with_author ?(starting=0l) ?(number=Utils.offset) author =
     Lwt.return (feeds, tags)
   )
 
+let count_feeds_with_author author =
+  Lwt_pool.use pool (fun db ->
+    get_user_id_with_name author
+    >>= (fun author ->
+      Lwt_Query.view_one db (<:view< group { n = count[f] } | f in $feeds$; f.author = $int32:author#!id$ >>)
+    )
+    >>= fun count ->
+    Lwt.return (count)
+  )
+
 let get_feeds_with_tag ?(starting=0l) ?(number=Utils.offset) tag =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.view db (
@@ -156,6 +172,15 @@ let get_feeds_with_tag ?(starting=0l) ?(number=Utils.offset) tag =
         $in'$ t.id_feed $List.map (fun x -> x#id) feeds$ >>)
     >>= fun tags ->
     Lwt.return (feeds, tags)
+  )
+
+let count_feeds_with_tag tag =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.view_one db (<:view< group { n = count[f] }
+    | f in $feeds$; t in $feeds_tags$;
+    t.id_feed = f.id;
+    t.tag = $string:tag$ >>
+    )
   )
 
 let get_feed_url_with_url url =
@@ -184,12 +209,6 @@ let get_feed_with_id id =
         t.id_feed = $int32:id$ >>)
     >>= fun tags ->
     Lwt.return (feeds, tags)
-  )
-
-let count_feeds () =
-  Lwt_pool.use pool (fun db ->
-    Lwt_Query.view_one db (<:view< group { n = count[f] } | f in $feeds$ >>
-    )
   )
 
 let add_feed url title tags userid =
