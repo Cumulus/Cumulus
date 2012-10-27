@@ -1,11 +1,11 @@
 type feed
 
 class type feed_db = object
-  method author : Sql.int32_t macaque_type Sql.t
-  method id : Sql.int32_t macaque_type Sql.t
-  method timedate : Sql.timestamp_t macaque_type Sql.t
-  method title : Sql.string_t macaque_type Sql.t
-  method url : Sql.string_t macaque_type Sql.t
+  method author : Sql.int32_t Db.macaque_type Sql.t
+  method id : Sql.int32_t Db.macaque_type Sql.t
+  method timedate : Sql.timestamp_t Db.macaque_type Sql.t
+  method title : Sql.string_t Db.macaque_type Sql.t
+  method url : Sql.string_t Db.macaque_type Sql.t
 end
 
 val feed_new : feed_db -> string list -> feed
