@@ -62,7 +62,10 @@ let to_atom () =
     )
   )
 
-let bus = Eliom_bus.create Json.t<unit>
+let (event, private_event, call_event) =
+  let (private_event, call_event) = React.E.create () in
+  let event = Eliom_react.Down.of_react private_event in
+  (event, private_event, call_event)
 
 let append_feed (url, (title, tags)) =
   User.get_userid () >>= fun userid ->
@@ -82,5 +85,5 @@ let append_feed (url, (title, tags)) =
               title
               (List.map (fun x -> String.lowercase (Utils.strip x)) (Str.split (Str.regexp "[,]+") tags))
               author >>= fun () ->
-            Eliom_bus.write bus ();
+            call_event ();
             Lwt.return Ok

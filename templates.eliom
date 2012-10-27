@@ -140,8 +140,8 @@ let link_footer ~link min max page = match page with
 let reload_feeds service =
   Eliom_service.onload {{
     let service = %service in
-    let bus = %Feeds.bus in
-    let stream = Eliom_bus.stream bus in
+    let event = %Feeds.event in
+    let stream = Lwt_react.E.to_stream event in
     Lwt.ignore_result
       (Lwt_stream.iter
          (fun () ->
