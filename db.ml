@@ -147,8 +147,6 @@ let count_feeds_with_author author =
     >>= (fun author ->
       Lwt_Query.view_one db (<:view< group { n = count[f] } | f in $feeds$; f.author = $int32:author#!id$ >>)
     )
-    >>= fun count ->
-    Lwt.return (count)
   )
 
 let get_feeds_with_tag ?(starting=0l) ?(number=Utils.offset) tag =
