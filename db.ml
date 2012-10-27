@@ -5,17 +5,23 @@ end
 module Lwt_PGOCaml = PGOCaml_generic.Make(Lwt_thread)
 module Lwt_Query = Query.Make_with_Db(Lwt_thread)(Lwt_PGOCaml)
 
+class type ['a] macaque_type = object
+  method get : unit
+  method nul : Sql.non_nullable
+  method t : 'a
+end
+
 class type feed = object
-  method author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
-  method id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
-  method timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t
-  method title : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
-  method url : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
+  method author : Sql.int32_t macaque_type Sql.t
+  method id : Sql.int32_t macaque_type Sql.t
+  method timedate : Sql.timestamp_t macaque_type Sql.t
+  method title : Sql.string_t macaque_type Sql.t
+  method url : Sql.string_t macaque_type Sql.t
 end
 
 class type tag = object
-  method tag : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
-  method id_feed : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
+  method tag : Sql.string_t macaque_type Sql.t
+  method id_feed : Sql.int32_t macaque_type Sql.t
 end
 
 type feeds_and_tags = feed list * tag list
