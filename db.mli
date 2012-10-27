@@ -53,6 +53,14 @@ val count_feeds :
   unit ->
   <n: <get: unit; nul: Sql.non_nullable; t: Sql.int64_t> Sql.t> Lwt.t
 
+val count_feeds_with_author :
+  string ->
+  <n: <get: unit; nul: Sql.non_nullable; t: Sql.int64_t> Sql.t> Lwt.t
+
+val count_feeds_with_tag :
+  string ->
+  <n: <get: unit; nul: Sql.non_nullable; t: Sql.int64_t> Sql.t> Lwt.t
+
 val add_feed : string -> string -> string list -> int32 -> unit Lwt.t
 val add_user : string -> string -> string -> unit Lwt.t
 
