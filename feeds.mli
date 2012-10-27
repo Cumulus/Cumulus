@@ -1,6 +1,6 @@
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
-val bus : unit Eliom_bus.t
+val event : unit Eliom_react.Down.t
 
 val to_html :
   starting:int32 -> unit -> (([> Html5_types.div ] Html.elt) list) Lwt.t
