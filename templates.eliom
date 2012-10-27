@@ -29,18 +29,9 @@ let error_frame = Eliom_content.Html5.D.p []
     Js.to_string input##value
 }}
 
-let user_form () = Lwt.return [
-  Html.header
-    ~a: [Html.a_class ["line";"mod"]]
-    [
-      Html.div
-        ~a: [Html.a_class ["mod left"]] [
-          Html.a
-            ~a: [Html.a_class ["title"]]
-            ~service: Services.main
-            [Html.pcdata "Cumulus Project"] None;
-        ];
-      Html.div
+let user_form () =
+  Lwt.return
+    [ Html.div
         ~a: [Html.a_class ["mod";"right"]][
           Html.post_form
             ~a: [Html.a_class ["right"]]
@@ -62,55 +53,67 @@ let user_form () = Lwt.return [
                 ~service: Services.registration
                 [Html.pcdata "Inscription"] ();
              ]
-            ) ()
-        ]
-    ]
-]
-
-let user_information user = Lwt.return [
-  Html.header
-    ~a: [Html.a_class ["line mod"]]
-    [
-      Html.div
-        ~a: [Html.a_class ["mod left"]] [
-          Html.a
-            ~a: [Html.a_class ["title"]]
-            ~service: Services.main
-            [Html.pcdata "Cumulus Project"] None;
-        ];
-      Html.div
-        ~a: [Html.a_class ["mod";"right"]][
-          Html.post_form
-            ~a: [Html.a_class ["right"]]
-            ~service: Services.disconnect
-            (fun () ->
-              [
-                Html.p [
-                  Html.a ~a: [Html.a_class ["nav"]]
-                    ~service: Services.preferences
-                    [Html.pcdata "Préférences"] ();
-                  Html.string_input
-                    ~input_type: `Submit
-                    ~value: "Déconnexion"
-                    ();
-                  Html.img
-                    ~alt: (Sql.get user#name)
-                    ~src: (
-                      Html.make_uri
-                        ~service: (Utils.get_gravatar (Sql.get user#email))
-                        (30, "identicon")) ();
-                ]])
+            )
             ()
         ]
     ]
-]
+
+let user_information user =
+  Lwt.return
+    [ Html.div
+        ~a:[Html.a_class ["mod";"right"]]
+        [ Html.post_form
+            ~a:[Html.a_class ["right"]]
+            ~service:Services.disconnect
+            (fun () ->
+              [ Html.p
+                  [ Html.a
+                      ~a:[Html.a_class ["nav"]]
+                      ~service:Services.preferences
+                      [Html.pcdata "Préférences"]
+                      ();
+                    Html.string_input
+                      ~input_type:`Submit
+                      ~value:"Déconnexion"
+                      ();
+                    Html.img
+                      ~alt:(Sql.get user#name)
+                      ~src:(
+                        Html.make_uri
+                          ~service: (Utils.get_gravatar (Sql.get user#email))
+                          (30, "identicon")
+                      )
+                      ();
+                  ]
+              ]
+            )
+            ()
+        ]
+    ]
 
 let user_info () =
-  User.get_user_and_email () >>= function
+  User.get_user_and_email () >>= (function
     | Some user -> user_information user
     | None -> user_form ()
+  )
+  >>= fun content ->
+  Lwt.return
+    [ Html.header
+        ~a:[Html.a_class ["line mod"]]
+        ( [ Html.div
+              ~a:[Html.a_class ["mod left"]]
+              [ Html.a
+                  ~a:[Html.a_class ["title"]]
+                  ~service: Services.main
+                  [Html.pcdata "Cumulus Project"]
+                  None;
+              ];
+          ]
+          @ content
+        )
+    ]
 
-let main_style content =
+let main_style content footer =
   user_info () >>= fun user ->
   let url_field =
     Eliom_content.Html5.D.string_input
@@ -182,11 +185,17 @@ let main_style content =
                   error_frame;
                 ]
               @ content
-              @ [Html.br ();
-                 Html.br ();
-                 Html.pcdata "(not so) Proudly propulsed by the inglorious \
-                              Cumulus Project, love, and the OCaml web \
-                              Framework Ocsigen";
+              @ [ Html.div
+                    ~a:[Html.a_class ["footer"]]
+                    ( footer
+                      @ [ Html.br ();
+                          Html.br ();
+                          Html.pcdata
+                            "(not so) Proudly propulsed by the inglorious \
+                             Cumulus Project, love, and the OCaml web \
+                             Framework Ocsigen";
+                        ]
+                    )
                 ]
              )
          ]
@@ -222,16 +231,14 @@ let private_main ~page ~link ~service feeds count =
   count >>= fun count ->
   User.get_login_state () >>= fun login_state ->
   main_style
-    (Utils.msg login_state
-     @ feeds
-     @ [
-       Html.div ~a: [Html.a_class ["footer"]]
-         (let n = Int64.to_int (Sql.get count#n) in
-          let offset = Int32.to_int Utils.offset in
-          link_footer link 0
-            ((n / offset) - (if n mod offset = 0 then 1 else 0)) page
-         )
-     ]
+    (Utils.msg login_state @ feeds)
+    (let n = Int64.to_int (Sql.get count#n) in
+     let offset = Int32.to_int Utils.offset in
+     link_footer
+       link
+       0
+       ((n / offset) - (if n mod offset = 0 then 1 else 0))
+       page
     )
 
 let private_register () =
@@ -294,11 +301,12 @@ let private_register () =
           ]
         ]
     ]
+    []
 
 let feed feeds =
   feeds >>= fun feeds ->
   User.is_connected () >>= fun state ->
-  main_style feeds
+  main_style feeds []
 
 let private_preferences () =
   User.is_connected () >>= fun state ->
@@ -378,6 +386,7 @@ let private_preferences () =
             ]
         ]
     )
+    []
 
 (* see TODO [1] *)
 let main ?(page=0) ~service () =
@@ -420,7 +429,7 @@ let tag ?(page=0) ~service tag =
 let view_feed id =
   User.get_login_state () >>= fun login_state ->
   Feeds.feed_id_to_html (Int32.of_int id) >>= fun feed ->
-  main_style feed
+  main_style feed []
 
 let register () =
   private_register ()
