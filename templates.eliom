@@ -1,9 +1,6 @@
-let error_frame = Eliom_content.Html5.D.p []
-
 {client{
-  let display_error error_frame error =
+  let display_error error_frame =
     let error_frame = Eliom_content.Html5.To_dom.of_p error_frame in
-    error_frame##innerHTML <- Js.string error;
     let id_timeout = ref None in
     id_timeout := Some
       (Dom_html.window##setTimeout
@@ -17,8 +14,7 @@ let error_frame = Eliom_content.Html5.D.p []
             ),
           5_000.
          )
-      );
-    Lwt.return ()
+      )
 
   let input_value field =
     let input = Eliom_content.Html5.To_dom.of_input field in
@@ -111,36 +107,11 @@ let user_info () =
 
 let main_style content footer =
   user_info () >>= fun user ->
-  let url_field =
-    Eliom_content.Html5.D.string_input
-      ~a:[Html.a_placeholder "URL"]
-      ~input_type:`Text
-      ()
-  and title_field =
-    Eliom_content.Html5.D.string_input
-      ~a:[Html.a_placeholder "Titre"]
-      ~input_type:`Text
-      ()
-  and tags_field =
-    Eliom_content.Html5.D.string_input
-      ~a:[Html.a_placeholder "Tags"]
-      ~input_type:`Text
-      ()
-  in
-  let submit = {{
-    Lwt.ignore_result
-      (Eliom_client.call_caml_service
-         ~service:%Services.append_feed
-         ()
-         ( input_value %url_field,
-           ( input_value %title_field,
-             input_value %tags_field
-           )
-         )
-       >>= display_error %error_frame
-      )
-  }}
-  in
+  Errors.get_error () >>= fun error ->
+  let error_frame = Eliom_content.Html5.D.p [Html.pcdata error] in
+  Eliom_service.onload {{
+    display_error %error_frame
+  }};
   Lwt.return
     (Html.html
        (Html.head
@@ -165,18 +136,31 @@ let main_style content footer =
              (user
               @ [ Html.div
                     ~a:[Html.a_class ["dash"]]
-                    [ Html.div
-                        [ url_field;
-                          title_field;
-                          tags_field;
+                    [ Html.post_form
+                        ~service:Services.append_feed
+                        (fun (url_name, (title_name, tags_name)) -> [
                           Html.string_input
-                            ~a:[ Html.a_class ["btn btn-primary"];
-                                 Html.a_onclick submit;
-                               ]
+                            ~a:[Html.a_placeholder "URL"]
+                            ~input_type:`Text
+                            ~name:url_name
+                            ();
+                          Html.string_input
+                            ~a:[Html.a_placeholder "Titre"]
+                            ~input_type:`Text
+                            ~name:title_name
+                            ();
+                          Html.string_input
+                            ~a:[Html.a_placeholder "Tags"]
+                            ~input_type:`Text
+                            ~name:tags_name
+                            ();
+                          Html.string_input
+                            ~a:[Html.a_class ["btn btn-primary"]]
                             ~input_type:`Submit
                             ~value: "Envoyer !"
                             ()
-                        ]
+                         ])
+                        ()
                     ];
                   error_frame;
                 ]
@@ -225,9 +209,8 @@ let private_main ~page ~link ~service feeds count =
   ignore (reload_feeds service);
   feeds >>= fun feeds ->
   count >>= fun count ->
-  User.get_login_state () >>= fun login_state ->
   main_style
-    (Utils.msg login_state @ feeds)
+    feeds
     (let n = Int64.to_int (Sql.get count#n) in
      let offset = Int32.to_int Utils.offset in
      link_footer
@@ -239,63 +222,45 @@ let private_main ~page ~link ~service feeds count =
 
 let private_register () =
   User.is_connected () >>= fun state ->
-  let username_field =
-    Eliom_content.Html5.D.string_input
-      ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Pseudo"]
-      ~input_type:`Text
-      ()
-  and password_field =
-    Eliom_content.Html5.D.string_input
-      ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Mot de passe"]
-      ~input_type:`Password
-      ()
-  and password_check_field =
-    Eliom_content.Html5.D.string_input
-      ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Confirmation"]
-      ~input_type:`Password
-      ()
-  and email_field =
-    Eliom_content.Html5.D.string_input
-      ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Email"]
-      ~input_type:`Text
-      ()
-  in
-  let submit = {{
-    Lwt.ignore_result
-      (Eliom_client.call_caml_service
-         ~service:%Services.add_user
-         ()
-         ( input_value %username_field,
-           ( input_value %email_field,
-             ( input_value %password_field,
-               input_value %password_check_field
-             )
-           )
-         )
-       >>= display_error %error_frame
-      )
-  }}
-  in
   main_style
-    [Html.div
+    [Html.post_form
         ~a:[Html.a_class ["box"]]
-        [ Html.h1 [Html.pcdata "Inscription"];
+        ~service:Services.add_user
+        (fun (username_name, (email_name, (password_name, password_check))) -> [
+          Html.h1 [Html.pcdata "Inscription"];
           Html.p [
-            username_field;
-            Html.br ();
-            password_field;
-            Html.br ();
-            password_check_field;
-            Html.br ();
-            email_field;
+            Html.string_input
+              ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Pseudo"]
+              ~input_type:`Text
+              ~name:username_name
+              ();
             Html.br ();
             Html.string_input
-              ~a:[Html.a_class ["btn-box"]; Html.a_onclick submit]
+              ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Mot de passe"]
+              ~input_type:`Password
+              ~name:email_name
+              ();
+            Html.br ();
+            Html.string_input
+              ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Confirmation"]
+              ~input_type:`Password
+              ~name:password_name
+              ();
+            Html.br ();
+            Html.string_input
+              ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Email"]
+              ~input_type:`Text
+              ~name:password_check
+              ();
+            Html.br ();
+            Html.string_input
+              ~a:[Html.a_class ["btn-box"]]
               ~input_type:`Submit
               ~value:"Valider"
               ()
           ]
-        ]
+        ])
+        ()
     ]
     []
 
@@ -306,45 +271,6 @@ let feed feeds =
 
 let private_preferences () =
   User.is_connected () >>= fun state ->
-  let password_field =
-    Eliom_content.Html5.D.string_input
-      ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Nouveau mot de passe"]
-      ~input_type:`Password
-      ()
-  and password_check_field =
-    Eliom_content.Html5.D.string_input
-      ~a:[Html.a_class ["input-box"];
-          Html.a_placeholder "Confirmer le nouveau mot de passe";
-         ]
-      ~input_type:`Password
-      ()
-  and email_field =
-    Eliom_content.Html5.D.string_input
-      ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Nouvelle adresse"]
-      ~input_type:`Text
-      ()
-  in
-  let submit_password = {{
-    Lwt.ignore_result
-      (Eliom_client.call_caml_service
-         ~service:%Services.update_user_password
-         ()
-         ( input_value %password_field,
-           input_value %password_check_field
-         )
-       >>= display_error %error_frame
-      )
-  }}
-  and submit_email = {{
-    Lwt.ignore_result
-      (Eliom_client.call_caml_service
-         ~service:%Services.update_user_mail
-         ()
-         (input_value %email_field)
-       >>= display_error %error_frame
-      )
-  }}
-  in
   main_style
     ( if not state then
         [Html.div
@@ -352,34 +278,58 @@ let private_preferences () =
             [Html.pcdata "Veuillez vous connecter pour accéder aux préférences."]
         ]
       else
-        [ Html.div
-            ~a:[Html.a_class ["box"]] [
+        [ Html.post_form
+            ~a:[Html.a_class ["box"]]
+            ~service:Services.update_user_password
+            (fun (password_name, password_check) -> [
               Html.h1 [Html.pcdata "Modifier le mot de passe"] ;
               Html.p [
-                password_field;
-                Html.br ();
-                password_check_field;
+                Html.string_input
+                  ~a:[Html.a_class ["input-box"];
+                      Html.a_placeholder "Nouveau mot de passe"
+                     ]
+                  ~input_type:`Password
+                  ~name:password_name
+                  ();
                 Html.br ();
                 Html.string_input
-                  ~a:[Html.a_class ["btn-box"]; Html.a_onclick submit_password]
+                  ~a:[Html.a_class ["input-box"];
+                      Html.a_placeholder "Confirmer le nouveau mot de passe";
+                     ]
+                  ~input_type:`Password
+                  ~name:password_check
+                  ();
+                Html.br ();
+                Html.string_input
+                  ~a:[Html.a_class ["btn-box"]]
                   ~input_type:`Submit
                   ~value:"Valider"
                   ()
               ]
-            ];
-          Html.div
-            ~a:[Html.a_class ["box"]] [
+            ])
+            ();
+          Html.post_form
+            ~a:[Html.a_class ["box"]]
+            ~service:Services.update_user_mail
+            (fun email_name -> [
               Html.h1 [Html.pcdata "Changer d'adresse mail"];
               Html.p [
-                email_field;
+                Html.string_input
+                  ~a:[Html.a_class ["input-box"];
+                      Html.a_placeholder "Nouvelle adresse"
+                     ]
+                  ~input_type:`Text
+                  ~name:email_name
+                  ();
                 Html.br ();
                 Html.string_input
-                  ~a:[Html.a_class ["btn-box"]; Html.a_onclick submit_email]
+                  ~a:[Html.a_class ["btn-box"]]
                   ~input_type:`Submit
                   ~value:"Valider"
                   ()
               ]
-            ]
+            ])
+            ()
         ]
     )
     []
@@ -423,7 +373,6 @@ let tag ?(page=0) ~service tag =
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =
-  User.get_login_state () >>= fun login_state ->
   Feeds.feed_id_to_html (Int32.of_int id) >>= fun feed ->
   main_style feed []
 
