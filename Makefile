@@ -17,6 +17,8 @@ SERVER_FILES := html.ml \
 		db.mli \
 		db.ml \
 		services.ml \
+		errors.mli \
+		errors.ml \
 		user.mli \
 		user.ml \
 		feed.mli \
