@@ -238,19 +238,19 @@ let private_register () =
             Html.string_input
               ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Mot de passe"]
               ~input_type:`Password
-              ~name:email_name
+              ~name:password_name
               ();
             Html.br ();
             Html.string_input
               ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Confirmation"]
               ~input_type:`Password
-              ~name:password_name
+              ~name:password_check
               ();
             Html.br ();
             Html.string_input
               ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Email"]
               ~input_type:`Text
-              ~name:password_check
+              ~name:email_name
               ();
             Html.br ();
             Html.string_input
