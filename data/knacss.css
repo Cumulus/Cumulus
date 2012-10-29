@@ -41,7 +41,6 @@ body {
     background-color: #ffffff;
     color: #000;
     font-family: "Century Gothic", arial, helvetica, sans-serif;
-    line-height: 15px; /* adapt to your design */
 }
 
 header img {
@@ -363,6 +362,7 @@ header {
 }
 
 .post {
+  line-height: 15px; /* adapt to your design */
   margin-left: 10%;
   margin-right: 10%;
   margin-bottom: 5px;
@@ -441,7 +441,7 @@ img {
 .title {
   font-family: "Helvetica";
   text-decoration: none;
-  padding-top: 0.3em;
+  padding-top: 0.5em;
   font-size: 2.5em;
 }
 
