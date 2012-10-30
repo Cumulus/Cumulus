@@ -1,9 +1,9 @@
 module Calendar = CalendarLib.Calendar
 
 class type feed_db = object
-  method author : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
-  method id : < get : unit; nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
-  method timedate : < get : unit; nul : Sql.non_nullable; t : Sql.timestamp_t > Sql.t
+  method author : Sql.int32_t Db.macaque_type Sql.t
+  method id : Sql.int32_t Db.macaque_type Sql.t
+  method timedate : Sql.timestamp_t Db.macaque_type Sql.t
   method description : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
   method url : < get : unit; nul : Sql.nullable; t : Sql.string_t > Sql.t
   method parent : < get : unit; nul : Sql.nullable; t : Sql.int32_t > Sql.t
@@ -82,7 +82,7 @@ let to_html self =
            | n -> [Html.pcdata ((string_of_int n) ^ " commentaires ")])
          (* [Html.pcdata (string_to_int (Int64.to_int comments)) " commentaires "] *)
          (* url_of_title or url_of_desc ? *)
-         (Int32.to_int self.id, Utils.url_of_title self.description);
+         (Int32.to_int self.id, Utils.strip self.description);
        Html.pcdata "Tags: "
       ];
       links_of_tags self.tags;
