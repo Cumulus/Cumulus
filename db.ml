@@ -109,7 +109,8 @@ let get_feeds ?(starting=0l) ?(number=Utils.offset) () =
       } order by f.id desc
         limit $int32:number$
         offset $int32:starting$ |
-          f in $feeds$ >>)
+          f in $feeds$;
+          is_null f.parent; >>)
     >>= fun feeds ->
     Lwt_Query.view db (<:view< {
       t.tag;
@@ -139,6 +140,7 @@ let get_feeds_with_author ?(starting=0l) ?(number=Utils.offset) author =
           f.parent;
         } order by f.id desc limit $int32:number$ offset $int32:starting$ |
           f in $feeds$;
+          is_null f.parent;
           f.author = $int32:author#!id$ >>)
     )
     >>= fun feeds ->
@@ -240,7 +242,7 @@ let add_feed url description tags userid =
         description = $string:description$;
         timedate = feeds?timedate;
         author = $int32:userid$;
-        parent = null
+        parent = null;
       } >>)
     )
   and tag =
