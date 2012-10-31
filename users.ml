@@ -6,7 +6,8 @@ let connect_user username password =
       User.connect user password
 
 let add_user (name, (email, (password, password_check))) =
-  if password <> password_check then
+  if (password <> password_check) 
+  || (not (Str.string_match (Str.regexp "\\([^<>(),; \t]+@[^<>(),; \t]+\\)") email 0)) then
     Lwt.return false
   else
     Db.get_user_with_name name >>= function
@@ -24,7 +25,10 @@ let update_user_password ((password, password_check)) =
     Lwt.return false
 
 let update_user_mail (email) =
-  Lwt.return false
+  if (Str.string_match (Str.regexp "\\([^<>(),; \t]+@[^<>(),; \t]+\\)") email 0) then
+    Lwt.return true
+  else
+    Lwt.return false
 (*
   Dans un premier temps, il faut verifier que l'adresse email renseignee est valide (bien un @, pas d'espace...)
   Il faut faire un appel en BDD pour changer le mail de l'utilisateur
