@@ -200,10 +200,9 @@ let reload_feeds service =
     let event = %Feeds.event in
     let stream = Lwt_react.E.to_stream event in
     Lwt.ignore_result
-      (Lwt_stream.iter
+      (Lwt_stream.iter_s
          (fun () ->
-           Lwt.ignore_result
-             (Eliom_client.change_page ~service () ())
+           Eliom_client.change_page ~service () ()
          )
          stream
       )

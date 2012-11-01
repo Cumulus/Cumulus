@@ -68,7 +68,7 @@ let () =
         | true -> Lwt.return "Vous êtes bien enregistré"
         | false ->
             Lwt.return
-              "L'utilisateur existe deja, ou le mot de passe est invalide"
+              "L'utilisateur existe deja, ou une information est invalide"
       )
       >>= Errors.set_error
     );
