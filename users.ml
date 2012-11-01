@@ -5,16 +5,21 @@ let connect_user username password =
       let user = User.user_new user in
       User.connect user password
 
-let add_user (name, (email, (password, password_check))) =
-  if (password <> password_check) 
-  || (not (Str.string_match (Str.regexp "\\([^<>(),; \t]+@[^<>(),; \t]+\\)") email 0)) then
-    Lwt.return false
-  else
-    Db.get_user_with_name name >>= function
-      | (Some _) -> Lwt.return false
-      | None ->
-        User.add name password email >>= fun () ->
-        Lwt.return true
+let add_user = function
+  | ("", ((_ as email), ((_ as password), (_ as password_check))))
+  | (_, (("" as email), ((_ as password), (_ as password_check))))
+  | (_, ((_ as email), (("" as password), (_ as password_check))))
+  | (_, ((_ as email), ((_ as password), ("" as password_check))))
+  | (_, (email, (password, password_check)))
+      when password <> password_check
+        || Utils.is_invalid_email email ->
+      Lwt.return false
+  | (name, (email, (password, password_check))) ->
+      Db.get_user_with_name name >>= function
+        | (Some _) -> Lwt.return false
+        | None ->
+            User.add name password email >>= fun () ->
+            Lwt.return true
 
 let update_user_password = function
   | (("" as password), (_ as password_check))
