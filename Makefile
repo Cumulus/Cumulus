@@ -25,8 +25,6 @@ SERVER_FILES := html.ml \
 		feed.ml \
 		feeds.mli \
 		feeds.ml \
-		users.mli \
-		users.ml \
 		templates.eliomi \
 		templates.eliom \
 		main.ml
