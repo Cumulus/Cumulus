@@ -11,6 +11,7 @@ class type feed = object
   method description : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
   method url : < get : unit; nul : Sql.nullable; t : Sql.string_t > Sql.t
   method parent : < get : unit; nul : Sql.nullable; t : Sql.int32_t > Sql.t
+  method root : < get : unit; nul : Sql.nullable; t : Sql.int32_t > Sql.t
 end
 
 class type tag = object

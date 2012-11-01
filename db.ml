@@ -18,6 +18,7 @@ class type feed = object
   method description : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
   method url : < get : unit; nul : Sql.nullable; t : Sql.string_t > Sql.t
   method parent : < get : unit; nul : Sql.nullable; t : Sql.int32_t > Sql.t
+  method root : < get : unit; nul : Sql.nullable; t : Sql.int32_t > Sql.t
 end
 
 class type tag = object
@@ -51,7 +52,8 @@ let feeds = (<:table< feeds (
   description text NOT NULL,
   timedate timestamp NOT NULL DEFAULT(current_timestamp),
   author integer NOT NULL,
-  parent integer
+  parent integer,
+  root integer
 ) >>)
 
 let feeds_tags_id_seq = (<:sequence< serial "feeds_tags_id_seq" >>)
@@ -106,6 +108,7 @@ let get_feeds ?(starting=0l) ?(number=Utils.offset) () =
         f.timedate;
         f.author;
         f.parent;
+        f.root;
       } order by f.id desc
         limit $int32:number$
         offset $int32:starting$ |
@@ -138,6 +141,7 @@ let get_feeds_with_author ?(starting=0l) ?(number=Utils.offset) author =
           f.timedate;
           f.author;
           f.parent;
+          f.root;
         } order by f.id desc limit $int32:number$ offset $int32:starting$ |
           f in $feeds$;
           is_null f.parent;
@@ -171,6 +175,7 @@ let get_feeds_with_tag ?(starting=0l) ?(number=Utils.offset) tag =
         f.timedate;
         f.author;
         f.parent;
+        f.root;
       } order by f.id desc limit $int32:number$ offset $int32:starting$ |
         f in $feeds$; t in $feeds_tags$;
         t.tag = $string:tag$;
@@ -211,6 +216,7 @@ let get_feed_with_id id =
         f.timedate;
         f.author;
         f.parent;
+        f.root;
       } | f in $feeds$;
           f.id = $int32:id$ >>)
     >>= fun feeds ->
@@ -243,6 +249,7 @@ let add_feed url description tags userid =
         timedate = feeds?timedate;
         author = $int32:userid$;
         parent = null;
+        root = null;
       } >>)
     )
   and tag =
