@@ -39,6 +39,12 @@ let is_invalid_url input =
       "\\(#"   ^ legit_chars ^ "*\\)?$"                (* Anchor *) in
   not (Str.string_match (Str.regexp regexp_match_url) input 0)
 
+let is_invalid_email =
+  let email_regexp = Str.regexp "\\([^<>(),; \t]+@[^<>(),; \t]+\\)" in
+  (fun email ->
+    not (Str.string_match email_regexp email 0)
+  )
+
 let get_gravatar email =
   let md5_email = Digest.to_hex (Digest.string (String.lowercase email))
   in Eliom_service.external_service

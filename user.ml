@@ -68,3 +68,13 @@ let disconnect () =
     | true -> Eliom_reference.unset current_user >>= (fun () ->
       Lwt.return true)
     | false -> Lwt.return false
+
+let update_password password =
+  get_userid () >>= function
+    | None -> Lwt.return ()
+    | Some id -> Db.update_user_password id (hash_password password)
+
+let update_email email =
+  get_userid () >>= function
+    | None -> Lwt.return ()
+    | Some id -> Db.update_user_email id email

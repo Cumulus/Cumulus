@@ -19,3 +19,5 @@ val get_user_and_email :
   < email: Sql.string_t Db.macaque_type Sql.t;
   name : Sql.string_t Db.macaque_type Sql.t >
     option Lwt.t
+val update_password : string -> unit Lwt.t
+val update_email : string -> unit Lwt.t

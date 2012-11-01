@@ -16,20 +16,19 @@ let add_user (name, (email, (password, password_check))) =
         User.add name password email >>= fun () ->
         Lwt.return true
 
+let update_user_password = function
+  | (("" as password), (_ as password_check))
+  | ((_ as password), ("" as password_check))
+  | (password, password_check) when password <> password_check ->
+      Lwt.return false
+  | (password, _) ->
+      User.update_password password >>= fun () ->
+      Lwt.return true
 
-let update_user_password ((password, password_check)) =
-  if password <> password_check then
-    Lwt.return false
-  else
-    (* Il faut faire un appel en BDD pour changer le mot de passe de l'utilisateur *)
-    Lwt.return false
-
-let update_user_mail (email) =
-  if (Str.string_match (Str.regexp "\\([^<>(),; \t]+@[^<>(),; \t]+\\)") email 0) then
-    Lwt.return true
-  else
-    Lwt.return false
-(*
-  Dans un premier temps, il faut verifier que l'adresse email renseignee est valide (bien un @, pas d'espace...)
-  Il faut faire un appel en BDD pour changer le mail de l'utilisateur
-*)
+let update_user_mail = function
+  | "" as email
+  | email when Utils.is_invalid_email email ->
+      Lwt.return false
+  | email ->
+      User.update_email email >>= fun () ->
+      Lwt.return true
