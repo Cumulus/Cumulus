@@ -68,6 +68,9 @@ val count_feeds_with_tag :
 val count_comments :
   int32 ->
   < n : Sql.int64_t macaque_type Sql.t > Lwt.t
+val get_comments :
+  int32 ->
+  feeds_and_tags Lwt.t 
 
 val add_feed : string -> string -> string list -> int32 -> unit Lwt.t
 val add_user : string -> string -> string -> unit Lwt.t

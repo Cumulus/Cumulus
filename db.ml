@@ -308,6 +308,29 @@ let is_feed_author feed userid =
 *
 *)
 
+let get_comments root = 
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.view db (
+      <:view< {
+        f.id;
+        f.url;
+        f.description;
+        f.timedate;
+        f.author;
+        f.parent;
+        f.root;
+      } order by f.timedate desc |
+        f in $feeds$;
+        f.root = $int32:root$; >>)
+    >>= fun feeds ->
+    Lwt_Query.view db (<:view< {
+      t.tag;
+      t.id_feed;
+    } | t in $feeds_tags$ >>)
+    >>= fun tags ->
+    Lwt.return (feeds, tags)
+  )
+
 let delete_feed feed userid =
   is_feed_author feed userid >>= function
     | true ->
