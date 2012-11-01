@@ -39,7 +39,7 @@ let () =
   Eliom_registration.Action.register
     ~service: Services.auth
     (fun () (username, password) ->
-      Users.connect_user username password >>= (function
+      User.connect username password >>= (function
         | User.Already_connected -> Lwt.return "Déjà connecté"
         | User.Ok -> Lwt.return "Connecté"
         | User.Bad_password -> Lwt.return "Mauvais mot de passe"
@@ -64,18 +64,18 @@ let () =
   Eliom_registration.Action.register
     ~service:Services.add_user
     (fun () data ->
-      Users.add_user data >>= (function
+      User.add data >>= (function
         | true -> Lwt.return "Vous êtes bien enregistré"
         | false ->
             Lwt.return
-              "L'utilisateur existe deja, ou le mot de passe est invalide"
+              "L'utilisateur existe deja, ou une information est invalide"
       )
       >>= Errors.set_error
     );
   Eliom_registration.Action.register
     ~service:Services.update_user_mail
     (fun () data ->
-      Users.update_user_mail data >>= (function
+      User.update_email data >>= (function
         | true -> Lwt.return "Modification de l'adresse mail effectuée"
         | false -> Lwt.return "Adresse invalide"
       )
@@ -84,7 +84,7 @@ let () =
   Eliom_registration.Action.register
     ~service:Services.update_user_password
     (fun () data ->
-      Users.update_user_password data >>= (function
+      User.update_password data >>= (function
         | true -> Lwt.return "Mot de passe changé."
         | false ->
             Lwt.return

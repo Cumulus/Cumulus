@@ -313,3 +313,17 @@ let delete_feed feed userid =
         )
     | false ->
         Lwt.return ()
+
+let update_user_password userid password =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.query db (<:update< u in $users$ := {
+      password = $string:password$;
+    } | u.id = $int32:userid$ >>)
+  )
+
+let update_user_email userid email =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.query db (<:update< u in $users$ := {
+      email = $string:email$;
+    } | u.id = $int32:userid$ >>)
+  )

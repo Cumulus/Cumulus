@@ -73,3 +73,6 @@ val add_user : string -> string -> string -> unit Lwt.t
 
 val is_feed_author : int32 -> int32 -> bool Lwt.t
 val delete_feed : int32 -> int32 -> unit Lwt.t
+
+val update_user_password : int32 -> string -> unit Lwt.t
+val update_user_email : int32 -> string -> unit Lwt.t
