@@ -1,13 +1,5 @@
 module Calendar = CalendarLib.Calendar
 
-class type feed_db = object
-  method author : Sql.int32_t Db.macaque_type Sql.t
-  method id : Sql.int32_t Db.macaque_type Sql.t
-  method timedate : Sql.timestamp_t Db.macaque_type Sql.t
-  method title : Sql.string_t Db.macaque_type Sql.t
-  method url : Sql.string_t Db.macaque_type Sql.t
-end
-
 type feed = {
   id : int32;
   url : string;
