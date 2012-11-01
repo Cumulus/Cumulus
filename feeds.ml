@@ -47,6 +47,15 @@ let feed_id_to_html id =
   >>= feeds_of_db
   >>= private_to_html
 
+let feed_id_to_html_with_comments id =
+  Db.get_feed_with_id id
+  >>= (fun root ->
+  Db.get_comments id
+  >>= (fun comments ->
+    Lwt.return ((fst root) @ (fst comments), (snd root) @ (snd comments))))
+  >>= feeds_of_db
+  >>= private_to_html
+
 (* FIXME? should atom feed return only a limited number of links ? *)
 let to_atom () =
   Db.get_feeds ~number:100l ()
