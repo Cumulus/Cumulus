@@ -25,7 +25,7 @@ let msg str = [
   ]
 ]
 
-let is_invalid_url input =
+let is_invalid_url =
   let regexp_match_url =
     let legit_chars = "[]0-9A-Za-z_~().,+=&%-]" in
     let num = "[0-9]?" in
@@ -37,7 +37,9 @@ let is_invalid_url input =
       "\\(/"   ^ legit_chars ^ "*\\)*" ^               (* Arborescence *)
       "\\(\\?" ^ legit_chars ^ "*\\)?" ^               (* Parameters *)
       "\\(#"   ^ legit_chars ^ "*\\)?$"                (* Anchor *) in
-  not (Str.string_match (Str.regexp regexp_match_url) input 0)
+  (fun input ->
+    not (Str.string_match (Str.regexp regexp_match_url) input 0)
+  )
 
 let is_invalid_email =
   let email_regexp = Str.regexp "\\([^<>(),; \t]+@[^<>(),; \t]+\\)" in
