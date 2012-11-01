@@ -293,21 +293,6 @@ let is_feed_author feed userid =
     Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
     Lwt.return false
 
-(* Requête pour récupérer le commentaires et tout ses enfants:
-*
-* WITH RECURSIVE CTE AS (
-* -- INIT
-*   SELECT id AS FID, description AS FDESC FROM feeds
-*   WHERE id = $id$
-*   UNION ALL
-* -- RECURSION
-*   SELECT id AS BID, description AS BDESC FROM feeds
-*   INNER JOIN CTE AS rec
-*   ON parent = REC.FID
-* ) SELECT FID AS id, FDESC AS description FROM CTE;
-*
-*)
-
 let get_comments root = 
   Lwt_pool.use pool (fun db ->
     Lwt_Query.view db (
