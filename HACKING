@@ -5,8 +5,7 @@ Files purposes:
  - html.ml: Just a file to avoid redundant: module Html = Eliom_content.Html5.F
  - services.ml: All services definition
  - templates.ml: All Html templates and generation.
- - user.ml: All operations on one user.
- - users.ml: All operations on multiples users + interfaces with the database though db.ml.
+ - user.ml: All operations on one user + interfaces with the database though db.ml.
  - utils.ml Other useful function that cannot be classified or for more general functions.
  - *.mli: For all module that have private content/functions.
 
