@@ -59,6 +59,11 @@ let update_user_password =
                                       (string "password_check"))
     ()
 
+let update_user_feeds_per_page =
+  Eliom_service.post_coservice'
+    ~post_params: Eliom_parameter.((int "feeds_per_page"))
+    ()
+
 let registration =
   Eliom_service.service
     ~path: ["registration"]

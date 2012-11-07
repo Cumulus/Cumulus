@@ -27,20 +27,7 @@ let private_to_html data =
       )
     ) data
 
-let author_to_html ~starting author =
-  Db.get_feeds_with_author ~starting author
-  >>= feeds_of_db
-  >>= private_to_html
-
-let tag_to_html ~starting tag =
-  Db.get_feeds_with_tag ~starting tag
-  >>= feeds_of_db
-  >>= private_to_html
-
-let to_html ~starting () =
-  Db.get_feeds ~starting ()
-  >>= feeds_of_db
-  >>= private_to_html
+let to_html feeds = feeds_of_db feeds >>= private_to_html
 
 let feed_id_to_html id =
   Db.get_feed_with_id id
@@ -49,7 +36,7 @@ let feed_id_to_html id =
 
 (* FIXME? should atom feed return only a limited number of links ? *)
 let to_atom () =
-  Db.get_feeds ~number:100l ()
+  Db.get_feeds 0l 10l
   >>= feeds_of_db
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->

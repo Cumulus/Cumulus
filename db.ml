@@ -26,6 +26,8 @@ end
 
 type feeds_and_tags = feed list * tag list
 
+type feed_generator = int32 -> int32 -> feeds_and_tags Lwt.t
+
 let connect () =
   Lwt_PGOCaml.connect
     ~database: "cumulus"
@@ -67,7 +69,8 @@ let users = (<:table< users (
   name text NOT NULL,
   password text NOT NULL,
   email text NOT NULL,
-  is_admin boolean NOT NULL DEFAULT(false)
+  is_admin boolean NOT NULL DEFAULT(false),
+  feeds_per_page integer NOT NULL DEFAULT(10)
 ) >>)
 
 let rec in' value = function
@@ -94,7 +97,7 @@ let get_user_with_name name =
         a in $users$; a.name = $string:name$ >>)
   )
 
-let get_feeds ?(starting=0l) ?(number=Utils.offset) () =
+let get_feeds starting number =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.view db (
       <:view< {
@@ -122,7 +125,7 @@ let count_feeds () =
     )
   )
 
-let get_feeds_with_author ?(starting=0l) ?(number=Utils.offset) author =
+let get_feeds_with_author author starting number =
   Lwt_pool.use pool (fun db ->
     get_user_id_with_name author
     >>= (fun author ->
@@ -155,7 +158,7 @@ let count_feeds_with_author author =
     )
   )
 
-let get_feeds_with_tag ?(starting=0l) ?(number=Utils.offset) tag =
+let get_feeds_with_tag tag starting number =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.view db (
       <:view< {
@@ -253,6 +256,7 @@ let add_user name password email =
       password = $string:password$;
       email = $string:email$;
       is_admin = users?is_admin;
+      feeds_per_page = 10;
     } >>)
   )
 
@@ -295,5 +299,12 @@ let update_user_email userid email =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.query db (<:update< u in $users$ := {
       email = $string:email$;
+    } | u.id = $int32:userid$ >>)
+  )
+
+let update_user_feeds_per_page userid nb_feeds =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.query db (<:update< u in $users$ := {
+      feeds_per_page = $int32:nb_feeds$;
     } | u.id = $int32:userid$ >>)
   )

@@ -56,3 +56,7 @@ let get_gravatar email =
 let strip str =
   let str = Str.replace_first (Str.regexp "^[ ]+") "" str in
   Str.replace_first (Str.regexp "[ ]+$") "" str
+
+let from_option default = function
+  | None -> default
+  | Some x -> x

@@ -18,6 +18,7 @@ class type tag = object
 end
 
 type feeds_and_tags = feed list * tag list
+type feed_generator = int32 -> int32 -> feeds_and_tags Lwt.t
 
 val get_user_name_and_email_with_id :
   int32 ->
@@ -30,23 +31,12 @@ val get_user_with_name :
   id : Sql.int32_t macaque_type Sql.t;
   name : Sql.string_t macaque_type Sql.t;
   password : Sql.string_t macaque_type Sql.t;
-  is_admin : Sql.bool_t macaque_type Sql.t >
+  is_admin : Sql.bool_t macaque_type Sql.t;
+  feeds_per_page : Sql.int32_t macaque_type Sql.t >
     option Lwt.t
-val get_feeds :
-  ?starting:int32 ->
-  ?number:int32 ->
-  unit ->
-  feeds_and_tags Lwt.t
-val get_feeds_with_author :
-  ?starting:int32 ->
-  ?number:int32 ->
-  string ->
-  feeds_and_tags Lwt.t
-val get_feeds_with_tag :
-  ?starting:int32 ->
-  ?number:int32 ->
-  string ->
-  feeds_and_tags Lwt.t
+val get_feeds : feed_generator
+val get_feeds_with_author : string -> feed_generator
+val get_feeds_with_tag : string -> feed_generator
 val get_feed_url_with_url :
   string ->
   < url : Sql.string_t macaque_type Sql.t >
@@ -75,3 +65,4 @@ val delete_feed : int32 -> int32 -> unit Lwt.t
 
 val update_user_password : int32 -> string -> unit Lwt.t
 val update_user_email : int32 -> string -> unit Lwt.t
+val update_user_feeds_per_page : int32 -> int32 -> unit Lwt.t

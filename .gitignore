@@ -2,3 +2,4 @@ _server
 _client
 .depend
 dest
+*.type_mli

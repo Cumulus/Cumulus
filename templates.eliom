@@ -208,10 +208,11 @@ let private_main ~page ~link ~service feeds count =
   ignore (reload_feeds service);
   feeds >>= fun feeds ->
   count >>= fun count ->
+  User.get_offset () >>= fun off ->
   main_style
     feeds
     (let n = Int64.to_int (Sql.get count#n) in
-     let offset = Int32.to_int Utils.offset in
+     let offset = Int32.to_int off in
      link_footer
        link
        0
@@ -270,13 +271,15 @@ let feed feeds =
 
 let private_preferences () =
   User.is_connected () >>= fun state ->
+  User.get_user () >>= fun user ->
   main_style
-    ( if not state then
+    (match user with
+      | None ->
         [Html.div
             ~a:[Html.a_class ["box"]]
             [Html.pcdata "Veuillez vous connecter pour accéder aux préférences."]
         ]
-      else
+      | Some usr ->
         [ Html.post_form
             ~a:[Html.a_class ["box"]]
             ~service:Services.update_user_password
@@ -315,10 +318,34 @@ let private_preferences () =
               Html.p [
                 Html.string_input
                   ~a:[Html.a_class ["input-box"];
-                      Html.a_placeholder "Nouvelle adresse"
+                      Html.a_placeholder User.(usr.email);
+                      Html.a_id "new_email"
                      ]
                   ~input_type:`Text
                   ~name:email_name
+                  ();
+                Html.br ();
+                Html.string_input
+                  ~a:[Html.a_class ["btn-box"]]
+                  ~input_type:`Submit
+                  ~value:"Valider"
+                  ()
+              ]
+            ])
+            ();
+          Html.post_form
+            ~a:[Html.a_class ["box"]]
+            ~service:Services.update_user_feeds_per_page
+            (fun nb_feeds_name -> [
+              Html.h1 [Html.pcdata "Changer le nombre de liens par page"];
+              Html.p [
+                Html.int_input
+                  ~a:[Html.a_class ["input-box"];
+                      Html.a_placeholder (Int32.to_string
+                                                    User.(usr.feeds_per_page))
+                     ]
+                  ~input_type:`Text
+                  ~name:nb_feeds_name
                   ();
                 Html.br ();
                 Html.string_input
@@ -333,41 +360,44 @@ let private_preferences () =
     )
     []
 
+let feed_list ~service page link feeds nb_feeds =
+  User.get_offset () >>= fun off ->
+  let starting = Int32.mul (Int32.of_int page) off in
+  feeds starting off >>= fun feedlist ->
+  private_main ~page ~link
+    ~service
+    (Feeds.to_html feedlist)
+    nb_feeds
+
 (* see TODO [1] *)
 let main ?(page=0) ~service () =
-  let starting = Int32.mul (Int32.of_int page) Utils.offset in
-  private_main ~page
-    ~link:(fun name param ->
+  feed_list ~service page
+    (fun name param ->
       Html.a ~service:Services.main [
         Html.pcdata name
       ] param
     )
-    ~service
-    (Feeds.to_html ~starting ())
+    Db.get_feeds
     (Db.count_feeds ())
 
 let user ?(page=0) ~service username =
-  let starting = Int32.mul (Int32.of_int page) Utils.offset in
-  private_main ~page
-    ~link:(fun name param ->
+  feed_list ~service page
+    (fun name param ->
       Html.a ~service:Services.author_feed [
         Html.pcdata name
       ] (param, username)
-    )
-    ~service
-    (Feeds.author_to_html ~starting username)
+      )
+    (Db.get_feeds_with_author username)
     (Db.count_feeds_with_author username)
 
 let tag ?(page=0) ~service tag =
-  let starting = Int32.mul (Int32.of_int page) Utils.offset in
-  private_main ~page
-    ~link:(fun name param ->
+  feed_list ~service page
+    (fun name param ->
       Html.a ~service:Services.tag_feed [
         Html.pcdata name
       ] (param, tag)
-    )
-    ~service
-    (Feeds.tag_to_html ~starting tag)
+     )
+    (Db.get_feeds_with_tag tag)
     (Db.count_feeds_with_tag tag)
 
 (* Shows a specific link (TODO: and its comments) *)

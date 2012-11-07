@@ -4,6 +4,7 @@ type user = {
   password : Bcrypt.hash_t;
   email : string;
   is_admin : bool;
+  feeds_per_page : int32;
 }
 type user_state = Already_connected | Ok | Bad_password | Not_found
 
@@ -13,6 +14,7 @@ let user_new data = {
   password = Bcrypt.hash_of_string data#!password;
   email = data#!email;
   is_admin = data#!is_admin;
+  feeds_per_page = data#!feeds_per_page;
 }
 
 let hash_password password =
@@ -42,10 +44,17 @@ let add = function
 let (current_user : (user option) Eliom_reference.eref) =
   Eliom_reference.eref ~scope: Eliom_common.session None
 
+let get_user () = Eliom_reference.get current_user
+
 let get_userid () =
-  Eliom_reference.get current_user >>= function
+  get_user () >>= function
     | None -> Lwt.return None
     | (Some user) -> Lwt.return (Some user.id)
+
+let get_user_feeds_per_page () =
+  Eliom_reference.get current_user >>= function
+    | None -> Lwt.return None
+    | Some user -> Lwt.return (Some user.feeds_per_page)
 
 let is_connected () =
   Eliom_reference.get current_user >>= function
@@ -109,3 +118,14 @@ let update_email = function
         | Some id ->
             Db.update_user_email id email >>= fun () ->
             Lwt.return true
+
+let update_feeds_per_page nb_feeds =
+  get_userid () >>= function
+    | None -> Lwt.return false
+    | Some id ->
+        Db.update_user_feeds_per_page id nb_feeds >>= fun () ->
+        Lwt.return true
+
+let get_offset () =
+  get_user_feeds_per_page () >>= fun off ->
+  Lwt.return (Utils.from_option Utils.offset off)
