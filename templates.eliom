@@ -1,12 +1,11 @@
 {client{
   let display_error error_frame =
-    let error_frame = Eliom_content.Html5.To_dom.of_p error_frame in
     let id_timeout = ref None in
     id_timeout := Some
       (Dom_html.window##setTimeout
          (Js.wrap_callback
             (fun () ->
-              error_frame##innerHTML <- Js.string "";
+              Eliom_content.Html5.Manip.replaceAllChild error_frame [];
               match !id_timeout with
                 | None -> () (* It cannot happen *)
                 | Some id ->
