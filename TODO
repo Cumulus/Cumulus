@@ -3,11 +3,6 @@ Choses importantes à faire dans Cumulus:
 [1] Implémenter le multi-pages (suite) : autoriser les utilisateurs à configurer le
   nombre de liens par page.
 
-Implémenter le check des mots de passe à l'inscription: Pour l'instant, on entre
-le mot de passe deux fois à l'inscription, mais rien n'est vérifié. Il faut donc
-mettre en place le check qui vérifie que l'user a bien tappé deux fois son mot
-de passe, sans se tromper. Du client-side est envisageable.
-
 Faire en sorte que le formulaire d'inscription ne se vide pas
    completement quand il y a une erreur.
 
@@ -18,9 +13,5 @@ principale, par exemple.
 
 Implémenter les commentaires: Pas besoin de faire très compliqué, ceci dit une
 vue par fils de discussions serait très appréciée.
-
-Implement the dynamic feed update on the main page. (jpdeplaix)
-
-liens next et prev.
 
 Un formulaire de recuperation de mots de passe.
