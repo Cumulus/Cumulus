@@ -149,37 +149,10 @@ let get_feeds ?starting ?number () =
 
 let count_feeds_aux ~filter () =
   Lwt_pool.use pool (fun db ->
-<<<<<<< HEAD
-    get_user_id_with_name author
-    >>= (fun author ->
-      Lwt_Query.view db (
-        <:view< {
-          f.id;
-          f.url;
-          f.description;
-          f.timedate;
-          f.author;
-          f.parent;
-          f.root;
-        } order by f.id desc limit $int32:number$ offset $int32:starting$ |
-          f in $feeds$;
-          is_null f.parent;
-          f.author = $int32:author#!id$ >>)
-    )
-    >>= fun feeds ->
-    Lwt_Query.view db (<:view< {
-      t.tag;
-      t.id_feed;
-    } | t in $feeds_tags$;
-        $in'$ t.id_feed $List.map (fun x -> x#id) feeds$ >>)
-    >>= fun tags ->
-    Lwt.return (feeds, tags)
-=======
     Lwt_Query.view_one db (<:view< group {
       n = count[f];
     } | f in $feeds$;
         $filter$ f >>)
->>>>>>> master
   )
 
 let count_feeds () =
@@ -197,38 +170,11 @@ let count_feeds_with_author author =
   let filter f = (<:value< f.author = $int32:author#!id$ >>) in
   count_feeds_aux ~filter ()
 
-<<<<<<< HEAD
-let get_feeds_with_tag ?(starting=0l) ?(number=Utils.offset) tag =
-  Lwt_pool.use pool (fun db ->
-    Lwt_Query.view db (
-      <:view< {
-        f.id;
-        f.url;
-        f.description;
-        f.timedate;
-        f.author;
-        f.parent;
-        f.root;
-      } order by f.id desc limit $int32:number$ offset $int32:starting$ |
-        f in $feeds$; t in $feeds_tags$;
-        t.tag = $string:tag$;
-        t.id_feed = f.id >>)
-    >>= fun feeds ->
-    Lwt_Query.view db (<:view< {
-      t.tag;
-      t.id_feed;
-    } | t in $feeds_tags$;
-        $in'$ t.id_feed $List.map (fun x -> x#id) feeds$ >>)
-    >>= fun tags ->
-    Lwt.return (feeds, tags)
-  )
-=======
 let get_feeds_with_tag ?starting ?number tag =
   get_id_feed_from_tag tag >>= fun tags ->
   let feeds_filter f = filter_tags_id f tags in
   let tags_filter feeds t = filter_feeds_id t feeds in
   get_feeds_aux ?starting ?number ~feeds_filter ~tags_filter ()
->>>>>>> master
 
 let count_feeds_with_tag tag =
   get_id_feed_from_tag tag >>= fun tags ->
