@@ -57,7 +57,7 @@ let rec generate_tree_comments stack comments =
   in let rec scan tree stack acc = match stack with
     | [] -> tree :: acc
     | x :: r -> if parent_in_tree_feed (get tree) x
-                then scan (append_tree tree (get tree) x) r acc
+                then (append_tree tree (get tree) x) :: r
                 else scan tree r (x :: acc)
   in match comments with
     | [] -> begin match stack with
