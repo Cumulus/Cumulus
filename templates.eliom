@@ -342,7 +342,7 @@ let main ?(page=0) ~service () =
       ] param
     )
     ~service
-    (Feeds.to_html ~starting ())
+    (Feeds.root_to_html ~starting ())
     (Db.count_feeds ())
 
 let user ?(page=0) ~service username =

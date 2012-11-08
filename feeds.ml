@@ -56,6 +56,11 @@ let tag_to_html ~starting tag =
   >>= feeds_of_db
   >>= private_to_html
 
+let root_to_html ~starting () =
+  Db.get_root_feeds ~starting ()
+  >>= feeds_of_db
+  >>= private_to_html
+
 let to_html ~starting () =
   Db.get_feeds ~starting ()
   >>= feeds_of_db
