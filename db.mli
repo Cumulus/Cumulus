@@ -34,6 +34,11 @@ val get_user_with_name :
   password : Sql.string_t macaque_type Sql.t;
   is_admin : Sql.bool_t macaque_type Sql.t >
     option Lwt.t
+val get_root_feeds :
+  ?starting:int32 ->
+  ?number:int32 ->
+  unit ->
+  feeds_and_tags Lwt.t
 val get_feeds :
   ?starting:int32 ->
   ?number:int32 ->
