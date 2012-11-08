@@ -2,15 +2,6 @@ module Calendar = CalendarLib.Calendar
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
-type 'a tree =
-  | Sheet of 'a
-  | Node of 'a * 'a tree list
-
-let rec get_tree_feeds feed comments =
-  match (Feed.get_comments_of_feed feed comments) with
-    | [] -> Sheet feed 
-    | l -> Node (feed, List.map (fun x -> get_tree_feeds x (Feed.get_others_of_feed feed comments)) l)
-
 let feeds_of_db feeds =
   Lwt.return
     (List.map
@@ -34,17 +25,7 @@ let private_to_html data =
       Feed.to_html feed >>= (fun elm ->
         Lwt.return (Html.div ~a: [Html.a_class ["line post"]] elm)
       )
-    ) data
-
-let get_comments id =
-  Db.get_feed_with_id id
-  >>= feeds_of_db
-  >>= (fun root ->
-  Db.get_comments id
-  >>= feeds_of_db
-  >>= (fun comments ->
-    Lwt.return (get_tree_feeds (List.hd root) comments)
-  ))
+    ) data 
 
 let author_to_html ~starting author =
   Db.get_feeds_with_author ~starting author
@@ -60,6 +41,17 @@ let root_to_html ~starting () =
   Db.get_root_feeds ~starting ()
   >>= feeds_of_db
   >>= private_to_html
+
+let comments_to_string id =
+  Db.get_feed_with_id id
+  >>= feeds_of_db
+  >>= (fun root ->
+  Db.get_comments id
+  >>= feeds_of_db
+  >>= (fun comments ->
+    let tree = Feed.generate_tree_comments [Feed.Sheet (List.hd root)] comments 
+    in Lwt.return (List.fold_left (fun x -> fun y -> x ^ ";" ^ (Feed.string_of_tree (List.hd tree))) "" tree)
+  ))
 
 let to_html ~starting () =
   Db.get_feeds ~starting ()
