@@ -42,7 +42,7 @@ let root_to_html ~starting () =
   >>= feeds_of_db
   >>= private_to_html
 
-let comments_to_string id =
+let comments_to_html id =
   Db.get_feed_with_id id
   >>= feeds_of_db
   >>= (fun root ->
@@ -50,7 +50,7 @@ let comments_to_string id =
   >>= feeds_of_db
   >>= (fun comments ->
     let tree = Feed.generate_tree_comments [Feed.Sheet (List.hd root)] comments 
-    in Lwt.return (List.fold_left (fun x -> fun y -> x ^ ";" ^ (Feed.string_of_tree (List.hd tree))) "" tree)
+    in Feed.html_from_tree (List.hd tree)
   ))
 
 let to_html ~starting () =
