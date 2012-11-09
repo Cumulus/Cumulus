@@ -45,7 +45,6 @@ let string_of_tree root =
                             Buffer.add_char buffer ')'
   in aux root; Buffer.contents buffer
 
-
 let rec generate_tree_comments stack comments =
   let get = function
     | Sheet elm -> begin match elm.parent with
@@ -129,6 +128,13 @@ let to_html self =
       );
     ]
   )
+
+let rec html_from_tree = function
+  | Sheet feed -> to_html feed >>= (fun elm -> Lwt.return (Html.div ~a: [Html.a_class ["line post"]] elm))
+  | Node (feed, childs) -> to_html feed >>= (fun elm ->
+                           Lwt_util.map html_from_tree childs >>= (fun childs ->
+                              Lwt.return (Html.div ~a: [Html.a_class ["line post"]] (elm @ childs))
+                           ))
 
 let to_atom self =
   Db.get_user_name_and_email_with_id self.author >>= fun author ->
