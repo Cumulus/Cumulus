@@ -371,10 +371,8 @@ let tag ?(page=0) ~service tag =
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =
-  Feeds.comments_to_string (Int32.of_int id) >>= (fun s ->
-    Ocsigen_messages.warning s; Lwt.return (true));
-  Feeds.feed_id_to_html (Int32.of_int id) >>= fun feed ->
-  main_style feed []
+  Feeds.comments_to_html (Int32.of_int id) >>= (fun feed ->
+    main_style [feed] [])
 
 let register () =
   private_register ()
