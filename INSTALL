@@ -2,3 +2,16 @@ For init the database, just execute initdb.sh with the user postgres.
 And add the following line in /etc/postgresql/<maybe sub-dir>/pg_hba.conf:
 
 local cumulus cumulus password
+
+You'll also need to compile pgocaml with batteries support instead of the
+original extlib. If you use opam, you can edit the package files/opam.patch file
+to do so (add this diff after the first one.):
+
+@@ -17,6 +17,7 @@
+  # Boston, MA 02111-1307, USA.
+
+  include Makefile.config
+ +USE_BATTERIES := yes
+
+  ifeq ($(USE_BATTERIES),yes)
+  EXTLIB := batteries
