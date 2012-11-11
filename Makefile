@@ -4,7 +4,7 @@ APP_NAME := dest/cumulus
 
 ## Packages required to build the server part of the application
 
-SERVER_PACKAGES := macaque.syntax safepass
+SERVER_PACKAGES := macaque.syntax safepass batteries
 
 ## Packages to be linked in the client part
 

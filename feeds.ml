@@ -1,4 +1,5 @@
 module Calendar = CalendarLib.Calendar
+module UTF8 = Batteries.UTF8
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
@@ -83,7 +84,9 @@ let append_feed (url, (title, tags)) =
             Db.add_feed
               url
               title
-              (List.map (fun x -> String.lowercase (Utils.strip x)) (Str.split (Str.regexp "[,]+") tags))
+              (* (List.map (fun x -> String.lowercase (Utils.strip x)) (Str.split (Str.regexp "[,]+") tags)) *)
+              (List.map (fun x -> (UTF8.to_string (UTF8.lowercase (UTF8.of_string (Utils.strip x)))))
+                 (Str.split (Str.regexp "[,]+") tags))
               author >>= fun () ->
             call_event ();
             Lwt.return Ok
