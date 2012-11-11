@@ -73,12 +73,11 @@ let links_of_tags tags =
 
 let to_html self =
   let content = match self.url with
-    | Some l -> let url_service =
-                  Eliom_service.external_service
-                    l []
+    | Some url -> let url_service = Eliom_service.external_service
+                    (Eliom_lib.Url.remove_end_slash url) []
                     Eliom_parameter.unit () in
-                Html.a ~a: [Html.a_class ["postitle"]] ~service: url_service
-                  [Html.pcdata self.description] ()
+                  Html.a ~a: [Html.a_class ["postitle"]] ~service: url_service
+                    [Html.pcdata self.description] ()
     | None -> Html.pcdata self.description in
   Db.get_user_name_and_email_with_id self.author >>= fun author ->
   User.get_userid () >>= (function
