@@ -25,10 +25,12 @@ let links_of_tags tags =
   ) [] tags
 
 let to_html self =
+  let url = Eliom_lib.Url.remove_end_slash self.url in
   let url_service =
     Eliom_service.external_service
-      self.url []
-      Eliom_parameter.unit () in
+      url []
+      Eliom_parameter.unit ()
+  in
   Db.get_user_name_and_email_with_id self.author >>= fun author ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
