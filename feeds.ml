@@ -50,8 +50,8 @@ let comments_to_html id =
   Db.get_comments id
   >>= feeds_of_db
   >>= (fun comments ->
-    let tree = Feed.generate_tree_comments [Feed.Sheet (List.hd root)] comments 
-    in Feed.html_from_tree (List.hd tree)
+    let tree = Comments.tree_comments [Comments.Sheet (List.hd root)] comments 
+    in Comments.to_html (List.hd tree)
   ))
 
 let to_html ~starting () =

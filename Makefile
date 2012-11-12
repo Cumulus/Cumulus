@@ -23,6 +23,8 @@ SERVER_FILES := html.ml \
 		user.ml \
 		feed.mli \
 		feed.ml \
+		comments.mli \
+		comments.ml \
 		feeds.mli \
 		feeds.ml \
 		templates.eliom \
