@@ -108,7 +108,7 @@ let () =
     (fun () () -> Templates.preferences ());
   Cumulus_appl.register
     ~service: Services.comment
-    (fun (parent, root) () -> Templates.comment parent root);
+    (fun (root, (parent, id)) () -> Templates.comment root parent id);
   Eliom_registration.Action.register
     ~service:Services.delete_feed
     (fun feed () ->
