@@ -1,6 +1,8 @@
 module Calendar = CalendarLib.Calendar
 module UTF8 = Batteries.UTF8
 
+open Feed
+
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
 let feeds_of_db feeds =
@@ -53,6 +55,23 @@ let comments_to_html id =
     let tree = Comments.tree_comments [Comments.Sheet (List.hd root)] comments 
     in Comments.to_html (List.hd tree)
   ))
+
+let branch_to_html root id =
+  Db.get_feed_with_id root
+  >>= feeds_of_db
+  >>= (fun root ->
+  Db.get_feed_with_id id
+  >>= feeds_of_db
+  >>= (fun sheet ->
+  let sheet = List.hd sheet 
+  in match sheet.root with
+    | None -> Comments.to_html (Comments.Sheet sheet)
+    | Some n -> Db.get_comments n
+                >>= feeds_of_db
+                >>= (fun comments ->
+                  let tree = Comments.branch_comments (Comments.Sheet sheet) (root @ comments)
+                  in Comments.to_html tree
+  )))
 
 let to_html ~starting () =
   Db.get_feeds ~starting ()
