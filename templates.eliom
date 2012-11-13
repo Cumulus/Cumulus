@@ -332,6 +332,89 @@ let private_preferences () =
     )
     []
 
+let private_comment vroot vparent =
+  User.is_connected () >>= fun state ->
+  main_style
+    ( if not state then
+        [Html.div
+            ~a:[Html.a_class ["box"]]
+            [Html.pcdata "Veuillez vous connecter pour poster un commentaire."]
+        ]
+      else
+        [ Html.post_form
+            ~a:[Html.a_class ["box"]]
+            ~service:Services.add_link_comment
+            (fun (root, (parent, (url, (desc, tags)))) -> [
+              Html.h1 [Html.pcdata "Lien"] ;
+              Html.p [
+                Html.string_input
+                  ~a:[Html.a_class ["input-box"];
+                      Html.a_placeholder "URL"
+                     ]
+                  ~input_type:`Text
+                  ~name:url
+                  ();
+                Html.br ();
+                Html.string_input
+                  ~a:[Html.a_class ["input-box"];
+                      Html.a_placeholder "Titre";
+                     ]
+                  ~input_type:`Text
+                  ~name:desc
+                  ();
+                Html.br ();
+                Html.string_input
+                  ~a:[Html.a_class ["input-box"];
+                      Html.a_placeholder "Tags";
+                     ]
+                  ~input_type:`Text
+                  ~name:tags
+                  ();
+                Html.br ();
+                Html.int_input
+                  ~input_type:`Hidden
+                  ~name:parent
+                  ~value:vparent
+                  ();
+                Html.int_input
+                  ~input_type:`Hidden
+                  ~name:root
+                  ~value:vroot
+                  ();
+                Html.string_input
+                  ~a:[Html.a_class ["btn-box"]]
+                  ~input_type:`Submit
+                  ~value:"Envoyer !"
+                  ()
+              ]
+            ])
+            ();
+          Html.post_form
+            ~a:[Html.a_class ["box"]]
+            ~service:Services.add_desc_comment
+            (fun (root, (parent, desc)) -> [
+              Html.h1 [Html.pcdata "Commentaire"];
+              Html.p [
+                Html.textarea
+                  ~a:[Html.a_class ["input-box"];
+                      Html.a_placeholder "Texte"
+                     ]
+                  ~name:desc
+                  ();
+                Html.br ();
+                Html.string_input
+                  ~a:[Html.a_class ["btn-box"]]
+                  ~input_type:`Submit
+                  ~value:"Envoyer !"
+                  ()
+              ]
+            ])
+            ()
+        ]
+    )
+    []
+
+
 (* see TODO [1] *)
 let main ?(page=0) ~service () =
   let starting = Int32.mul (Int32.of_int page) Utils.offset in
@@ -379,3 +462,6 @@ let register () =
 
 let preferences () =
   private_preferences ()
+
+let comment root parent =
+  private_comment root parent
