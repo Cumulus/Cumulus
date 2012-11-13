@@ -48,6 +48,22 @@ let add_user =
                                       (string "email"))
     ()
 
+let add_link_comment =
+  Eliom_service.post_coservice'
+    ~post_params: Eliom_parameter.((int "root") **
+                                   (int "parent") **
+                                   (string "url") **
+                                   (string "desc") **
+                                   (string "tags"))
+    ()
+
+let add_desc_comment =
+  Eliom_service.post_coservice'
+    ~post_params: Eliom_parameter.((int "root") **
+                                   (int "parent") **
+                                   (string "desc"))
+    ()
+
 let update_user_mail =
   Eliom_service.post_coservice'
     ~post_params: Eliom_parameter.((string "email"))
@@ -75,6 +91,12 @@ let preferences =
     ~path: ["preferences"]
     ~get_params: Eliom_parameter.unit
    ()
+
+let comment =
+  Eliom_service.service
+    ~path: ["comment"]
+    ~get_params: Eliom_parameter.(suffix (int "root" ** int "parent"))
+    ()
 
 let delete_feed =
   Eliom_service.coservice'
