@@ -332,8 +332,9 @@ let private_preferences () =
     )
     []
 
-let private_comment vroot vparent =
+let private_comment vroot vparent vid =
   User.is_connected () >>= fun state ->
+  Feeds.branch_to_html vroot vid >>= fun branch ->
   main_style
     ( if not state then
         [Html.div
@@ -341,7 +342,7 @@ let private_comment vroot vparent =
             [Html.pcdata "Veuillez vous connecter pour poster un commentaire."]
         ]
       else
-        [ Html.post_form
+        [ branch; Html.post_form
             ~a:[Html.a_class ["box"]]
             ~service:Services.add_link_comment
             (fun (root, (parent, (url, (desc, tags)))) -> [
@@ -379,7 +380,7 @@ let private_comment vroot vparent =
                 Html.int_input
                   ~input_type:`Hidden
                   ~name:root
-                  ~value:vroot
+                  ~value:(Int32.to_int vroot)
                   ();
                 Html.string_input
                   ~a:[Html.a_class ["btn-box"]]
@@ -463,5 +464,5 @@ let register () =
 let preferences () =
   private_preferences ()
 
-let comment root parent =
-  private_comment root parent
+let comment root parent id =
+  private_comment (Int32.of_int root) parent (Int32.of_int id)
