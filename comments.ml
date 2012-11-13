@@ -27,18 +27,16 @@ let string_of_tree root =
 
 let rec tree_comments stack comments =
   let get = function
-    | Sheet elm -> begin match elm.parent with
-                     | None -> 0l (* OH LE GROS HACK *)
-                     | Some n -> n end
+    | Sheet elm
     | Node (elm, _) -> match elm.parent with
-                        | None -> 0l (* OH LE GROS HACK *)
+                        | None -> 0l
                         | Some n -> n
   in let rec scan ?(end_of_scan=false) tree stack acc = match stack with
     | [] -> tree :: acc
     | x :: r -> if has_parent (get tree) x
                 then if end_of_scan
-                     then scan (append_tree tree (get tree) x) r acc
-                     else (append_tree tree (get tree) x) :: r
+                    then (append_tree tree (get tree) x) :: r
+                    else scan (append_tree tree (get tree) x) r acc
                 else scan tree r (x :: acc)
   in match comments with
     | [] -> begin match stack with
@@ -46,6 +44,24 @@ let rec tree_comments stack comments =
               | [ x ] -> [ x ]
               | x :: r -> scan ~end_of_scan:(true) x r [] end
     | x :: r -> tree_comments (scan (Sheet x) stack []) r
+
+let rec branch_comments root comments =
+  let get = function
+    | Sheet elm
+    | Node (elm, _) -> match elm.parent with
+                        | None -> 0l
+                        | Some n -> n
+  in let is_root = function
+    | Sheet elm
+    | Node (elm, _) -> match elm.parent with
+                        | None -> true
+                        | Some _ -> false
+  in match comments with
+    | [] -> root
+    | l when (is_root root) -> root
+    | x :: r -> if x.id = (get root)
+                then branch_comments (Node (x, [root])) r
+                else branch_comments root r
 
 let rec to_html = function
   | Sheet feed -> Feed.to_html feed >>= (fun elm -> Lwt.return (Html.div ~a: [Html.a_class ["line post"]] elm))
