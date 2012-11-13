@@ -56,12 +56,15 @@ let rec branch_comments root comments =
     | Node (elm, _) -> match elm.parent with
                         | None -> true
                         | Some _ -> false
+  in let rec search id = function
+    | [] -> None
+    | x :: r -> if (get x) = id then Some x else search id r
   in match comments with
     | [] -> root
     | l when (is_root root) -> root
     | x :: r -> if x.id = (get root)
                 then branch_comments (Node (x, [root])) r
-                else branch_comments root r
+                else branch_comments root (r @ [x])
 
 let rec to_html = function
   | Sheet feed -> Feed.to_html feed >>= (fun elm -> Lwt.return (Html.div ~a: [Html.a_class ["line post"]] elm))
