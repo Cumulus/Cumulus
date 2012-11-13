@@ -54,9 +54,6 @@ let rec branch_comments root comments =
     | Node (elm, _) -> match elm.Feed.parent with
                         | None -> true
                         | Some _ -> false
-  in let rec search id = function
-    | [] -> None
-    | x :: r -> if (get x) = id then Some x else search id r
   in match comments with
     | [] -> root
     | l when (is_root root) -> root
