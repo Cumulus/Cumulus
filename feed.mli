@@ -7,6 +7,7 @@ type feed = {
   date : CalendarLib.Calendar.t;
   author : int32;
   parent : int32 option;
+  root : int32 option;
   tags: string list
 }
 

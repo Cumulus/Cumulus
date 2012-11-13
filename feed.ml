@@ -7,6 +7,7 @@ type feed = {
   date : Calendar.t;
   author : int32;
   parent : int32 option;
+  root : int32 option;
   tags: string list
 }
 
@@ -19,6 +20,7 @@ let feed_new data tags = {
   date = data#!timedate;
   author = data#!author;
   parent = data#?parent;
+  root = data#?root;
   tags = tags
 }
 
