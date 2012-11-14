@@ -4,6 +4,8 @@ Build Requirements
  * Eliom >= 2.2
  * Lwt >= 2.4
  * OCaml-safepass >= 1.2
+ * Batteries >= 1.5
+ * PG'OCaml compiled with batteries >= 1.6
  * MaCaQue >= 0.6
 
 Run Requirements
@@ -11,3 +13,5 @@ Run Requirements
 
  * Ocsigenserver
  * PostgreSQL
+
+A running demo is available at: http://cumulus.mirai.fr/
