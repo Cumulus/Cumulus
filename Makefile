@@ -111,7 +111,7 @@ ${ELIOM_CLIENT_DIR}/%.cmi: %.eliomi
 	${JS_OF_ELIOM} -c ${CLIENT_INC} $<
 
 ${ELIOM_CLIENT_DIR}/%.cmo: %.eliom
-	${JS_OF_ELIOM} -c ${CLIENT_INC} $<
+	${JS_OF_ELIOM} -c -noinfer ${CLIENT_INC} $<
 ${ELIOM_CLIENT_DIR}/%.cmo: %.ml
 	${JS_OF_ELIOM} -c ${CLIENT_INC} $<
 
