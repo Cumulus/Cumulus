@@ -1,47 +1,47 @@
 let atom =
-  Eliom_service.service
+  Eliom_service.Http.service
     ~path: ["atom.xml"]
     ~get_params: Eliom_parameter.unit
     ()
 
 let main =
-  Eliom_service.service
+  Eliom_service.Appl.service
     ~path: [""]
     ~get_params: (Eliom_parameter.opt (Eliom_parameter.int "page"))
     ()
 
 let view_feed =
-  Eliom_service.service
+  Eliom_service.Appl.service
     ~path:["view"]
     ~get_params: Eliom_parameter.(suffix (int "id" ** string "name"))
     ()
 
 let append_feed =
-  Eliom_service.post_coservice'
+  Eliom_service.Http.post_coservice'
     ~post_params: Eliom_parameter.((string "url") **
                                       (string "title") **
                                       (string "tags"))
     ()
 
 let author_feed =
-  Eliom_service.service
+  Eliom_service.Appl.service
     ~path: [""]
     ~get_params: Eliom_parameter.(opt (int "page") ** string "username")
     ()
 
 let tag_feed =
-  Eliom_service.service
+  Eliom_service.Appl.service
     ~path: [""]
     ~get_params: Eliom_parameter.(opt (int "page") ** string "tag")
     ()
 
 let auth =
-  Eliom_service.post_coservice'
+  Eliom_service.Http.post_coservice'
     ~post_params: Eliom_parameter.((string "username") ** (string "password"))
     ()
 
 let add_user =
-  Eliom_service.post_coservice'
+  Eliom_service.Http.post_coservice'
     ~post_params: Eliom_parameter.((string "username") **
                                       (string "password") **
                                       (string "password_check") **
@@ -49,34 +49,34 @@ let add_user =
     ()
 
 let update_user_mail =
-  Eliom_service.post_coservice'
+  Eliom_service.Http.post_coservice'
     ~post_params: Eliom_parameter.((string "email"))
     ()
 
 let update_user_password =
-  Eliom_service.post_coservice'
+  Eliom_service.Http.post_coservice'
     ~post_params: Eliom_parameter.((string "password") **
                                       (string "password_check"))
     ()
 
 let registration =
-  Eliom_service.service
+  Eliom_service.Appl.service
     ~path: ["registration"]
     ~get_params: Eliom_parameter.unit
     ()
 
 let disconnect =
-  Eliom_service.post_coservice'
+  Eliom_service.Http.post_coservice'
     ~post_params: Eliom_parameter.unit
     ()
 
 let preferences =
-  Eliom_service.service
+  Eliom_service.Appl.service
     ~path: ["preferences"]
     ~get_params: Eliom_parameter.unit
    ()
 
 let delete_feed =
-  Eliom_service.coservice'
+  Eliom_service.Http.coservice'
     ~get_params:(Eliom_parameter.int32 "id")
     ()
