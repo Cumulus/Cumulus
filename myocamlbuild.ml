@@ -591,6 +591,7 @@ end) = struct
       in
       List.iter (fun tags -> pflag tags "need_eliom_type" use_type_file) tags
     in
+    flag ["ocaml"; "infer_interface"; "thread"] (A "-thread");
     dep ["file:" ^ Client.package] [Client.name];
     rule "js_of_ocaml: .byte -> .js" ~dep:Client.dep ~prod:Client.name
       (fun env _ ->

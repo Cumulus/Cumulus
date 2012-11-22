@@ -9,6 +9,8 @@ type feed = {
   tags: string list
 }
 
+let (>>=) = Lwt.(>>=)
+
 let feed_new data tags = {
   id = data#!id;
   url = data#!url;

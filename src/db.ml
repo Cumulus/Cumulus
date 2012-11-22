@@ -26,6 +26,8 @@ end
 
 type feeds_and_tags = feed list * tag list
 
+let (>>=) = Lwt.(>>=)
+
 let connect () =
   Lwt_PGOCaml.connect
     ~database: "cumulus"

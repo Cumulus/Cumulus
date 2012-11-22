@@ -7,6 +7,8 @@ type user = {
 }
 type user_state = Already_connected | Ok | Bad_password | Not_found
 
+let (>>=) = Lwt.(>>=)
+
 let user_new data = {
   id = data#!id;
   name = data#!name;

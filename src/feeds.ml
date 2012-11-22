@@ -3,6 +3,8 @@ module UTF8 = Batteries.UTF8
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
+let (>>=) = Lwt.(>>=)
+
 let feeds_of_db feeds =
   Lwt.return
     (List.map
