@@ -1,4 +1,3 @@
-_server
-_client
-.depend
-dest
+_build
+setup.data
+setup.log

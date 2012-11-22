@@ -1,0 +1,10 @@
+# OASIS_START
+# DO NOT EDIT (digest: 4100d2d4b343c67ed3293968390e2bd5)
+version = "0.1"
+description = "Test"
+requires = "eliom.client eliom.syntax"
+archive(byte) = "cumulus_client.cma"
+archive(byte, plugin) = "cumulus_client.cma"
+exists_if = "cumulus_client.cma"
+# OASIS_STOP
+
