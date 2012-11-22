@@ -1,0 +1,12 @@
+# OASIS_START
+# DO NOT EDIT (digest: 5586f4e38fbfa74723d374420ccd40d5)
+version = "0.1"
+description = "Test"
+requires = "eliom.server macaque.syntax batteries lwt.syntax safepass"
+archive(byte) = "cumulus.cma"
+archive(byte, plugin) = "cumulus.cma"
+archive(native) = "cumulus.cmxa"
+archive(native, plugin) = "cumulus.cmxs"
+exists_if = "cumulus.cma"
+# OASIS_STOP
+
