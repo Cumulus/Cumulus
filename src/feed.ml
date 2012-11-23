@@ -27,12 +27,6 @@ let links_of_tags tags =
   ) [] tags
 
 let to_html self =
-  let url = Eliom_lib.Url.remove_end_slash self.url in
-  let url_service =
-    Eliom_service.external_service
-      url []
-      Eliom_parameter.unit ()
-  in
   Db.get_user_name_and_email_with_id self.author >>= fun author ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
@@ -54,8 +48,11 @@ let to_html self =
               ~service: (Utils.get_gravatar (author#!email)) (40, "identicon")
           )
           ();
-       Html.a ~a: [Html.a_class ["postitle"]] ~service: url_service
-         [Html.pcdata self.title] ();
+       Html.Raw.a
+         ~a:[Html.a_class ["postitle"];
+             Html.a_href (Html.uri_of_string (fun () -> self.url));
+            ]
+         [Html.pcdata self.title];
        Html.br ();
        Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
        Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
