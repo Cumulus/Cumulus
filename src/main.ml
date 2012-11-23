@@ -28,11 +28,11 @@ let () =
     ~service:Services.append_feed
     (fun () data ->
       Feeds.append_feed data >>= (function
-        | Feeds.Not_connected -> Lwt.return "Vous ne vous etes pas autentifie"
+        | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
-        | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide."
-        | Feeds.Already_exist -> Lwt.return "Le lien existe deja"
-        | Feeds.Ok -> Lwt.return "Le lien a bien ete ajoute"
+        | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
+        | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
+        | Feeds.Ok -> Lwt.return "Le lien a bien été ajouté"
       )
       >>= Errors.set_error
     );
