@@ -50,6 +50,56 @@ let validate db =
 
 let pool = Lwt_pool.create 16 ~validate connect
 
+(** Updating the database *)
+
+let options = (<:table< options (
+  name text NOT NULL,
+  value text NOT NULL
+) >>)
+
+let current_version db =
+  Lwt_Query.view_one db (<:view< {
+    o.value;
+  } | o in $options$;
+      o.name = "dbversion" >>)
+  >>= fun version ->
+  Lwt.return (int_of_string version#!value)
+
+let update_version db value =
+  let value = string_of_int value in
+  Lwt_Query.query db (<:update< o in $options$ := {
+    value = $string:value$;
+  } | o.name = "dbversion" >>)
+
+let update version f =
+  Lwt_pool.use pool (fun db ->
+    current_version db >>= fun current_version ->
+    if current_version < version then
+      Lwt_pool.use pool (fun db ->
+        Printf.eprintf "Updating Cumulus database to version %d\n" version;
+        f db >>= fun () ->
+        update_version db version
+      )
+    else
+      Lwt.return ()
+  )
+
+let alter db query =
+  let name = "query" in
+  Lwt_PGOCaml.prepare db ~query ~name () >>= fun () ->
+  Lwt_PGOCaml.execute db ~name ~params:[] () >>= fun _ ->
+  Lwt_PGOCaml.close_statement db ~name ()
+
+let () =
+  Lwt_main.run begin
+    update 2 (fun db ->
+      alter db "ALTER TABLE users ADD COLUMN \
+                feeds_per_page integer NOT NULL DEFAULT(10)"
+    )
+  end
+
+(** Tables description *)
+
 let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
 
 let feeds = (<:table< feeds (
