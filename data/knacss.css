@@ -453,37 +453,33 @@ a:focus {
   outline: 0px;
 }
 
-/*.tags:hover {
-  background-color: #108BDE;
-  color: #fff;
-  padding: 0px 3px;
-  margin-left: 2px;
-  overflow: hidden;
-}
-
-.tags {
-  padding: 0px 2px;
-}*/
-
-.footer {
+footer {
   padding: 15px 10%;
   font-size: 10px;
   font-style: italic;
   color: #aaa;
 }
 
-.footer a {
+footer a {
+  color: #109bde;
+}
+
+.navigation {
+  margin-left: 10%;
+  margin-top: 15px;
+}
+
+.navigation a {
   padding: 8px 1.5em;
   border: 2px solid #f2f2f2;
   font-size: 12px;
-  margin-right: 8px;
   line-height: 20px;
   background-color: #f0f0f0;
   font-style: normal;
   color: #777;
 }
 
-.footer a:hover {
+.navigation a:hover {
   border-color: #108BDE;
   background-color: #108BDE;
   color: #fff;
