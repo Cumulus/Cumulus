@@ -85,8 +85,8 @@ let () =
     ~service:Services.update_user_feeds_per_page
     (fun () data ->
       User.update_feeds_per_page (Int32.of_int data) >>= (function
-        | true -> Lwt.return "Modification de l'adresse mail effectuée"
-        | false -> Lwt.return "Adresse invalide"
+        | true -> Lwt.return "Nombre de liens par page modifié"
+        | false -> Lwt.return "Nombre invalide"
       )
       >>= Errors.set_error
     );

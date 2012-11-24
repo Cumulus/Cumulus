@@ -250,7 +250,7 @@ let add_user name password email =
       password = $string:password$;
       email = $string:email$;
       is_admin = users?is_admin;
-      feeds_per_page = 10;
+      feeds_per_page = users?feeds_per_page;
     } >>)
   )
 
