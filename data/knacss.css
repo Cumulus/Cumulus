@@ -498,3 +498,13 @@ a:focus {
 .input-box {
   margin-bottom: 5px;
 }
+
+.msghandler {
+  margin-right: auto;
+  margin-left: auto;
+  width: 30%;
+  background: #f3f3f3;
+  color: #777;
+  text-align: center;
+  padding: 5px;
+}

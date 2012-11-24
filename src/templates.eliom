@@ -111,7 +111,7 @@ let user_info () =
 let main_style content footer =
   user_info () >>= fun user ->
   Errors.get_error () >>= fun error ->
-  let error_frame = Eliom_content.Html5.D.p [Html.pcdata error] in
+  let error_frame = Eliom_content.Html5.D.p ~a: [Html.a_class ["msghandler"]] [Html.pcdata error] in
   Eliom_service.onload {{
     display_error %error_frame
   }};
