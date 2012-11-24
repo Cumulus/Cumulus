@@ -217,14 +217,13 @@ let private_main ~page ~link ~service feeds count =
     (let n = Int64.to_int (Sql.get count#n) in
      let offset = Int32.to_int off in
      link_footer
-       link
+       ~link
        0
        ((n / offset) - (if n mod offset = 0 then 1 else 0))
        page
     )
 
 let private_register () =
-  User.is_connected () >>= fun state ->
   main_style
     [Html.post_form
         ~a:[Html.a_class ["box"]]
@@ -269,11 +268,9 @@ let private_register () =
 
 let feed feeds =
   feeds >>= fun feeds ->
-  User.is_connected () >>= fun state ->
   main_style feeds []
 
 let private_preferences () =
-  User.is_connected () >>= fun state ->
   User.get_user () >>= fun user ->
   main_style
     (match user with

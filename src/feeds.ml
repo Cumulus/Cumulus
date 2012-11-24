@@ -52,10 +52,10 @@ let to_atom () =
     )
   )
 
-let (event, private_event, call_event) =
+let (event, call_event) =
   let (private_event, call_event) = React.E.create () in
   let event = Eliom_react.Down.of_react private_event in
-  (event, private_event, call_event)
+  (event, call_event)
 
 let append_feed (url, (title, tags)) =
   User.get_userid () >>= fun userid ->

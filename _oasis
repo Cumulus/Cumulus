@@ -21,6 +21,8 @@ Library cumulus
     _server/Templates,
     Main
   BuildDepends: eliom.server, macaque.syntax, batteries, lwt.syntax, safepass
+#  ByteOpt: -w A
+#  NativeOpt: -w A
 
 Library cumulus_client
   Path: .
@@ -31,6 +33,8 @@ Library cumulus_client
     eliom.client,
     eliom.syntax
   CompiledObject: byte
+#  ByteOpt: -w A
+#  NativeOpt: -w A
   DataFiles:
     data/* (/tmp),
     _build/src/_client/cumulus.js (/tmp)

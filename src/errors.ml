@@ -1,5 +1,3 @@
-let (>>=) = Lwt.(>>=)
-
 let error = Eliom_reference.eref ~scope:Eliom_common.request ""
 
 let get_error () =

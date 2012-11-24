@@ -36,7 +36,7 @@ let add = function
       when password <> password_check
         || Utils.is_invalid_email email ->
       Lwt.return false
-  | (name, (email, (password, password_check))) ->
+  | (name, (email, (password, _))) ->
       Db.get_user_with_name name >>= function
         | Some _ -> Lwt.return false
         | None ->
