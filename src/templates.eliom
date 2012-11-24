@@ -9,7 +9,7 @@
       (Dom_html.window##setTimeout
          (Js.wrap_callback
             (fun () ->
-              Eliom_content.Html5.Manip.replaceAllChild error_frame [];
+              Eliom_content.Html5.Manip.removeAllChild error_frame;
               match !id_timeout with
                 | None -> () (* It cannot happen *)
                 | Some id ->
@@ -110,11 +110,22 @@ let user_info () =
 
 let main_style content footer =
   user_info () >>= fun user ->
-  Errors.get_error () >>= fun error ->
-  let error_frame = Eliom_content.Html5.D.p ~a: [Html.a_class ["msghandler"]] [Html.pcdata error] in
-  Eliom_service.onload {{
-    display_error %error_frame
-  }};
+  let base_error_frame =
+    Eliom_content.Html5.D.div
+      ~a:[Html.a_class ["msghandler"]]
+  in
+  Errors.get_error () >>= (function
+    | Some error ->
+        let error_frame =
+          base_error_frame [Html.p [Html.pcdata error]]
+        in
+        Eliom_service.onload {{
+          display_error %error_frame
+        }};
+        Lwt.return error_frame
+    | None -> Lwt.return (base_error_frame [])
+  )
+  >>= fun error_frame ->
   Lwt.return
     (Html.html
        (Html.head

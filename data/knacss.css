@@ -499,7 +499,7 @@ a:focus {
   margin-bottom: 5px;
 }
 
-.msghandler {
+.msghandler p {
   margin-right: auto;
   margin-left: auto;
   width: 30%;
@@ -507,4 +507,9 @@ a:focus {
   color: #777;
   text-align: center;
   padding: 5px;
+}
+
+.msghandler {
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
