@@ -82,6 +82,15 @@ let () =
       >>= Errors.set_error
     );
   Eliom_registration.Action.register
+    ~service:Services.update_user_feeds_per_page
+    (fun () data ->
+      User.update_feeds_per_page (Int32.of_int data) >>= (function
+        | true -> Lwt.return "Modification de l'adresse mail effectuée"
+        | false -> Lwt.return "Adresse invalide"
+      )
+      >>= Errors.set_error
+    );
+  Eliom_registration.Action.register
     ~service:Services.update_user_password
     (fun () data ->
       User.update_password data >>= (function
