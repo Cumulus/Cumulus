@@ -1,6 +1,6 @@
 let atom =
   Eliom_service.service
-    ~path: ["atom.xml"]
+    ~path: ["cumulus.atom"]
     ~get_params: Eliom_parameter.unit
     ()
 
