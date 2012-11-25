@@ -36,5 +36,5 @@ Library cumulus_client
 #  ByteOpt: -w A
 #  NativeOpt: -w A
   DataFiles:
-    data/* (/tmp),
-    _build/src/_client/cumulus.js (/tmp)
+    data/*,
+    _build/src/_client/cumulus.js
