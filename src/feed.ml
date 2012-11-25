@@ -55,19 +55,22 @@ let to_html self =
          [Html.pcdata self.title];
        Html.br ();
        Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
-       Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
+       Html.a
+         ~service:Services.author_feed
+         [Html.pcdata author#!name]
+         (None, author#!name);
       ];
       [Html.br ();
        (* TODO : afficher "n commentaire(s)" *)
        Html.a
-         Services.view_feed
+         ~service:Services.view_feed
          [Html.pcdata "n commentaires "]
          (Int32.to_int self.id, self.title);
        Html.pcdata "Tags: "
       ];
       links_of_tags self.tags;
       (if is_author then
-          [Html.a Services.delete_feed [Html.pcdata " (supprimer ?)"] self.id]
+          [Html.a ~service:Services.delete_feed [Html.pcdata " (supprimer ?)"] self.id]
        else []
       );
     ]
@@ -78,9 +81,10 @@ let to_atom self =
   Lwt.return (
     Atom_feed.entry
       ~updated: self.date
-      ~id:(Int32.to_string self.id)
+      ~id:(Html.uri_of_string (fun () -> Int32.to_string self.id))
       ~title: (Atom_feed.plain self.title)
       [Atom_feed.authors [Atom_feed.author author#!name];
-       Atom_feed.links [Atom_feed.link self.url];
+       Atom_feed.links
+         [Atom_feed.link (Html.uri_of_string (fun () -> self.url))];
       ]
   )

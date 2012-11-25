@@ -28,6 +28,12 @@ type feeds_and_tags = feed list * tag list
 
 let (>>=) = Lwt.(>>=)
 
+type feed_generator =
+    starting:int32 ->
+    number:int32 ->
+    unit ->
+    feeds_and_tags Lwt.t
+
 let connect () =
   Lwt_PGOCaml.connect
     ~database: "cumulus"
@@ -43,6 +49,56 @@ let validate db =
     (fun _ -> Lwt.return false)
 
 let pool = Lwt_pool.create 16 ~validate connect
+
+(** Updating the database *)
+
+let options = (<:table< options (
+  name text NOT NULL,
+  value text NOT NULL
+) >>)
+
+let current_version db =
+  Lwt_Query.view_one db (<:view< {
+    o.value;
+  } | o in $options$;
+      o.name = "dbversion" >>)
+  >>= fun version ->
+  Lwt.return (int_of_string version#!value)
+
+let update_version db value =
+  let value = string_of_int value in
+  Lwt_Query.query db (<:update< o in $options$ := {
+    value = $string:value$;
+  } | o.name = "dbversion" >>)
+
+let update version f =
+  Lwt_pool.use pool (fun db ->
+    current_version db >>= fun current_version ->
+    if current_version < version then
+      Lwt_pool.use pool (fun db ->
+        Printf.eprintf "Updating Cumulus database to version %d\n" version;
+        f db >>= fun () ->
+        update_version db version
+      )
+    else
+      Lwt.return ()
+  )
+
+let alter db query =
+  let name = "query" in
+  Lwt_PGOCaml.prepare db ~query ~name () >>= fun () ->
+  Lwt_PGOCaml.execute db ~name ~params:[] () >>= fun _ ->
+  Lwt_PGOCaml.close_statement db ~name ()
+
+let () =
+  Lwt_main.run begin
+    update 2 (fun db ->
+      alter db "ALTER TABLE users ADD COLUMN \
+                feeds_per_page integer NOT NULL DEFAULT(10)"
+    )
+  end
+
+(** Tables description *)
 
 let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
 
@@ -69,7 +125,8 @@ let users = (<:table< users (
   name text NOT NULL,
   password text NOT NULL,
   email text NOT NULL,
-  is_admin boolean NOT NULL DEFAULT(false)
+  is_admin boolean NOT NULL DEFAULT(false),
+  feeds_per_page integer NOT NULL DEFAULT(10)
 ) >>)
 
 let rec in' value = function
@@ -110,8 +167,8 @@ let get_user_with_name name =
   )
 
 let get_feeds_aux
-    ?(starting=0l)
-    ?(number=Utils.offset)
+    ~starting
+    ~number
     ~feeds_filter
     ~tags_filter
     () =
@@ -138,10 +195,10 @@ let get_feeds_aux
     Lwt.return (feeds, tags)
   )
 
-let get_feeds ?starting ?number () =
+let get_feeds ~starting ~number () =
   let feeds_filter _ = (<:value< true >>) in
   let tags_filter _ _ = (<:value< true >>) in
-  get_feeds_aux ?starting ?number ~feeds_filter ~tags_filter ()
+  get_feeds_aux ~starting ~number ~feeds_filter ~tags_filter ()
 
 let count_feeds_aux ~filter () =
   Lwt_pool.use pool (fun db ->
@@ -155,7 +212,7 @@ let count_feeds () =
   let filter _ = (<:value< true >>) in
   count_feeds_aux ~filter ()
 
-let get_feeds_with_author ?starting ?number author =
+let get_feeds_with_author author ~starting ~number () =
   get_user_id_with_name author >>= fun author ->
   let feeds_filter f = (<:value< f.author = $int32:author#!id$ >>) in
   let tags_filter feeds t = filter_feeds_id t feeds in
@@ -166,7 +223,7 @@ let count_feeds_with_author author =
   let filter f = (<:value< f.author = $int32:author#!id$ >>) in
   count_feeds_aux ~filter ()
 
-let get_feeds_with_tag ?starting ?number tag =
+let get_feeds_with_tag tag ~starting ~number () =
   get_id_feed_from_tag tag >>= fun tags ->
   let feeds_filter f = filter_tags_id f tags in
   let tags_filter feeds t = filter_feeds_id t feeds in
@@ -243,6 +300,7 @@ let add_user name password email =
       password = $string:password$;
       email = $string:email$;
       is_admin = users?is_admin;
+      feeds_per_page = users?feeds_per_page;
     } >>)
   )
 
@@ -285,5 +343,12 @@ let update_user_email userid email =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.query db (<:update< u in $users$ := {
       email = $string:email$;
+    } | u.id = $int32:userid$ >>)
+  )
+
+let update_user_feeds_per_page userid nb_feeds =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.query db (<:update< u in $users$ := {
+      feeds_per_page = $int32:nb_feeds$;
     } | u.id = $int32:userid$ >>)
   )

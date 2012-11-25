@@ -36,3 +36,8 @@ setup.data:
 .PHONY: build doc test all install uninstall reinstall clean distclean configure
 
 # OASIS_STOP
+
+run:
+	cp _build/src/_client/cumulus.js /tmp
+	cp data/* /tmp
+	ocsigenserver -c ocsigenserver.conf -v

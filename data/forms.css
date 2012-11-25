@@ -108,7 +108,7 @@ input[type="reset"] {
 
 	min-width: 100px;
 	padding: .3em 0 .3em .3em;
-	border: 1px solid #ccc;
+	border: 1px solid #e0e0e0;
 }
 input[type="submit"] {
 	padding: .5em 1em;
@@ -144,11 +144,12 @@ header input[type="submit"] {
 
 
 header input[type="submit"]:hover {
-  background-color: #444;
+  background-color: #a64646;
+  color: #fff;
 }
 
 header .nav:hover {
-  background-color: #444;
+  background-color: #108bde;
 }
 
 .dash input[type="submit"] {
@@ -156,13 +157,14 @@ header .nav:hover {
   border: 1px solid #eee;
   font-size: 12px;
   margin-left: 5px;
-  background-color: #eee;
-  border-color: #eee;
-  color: #111;
+  background-color: #e9e9e9;
+  border-color: #ebebeb;
+  color: #555;
 }
 
 .dash input[type="submit"]:hover {
-  background-color: #ddd;
+  background-color: #108bde;
+  color: #fff;
 }
 
 .nav {
