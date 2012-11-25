@@ -185,7 +185,7 @@ let main_style content footer =
                           Html.br ();
                           Html.pcdata "(not so) Proudly propulsed by the inglorious ";
 			  Html.Raw.a ~a: [Html.a_href (Html.uri_of_string (fun ()
-			    -> "http://bitbucket.com/Engil/cumulus"))]
+			    -> "http://bitbucket.org/Engil/cumulus"))]
 			  [Html.pcdata "Cumulus Project"];
 			  Html.pcdata ", with love, and the ";
 			  Html.Raw.a ~a: [Html.a_href (Html.uri_of_string (fun ()
