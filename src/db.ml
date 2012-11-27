@@ -98,6 +98,13 @@ let () =
       alter db "ALTER TABLE users ADD COLUMN \
                 feeds_per_page integer NOT NULL DEFAULT(10)"
     )
+    >>= fun () ->
+    update 3 (fun db ->
+      alter db "ALTER TABLE feeds ALTER url TYPE text" >>= fun () ->
+      alter db "ALTER TABLE feeds ADD COLUMN parent integer" >>= fun () ->
+      alter db "ALTER TABLE feeds ADD COLUMN parent integer" >>= fun () ->
+      alter db "ALTER TABLE feeds RENAME COLUMN title TO description"
+    )
   end
 
 (** Tables description *)
