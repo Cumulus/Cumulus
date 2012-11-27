@@ -28,11 +28,11 @@ let () =
     ~service:Services.append_feed
     (fun () data ->
       Feeds.append_feed data >>= (function
-        | Feeds.Not_connected -> Lwt.return "Vous ne vous etes pas autentifie"
+        | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
-        | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide."
-        | Feeds.Already_exist -> Lwt.return "Le lien existe deja"
-        | Feeds.Ok -> Lwt.return "Le lien a bien ete ajoute"
+        | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
+        | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
+        | Feeds.Ok -> Lwt.return "Le lien a bien été ajouté"
       )
       >>= Errors.set_error
     );
@@ -58,7 +58,7 @@ let () =
     );
   Cumulus_appl.register
     ~service: Services.view_feed
-    (fun (id, name) () ->
+    (fun (id, _) () ->
       Templates.view_feed id
     );
   Eliom_registration.Action.register
@@ -78,6 +78,15 @@ let () =
       User.update_email data >>= (function
         | true -> Lwt.return "Modification de l'adresse mail effectuée"
         | false -> Lwt.return "Adresse invalide"
+      )
+      >>= Errors.set_error
+    );
+  Eliom_registration.Action.register
+    ~service:Services.update_user_feeds_per_page
+    (fun () data ->
+      User.update_feeds_per_page (Int32.of_int data) >>= (function
+        | true -> Lwt.return "Nombre de liens par page modifié"
+        | false -> Lwt.return "Nombre invalide"
       )
       >>= Errors.set_error
     );

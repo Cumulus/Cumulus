@@ -12,6 +12,7 @@ type feed = {
 }
 
 type tree = Sheet of feed | Node of feed * tree list 
+let (>>=) = Lwt.(>>=)
 
 let feed_new data tags = {
   id = data#!id;
@@ -32,11 +33,11 @@ let links_of_tags tags =
 
 let to_html self =
   let content = match self.url with
-    | Some url -> let url_service = Eliom_service.external_service
-                    (Eliom_lib.Url.remove_end_slash url) []
-                    Eliom_parameter.unit () in
-                  Html.a ~a: [Html.a_class ["postitle"]] ~service: url_service
-                    [Html.pcdata self.description] ()
+    | Some url -> Html.Raw.a
+                    ~a:[Html.a_class ["postitle"];
+                        Html.a_href (Html.uri_of_string (fun () -> url));
+                       ]
+                  [Html.pcdata self.description]
     | None -> Html.pcdata self.description in
   Db.get_user_name_and_email_with_id self.author >>= fun author ->
   User.get_userid () >>= (function
@@ -63,12 +64,15 @@ let to_html self =
        content;
        Html.br ();
        Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
-       Html.a Services.author_feed [Html.pcdata (author#!name)] (None, author#!name);
+       Html.a
+         ~service:Services.author_feed
+         [Html.pcdata author#!name]
+         (None, author#!name);
       ];
       [Html.br ();
        (* TODO : afficher "n commentaire(s)" *)
        Html.a
-         Services.view_feed
+         ~service:Services.view_feed
          (let n = Int64.to_int comments#!n
          in match n with
            | 0
@@ -81,7 +85,7 @@ let to_html self =
       ];
       links_of_tags self.tags;
       (if is_author then
-          [Html.a Services.delete_feed [Html.pcdata " (supprimer ?)"] self.id]
+          [Html.a ~service:Services.delete_feed [Html.pcdata " (supprimer ?)"] self.id]
        else []
       );
     ]
@@ -89,15 +93,14 @@ let to_html self =
 
 let to_atom self =
   Db.get_user_name_and_email_with_id self.author >>= fun author ->
-  Lwt.return (match self.url with
-    | Some l -> Atom_feed.entry
-                  ~updated: self.date
-                  ~id: (Html.Xml.uri_of_string l)
-                  ~title: (Atom_feed.plain self.description) (* title is description ? *)
-                [Atom_feed.authors [Atom_feed.author author#!name]]
-    | None -> Atom_feed.entry
-                  ~updated: self.date
-                  ~id: (Html.Xml.uri_of_string (Int32.to_string self.id))
-                  ~title: (Atom_feed.plain self.description) (* title is description ? *)
-                [Atom_feed.authors [Atom_feed.author author#!name]]
+  Lwt.return (
+    Atom_feed.entry
+      ~updated: self.date
+      ~id:(Html.uri_of_string (fun () -> Int32.to_string self.id))
+      ~title: (Atom_feed.plain self.description)
+      [Atom_feed.authors [Atom_feed.author author#!name];
+       (match self.url with
+        | Some url -> Atom_feed.links [Atom_feed.link (Html.uri_of_string (fun () -> url))]
+        | _ -> Atom_feed.links []);
+      ]
   )

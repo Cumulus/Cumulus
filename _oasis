@@ -1,0 +1,41 @@
+OASISFormat: 0.3
+Name:        cumulus
+Version:     0.1
+Synopsis:    Test
+Authors:     Me
+License:     MIT
+Plugins:     DevFiles (0.3), META (0.3)
+
+Library cumulus
+  Path: src
+  BuildTools: ocamlbuild
+  Modules:
+    Html,
+    Utils,
+    Db,
+    Services,
+    Errors,
+    User,
+    Feed,
+	Comments,
+    Feeds,
+    _server/Templates,
+    Main
+  BuildDepends: eliom.server, macaque.syntax, batteries, lwt.syntax, safepass
+#  ByteOpt: -w A
+#  NativeOpt: -w A
+
+Library cumulus_client
+  Path: .
+  BuildTools: ocamlbuild
+  Modules:
+    src/_client/Templates
+  BuildDepends:
+    eliom.client,
+    eliom.syntax
+  CompiledObject: byte
+#  ByteOpt: -w A
+#  NativeOpt: -w A
+  DataFiles:
+    data/*,
+    _build/src/_client/cumulus.js

@@ -48,10 +48,12 @@ let is_invalid_email =
   )
 
 let get_gravatar email =
-  let md5_email = Digest.to_hex (Digest.string (String.lowercase email))
-  in Eliom_service.external_service
-    "http://www.gravatar.com" [ "avatar"; md5_email ]
-    Eliom_parameter.((int "s") ** (string "d")) ()
+  let md5_email = Digest.to_hex (Digest.string (String.lowercase email)) in
+  Eliom_service.external_service
+    ~prefix:"http://www.gravatar.com"
+    ~path:[ "avatar"; md5_email ]
+    ~get_params:Eliom_parameter.((int "s") ** (string "d"))
+    ()
 
 let strip str =
   let str = Str.replace_first (Str.regexp "^[ ]+") "" str in

@@ -3,6 +3,8 @@ module UTF8 = Batteries.UTF8
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
+let (>>=) = Lwt.(>>=)
+
 let feeds_of_db feeds =
   Lwt.return
     (List.map
@@ -27,21 +29,6 @@ let private_to_html data =
         Lwt.return (Html.div ~a: [Html.a_class ["line post"]] elm)
       )
     ) data 
-
-let author_to_html ~starting author =
-  Db.get_feeds_with_author ~starting author
-  >>= feeds_of_db
-  >>= private_to_html
-
-let tag_to_html ~starting tag =
-  Db.get_feeds_with_tag ~starting tag
-  >>= feeds_of_db
-  >>= private_to_html
-
-let root_to_html ~starting () =
-  Db.get_root_feeds ~starting ()
-  >>= feeds_of_db
-  >>= private_to_html
 
 let comments_to_html id =
   Db.get_feed_with_id id
@@ -71,10 +58,7 @@ let branch_to_html root id =
                   in Comments.to_html tree
   )))
 
-let to_html ~starting () =
-  Db.get_feeds ~starting ()
-  >>= feeds_of_db
-  >>= private_to_html
+let to_html feeds = feeds_of_db feeds >>= private_to_html
 
 let feed_id_to_html id =
   Db.get_feed_with_id id
@@ -83,7 +67,7 @@ let feed_id_to_html id =
 
 (* FIXME? should atom feed return only a limited number of links ? *)
 let to_atom () =
-  Db.get_feeds ~number:100l ()
+  Db.get_feeds ~starting:0l ~number:Utils.offset ()
   >>= feeds_of_db
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
@@ -96,10 +80,10 @@ let to_atom () =
     )
   )
 
-let (event, private_event, call_event) =
+let (event, call_event) =
   let (private_event, call_event) = React.E.create () in
   let event = Eliom_react.Down.of_react private_event in
-  (event, private_event, call_event)
+  (event, call_event)
 
 let append_feed (url, (description, tags)) =
   User.get_userid () >>= fun userid ->

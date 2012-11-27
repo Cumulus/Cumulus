@@ -1,6 +1,6 @@
 let atom =
   Eliom_service.service
-    ~path: ["atom.xml"]
+    ~path: ["cumulus.atom"]
     ~get_params: Eliom_parameter.unit
     ()
 
@@ -73,6 +73,11 @@ let update_user_password =
   Eliom_service.post_coservice'
     ~post_params: Eliom_parameter.((string "password") **
                                       (string "password_check"))
+    ()
+
+let update_user_feeds_per_page =
+  Eliom_service.post_coservice'
+    ~post_params: Eliom_parameter.((int "feeds_per_page"))
     ()
 
 let registration =
