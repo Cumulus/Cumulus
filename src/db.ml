@@ -347,7 +347,7 @@ let is_feed_author feed userid =
     Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
     Lwt.return false
 
-let get_comments root = 
+let get_comments root =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.view db (
       <:view< {

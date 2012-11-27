@@ -12,8 +12,8 @@ CREATE TABLE feeds (
     description text NOT NULL,
     timedate timestamp NOT NULL,
     author integer NOT NULL,
-	parent integer,
-	root integer
+    parent integer,
+    root integer
 );
 
 CREATE TABLE feeds_tags (
