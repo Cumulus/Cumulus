@@ -28,7 +28,7 @@ let private_to_html data =
       Feed.to_html feed >>= (fun elm ->
         Lwt.return (Html.div ~a: [Html.a_class ["line post"]] elm)
       )
-    ) data 
+    ) data
 
 let comments_to_html id =
   Db.get_feed_with_id id
@@ -37,7 +37,7 @@ let comments_to_html id =
   Db.get_comments id
   >>= feeds_of_db
   >>= (fun comments ->
-    let tree = Comments.tree_comments [Comments.Sheet (List.hd root)] comments 
+    let tree = Comments.tree_comments [Comments.Sheet (List.hd root)] comments
     in Comments.to_html (List.hd tree)
   ))
 
@@ -48,7 +48,7 @@ let branch_to_html root id =
   Db.get_feed_with_id id
   >>= feeds_of_db
   >>= (fun sheet ->
-  let sheet = List.hd sheet 
+  let sheet = List.hd sheet
   in match sheet.Feed.root with
     | None -> Comments.to_html (Comments.Sheet sheet)
     | Some n -> Db.get_comments n

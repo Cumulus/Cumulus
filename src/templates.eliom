@@ -179,21 +179,29 @@ let main_style content footer =
                   error_frame;
                 ]
               @ content
-	      @ [Html.div ~a: [Html.a_class ["navigation"]]footer]
+              @ [Html.div ~a: [Html.a_class ["navigation"]]footer]
               @ [ Html.footer
                     ( [ Html.br ();
-                          Html.br ();
-                          Html.pcdata "(not so) Proudly propulsed by the inglorious ";
-			  Html.Raw.a ~a: [Html.a_href (Html.uri_of_string (fun ()
-			    -> "http://bitbucket.org/Engil/cumulus"))]
-			  [Html.pcdata "Cumulus Project"];
-			  Html.pcdata ", with love, and the ";
-			  Html.Raw.a ~a: [Html.a_href (Html.uri_of_string (fun ()
-			    -> "http://ocsigen.org/"))]
-			  [Html.pcdata "OCaml web framework Ocsigen"];
-			  Html.a ~service:Services.atom
-			  [Html.pcdata "    (Flux Atom du site)"] ();
-                        ]
+                        Html.br ();
+                        Html.pcdata "(not so) Proudly propulsed by the inglorious ";
+                        Html.Raw.a ~a:[Html.a_href
+                                          (Html.uri_of_string
+                                             (fun () ->
+                                               "http://bitbucket.org/Engil/cumulus"
+                                             )
+                                          )
+                                      ]
+                          [Html.pcdata "Cumulus Project"];
+                        Html.pcdata ", with love, and the ";
+                        Html.Raw.a ~a:[Html.a_href
+                                          (Html.uri_of_string
+                                             (fun () -> "http://ocsigen.org/")
+                                          )
+                                      ]
+                          [Html.pcdata "OCaml web framework Ocsigen"];
+                        Html.a ~service:Services.atom
+                          [Html.pcdata "    (Flux Atom du site)"] ();
+                      ]
                     )
                 ]
              )

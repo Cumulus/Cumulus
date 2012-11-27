@@ -11,7 +11,7 @@ type feed = {
   tags: string list
 }
 
-type tree = Sheet of feed | Node of feed * tree list 
+type tree = Sheet of feed | Node of feed * tree list
 let (>>=) = Lwt.(>>=)
 
 let feed_new data tags = {
@@ -27,7 +27,13 @@ let feed_new data tags = {
 
 let links_of_tags tags =
   List.fold_left (fun acc tag ->
-    let link = Html.a ~a: [Html.a_class ["tags"]] ~service: Services.tag_feed [Html.pcdata tag] (None, tag) in
+    let link =
+      Html.a
+        ~a:[Html.a_class ["tags"]]
+        ~service:Services.tag_feed
+        [Html.pcdata tag]
+        (None, tag)
+    in
     acc @ [Html.pcdata " "; link]
   ) [] tags
 
@@ -100,7 +106,8 @@ let to_atom self =
       ~title: (Atom_feed.plain self.description)
       [Atom_feed.authors [Atom_feed.author author#!name];
        (match self.url with
-        | Some url -> Atom_feed.links [Atom_feed.link (Html.uri_of_string (fun () -> url))]
-        | _ -> Atom_feed.links []);
+         | Some url ->
+             Atom_feed.links [Atom_feed.link (Html.uri_of_string (fun () -> url))]
+         | _ -> Atom_feed.links []);
       ]
   )
