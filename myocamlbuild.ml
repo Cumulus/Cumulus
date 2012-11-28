@@ -502,6 +502,7 @@ module Ocamlbuild_eliom (Client : sig
   val name : string
   val dep : string
   val package : string
+  val dispatch_default : Ocamlbuild_plugin.hook -> unit
 end) = struct
   open Ocamlbuild_plugin
   module Pack = Ocamlbuild_pack
@@ -605,25 +606,40 @@ end) = struct
       );
     dispatch
       (fun hook ->
-        dispatch_default hook;
+        Client.dispatch_default hook;
         (match hook with
           | After_rules ->
               tag_eliom_files ();
               tag_byte_file ();
-              copy_rule_with_header "*.eliom -> _server/*.ml"
+              copy_rule_with_header "*.eliom -> **/_server/*.ml"
                 ~deps:["%(path)/_type/%(file).inferred.mli"]
                 "%(path)/%(file).eliom" "%(path)/_server/%(file:<*>).ml";
-              copy_rule_with_header "*.eliomi -> _server/*.mli"
+              copy_rule_with_header "*.eliomi -> **/_server/*.mli"
                 "%(path)/%(file).eliomi" "%(path)/_server/%(file:<*>).mli";
-              copy_rule_with_header "*.eliom -> _type/*.ml"
+              copy_rule_with_header "*.eliom -> **/_type/*.ml"
                 "%(path)/%(file).eliom" "%(path)/_type/%(file:<*>).ml";
-              copy_rule_with_header "*.eliomi -> _type/*.mli"
+              copy_rule_with_header "*.eliomi -> **/_type/*.mli"
                 "%(path)/%(file).eliomi" "%(path)/_type/%(file:<*>).mli";
-              copy_rule_with_header "*.eliom -> _client/*.ml"
+              copy_rule_with_header "*.eliom -> **/_client/*.ml"
                 ~deps:["%(path)/_type/%(file).inferred.mli"]
                 "%(path)/%(file).eliom" "%(path)/_client/%(file:<*>).ml";
-              copy_rule_with_header "*.eliomi -> _client/*.mli"
+              copy_rule_with_header "*.eliomi -> **/_client/*.mli"
                 "%(path)/%(file).eliomi" "%(path)/_client/%(file:<*>).mli";
+
+              copy_rule_with_header "*.eliom -> _server/*.ml"
+                ~deps:["_type/%(file).inferred.mli"]
+                "%(file).eliom" "_server/%(file:<*>).ml";
+              copy_rule_with_header "*.eliomi -> _server/*.mli"
+                "%(file).eliomi" "_server/%(file:<*>).mli";
+              copy_rule_with_header "*.eliom -> _type/*.ml"
+                "%(file).eliom" "_type/%(file:<*>).ml";
+              copy_rule_with_header "*.eliomi -> _type/*.mli"
+                "%(file).eliomi" "_type/%(file:<*>).mli";
+              copy_rule_with_header "*.eliom -> _client/*.ml"
+                ~deps:["_type/%(file).inferred.mli"]
+                "%(file).eliom" "_client/%(file:<*>).ml";
+              copy_rule_with_header "*.eliomi -> _client/*.mli"
+                "%(file).eliomi" "_client/%(file:<*>).mli";
           | _ -> ()
         );
       );
@@ -633,6 +649,7 @@ module M = Ocamlbuild_eliom(struct
   let name = "src/_client/cumulus.js"
   let dep  = "src/_client/templates.byte"
   let package = "cumulus_client.cma"
+  let dispatch_default = dispatch_default
 end);;
 
 M.init ();;
