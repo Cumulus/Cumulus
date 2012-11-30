@@ -10,9 +10,12 @@ Library cumulus
   Path: src
   BuildTools: ocamlbuild
   Modules:
+    Db_update,
     Html,
     Utils,
     Db,
+    Db_feed,
+    Db_user,
     Services,
     Errors,
     User,

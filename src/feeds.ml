@@ -31,10 +31,10 @@ let private_to_html data =
     ) data
 
 let comments_to_html id =
-  Db.get_feed_with_id id
+  Db_feed.get_feed_with_id id
   >>= feeds_of_db
   >>= (fun root ->
-  Db.get_comments id
+  Db_feed.get_comments id
   >>= feeds_of_db
   >>= (fun comments ->
     let result = Comments.tree_comments [Comments.Sheet (List.hd root)] comments
@@ -44,16 +44,16 @@ let comments_to_html id =
   ))
 
 let branch_to_html id =
-  Db.get_feed_with_id id
+  Db_feed.get_feed_with_id id
   >>= feeds_of_db
   >>= (fun sheet ->
   let sheet = List.hd sheet
   in match sheet.Feed.root with
     | None -> Comments.to_html (Comments.Sheet sheet)
-    | Some id -> Db.get_feed_with_id id
+    | Some id -> Db_feed.get_feed_with_id id
                  >>= feeds_of_db
                  >>= (fun root ->
-                 Db.get_comments id
+                 Db_feed.get_comments id
                  >>= feeds_of_db
                  >>= (fun comments ->
                    let tree = Comments.branch_comments (Comments.Sheet sheet) (root @ comments)
@@ -63,13 +63,13 @@ let branch_to_html id =
 let to_html feeds = feeds_of_db feeds >>= private_to_html
 
 let feed_id_to_html id =
-  Db.get_feed_with_id id
+  Db_feed.get_feed_with_id id
   >>= feeds_of_db
   >>= private_to_html
 
 (* FIXME? should atom feed return only a limited number of links ? *)
 let to_atom () =
-  Db.get_feeds ~starting:0l ~number:Utils.offset ()
+  Db_feed.get_feeds ~starting:0l ~number:Utils.offset ()
   >>= feeds_of_db
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
@@ -97,10 +97,10 @@ let append_feed (url, (description, tags)) =
       else if Utils.is_invalid_url url then
         Lwt.return Invalid_url
       else
-        Db.get_feed_url_with_url url >>= function
+        Db_feed.get_feed_url_with_url url >>= function
           | (Some _) -> Lwt.return Already_exist
           | None ->
-            Db.add_feed
+            Db_feed.add_feed
               url
               description
               (* (List.map (fun x -> String.lowercase (Utils.strip x)) (Str.split (Str.regexp "[,]+") tags)) *)
@@ -114,28 +114,28 @@ let append_link_comment (id, (url, (description, tags))) =
   User.get_userid () >>= fun userid ->
     match userid with
       | None -> Lwt.return Not_connected
-      | Some author -> 
+      | Some author ->
         if (Utils.string_is_empty description || Utils.string_is_empty tags) then
           Lwt.return Empty
         else if Utils.is_invalid_url url then
           Lwt.return Invalid_url
         else
-          Db.get_feed_url_with_url url >>= function
+          Db_feed.get_feed_url_with_url url >>= function
             | Some _ -> Lwt.return Already_exist
             | None ->
-              Db.get_feed_with_id (Int32.of_int id) >>= fun feeds_list ->
+              Db_feed.get_feed_with_id (Int32.of_int id) >>= fun feeds_list ->
                 let feed = List.hd (fst feeds_list) in
                 let parent = feed#!id in
                 let root = match feed#?root with
                   | Some root -> root
                   | None -> parent
                 in
-                Db.add_link_comment
+                Db_feed.add_link_comment
                   url
                   description
                   (List.map (fun x -> (UTF8.to_string (UTF8.lowercase (UTF8.of_string (Utils.strip x)))))
                     (Str.split (Str.regexp "[,]+") tags))
-                  root 
+                  root
                   parent
                   author >>= fun () ->
                 call_event ();
@@ -145,20 +145,20 @@ let append_desc_comment (id, description) =
   User.get_userid () >>= fun userid ->
     match userid with
       | None -> Lwt.return Not_connected
-      | Some author -> 
+      | Some author ->
         if Utils.string_is_empty description then
           Lwt.return Empty
         else
-          Db.get_feed_with_id (Int32.of_int id) >>= fun feeds_list ->
+          Db_feed.get_feed_with_id (Int32.of_int id) >>= fun feeds_list ->
             let feed = List.hd (fst feeds_list) in
             let parent = feed#!id in
             let root = match feed#?root with
               | Some root -> root
               | None -> parent
             in
-            Db.add_desc_comment
+            Db_feed.add_desc_comment
               description
-              root 
+              root
               parent
               author >>= fun () ->
             call_event ();

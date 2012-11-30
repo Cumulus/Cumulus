@@ -45,18 +45,18 @@ let to_html self =
                        ]
                   [Html.pcdata self.description]
     | None -> Html.pcdata self.description in
-  Db.get_user_name_and_email_with_id self.author >>= fun author ->
+  Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
     | Some userid ->
-        Db.is_feed_author self.id userid
+        Db_feed.is_feed_author self.id userid
         >>= fun x ->
         User.is_admin ()
         >>= fun y ->
         Lwt.return (x || y)
   )
   >>= fun is_author ->
-  Db.count_comments self.id >>= fun comments ->
+  Db_feed.count_comments self.id >>= fun comments ->
   Lwt.return (
     List.flatten [
       [Html.img
@@ -102,7 +102,7 @@ let to_html self =
   )
 
 let to_atom self =
-  Db.get_user_name_and_email_with_id self.author >>= fun author ->
+  Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   Lwt.return (
     Atom_feed.entry
       ~updated: self.date

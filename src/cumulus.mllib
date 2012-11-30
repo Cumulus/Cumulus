@@ -1,8 +1,11 @@
 # OASIS_START
-# DO NOT EDIT (digest: 31e6dbee0a16dc66b5ee35d7e5368ec3)
+# DO NOT EDIT (digest: 48353bc810ea77e2b2abf14acfceae87)
+Db_update
 Html
 Utils
 Db
+Db_feed
+Db_user
 Services
 Errors
 User

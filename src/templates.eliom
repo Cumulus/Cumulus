@@ -484,8 +484,8 @@ let main ?(page=0) ~service () =
         Html.pcdata name
       ] param
     )
-    (Db.get_root_feeds)
-    (Db.count_feeds ())
+    (Db_feed.get_root_feeds)
+    (Db_feed.count_feeds ())
 
 let user ?(page=0) ~service username =
   feed_list ~service page
@@ -494,8 +494,8 @@ let user ?(page=0) ~service username =
         Html.pcdata name
       ] (param, username)
       )
-    (Db.get_feeds_with_author username)
-    (Db.count_feeds_with_author username)
+    (Db_feed.get_feeds_with_author username)
+    (Db_feed.count_feeds_with_author username)
 
 let tag ?(page=0) ~service tag =
   feed_list ~service page
@@ -504,8 +504,8 @@ let tag ?(page=0) ~service tag =
         Html.pcdata name
       ] (param, tag)
      )
-    (Db.get_feeds_with_tag tag)
-    (Db.count_feeds_with_tag tag)
+    (Db_feed.get_feeds_with_tag tag)
+    (Db_feed.count_feeds_with_tag tag)
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =

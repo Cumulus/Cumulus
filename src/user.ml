@@ -37,10 +37,10 @@ let add = function
         || Utils.is_invalid_email email ->
       Lwt.return false
   | (name, (email, (password, _))) ->
-      Db.get_user_with_name name >>= function
+      Db_user.get_user_with_name name >>= function
         | Some _ -> Lwt.return false
         | None ->
-            Db.add_user name (hash_password password) email >>= fun () ->
+            Db_user.add_user name (hash_password password) email >>= fun () ->
             Lwt.return true
 
 let (get_user, set_user, unset_user) =
@@ -73,7 +73,7 @@ let is_admin () =
     | Some user -> Lwt.return user.is_admin
 
 let connect user password =
-  Db.get_user_with_name user >>= function
+  Db_user.get_user_with_name user >>= function
     | None -> Lwt.return Not_found
     | (Some user) ->
       let user = user_new user in
@@ -91,7 +91,7 @@ let get_user_and_email () =
   match userid with
     | None -> Lwt.return None
     | Some id ->
-      Db.get_user_name_and_email_with_id id >>= fun user ->
+      Db_user.get_user_name_and_email_with_id id >>= fun user ->
       Lwt.return (Some user)
 
 let disconnect () =
@@ -110,7 +110,7 @@ let update_password = function
       get_userid () >>= function
         | None -> Lwt.return false
         | Some id ->
-            Db.update_user_password id (hash_password password)
+            Db_user.update_user_password id (hash_password password)
             >>= fun () ->
             Lwt.return true
 
@@ -123,7 +123,7 @@ let update_email = function
         | None -> Lwt.return false
         | Some user ->
             set_user {user with email} >>= fun () ->
-            Db.update_user_email user.id email >>= fun () ->
+            Db_user.update_user_email user.id email >>= fun () ->
             Lwt.return true
 
 let update_feeds_per_page feeds_per_page =
@@ -131,7 +131,7 @@ let update_feeds_per_page feeds_per_page =
     | None -> Lwt.return false
     | Some user ->
         set_user {user with feeds_per_page} >>= fun () ->
-        Db.update_user_feeds_per_page user.id feeds_per_page >>= fun () ->
+        Db_user.update_user_feeds_per_page user.id feeds_per_page >>= fun () ->
         Lwt.return true
 
 let get_offset () =
