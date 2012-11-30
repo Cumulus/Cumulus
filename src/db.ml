@@ -100,7 +100,7 @@ let () =
     )
     >>= fun () ->
     update 3 (fun db ->
-      alter db "ALTER TABLE feeds ALTER url TYPE text" >>= fun () ->
+      alter db "ALTER TABLE feeds ALTER url DROP NOT NULL" >>= fun () ->
       alter db "ALTER TABLE feeds ADD COLUMN parent integer" >>= fun () ->
       alter db "ALTER TABLE feeds ADD COLUMN root integer" >>= fun () ->
       alter db "ALTER TABLE feeds RENAME COLUMN title TO description"
