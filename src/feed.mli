@@ -1,4 +1,15 @@
-type feed
+open CalendarLib
+
+type feed = {
+  id : int32;
+  url : string option;
+  description : string;
+  date : CalendarLib.Calendar.t;
+  author : int32;
+  parent : int32 option;
+  root : int32 option;
+  tags: string list
+}
 
 val feed_new : Db.feed -> string list -> feed
 val to_html : feed ->

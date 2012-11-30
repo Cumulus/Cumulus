@@ -8,10 +8,12 @@ CREATE TABLE options (
 
 CREATE TABLE feeds (
     id integer NOT NULL,
-    url text NOT NULL,
-    title text NOT NULL,
+    url text,
+    description text NOT NULL,
     timedate timestamp NOT NULL,
-    author integer NOT NULL
+    author integer NOT NULL,
+    parent integer,
+    root integer
 );
 
 CREATE TABLE feeds_tags (
@@ -33,4 +35,4 @@ CREATE SEQUENCE users_id_seq;
 CREATE SEQUENCE feeds_id_seq;
 CREATE SEQUENCE feeds_tags_id_seq;
 
-INSERT INTO options VALUES ('dbversion', '2');
+INSERT INTO options VALUES ('dbversion', '3');

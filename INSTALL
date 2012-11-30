@@ -4,14 +4,11 @@ And add the following line in /etc/postgresql/<maybe sub-dir>/pg_hba.conf:
 local cumulus cumulus password
 
 You'll also need to compile pgocaml with batteries support instead of the
-original extlib. If you use opam, you can edit the package files/opam.patch file
-to do so (add this diff after the first one.):
+original extlib. If you use opam, you can usr our custum repository containing
+the patched pgocaml package:
 
-@@ -17,6 +17,7 @@
-  # Boston, MA 02111-1307, USA.
+opam remote -add mirai https://bitbucket.org/Engil/opam.git
 
-  include Makefile.config
- +USE_BATTERIES := yes
-
-  ifeq ($(USE_BATTERIES),yes)
-  EXTLIB := batteries
+Next you'll need to edit the package preference in ~/.opam/repo/index by
+removing the word default after the pgocaml package name (to make « mirai » the
+only repo used for this package)
