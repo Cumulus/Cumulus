@@ -396,8 +396,8 @@ let private_comment id =
       else
         [ branch; Html.post_form
             ~a:[Html.a_class ["box"]]
-            ~service:Services.add_link_comment
-            (fun (root, (parent, (url, (desc, tags)))) -> [
+            ~service:Services.append_link_comment
+            (fun (parent, (url, (desc, tags))) -> [
               Html.h1 [Html.pcdata "Lien"] ;
               Html.p [
                 Html.string_input
@@ -427,12 +427,7 @@ let private_comment id =
                 Html.int_input
                   ~input_type:`Hidden
                   ~name:parent
-                  ~value:0
-                  ();
-                Html.int_input
-                  ~input_type:`Hidden
-                  ~name:root
-                  ~value:0
+                  ~value:(Int32.to_int id)
                   ();
                 Html.string_input
                   ~a:[Html.a_class ["btn-box"]]
@@ -444,8 +439,8 @@ let private_comment id =
             ();
           Html.post_form
             ~a:[Html.a_class ["box"]]
-            ~service:Services.add_desc_comment
-            (fun (root, (parent, desc)) -> [
+            ~service:Services.append_desc_comment
+            (fun (parent, desc) -> [
               Html.h1 [Html.pcdata "Commentaire"];
               Html.p [
                 Html.textarea
@@ -454,7 +449,12 @@ let private_comment id =
                      ]
                   ~name:desc
                   ();
-                Html.br ();
+               Html.int_input
+                  ~input_type:`Hidden
+                  ~name:parent
+                  ~value:(Int32.to_int id)
+                  ();
+               Html.br ();
                 Html.string_input
                   ~a:[Html.a_class ["btn-box"]]
                   ~input_type:`Submit
