@@ -87,6 +87,10 @@ let to_html self =
          (* [Html.pcdata (string_to_int (Int64.to_int comments)) " commentaires "] *)
          (* url_of_title or url_of_desc ? *)
          (Int32.to_int self.id, Utils.strip self.description);
+       Html.a
+         ~service:Services.comment
+         [Html.pcdata "Poster un commentaire "]
+         (Int32.to_int self.id, Utils.strip self.description);
        Html.pcdata "Tags: "
       ];
       links_of_tags self.tags;
