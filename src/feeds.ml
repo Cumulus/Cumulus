@@ -135,9 +135,9 @@ let append_link_comment (id, (url, (description, tags))) =
                   description
                   (List.map (fun x -> (UTF8.to_string (UTF8.lowercase (UTF8.of_string (Utils.strip x)))))
                     (Str.split (Str.regexp "[,]+") tags))
-                  author
+                  root 
                   parent
-                  root >>= fun () ->
+                  author >>= fun () ->
                 call_event ();
                 Lwt.return Ok
 
@@ -158,8 +158,8 @@ let append_desc_comment (id, description) =
             in
             Db.add_desc_comment
               description
-              author
+              root 
               parent
-              root >>= fun () ->
+              author >>= fun () ->
             call_event ();
             Lwt.return Ok

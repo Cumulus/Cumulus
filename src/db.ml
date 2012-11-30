@@ -372,7 +372,6 @@ let add_desc_comment description root parent userid =
   in
   feed
 
-
 let add_user name password email =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.query db (<:insert< $users$ := {
