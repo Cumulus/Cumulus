@@ -35,4 +35,4 @@ CREATE SEQUENCE users_id_seq;
 CREATE SEQUENCE feeds_id_seq;
 CREATE SEQUENCE feeds_tags_id_seq;
 
-INSERT INTO options VALUES ('dbversion', '2');
+INSERT INTO options VALUES ('dbversion', '3');
