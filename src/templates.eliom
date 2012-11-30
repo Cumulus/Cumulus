@@ -384,9 +384,9 @@ let private_preferences () =
     )
     []
 
-let private_comment vroot vparent vid =
+let private_comment id =
   User.is_connected () >>= fun state ->
-  Feeds.branch_to_html vroot vid >>= fun branch ->
+  Feeds.branch_to_html id >>= fun branch ->
   main_style
     ( if not state then
         [Html.div
@@ -427,12 +427,12 @@ let private_comment vroot vparent vid =
                 Html.int_input
                   ~input_type:`Hidden
                   ~name:parent
-                  ~value:vparent
+                  ~value:0
                   ();
                 Html.int_input
                   ~input_type:`Hidden
                   ~name:root
-                  ~value:(Int32.to_int vroot)
+                  ~value:0
                   ();
                 Html.string_input
                   ~a:[Html.a_class ["btn-box"]]
@@ -518,5 +518,5 @@ let register () =
 let preferences () =
   private_preferences ()
 
-let comment root parent id =
-  private_comment (Int32.of_int root) parent (Int32.of_int id)
+let comment id =
+  private_comment (Int32.of_int id)

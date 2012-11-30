@@ -43,21 +43,21 @@ let comments_to_html id =
       | None -> Comments.to_html (Comments.Sheet (List.hd root))
   ))
 
-let branch_to_html root id =
-  Db.get_feed_with_id root
-  >>= feeds_of_db
-  >>= (fun root ->
+let branch_to_html id =
   Db.get_feed_with_id id
   >>= feeds_of_db
   >>= (fun sheet ->
   let sheet = List.hd sheet
   in match sheet.Feed.root with
     | None -> Comments.to_html (Comments.Sheet sheet)
-    | Some n -> Db.get_comments n
-                >>= feeds_of_db
-                >>= (fun comments ->
-                  let tree = Comments.branch_comments (Comments.Sheet sheet) (root @ comments)
-                  in Comments.to_html tree
+    | Some id -> Db.get_feed_with_id id
+                 >>= feeds_of_db
+                 >>= (fun root ->
+                 Db.get_comments id
+                 >>= feeds_of_db
+                 >>= (fun comments ->
+                   let tree = Comments.branch_comments (Comments.Sheet sheet) (root @ comments)
+                   in Comments.to_html tree
   )))
 
 let to_html feeds = feeds_of_db feeds >>= private_to_html
