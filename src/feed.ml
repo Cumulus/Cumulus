@@ -106,12 +106,12 @@ let to_atom self =
   Lwt.return (
     Atom_feed.entry
       ~updated: self.date
-      ~id:(Html.uri_of_string (fun () -> Int32.to_string self.id))
+      ~id:(Int32.to_string self.id)
       ~title: (Atom_feed.plain self.description)
       [Atom_feed.authors [Atom_feed.author author#!name];
        (match self.url with
          | Some url ->
-             Atom_feed.links [Atom_feed.link (Html.uri_of_string (fun () -> url))]
+             Atom_feed.links [Atom_feed.link url]
          | _ -> Atom_feed.links []);
       ]
   )
