@@ -48,19 +48,17 @@ let add_user =
                                       (string "email"))
     ()
 
-let add_link_comment =
+let append_link_comment =
   Eliom_service.post_coservice'
-    ~post_params: Eliom_parameter.((int "root") **
-                                   (int "parent") **
+    ~post_params: Eliom_parameter.((int "id") **
                                    (string "url") **
                                    (string "desc") **
                                    (string "tags"))
     ()
 
-let add_desc_comment =
+let append_desc_comment =
   Eliom_service.post_coservice'
-    ~post_params: Eliom_parameter.((int "root") **
-                                   (int "parent") **
+    ~post_params: Eliom_parameter.((int "id") **
                                    (string "desc"))
     ()
 
