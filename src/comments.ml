@@ -1,3 +1,5 @@
+module UTF8 = Batteries.UTF8
+
 type tree = Sheet of Feed.feed | Node of Feed.feed * tree list
 let (>>=) = Lwt.(>>=)
 
@@ -53,7 +55,7 @@ let rec tree_comments stack comments =
     | [] -> begin match stack with
               | [] -> None
               | [ x ] -> Some x
-              | x :: r -> Some (List.hd (scan x r []))
+              | x :: r -> tree_comments (scan x r []) []
             end
     | x :: r -> tree_comments (scan (Sheet x) stack []) r
 
