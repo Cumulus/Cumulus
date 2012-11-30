@@ -100,7 +100,7 @@ let preferences =
 let comment =
   Eliom_service.service
     ~path: ["comment"]
-    ~get_params: Eliom_parameter.(suffix (int "id"))
+    ~get_params: Eliom_parameter.(suffix ((int "id") ** string "name"))
     ()
 
 let delete_feed =
