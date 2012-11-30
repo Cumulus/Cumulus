@@ -15,8 +15,10 @@ class type feed = object
   method author : Sql.int32_t macaque_type Sql.t
   method id : Sql.int32_t macaque_type Sql.t
   method timedate : Sql.timestamp_t macaque_type Sql.t
-  method title : Sql.string_t macaque_type Sql.t
-  method url : Sql.string_t macaque_type Sql.t
+  method description : < get : unit; nul : Sql.non_nullable; t : Sql.string_t > Sql.t
+  method url : < get : unit; nul : Sql.nullable; t : Sql.string_t > Sql.t
+  method parent : < get : unit; nul : Sql.nullable; t : Sql.int32_t > Sql.t
+  method root : < get : unit; nul : Sql.nullable; t : Sql.int32_t > Sql.t
 end
 
 class type tag = object
@@ -96,6 +98,13 @@ let () =
       alter db "ALTER TABLE users ADD COLUMN \
                 feeds_per_page integer NOT NULL DEFAULT(10)"
     )
+    >>= fun () ->
+    update 3 (fun db ->
+      alter db "ALTER TABLE feeds ALTER url DROP NOT NULL" >>= fun () ->
+      alter db "ALTER TABLE feeds ADD COLUMN parent integer" >>= fun () ->
+      alter db "ALTER TABLE feeds ADD COLUMN root integer" >>= fun () ->
+      alter db "ALTER TABLE feeds RENAME COLUMN title TO description"
+    )
   end
 
 (** Tables description *)
@@ -104,10 +113,12 @@ let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
 
 let feeds = (<:table< feeds (
   id integer NOT NULL DEFAULT(nextval $feeds_id_seq$),
-  url text NOT NULL,
-  title text NOT NULL,
+  url text,
+  description text NOT NULL,
   timedate timestamp NOT NULL DEFAULT(current_timestamp),
-  author integer NOT NULL
+  author integer NOT NULL,
+  parent integer,
+  root integer
 ) >>)
 
 let feeds_tags_id_seq = (<:sequence< serial "feeds_tags_id_seq" >>)
@@ -177,9 +188,11 @@ let get_feeds_aux
       <:view< {
         f.id;
         f.url;
-        f.title;
+        f.description;
         f.timedate;
         f.author;
+        f.parent;
+        f.root;
       } order by f.id desc
         limit $int32:number$
         offset $int32:starting$ |
@@ -194,6 +207,11 @@ let get_feeds_aux
     >>= fun tags ->
     Lwt.return (feeds, tags)
   )
+
+let get_root_feeds ~starting ~number () =
+  let feeds_filter f = (<:value< is_null f.root || is_null f.parent >>) in
+  let tags_filter _ _ = (<:value< true >>) in
+  get_feeds_aux ~starting ~number ~feeds_filter ~tags_filter ()
 
 let get_feeds ~starting ~number () =
   let feeds_filter _ = (<:value< true >>) in
@@ -247,9 +265,11 @@ let get_feed_with_id id =
       <:view< {
         f.id;
         f.url;
-        f.title;
+        f.description;
         f.timedate;
         f.author;
+        f.parent;
+        f.root;
       } | f in $feeds$;
           f.id = $int32:id$ >>)
     >>= fun feeds ->
@@ -262,7 +282,13 @@ let get_feed_with_id id =
     Lwt.return (feeds, tags)
   )
 
-let add_feed url title tags userid =
+let count_comments parent =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.view_one db (<:view< group { n = count[f] } | f in $feeds$; f.parent = $int32:parent$ >>
+    )
+  )
+
+let add_feed url description tags userid =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.value db (<:value< feeds?id >>)
   )
@@ -272,9 +298,11 @@ let add_feed url title tags userid =
       Lwt_Query.query db (<:insert< $feeds$ := {
         id = $int32:id_feed$;
         url = $string:url$;
-        title = $string:title$;
+        description = $string:description$;
         timedate = feeds?timedate;
         author = $int32:userid$;
+        parent = null;
+        root = null;
       } >>)
     )
   and tag =
@@ -291,6 +319,58 @@ let add_feed url title tags userid =
       tags
   in
   Lwt.join [feed; tag]
+
+let add_link_comment url description tags root parent userid =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.value db (<:value< feeds?id >>)
+  )
+  >>= fun id_feed ->
+  let feed =
+    Lwt_pool.use pool (fun db ->
+      Lwt_Query.query db (<:insert< $feeds$ := {
+        id = $int32:id_feed$;
+        url = $string:url$;
+        description = $string:description$;
+        timedate = feeds?timedate;
+        author = $int32:userid$;
+        parent = $int32:parent$;
+        root = $int32:root$;
+      } >>)
+    )
+  and tag =
+    Lwt_list.iter_p
+      (fun tag ->
+        Lwt_pool.use pool (fun db ->
+          Lwt_Query.query db (<:insert< $feeds_tags$ := {
+            id = feeds_tags?id;
+            tag = $string:tag$;
+            id_feed = $int32:id_feed$;
+          } >>)
+        )
+      )
+      tags
+  in
+  Lwt.join [feed; tag]
+
+let add_desc_comment description root parent userid =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.value db (<:value< feeds?id >>)
+  )
+  >>= fun id_feed ->
+  let feed =
+    Lwt_pool.use pool (fun db ->
+      Lwt_Query.query db (<:insert< $feeds$ := {
+        id = $int32:id_feed$;
+        url = null;
+        description = $string:description$;
+        timedate = feeds?timedate;
+        author = $int32:userid$;
+        parent = $int32:parent$;
+        root = $int32:root$;
+      } >>)
+    )
+  in
+  feed
 
 let add_user name password email =
   Lwt_pool.use pool (fun db ->
@@ -318,6 +398,29 @@ let is_feed_author feed userid =
   with exn ->
     Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
     Lwt.return false
+
+let get_comments root =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.view db (
+      <:view< {
+        f.id;
+        f.url;
+        f.description;
+        f.timedate;
+        f.author;
+        f.parent;
+        f.root;
+      } order by f.timedate desc |
+        f in $feeds$;
+        f.root = $int32:root$ || f.parent = $int32:root$; >>)
+    >>= fun feeds ->
+    Lwt_Query.view db (<:view< {
+      t.tag;
+      t.id_feed;
+    } | t in $feeds_tags$ >>)
+    >>= fun tags ->
+    Lwt.return (feeds, tags)
+  )
 
 let delete_feed feed userid =
   is_feed_author feed userid >>= function

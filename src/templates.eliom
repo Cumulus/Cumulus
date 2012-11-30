@@ -179,21 +179,29 @@ let main_style content footer =
                   error_frame;
                 ]
               @ content
-	      @ [Html.div ~a: [Html.a_class ["navigation"]]footer]
+              @ [Html.div ~a: [Html.a_class ["navigation"]]footer]
               @ [ Html.footer
                     ( [ Html.br ();
-                          Html.br ();
-                          Html.pcdata "(not so) Proudly propulsed by the inglorious ";
-			  Html.Raw.a ~a: [Html.a_href (Html.uri_of_string (fun ()
-			    -> "http://bitbucket.org/Engil/cumulus"))]
-			  [Html.pcdata "Cumulus Project"];
-			  Html.pcdata ", with love, and the ";
-			  Html.Raw.a ~a: [Html.a_href (Html.uri_of_string (fun ()
-			    -> "http://ocsigen.org/"))]
-			  [Html.pcdata "OCaml web framework Ocsigen"];
-			  Html.a ~service:Services.atom
-			  [Html.pcdata "    (Flux Atom du site)"] ();
-                        ]
+                        Html.br ();
+                        Html.pcdata "(not so) Proudly propulsed by the inglorious ";
+                        Html.Raw.a ~a:[Html.a_href
+                                          (Html.uri_of_string
+                                             (fun () ->
+                                               "http://bitbucket.org/Engil/cumulus"
+                                             )
+                                          )
+                                      ]
+                          [Html.pcdata "Cumulus Project"];
+                        Html.pcdata ", with love, and the ";
+                        Html.Raw.a ~a:[Html.a_href
+                                          (Html.uri_of_string
+                                             (fun () -> "http://ocsigen.org/")
+                                          )
+                                      ]
+                          [Html.pcdata "OCaml web framework Ocsigen"];
+                        Html.a ~service:Services.atom
+                          [Html.pcdata "    (Flux Atom du site)"] ();
+                      ]
                     )
                 ]
              )
@@ -376,6 +384,89 @@ let private_preferences () =
     )
     []
 
+let private_comment id =
+  User.is_connected () >>= fun state ->
+  Feeds.branch_to_html id >>= fun branch ->
+  main_style
+    ( if not state then
+        [Html.div
+            ~a:[Html.a_class ["box"]]
+            [Html.pcdata "Veuillez vous connecter pour poster un commentaire."]
+        ]
+      else
+        [ branch; Html.post_form
+            ~a:[Html.a_class ["box"]]
+            ~service:Services.append_link_comment
+            (fun (parent, (url, (desc, tags))) -> [
+              Html.h1 [Html.pcdata "Lien"] ;
+              Html.p [
+                Html.string_input
+                  ~a:[Html.a_class ["input-box"];
+                      Html.a_placeholder "URL"
+                     ]
+                  ~input_type:`Text
+                  ~name:url
+                  ();
+                Html.br ();
+                Html.string_input
+                  ~a:[Html.a_class ["input-box"];
+                      Html.a_placeholder "Titre";
+                     ]
+                  ~input_type:`Text
+                  ~name:desc
+                  ();
+                Html.br ();
+                Html.string_input
+                  ~a:[Html.a_class ["input-box"];
+                      Html.a_placeholder "Tags";
+                     ]
+                  ~input_type:`Text
+                  ~name:tags
+                  ();
+                Html.br ();
+                Html.int_input
+                  ~input_type:`Hidden
+                  ~name:parent
+                  ~value:(Int32.to_int id)
+                  ();
+                Html.string_input
+                  ~a:[Html.a_class ["btn-box"]]
+                  ~input_type:`Submit
+                  ~value:"Envoyer !"
+                  ()
+              ]
+            ])
+            ();
+          Html.post_form
+            ~a:[Html.a_class ["box"]]
+            ~service:Services.append_desc_comment
+            (fun (parent, desc) -> [
+              Html.h1 [Html.pcdata "Commentaire"];
+              Html.p [
+                Html.textarea
+                  ~a:[Html.a_class ["input-box"];
+                      Html.a_placeholder "Texte"
+                     ]
+                  ~name:desc
+                  ();
+               Html.int_input
+                  ~input_type:`Hidden
+                  ~name:parent
+                  ~value:(Int32.to_int id)
+                  ();
+               Html.br ();
+                Html.string_input
+                  ~a:[Html.a_class ["btn-box"]]
+                  ~input_type:`Submit
+                  ~value:"Envoyer !"
+                  ()
+              ]
+            ])
+            ()
+        ]
+    )
+    []
+
 let feed_list ~service page link feeds nb_feeds =
   User.get_offset () >>= fun off ->
   let starting = Int32.mul (Int32.of_int page) off in
@@ -393,7 +484,7 @@ let main ?(page=0) ~service () =
         Html.pcdata name
       ] param
     )
-    (Db.get_feeds)
+    (Db.get_root_feeds)
     (Db.count_feeds ())
 
 let user ?(page=0) ~service username =
@@ -418,11 +509,14 @@ let tag ?(page=0) ~service tag =
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =
-  Feeds.feed_id_to_html (Int32.of_int id) >>= fun feed ->
-  main_style feed []
+  Feeds.comments_to_html (Int32.of_int id) >>= (fun feed ->
+    main_style [feed] [])
 
 let register () =
   private_register ()
 
 let preferences () =
   private_preferences ()
+
+let comment id =
+  private_comment (Int32.of_int id)

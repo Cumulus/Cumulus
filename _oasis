@@ -17,6 +17,7 @@ Library cumulus
     Errors,
     User,
     Feed,
+    Comments,
     Feeds,
     _server/Templates,
     Main
