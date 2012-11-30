@@ -37,8 +37,10 @@ let comments_to_html id =
   Db.get_comments id
   >>= feeds_of_db
   >>= (fun comments ->
-    let tree = Comments.tree_comments [Comments.Sheet (List.hd root)] comments
-    in Comments.to_html (List.hd tree)
+    let result = Comments.tree_comments [Comments.Sheet (List.hd root)] comments
+    in match result with
+      | Some tree -> Comments.to_html tree
+      | None -> Comments.to_html (Comments.Sheet (List.hd root))
   ))
 
 let branch_to_html root id =
