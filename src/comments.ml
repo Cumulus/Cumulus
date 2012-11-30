@@ -5,14 +5,15 @@ let rec has_parent id = function
   | Sheet elm -> elm.Feed.id = id
   | Node (elm, childs) ->
       let l = List.map (fun x -> has_parent id x) childs in
-      elm.Feed.id = id || (List.fold_left (fun x -> fun y -> x || y) false l)
+      (elm.Feed.id = id) || (List.fold_left (fun x -> fun y -> x || y) false l)
 
 let rec append_tree tree id = function
   | Sheet elm -> begin match id = elm.Feed.id with
-      | true -> Node (elm, [tree])
-      | false -> Sheet elm
-  end
-  | Node (elm, childs) -> match id = elm.Feed.id with
+                   | true -> Node (elm, [tree])
+                   | false -> Sheet elm
+                 end
+  | Node (elm, childs) ->
+    match id = elm.Feed.id with
       | true -> Node (elm, tree :: childs)
       | false ->
           let childs = List.map (fun x -> append_tree tree id x) childs in
@@ -41,21 +42,19 @@ let rec tree_comments stack comments =
           | None -> 0l
           | Some n -> n
   in
-  let rec scan ?(end_of_scan=false) tree stack acc = match stack with
-    | [] -> tree :: acc
+  let rec scan tree stack acc = match stack with
+    | [] -> acc @ [ tree ]
     | x :: r ->
         if has_parent (get tree) x
-        then if end_of_scan
-          then (append_tree tree (get tree) x) :: r
-          else scan (append_tree tree (get tree) x) r acc
+        then scan (append_tree tree (get tree) x) r acc
         else scan tree r (x :: acc)
   in
   match comments with
     | [] -> begin match stack with
-        | [] -> []
-        | [ x ] -> [ x ]
-        | x :: r -> scan ~end_of_scan:(true) x r []
-    end
+              | [] -> None
+              | [ x ] -> Some x
+              | x :: r -> Some (List.hd (scan x r []))
+            end
     | x :: r -> tree_comments (scan (Sheet x) stack []) r
 
 let rec branch_comments root comments =
