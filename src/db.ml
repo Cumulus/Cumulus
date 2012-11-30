@@ -358,7 +358,7 @@ let get_comments root =
         f.author;
         f.parent;
         f.root;
-      } order by f.timedate |
+      } order by f.timedate desc |
         f in $feeds$;
         f.root = $int32:root$ || f.parent = $int32:root$; >>)
     >>= fun feeds ->
