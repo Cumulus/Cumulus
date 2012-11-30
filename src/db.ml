@@ -320,6 +320,59 @@ let add_feed url description tags userid =
   in
   Lwt.join [feed; tag]
 
+let add_link_comment url description tags root parent userid =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.value db (<:value< feeds?id >>)
+  )
+  >>= fun id_feed ->
+  let feed =
+    Lwt_pool.use pool (fun db ->
+      Lwt_Query.query db (<:insert< $feeds$ := {
+        id = $int32:id_feed$;
+        url = $string:url$;
+        description = $string:description$;
+        timedate = feeds?timedate;
+        author = $int32:userid$;
+        parent = $int32:parent$;
+        root = $int32:root$;
+      } >>)
+    )
+  and tag =
+    Lwt_list.iter_p
+      (fun tag ->
+        Lwt_pool.use pool (fun db ->
+          Lwt_Query.query db (<:insert< $feeds_tags$ := {
+            id = feeds_tags?id;
+            tag = $string:tag$;
+            id_feed = $int32:id_feed$;
+          } >>)
+        )
+      )
+      tags
+  in
+  Lwt.join [feed; tag]
+
+let add_desc_comment description root parent userid =
+  Lwt_pool.use pool (fun db ->
+    Lwt_Query.value db (<:value< feeds?id >>)
+  )
+  >>= fun id_feed ->
+  let feed =
+    Lwt_pool.use pool (fun db ->
+      Lwt_Query.query db (<:insert< $feeds$ := {
+        id = $int32:id_feed$;
+        url = null;
+        description = $string:description$;
+        timedate = feeds?timedate;
+        author = $int32:userid$;
+        parent = $int32:parent$;
+        root = $int32:root$;
+      } >>)
+    )
+  in
+  feed
+
+
 let add_user name password email =
   Lwt_pool.use pool (fun db ->
     Lwt_Query.query db (<:insert< $users$ := {

@@ -67,8 +67,14 @@ val get_comments :
   int32 ->
   feeds_and_tags Lwt.t
 
-val add_feed : string -> string -> string list -> int32 -> unit Lwt.t
-val add_user : string -> string -> string -> unit Lwt.t
+val add_feed :
+  string -> string -> string list -> int32 -> unit Lwt.t
+val add_link_comment :
+  string -> string -> string list -> int32 -> int32 -> int32 -> unit Lwt.t
+val add_desc_comment :
+  string -> int32 -> int32 -> int32 -> unit Lwt.t
+val add_user : 
+  string -> string -> string -> unit Lwt.t
 
 val is_feed_author : int32 -> int32 -> bool Lwt.t
 val delete_feed : int32 -> int32 -> unit Lwt.t
