@@ -177,7 +177,7 @@ let add_feed ?root ?parent ~url ~description ~tags ~userid () =
         timedate = feeds?timedate;
         author = $int32:userid$;
         parent = of_option $Option.map Sql.Value.int32 parent$;
-        root = of_option $Option.map Sql.Value.int32 parent$;
+        root = of_option $Option.map Sql.Value.int32 root$;
       } >>)
   and tag =
     Lwt_list.iter_p
