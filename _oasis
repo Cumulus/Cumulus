@@ -1,8 +1,14 @@
 OASISFormat: 0.3
 Name:        cumulus
-Version:     0.1
-Synopsis:    Test
-Authors:     Me
+Version:     1.0
+Synopsis:    Buzz erl^WOCaml, le retour
+Authors:     Enguerrand Decorne,
+             Jacques-Pascal Deplaix,
+             Romain Calascibetta,
+             Louis Roche,
+             Poulet,
+             xarch,
+             Alexis Cassaigne
 License:     MIT
 Plugins:     DevFiles (0.3), META (0.3)
 

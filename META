@@ -1,7 +1,7 @@
 # OASIS_START
-# DO NOT EDIT (digest: 4100d2d4b343c67ed3293968390e2bd5)
-version = "0.1"
-description = "Test"
+# DO NOT EDIT (digest: e43c54ec0a8f0c4fd259efc1d88891de)
+version = "1.0"
+description = "Buzz erl^WOCaml, le retour"
 requires = "eliom.client eliom.syntax"
 archive(byte) = "cumulus_client.cma"
 archive(byte, plugin) = "cumulus_client.cma"
