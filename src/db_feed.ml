@@ -248,13 +248,53 @@ let get_comments root =
   >>= fun tags ->
   Lwt.return (feeds, tags)
 
+let list_of_depend_feed id =
+  let get_feeds_root_without_id root id =
+    Db.view
+      (<:view< {
+        f.id;
+        f.url;
+        f.description;
+        f.timedate;
+        f.author;
+        f.parent;
+        f.root;
+       } | f in $feeds$;
+      f.root = $int32:root$; f.id <> $int32:id$;
+      >>)
+  in 
+  let rec aux root comments =
+    let get = function
+      | None -> 0l
+      | Some n -> n
+    in match comments with
+      | [] -> [ root ]
+      | l -> let childs = List.filter (fun x -> (get x#?parent) = root#!id) l in
+             let others = List.filter (fun x -> (get x#?parent) <> root#!id) l in
+             if 0 = List.length childs
+             then [ root ]
+             else (root) :: (List.flatten (List.map (fun x -> aux x others) childs))
+  in
+  get_feed_with_id id
+  >>= fun (root, _) -> match root#?root with
+    | None -> Lwt.return [ root ]
+    | Some rootid -> get_feeds_root_without_id rootid (root#!id)
+                     >>= fun comments ->
+                     Lwt.return (aux root comments)
+
 let delete_feed feed userid =
   is_feed_author feed userid >>= function
     | true ->
+        list_of_depend_feed feed
+        >>= fun dfeeds ->
+          let feeds_filter f =
+            (<:value< $Db.in'$ f.id $List.map (fun x -> x#id) dfeeds$ >>) in
         Db.query
-          (<:delete< f in $feeds$ | f.id = $int32:feed$; >>)
+          (<:delete< f in $feeds$ | $feeds_filter$ f; >>)
         >>= fun () ->
+          let feeds_filter f =
+            (<:value< $Db.in'$ f.id_feed $List.map (fun x -> x#id) dfeeds$ >>) in
         Db.query
-          (<:delete< f in $feeds_tags$ | f.id_feed = $int32:feed$ >>)
+          (<:delete< f in $feeds_tags$ | $feeds_filter$ f >>)
     | false ->
         Lwt.return ()
