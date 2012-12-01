@@ -33,7 +33,6 @@ let get_user_name_and_email_with_id id =
       u.email;
      } | u in $users$;
     u.id = $int32:id$;
-    u.id = $int32:id$;
     >>)
 
 let get_user_with_name name =
