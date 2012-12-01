@@ -1,3 +1,5 @@
+module Option = Eliom_lib.Option
+
 let (>>=) = Lwt.(>>=)
 
 class type feed = object
@@ -136,7 +138,7 @@ let get_feed_url_with_url url =
     >>)
 
 let get_feed_with_id id =
-  Db.view
+  Db.view_one
     (<:view< {
       f.id;
       f.url;
@@ -160,14 +162,10 @@ let get_feed_with_id id =
   Lwt.return (feeds, tags)
 
 let count_comments parent =
-  Db.view_one
-    (<:view< group {
-      n = count[f];
-     } | f in $feeds$;
-    f.parent = $int32:parent$;
-    >>)
+  let filter f = (<:value< f.parent = $int32:parent$ >>) in
+  count_feeds_aux ~filter ()
 
-let add_feed url description tags userid =
+let add_feed ?root ?parent url description tags userid =
   Db.value (<:value< feeds?id >>)
   >>= fun id_feed ->
   let feed =
@@ -178,36 +176,8 @@ let add_feed url description tags userid =
         description = $string:description$;
         timedate = feeds?timedate;
         author = $int32:userid$;
-        parent = null;
-        root = null;
-      } >>)
-  and tag =
-    Lwt_list.iter_p
-      (fun tag ->
-        Db.query
-          (<:insert< $feeds_tags$ := {
-            id = feeds_tags?id;
-            tag = $string:tag$;
-            id_feed = $int32:id_feed$;
-          } >>)
-      )
-      tags
-  in
-  Lwt.join [feed; tag]
-
-let add_link_comment url description tags root parent userid =
-  Db.value (<:value< feeds?id >>)
-  >>= fun id_feed ->
-  let feed =
-    Db.query
-      (<:insert< $feeds$ := {
-        id = $int32:id_feed$;
-        url = $string:url$;
-        description = $string:description$;
-        timedate = feeds?timedate;
-        author = $int32:userid$;
-        parent = $int32:parent$;
-        root = $int32:root$;
+        parent = of_option $Option.map Sql.Value.int32 parent$;
+        root = of_option $Option.map Sql.Value.int32 parent$;
       } >>)
   and tag =
     Lwt_list.iter_p

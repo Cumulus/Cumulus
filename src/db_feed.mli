@@ -30,7 +30,7 @@ val get_feed_url_with_url :
     option Lwt.t
 val get_feed_with_id :
   int32 ->
-  feeds_and_tags Lwt.t
+  (feed * tag list) Lwt.t
 val count_feeds :
   unit ->
   < n : (Sql.int64_t, Sql.non_nullable) Db.t > Lwt.t
@@ -48,9 +48,13 @@ val get_comments :
   feeds_and_tags Lwt.t
 
 val add_feed :
-  string -> string -> string list -> int32 -> unit Lwt.t
-val add_link_comment :
-  string -> string -> string list -> int32 -> int32 -> int32 -> unit Lwt.t
+  ?root:int32 ->
+  ?parent:int32 ->
+  string ->
+  string ->
+  string list ->
+  int32 ->
+  unit Lwt.t
 val add_desc_comment :
   string -> int32 -> int32 -> int32 -> unit Lwt.t
 
