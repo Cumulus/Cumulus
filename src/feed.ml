@@ -37,7 +37,7 @@ let links_of_tags tags =
     acc @ [Html.pcdata " "; link]
   ) [] tags
 
-let to_html self =
+let to_html ?(desc_comment=false) self =
   let content = match self.url with
     | Some url -> Html.Raw.a
                     ~a:[Html.a_class ["postitle"];
@@ -91,9 +91,9 @@ let to_html self =
          ~service:Services.comment
          [Html.pcdata "Poster un commentaire "]
          (Int32.to_int self.id, Utils.strip self.description);
-       Html.pcdata "Tags: "
       ];
-      links_of_tags self.tags;
+      if not desc_comment then [Html.pcdata "Tags: "] else [];
+      if not desc_comment then links_of_tags self.tags else [];
       (if is_author then
           [Html.a ~service:Services.delete_feed [Html.pcdata " (supprimer ?)"] self.id]
        else []
