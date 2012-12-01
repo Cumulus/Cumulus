@@ -55,6 +55,16 @@ let get_gravatar email =
     ~get_params:Eliom_parameter.((int "s") ** (string "d"))
     ()
 
-let strip str =
-  let str = Str.replace_first (Str.regexp "^[ ]+") "" str in
-  Str.replace_first (Str.regexp "[ ]+$") "" str
+let strip =
+  let regexp_begin = Str.regexp "^[ ]+" in
+  let regexp_end = Str.regexp "[ ]+$" in
+  (fun str ->
+    let str = Str.replace_first regexp_begin "" str in
+    Str.replace_first regexp_end "" str
+  )
+
+let split =
+  let regexp = Str.regexp "[,]+" in
+  (fun str ->
+    Str.split regexp str
+  )

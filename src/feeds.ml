@@ -107,10 +107,7 @@ let append_feed (url, (description, tags)) =
             Db_feed.add_feed
               url
               description
-              (List.map
-                 strip_and_lowercase
-                 (Str.split (Str.regexp "[,]+") tags)
-              )
+              (List.map strip_and_lowercase (Utils.split tags))
               author >>= fun () ->
             call_event ();
             Lwt.return Ok
@@ -140,10 +137,7 @@ let append_link_comment (id, (url, (description, tags))) =
                   ~parent
                   url
                   description
-                  (List.map
-                     strip_and_lowercase
-                     (Str.split (Str.regexp "[,]+") tags)
-                  )
+                  (List.map strip_and_lowercase (Utils.split tags))
                   author >>= fun () ->
                 call_event ();
                 Lwt.return Ok
