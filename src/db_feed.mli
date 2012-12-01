@@ -50,16 +50,9 @@ val get_comments :
 val add_feed :
   ?root:int32 ->
   ?parent:int32 ->
-  url:string ->
+  ?url:string ->
   description:string ->
   tags:string list ->
-  userid:int32 ->
-  unit ->
-  unit Lwt.t
-val add_desc_comment :
-  description:string ->
-  root:int32 ->
-  parent:int32 ->
   userid:int32 ->
   unit ->
   unit Lwt.t

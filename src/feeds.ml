@@ -161,10 +161,11 @@ let append_desc_comment (id, description) =
             | Some root -> root
             | None -> parent
           in
-          Db_feed.add_desc_comment
+          Db_feed.add_feed
             ~description
             ~root
             ~parent
+            ~tags:[]
             ~userid:author
             ()
            >>= fun () ->

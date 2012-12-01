@@ -165,14 +165,14 @@ let count_comments parent =
   let filter f = (<:value< f.parent = $int32:parent$ >>) in
   count_feeds_aux ~filter ()
 
-let add_feed ?root ?parent ~url ~description ~tags ~userid () =
+let add_feed ?root ?parent ?url ~description ~tags ~userid () =
   Db.value (<:value< feeds?id >>)
   >>= fun id_feed ->
   let feed =
     Db.query
       (<:insert< $feeds$ := {
         id = $int32:id_feed$;
-        url = $string:url$;
+        url = of_option $Option.map Sql.Value.string url$;
         description = $string:description$;
         timedate = feeds?timedate;
         author = $int32:userid$;
@@ -192,23 +192,6 @@ let add_feed ?root ?parent ~url ~description ~tags ~userid () =
       tags
   in
   Lwt.join [feed; tag]
-
-let add_desc_comment ~description ~root ~parent ~userid () =
-  Db.value (<:value< feeds?id >>)
-  >>= fun id_feed ->
-  let feed =
-    Db.query
-      (<:insert< $feeds$ := {
-        id = $int32:id_feed$;
-        url = null;
-        description = $string:description$;
-        timedate = feeds?timedate;
-        author = $int32:userid$;
-        parent = $int32:parent$;
-        root = $int32:root$;
-      } >>)
-  in
-  feed
 
 let is_feed_author ~feed ~userid () =
   try_lwt begin
