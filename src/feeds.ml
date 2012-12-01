@@ -91,83 +91,70 @@ let strip_and_lowercase x =
   (* (List.map (fun x -> String.lowercase (Utils.strip x)) (Str.split (Str.regexp "[,]+") tags)) *)
   UTF8.to_string (UTF8.lowercase (UTF8.of_string (Utils.strip x)))
 
-let append_feed (url, (description, tags)) =
-  User.get_userid () >>= fun userid ->
-  match userid with
+let updating_and_ret () =
+  call_event ();
+  Lwt.return Ok
+
+let append_feed_aux_base ~description f =
+  User.get_userid () >>= function
     | None -> Lwt.return Not_connected
-    | (Some author) ->
-      if (Utils.string_is_empty description || Utils.string_is_empty tags) then
+    | Some author ->
+        if Utils.string_is_empty description
+        then Lwt.return Empty
+        else f ~author ()
+
+let append_feed_aux ~url ~description ~tags f =
+  append_feed_aux_base ~description
+    (fun ~author () ->
+      if Utils.string_is_empty tags then
         Lwt.return Empty
       else if Utils.is_invalid_url url then
         Lwt.return Invalid_url
       else
         Db_feed.get_feed_url_with_url url >>= function
-          | (Some _) -> Lwt.return Already_exist
-          | None ->
-            Db_feed.add_feed
-              ~url
-              ~description
-              ~tags:(List.map strip_and_lowercase (Utils.split tags))
-              ~userid:author
-              ()
-            >>= fun () ->
-            call_event ();
-            Lwt.return Ok
+          | Some _ -> Lwt.return Already_exist
+          | None -> f ~author () >>= updating_and_ret
+    )
+
+let append_feed (url, (description, tags)) =
+  append_feed_aux ~url ~description ~tags
+    (fun ~author () ->
+      Db_feed.add_feed
+        ~url
+        ~description
+        ~tags:(List.map strip_and_lowercase (Utils.split tags))
+        ~userid:author
+        ()
+    )
+
+let get_root_and_parent id =
+  Db_feed.get_feed_with_id (Int32.of_int id) >>= fun feeds_list ->
+  let feed = fst feeds_list in
+  let parent = feed#!id in
+  let root = match feed#?root with
+    | Some root -> root
+    | None -> parent
+  in
+  Lwt.return (Db_feed.add_feed ~root ~parent)
 
 let append_link_comment (id, (url, (description, tags))) =
-  User.get_userid () >>= fun userid ->
-    match userid with
-      | None -> Lwt.return Not_connected
-      | Some author ->
-        if (Utils.string_is_empty description || Utils.string_is_empty tags) then
-          Lwt.return Empty
-        else if Utils.is_invalid_url url then
-          Lwt.return Invalid_url
-        else
-          Db_feed.get_feed_url_with_url url >>= function
-            | Some _ -> Lwt.return Already_exist
-            | None ->
-                Db_feed.get_feed_with_id (Int32.of_int id) >>= fun feeds_list ->
-                let feed = fst feeds_list in
-                let parent = feed#!id in
-                let root = match feed#?root with
-                  | Some root -> root
-                  | None -> parent
-                in
-                Db_feed.add_feed
-                  ~root
-                  ~parent
-                  ~url
-                  ~description
-                  ~tags:(List.map strip_and_lowercase (Utils.split tags))
-                  ~userid:author
-                  ()
-                >>= fun () ->
-                call_event ();
-                Lwt.return Ok
+  append_feed_aux ~url ~description ~tags
+    (fun ~author () ->
+      get_root_and_parent id >>= fun f ->
+      f ~url
+        ~description
+        ~tags:(List.map strip_and_lowercase (Utils.split tags))
+        ~userid:author
+        ()
+    )
 
 let append_desc_comment (id, description) =
-  User.get_userid () >>= fun userid ->
-    match userid with
-      | None -> Lwt.return Not_connected
-      | Some author ->
-        if Utils.string_is_empty description then
-          Lwt.return Empty
-        else
-          Db_feed.get_feed_with_id (Int32.of_int id) >>= fun feeds_list ->
-          let feed = fst feeds_list in
-          let parent = feed#!id in
-          let root = match feed#?root with
-            | Some root -> root
-            | None -> parent
-          in
-          Db_feed.add_feed
-            ~description
-            ~root
-            ~parent
-            ~tags:[]
-            ~userid:author
-            ()
-           >>= fun () ->
-          call_event ();
-          Lwt.return Ok
+  append_feed_aux_base ~description
+    (fun ~author () ->
+      get_root_and_parent id >>= fun f ->
+      f ~description
+        ~tags:[]
+        ~userid:author
+        ()
+      >>= updating_and_ret
+    )
