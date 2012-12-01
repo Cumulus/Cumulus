@@ -19,10 +19,26 @@ val get_user_id_with_name :
   < id : (Sql.int32_t, Sql.non_nullable) Db.t > Lwt.t
 
 val add_user :
-  string -> string -> string -> unit Lwt.t
+  name:string ->
+  password:string ->
+  email:string ->
+  unit ->
+  unit Lwt.t
 
-val update_user_password : int32 -> string -> unit Lwt.t
+val update_user_password :
+  userid:int32 ->
+  password:string ->
+  unit ->
+  unit Lwt.t
 
-val update_user_email : int32 -> string -> unit Lwt.t
+val update_user_email :
+  userid:int32 ->
+  email:string ->
+  unit ->
+  unit Lwt.t
 
-val update_user_feeds_per_page : int32 -> int32 -> unit Lwt.t
+val update_user_feeds_per_page :
+  userid:int32 ->
+  nb_feeds:int32 ->
+  unit ->
+  unit Lwt.t

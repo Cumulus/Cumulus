@@ -40,7 +40,8 @@ let add = function
       Db_user.get_user_with_name name >>= function
         | Some _ -> Lwt.return false
         | None ->
-            Db_user.add_user name (hash_password password) email >>= fun () ->
+            let password = hash_password password in
+            Db_user.add_user ~name ~password ~email () >>= fun () ->
             Lwt.return true
 
 let (get_user, set_user, unset_user) =
@@ -110,7 +111,8 @@ let update_password = function
       get_userid () >>= function
         | None -> Lwt.return false
         | Some id ->
-            Db_user.update_user_password id (hash_password password)
+            let password = hash_password password in
+            Db_user.update_user_password ~userid:id ~password ()
             >>= fun () ->
             Lwt.return true
 
@@ -123,7 +125,7 @@ let update_email = function
         | None -> Lwt.return false
         | Some user ->
             set_user {user with email} >>= fun () ->
-            Db_user.update_user_email user.id email >>= fun () ->
+            Db_user.update_user_email ~userid:user.id ~email () >>= fun () ->
             Lwt.return true
 
 let update_feeds_per_page feeds_per_page =
@@ -131,7 +133,11 @@ let update_feeds_per_page feeds_per_page =
     | None -> Lwt.return false
     | Some user ->
         set_user {user with feeds_per_page} >>= fun () ->
-        Db_user.update_user_feeds_per_page user.id feeds_per_page >>= fun () ->
+        Db_user.update_user_feeds_per_page
+          ~userid:user.id
+          ~nb_feeds:feeds_per_page
+          ()
+        >>= fun () ->
         Lwt.return true
 
 let get_offset () =

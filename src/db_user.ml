@@ -42,7 +42,7 @@ let get_user_with_name name =
     u.name = $string:name$;
     >>)
 
-let add_user name password email =
+let add_user ~name ~password ~email () =
   Db.query
     (<:insert< $users$ := {
       id = users?id;
@@ -53,19 +53,19 @@ let add_user name password email =
       feeds_per_page = users?feeds_per_page;
     } >>)
 
-let update_user_password userid password =
+let update_user_password ~userid ~password () =
   Db.query
     (<:update< u in $users$ := {
       password = $string:password$;
     } | u.id = $int32:userid$; >>)
 
-let update_user_email userid email =
+let update_user_email ~userid ~email () =
   Db.query
     (<:update< u in $users$ := {
       email = $string:email$;
     } | u.id = $int32:userid$; >>)
 
-let update_user_feeds_per_page userid nb_feeds =
+let update_user_feeds_per_page ~userid ~nb_feeds () =
   Db.query
     (<:update< u in $users$ := {
       feeds_per_page = $int32:nb_feeds$;
