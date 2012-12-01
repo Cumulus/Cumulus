@@ -50,13 +50,28 @@ val get_comments :
 val add_feed :
   ?root:int32 ->
   ?parent:int32 ->
-  string ->
-  string ->
-  string list ->
-  int32 ->
+  url:string ->
+  description:string ->
+  tags:string list ->
+  userid:int32 ->
+  unit ->
   unit Lwt.t
 val add_desc_comment :
-  string -> int32 -> int32 -> int32 -> unit Lwt.t
+  description:string ->
+  root:int32 ->
+  parent:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
 
-val is_feed_author : int32 -> int32 -> bool Lwt.t
-val delete_feed : int32 -> int32 -> unit Lwt.t
+val is_feed_author :
+  feed:int32 ->
+  userid:int32 ->
+  unit ->
+  bool Lwt.t
+
+val delete_feed :
+  feed:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t

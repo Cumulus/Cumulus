@@ -49,7 +49,7 @@ let to_html self =
   User.get_userid () >>= (function
     | None -> Lwt.return false
     | Some userid ->
-        Db_feed.is_feed_author self.id userid
+        Db_feed.is_feed_author ~feed:self.id ~userid ()
         >>= fun x ->
         User.is_admin ()
         >>= fun y ->

@@ -147,5 +147,5 @@ let () =
     (fun feed () ->
       User.get_userid () >>= function
         | None -> Lwt.return ()
-        | Some userid -> Db_feed.delete_feed feed userid
+        | Some userid -> Db_feed.delete_feed ~feed ~userid ()
     )

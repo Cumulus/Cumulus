@@ -165,7 +165,7 @@ let count_comments parent =
   let filter f = (<:value< f.parent = $int32:parent$ >>) in
   count_feeds_aux ~filter ()
 
-let add_feed ?root ?parent url description tags userid =
+let add_feed ?root ?parent ~url ~description ~tags ~userid () =
   Db.value (<:value< feeds?id >>)
   >>= fun id_feed ->
   let feed =
@@ -193,7 +193,7 @@ let add_feed ?root ?parent url description tags userid =
   in
   Lwt.join [feed; tag]
 
-let add_desc_comment description root parent userid =
+let add_desc_comment ~description ~root ~parent ~userid () =
   Db.value (<:value< feeds?id >>)
   >>= fun id_feed ->
   let feed =
@@ -210,7 +210,7 @@ let add_desc_comment description root parent userid =
   in
   feed
 
-let is_feed_author feed userid =
+let is_feed_author ~feed ~userid () =
   try_lwt begin
     Db.view_one
       (<:view< f | f in $feeds$;
@@ -262,7 +262,7 @@ let list_of_depend_feed id =
        } | f in $feeds$;
       f.root = $int32:root$; f.id <> $int32:id$;
       >>)
-  in 
+  in
   let rec aux root comments =
     let get = function
       | None -> 0l
@@ -282,8 +282,8 @@ let list_of_depend_feed id =
                      >>= fun comments ->
                      Lwt.return (aux root comments)
 
-let delete_feed feed userid =
-  is_feed_author feed userid >>= function
+let delete_feed ~feed ~userid () =
+  is_feed_author ~feed ~userid () >>= function
     | true ->
         list_of_depend_feed feed
         >>= fun dfeeds ->

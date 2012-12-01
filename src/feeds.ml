@@ -105,10 +105,12 @@ let append_feed (url, (description, tags)) =
           | (Some _) -> Lwt.return Already_exist
           | None ->
             Db_feed.add_feed
-              url
-              description
-              (List.map strip_and_lowercase (Utils.split tags))
-              author >>= fun () ->
+              ~url
+              ~description
+              ~tags:(List.map strip_and_lowercase (Utils.split tags))
+              ~userid:author
+              ()
+            >>= fun () ->
             call_event ();
             Lwt.return Ok
 
@@ -125,7 +127,7 @@ let append_link_comment (id, (url, (description, tags))) =
           Db_feed.get_feed_url_with_url url >>= function
             | Some _ -> Lwt.return Already_exist
             | None ->
-              Db_feed.get_feed_with_id (Int32.of_int id) >>= fun feeds_list ->
+                Db_feed.get_feed_with_id (Int32.of_int id) >>= fun feeds_list ->
                 let feed = fst feeds_list in
                 let parent = feed#!id in
                 let root = match feed#?root with
@@ -135,10 +137,12 @@ let append_link_comment (id, (url, (description, tags))) =
                 Db_feed.add_feed
                   ~root
                   ~parent
-                  url
-                  description
-                  (List.map strip_and_lowercase (Utils.split tags))
-                  author >>= fun () ->
+                  ~url
+                  ~description
+                  ~tags:(List.map strip_and_lowercase (Utils.split tags))
+                  ~userid:author
+                  ()
+                >>= fun () ->
                 call_event ();
                 Lwt.return Ok
 
@@ -151,16 +155,18 @@ let append_desc_comment (id, description) =
           Lwt.return Empty
         else
           Db_feed.get_feed_with_id (Int32.of_int id) >>= fun feeds_list ->
-            let feed = fst feeds_list in
-            let parent = feed#!id in
-            let root = match feed#?root with
-              | Some root -> root
-              | None -> parent
-            in
-            Db_feed.add_desc_comment
-              description
-              root
-              parent
-              author >>= fun () ->
-            call_event ();
-            Lwt.return Ok
+          let feed = fst feeds_list in
+          let parent = feed#!id in
+          let root = match feed#?root with
+            | Some root -> root
+            | None -> parent
+          in
+          Db_feed.add_desc_comment
+            ~description
+            ~root
+            ~parent
+            ~userid:author
+            ()
+           >>= fun () ->
+          call_event ();
+          Lwt.return Ok
