@@ -1,4 +1,11 @@
+module Option = Eliom_lib.Option
+
 let (>>=) = Lwt.(>>=)
+
+type password = Bcrypt.hash_t
+
+let to_password x = Bcrypt.hash x
+let check_password = Bcrypt.verify
 
 let users_id_seq = (<:sequence< serial "users_id_seq" >>)
 
@@ -41,13 +48,28 @@ let get_user_with_name name =
      } | u in $users$;
     u.name = $string:name$;
     >>)
+  >>= fun user ->
+  Lwt.return
+    (Option.map
+       (fun x ->
+        object
+          method id = x#id;
+          method name = x#name;
+          method password = Bcrypt.hash_of_string x#!password
+          method email = x#email;
+          method is_admin = x#is_admin;
+          method feeds_per_page = x#feeds_per_page;
+        end
+       )
+       user
+    )
 
 let add_user ~name ~password ~email () =
   Db.query
     (<:insert< $users$ := {
       id = users?id;
       name = $string:name$;
-      password = $string:password$;
+      password = $string:Bcrypt.string_of_hash password$;
       email = $string:email$;
       is_admin = users?is_admin;
       feeds_per_page = users?feeds_per_page;
@@ -56,7 +78,7 @@ let add_user ~name ~password ~email () =
 let update_user_password ~userid ~password () =
   Db.query
     (<:update< u in $users$ := {
-      password = $string:password$;
+      password = $string:Bcrypt.string_of_hash password$;
     } | u.id = $int32:userid$; >>)
 
 let update_user_email ~userid ~email () =

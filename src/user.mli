@@ -3,7 +3,7 @@ type user_state = Already_connected | Ok | Bad_password | Not_found
 type user = {
   id : int32;
   name : string;
-  password : Bcrypt.hash_t;
+  password : Db_user.password;
   email : string;
   is_admin : bool;
   feeds_per_page : int32;

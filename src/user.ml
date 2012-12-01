@@ -1,7 +1,7 @@
 type user = {
   id : int32;
   name : string;
-  password : Bcrypt.hash_t;
+  password : Db_user.password;
   email : string;
   is_admin : bool;
   feeds_per_page : int32;
@@ -13,19 +13,11 @@ let (>>=) = Lwt.(>>=)
 let user_new data = {
   id = data#!id;
   name = data#!name;
-  password = Bcrypt.hash_of_string data#!password;
+  password = data#password;
   email = data#!email;
   is_admin = data#!is_admin;
   feeds_per_page = data#!feeds_per_page;
 }
-
-let hash_password password =
-  (* Cryptokit.hash_string (Cryptokit.Hash.sha256 ()) password *)
-  (* Digest.to_hex (Digest.string password) *)
-  (* Sha512.to_hex (Sha512.string password) *)
-  Bcrypt.string_of_hash (Bcrypt.hash password)
-
-let check_password self password = Bcrypt.verify password self.password
 
 let add = function
   | ("", ((_ as email), ((_ as password), (_ as password_check))))
@@ -40,7 +32,7 @@ let add = function
       Db_user.get_user_with_name name >>= function
         | Some _ -> Lwt.return false
         | None ->
-            let password = hash_password password in
+            let password = Db_user.to_password password in
             Db_user.add_user ~name ~password ~email () >>= fun () ->
             Lwt.return true
 
@@ -78,7 +70,7 @@ let connect user password =
     | None -> Lwt.return Not_found
     | (Some user) ->
       let user = user_new user in
-      if check_password user password then
+      if Db_user.check_password password user.password then
         is_connected () >>= function
           | true -> Lwt.return Already_connected
           | false ->
@@ -111,7 +103,7 @@ let update_password = function
       get_userid () >>= function
         | None -> Lwt.return false
         | Some id ->
-            let password = hash_password password in
+            let password = Db_user.to_password password in
             Db_user.update_user_password ~userid:id ~password ()
             >>= fun () ->
             Lwt.return true
