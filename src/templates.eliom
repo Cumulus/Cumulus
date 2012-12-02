@@ -55,6 +55,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       )
 }}
 
+let string_input_box ?(a=[]) =
+  Html.string_input ~a:(Html.a_class ["input-box"] :: a)
+
+let submit_input ?(a=[]) =
+  Html.string_input
+    ~a:(Html.a_class ["btn-box"] :: a)
+    ~input_type:`Submit
+
 let user_form () =
   Lwt.return
     [ Html.div
@@ -271,35 +279,31 @@ let private_register () =
         (fun (username_name, (email_name, (password_name, password_check))) -> [
           Html.h1 [Html.pcdata "Inscription"];
           Html.p [
-            Html.string_input
-              ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Pseudo"]
+            string_input_box
+              ~a:[Html.a_placeholder "Pseudo"]
               ~input_type:`Text
               ~name:username_name
               ();
             Html.br ();
-            Html.string_input
-              ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Mot de passe"]
+            string_input_box
+              ~a:[Html.a_placeholder "Mot de passe"]
               ~input_type:`Password
               ~name:password_name
               ();
             Html.br ();
-            Html.string_input
-              ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Confirmation"]
+            string_input_box
+              ~a:[Html.a_placeholder "Confirmation"]
               ~input_type:`Password
               ~name:password_check
               ();
             Html.br ();
-            Html.string_input
-              ~a:[Html.a_class ["input-box"]; Html.a_placeholder "Email"]
+            string_input_box
+              ~a:[Html.a_placeholder "Email"]
               ~input_type:`Text
               ~name:email_name
               ();
             Html.br ();
-            Html.string_input
-              ~a:[Html.a_class ["btn-box"]]
-              ~input_type:`Submit
-              ~value:"Valider"
-              ()
+            submit_input ~value:"Valider" ()
           ]
         ])
         ()
@@ -326,27 +330,19 @@ let private_preferences () =
             (fun (password_name, password_check) -> [
               Html.h1 [Html.pcdata "Modifier le mot de passe"] ;
               Html.p [
-                Html.string_input
-                  ~a:[Html.a_class ["input-box"];
-                      Html.a_placeholder "Nouveau mot de passe"
-                     ]
+                string_input_box
+                  ~a:[Html.a_placeholder "Nouveau mot de passe"]
                   ~input_type:`Password
                   ~name:password_name
                   ();
                 Html.br ();
-                Html.string_input
-                  ~a:[Html.a_class ["input-box"];
-                      Html.a_placeholder "Confirmer le nouveau mot de passe";
-                     ]
+                string_input_box
+                  ~a:[Html.a_placeholder "Confirmer le nouveau mot de passe"]
                   ~input_type:`Password
                   ~name:password_check
                   ();
                 Html.br ();
-                Html.string_input
-                  ~a:[Html.a_class ["btn-box"]]
-                  ~input_type:`Submit
-                  ~value:"Valider"
-                  ()
+                submit_input ~value:"Valider" ()
               ]
             ])
             ();
@@ -356,20 +352,15 @@ let private_preferences () =
             (fun email_name -> [
               Html.h1 [Html.pcdata "Changer d'adresse mail"];
               Html.p [
-                Html.string_input
-                  ~a:[Html.a_class ["input-box"];
-                      Html.a_placeholder User.(usr.email);
+                string_input_box
+                  ~a:[Html.a_placeholder User.(usr.email);
                       Html.a_id "new_email"
                      ]
                   ~input_type:`Text
                   ~name:email_name
                   ();
                 Html.br ();
-                Html.string_input
-                  ~a:[Html.a_class ["btn-box"]]
-                  ~input_type:`Submit
-                  ~value:"Valider"
-                  ()
+                submit_input ~value:"Valider" ()
               ]
             ])
             ();
@@ -388,11 +379,7 @@ let private_preferences () =
                   ~name:nb_feeds_name
                   ();
                 Html.br ();
-                Html.string_input
-                  ~a:[Html.a_class ["btn-box"]]
-                  ~input_type:`Submit
-                  ~value:"Valider"
-                  ()
+                submit_input ~value:"Valider" ()
               ]
             ])
             ()
@@ -416,26 +403,20 @@ let private_comment id =
             (fun (parent, (url, (desc, tags))) -> [
               Html.h1 [Html.pcdata "Lien"] ;
               Html.p [
-                Html.string_input
-                  ~a:[Html.a_class ["input-box"];
-                      Html.a_placeholder "URL"
-                     ]
+                string_input_box
+                  ~a:[Html.a_placeholder "URL"]
                   ~input_type:`Text
                   ~name:url
                   ();
                 Html.br ();
-                Html.string_input
-                  ~a:[Html.a_class ["input-box"];
-                      Html.a_placeholder "Titre";
-                     ]
+                string_input_box
+                  ~a:[Html.a_placeholder "Titre"]
                   ~input_type:`Text
                   ~name:desc
                   ();
                 Html.br ();
-                Html.string_input
-                  ~a:[Html.a_class ["input-box"];
-                      Html.a_placeholder "Tags";
-                     ]
+                string_input_box
+                  ~a:[Html.a_placeholder "Tags"]
                   ~input_type:`Text
                   ~name:tags
                   ();
@@ -445,11 +426,7 @@ let private_comment id =
                   ~name:parent
                   ~value:(Int32.to_int id)
                   ();
-                Html.string_input
-                  ~a:[Html.a_class ["btn-box"]]
-                  ~input_type:`Submit
-                  ~value:"Envoyer !"
-                  ()
+                submit_input ~value:"Envoyer !" ()
               ]
             ])
             ();
@@ -471,11 +448,7 @@ let private_comment id =
                   ~value:(Int32.to_int id)
                   ();
                Html.br ();
-                Html.string_input
-                  ~a:[Html.a_class ["btn-box"]]
-                  ~input_type:`Submit
-                  ~value:"Envoyer !"
-                  ()
+               submit_input ~value:"Envoyer !" ()
               ]
             ])
             ()
