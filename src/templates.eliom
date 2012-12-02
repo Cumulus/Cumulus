@@ -40,9 +40,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
          )
       )
 
-  let input_value field =
-    let input = Eliom_content.Html5.To_dom.of_input field in
-    Js.to_string input##value
+  (* Reloading feeds*)
+  let () =
+    let service = Eliom_service.void_coservice' in
+    let event = %Feeds.event in
+    let stream = Lwt_react.E.to_stream event in
+    Lwt.async
+      (fun () ->
+        Lwt_stream.iter_s
+          (fun () ->
+            Eliom_client.change_page ~service () ()
+          )
+          stream
+      )
 }}
 
 let user_form () =
@@ -238,22 +248,7 @@ let link_footer ~link min max page = match page with
         [ link "Précédent" (Some (page - 1)); link "Suivant" (Some (page + 1)) ]
       else []
 
-let reload_feeds service =
-  {unit{
-    let service = %service in
-    let event = %Feeds.event in
-    let stream = Lwt_react.E.to_stream event in
-    Lwt.ignore_result
-      (Lwt_stream.iter_s
-         (fun () ->
-           Eliom_client.change_page ~service () ()
-         )
-         stream
-      )
-  }}
-
 let private_main ~page ~link ~service feeds count =
-  ignore (reload_feeds service);
   feeds >>= fun feeds ->
   count >>= fun count ->
   User.get_offset () >>= fun off ->
