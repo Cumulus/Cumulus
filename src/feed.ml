@@ -58,7 +58,7 @@ let links_of_tags tags =
     acc @ [Html.pcdata " "; link]
   ) [] tags
 
-let to_html ?(desc_comment=false) self =
+let to_html self =
   let content = match self.url with
     | Some url -> Html.Raw.a
                     ~a:[Html.a_class ["postitle"];
@@ -66,6 +66,9 @@ let to_html ?(desc_comment=false) self =
                        ]
                   [Html.pcdata self.description]
     | None -> Html.pcdata self.description in
+  let tags = match self.url with
+    | Some _ -> (Html.pcdata "Tags: ") :: links_of_tags self.tags
+    | None -> [] in
   Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
@@ -112,9 +115,7 @@ let to_html ?(desc_comment=false) self =
          ~service:Services.comment
          [Html.pcdata "Poster un commentaire "]
          (Int32.to_int self.id, Utils.strip self.description);
-      ];
-      if not desc_comment then [Html.pcdata "Tags: "] else [];
-      if not desc_comment then links_of_tags self.tags else [];
+      ]; tags;
       (if is_author then
           [Html.a ~service:Services.delete_feed [Html.pcdata " (supprimer ?)"] self.id]
        else []

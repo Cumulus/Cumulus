@@ -33,6 +33,6 @@ type feed = {
 }
 
 val feed_new : Db_feed.feed -> string list -> feed
-val to_html : ?desc_comment:bool -> feed ->
+val to_html : feed ->
   (([> `A of [> `PCDATA ] | `Br | `Img | `PCDATA ] Html.elt) list) Lwt.t
 val to_atom : feed -> Atom_feed.entry Lwt.t

@@ -21,7 +21,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 module UTF8 = Batteries.UTF8
 
-type tree = Sheet of Feed.feed | Node of Feed.feed * tree list
+type tree =
+  | Sheet of Feed.feed 
+  | Node of Feed.feed * tree list
+
 let (>>=) = Lwt.(>>=)
 
 let rec has_parent id = function
@@ -102,14 +105,11 @@ let rec branch_comments root comments =
         else branch_comments root (r @ [x])
 
 let rec to_html tree =
-  let is_desc_comment feed = match feed.Feed.url with
-    | None -> true
-    | Some _ -> false
-  in match tree with
-  | Sheet feed ->
-      Feed.to_html ~desc_comment:(is_desc_comment feed) feed >>= fun elm ->
+  match tree with
+    | Sheet feed ->
+      Feed.to_html feed >>= fun elm ->
       Lwt.return (Html.div ~a: [Html.a_class ["line post"]] elm)
-  | Node (feed, childs) ->
-      Feed.to_html ~desc_comment:(is_desc_comment feed) feed >>= fun elm ->
+    | Node (feed, childs) ->
+      Feed.to_html feed >>= fun elm ->
       Lwt_util.map to_html childs >>= fun childs ->
       Lwt.return (Html.div ~a: [Html.a_class ["line post"]] (elm @ childs))
