@@ -58,6 +58,9 @@ let links_of_tags tags =
     acc @ [Html.pcdata " "; link]
   ) [] tags
 
+module H = Xhtml_f.Make(Eliom_content.Xml)
+module M = MarkdownHTML.Make_xhtml(H)
+
 let to_html self =
   let content = match self.url with
     | Some url -> Html.Raw.a
@@ -65,7 +68,17 @@ let to_html self =
                         Html.a_href (Html.uri_of_string (fun () -> url));
                        ]
                   [Html.pcdata self.description]
-    | None -> Html.pcdata self.description in
+    | None ->
+        let markdown = Markdown.parse_text self.description in
+        let render_pre ~kind s = H.pre [H.pcdata s] in
+        let render_link {Markdown.href_target; href_desc} =
+          H.a ~a:[H.a_href (H.uri_of_string href_target)] [H.pcdata href_desc]
+        in
+        let render_img {Markdown.img_src; img_alt} =
+          H.img ~src:(H.uri_of_string img_src) ~alt:img_alt ()
+        in
+        Html.p (Html.totl (H.toeltl (M.to_html ~render_pre ~render_link ~render_img markdown)))
+  in
   let tags = match self.url with
     | Some _ -> (Html.pcdata "Tags: ") :: links_of_tags self.tags
     | None -> [] in
