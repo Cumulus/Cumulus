@@ -182,8 +182,8 @@ let get_feed_with_id id =
   >>= fun tags ->
   Lwt.return (feeds, tags)
 
-let count_comments parent =
-  let filter f = (<:value< f.parent = $int32:parent$ >>) in
+let count_comments root =
+  let filter f = (<:value< f.root = $int32:root$ || f.parent = $int32:root$ >>) in
   count_feeds_aux ~filter ()
 
 let add_feed ?root ?parent ?url ~description ~tags ~userid () =
