@@ -55,6 +55,9 @@ val get_feed_with_id :
 val count_feeds :
   unit ->
   < n : (Sql.int64_t, Sql.non_nullable) Db.t > Lwt.t
+val count_root_feeds :
+  unit ->
+  < n : (Sql.int64_t, Sql.non_nullable) Db.t > Lwt.t
 val count_feeds_with_author :
   string ->
   < n : (Sql.int64_t, Sql.non_nullable) Db.t > Lwt.t

@@ -248,7 +248,11 @@ let main_style content footer =
        )
     )
 
-let link_footer ~link min max page = match page with
+let link_footer ~link min max page = 
+  let _ = Ocsigen_messages.warning
+  ("min: " ^ (string_of_int min) ^ " max: " ^ (string_of_int max) ^ " page: " ^
+  (string_of_int page)) in 
+  match page with
   | n when n = min && n < max -> [ link "Suivant" (Some (page + 1)) ]
   | n when n = max && n > min -> [ link "Précédent" (Some (page - 1)) ]
   | n ->
@@ -267,7 +271,7 @@ let private_main ~page ~link ~service feeds count =
      link_footer
        ~link
        0
-       ((n / offset) - (if n mod offset = 0 then 1 else 0))
+       ((n / offset) - (if (n mod offset) = 0 then 1 else 0))
        page
     )
 
@@ -474,7 +478,7 @@ let main ?(page=0) ~service () =
       ] param
     )
     (Db_feed.get_root_feeds)
-    (Db_feed.count_feeds ())
+    (Db_feed.count_root_feeds ())
 
 let user ?(page=0) ~service username =
   feed_list ~service page

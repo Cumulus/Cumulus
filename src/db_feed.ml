@@ -128,6 +128,11 @@ let count_feeds () =
   let filter _ = (<:value< true >>) in
   count_feeds_aux ~filter ()
 
+let count_root_feeds () =
+  let filter f = (<:value< is_null f.root || is_null f.parent >>) in
+  count_feeds_aux ~filter ()
+
+
 let get_feeds_with_author author ~starting ~number () =
   Db_user.get_user_id_with_name author >>= fun author ->
   let feeds_filter f = (<:value< f.author = $int32:author#!id$ >>) in
