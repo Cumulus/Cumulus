@@ -1,3 +1,4 @@
+(*
 Copyright (c) 2012 Enguerrand Decorne
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -16,3 +17,22 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*)
+
+open CalendarLib
+
+type feed = {
+  id : int32;
+  url : string option;
+  description : string;
+  date : CalendarLib.Calendar.t;
+  author : int32;
+  parent : int32 option;
+  root : int32 option;
+  tags: string list
+}
+
+val feed_new : Db_feed.feed -> string list -> feed
+val to_html : feed ->
+  (([> `A of [> `PCDATA ] | `Br | `Img | `PCDATA ] Html.elt) list) Lwt.t
+val to_atom : feed -> Atom_feed.entry Lwt.t

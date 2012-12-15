@@ -1,3 +1,4 @@
+(*
 Copyright (c) 2012 Enguerrand Decorne
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -16,3 +17,12 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*)
+
+let error = Eliom_reference.eref ~scope:Eliom_common.request_scope None
+
+let get_error () =
+  Eliom_reference.get error
+
+let set_error value =
+  Eliom_reference.set error (Some value)

@@ -350,7 +350,7 @@ behavior: url(/js/boxsizing.htc);
 }
 
 header {
-  background: #2B2B2B;
+  background: #222222;
   color: #000;
 }
 
@@ -362,24 +362,25 @@ header {
 }
 
 .post {
-  line-height: 15px; /* adapt to your design */
+  line-height: 15px;
   margin-left: 10%;
   margin-right: 10%;
   margin-bottom: 5px;
   padding: 10px;
-  background: #f1f1f1;
+  background: #f7f7f7;
   border-style: solid;
   border-width: 1px;
   border-color: #f9f9f9;
   color: #777;
-  font-size: 130%;
+  font-size: 13px;
   font-family: Helvetica, serif;
+  border-radius: 3px;
 }
 
 .box {
   margin: 20px 30%;
   padding: 10px;
-  background: #f1f1f1;
+  background: #f9f9f9;
   color: #777;
 }
 
@@ -388,14 +389,13 @@ a {
   text-decoration: none;
 }
 
-.post:hover a {
-  color: #fff;
+.post a:hover {
+  font-weight:bold;
 }
 
 .postitle {
   font-size: 1.3em;
   font-family: Helvetica, serif;
-  text-decoration: none;
 }
 
 /*.postitle  {
@@ -414,7 +414,7 @@ img {
 }
 
 .dash {
-  background-color: #ddd;
+  background-color: #f0f0f0;
   padding: 5px;
 }
 
@@ -434,13 +434,13 @@ img {
 }
 
 .post:hover {
-  background-color: #108BDE;
-  color: #fff;
+  background-color: #f1f1f1;
 }
 
 .title {
   font-family: "Helvetica";
   text-decoration: none;
+  font-style: bold;
   padding-top: 0.5em;
   font-size: 2.5em;
 }
@@ -453,36 +453,33 @@ a:focus {
   outline: 0px;
 }
 
-/*.tags:hover {
-  background-color: #108BDE;
-  color: #fff;
-  padding: 0px 3px;
-  margin-left: 2px;
-  overflow: hidden;
-}
-
-.tags {
-  padding: 0px 2px;
-}*/
-
-.footer {
+footer {
   padding: 15px 10%;
   font-size: 10px;
   font-style: italic;
   color: #aaa;
 }
 
-.footer a {
+footer a {
+  color: #109bde;
+}
+
+.navigation {
+  margin-left: 10%;
+  margin-top: 15px;
+}
+
+.navigation a {
   padding: 8px 1.5em;
-  border: 2px solid #e9e9e9;
+  border: 2px solid #f2f2f2;
   font-size: 12px;
-  margin-right: 8px;
-  background-color: #e9e9e9;
+  line-height: 20px;
+  background-color: #f0f0f0;
   font-style: normal;
   color: #777;
 }
 
-.footer a:hover {
+.navigation a:hover {
   border-color: #108BDE;
   background-color: #108BDE;
   color: #fff;
@@ -496,4 +493,19 @@ a:focus {
 
 .input-box {
   margin-bottom: 5px;
+}
+
+.msghandler p {
+  margin-right: auto;
+  margin-left: auto;
+  width: 30%;
+  background: #f3f3f3;
+  color: #777;
+  text-align: center;
+  padding: 5px;
+}
+
+.msghandler {
+  margin-top: 1em;
+  margin-bottom: 1em;
 }

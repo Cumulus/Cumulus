@@ -1,3 +1,4 @@
+(*
 Copyright (c) 2012 Enguerrand Decorne
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -16,3 +17,11 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*)
+
+type tree = Sheet of Feed.feed | Node of Feed.feed * tree list
+
+val tree_comments : tree list -> Feed.feed list -> tree option
+val branch_comments : tree -> Feed.feed list -> tree
+val string_of_tree : tree -> string
+val to_html : tree -> [< Html5_types.div_content_fun > `A `Br `Div `Img `PCDATA ] Html.elt Lwt.t

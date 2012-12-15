@@ -16,3 +16,4 @@ val tag :
 val register : unit -> [> `Html ] Html.elt Lwt.t
 val view_feed : int -> [> `Html ] Html.elt Lwt.t
 val preferences : unit -> [> `Html ] Html.elt Lwt.t
+val comment : int -> [> `Html ] Html.elt Lwt.t
