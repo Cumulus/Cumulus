@@ -1,7 +1,7 @@
 Build Requirements
 ==================
 
- * Eliom >= 2.2
+ * Eliom >= 3.0
  * Lwt >= 2.4
  * OCaml-safepass >= 1.2
  * Batteries >= 1.5
