@@ -248,17 +248,12 @@ let main_style content footer =
        )
     )
 
-let link_footer ~link min max page = 
-  let _ = Ocsigen_messages.warning
-  ("min: " ^ (string_of_int min) ^ " max: " ^ (string_of_int max) ^ " page: " ^
-  (string_of_int page)) in 
-  match page with
-  | n when n = min && n < max -> [ link "Suivant" (Some (page + 1)) ]
-  | n when n = max && n > min -> [ link "Précédent" (Some (page - 1)) ]
-  | n ->
-      if n > min && n < max then
-        [ link "Précédent" (Some (page - 1)); link "Suivant" (Some (page + 1)) ]
-      else []
+let link_footer ~link min max = function
+  | page when page = min && page < max -> [ link "Suivant" (Some (page + 1)) ]
+  | page when page = max && page > min -> [ link "Précédent" (Some (page - 1)) ]
+  | page when page > min && page < max ->
+      [ link "Précédent" (Some (page - 1)); link "Suivant" (Some (page + 1)) ]
+  | _ -> []
 
 let private_main ~page ~link ~service feeds count =
   feeds >>= fun feeds ->
