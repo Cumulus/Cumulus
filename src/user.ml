@@ -58,14 +58,25 @@ let add = function
             Lwt.return true
 
 let (get_user, set_user, unset_user) =
+  let session_scope = Eliom_common.default_session_scope in
   let eref =
     Eliom_reference.eref
-      ~scope:Eliom_common.default_session_scope
+      ~scope:session_scope
       ~persistent:"cumulus_user_v1"
       None
   in
   ((fun () -> Eliom_reference.get eref),
-   (fun user -> Eliom_reference.set eref (Some user)),
+   (fun user ->
+     let cookie_scope =
+       Eliom_common.cookie_scope_of_user_scope session_scope
+     in
+     Eliom_state.set_persistent_data_cookie_exp_date
+       ~cookie_scope
+       (Some (Unix.time () +. 4320000.))
+     (* 4320000 = 60 * 60 * 24 * 50 = 50 days *)
+     >>= fun () ->
+     Eliom_reference.set eref (Some user)
+   ),
    (fun () -> Eliom_reference.unset eref)
   )
 
