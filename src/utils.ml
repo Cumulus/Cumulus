@@ -19,17 +19,14 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-module Calendar = CalendarLib.Calendar
+module Calendar = struct
+  include CalendarLib.Calendar
+  module Printer = CalendarLib.Printer.Calendar
+end
 
 let offset = 10l
 
-let string_of_calendar cal =
-  (string_of_int (Calendar.day_of_month cal)) ^ "/" ^
-    (string_of_int (Calendar.Date.int_of_month (Calendar.month cal))) ^ "/" ^
-    (string_of_int (Calendar.year cal)) ^ " à " ^
-    (string_of_int (Calendar.hour cal)) ^ ":" ^
-    (string_of_int (Calendar.minute cal)) ^ ":" ^
-    (string_of_int (Calendar.second cal))
+let string_of_calendar cal = Calendar.Printer.sprint "%d/%m/%Y à %T" cal
 
 let string_is_empty str =
   let length = String.length str in
