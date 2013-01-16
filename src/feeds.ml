@@ -90,7 +90,7 @@ let feed_id_to_html id =
 
 (* FIXME? should atom feed return only a limited number of links ? *)
 let to_atom () =
-  Db_feed.get_feeds ~starting:0l ~number:Utils.offset ()
+  Db_feed.get_links_feeds ~starting:0l ~number:Utils.offset ()
   >>= feeds_of_db
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->

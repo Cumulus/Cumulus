@@ -129,11 +129,12 @@ let to_atom self =
     Atom_feed.entry
       ~updated: self.date
       ~id:(Int32.to_string self.id)
-      ~title: (Atom_feed.plain self.description)
+      ~title: (Atom_feed.plain (self.description ^ " [" ^ (String.concat ", " self.tags) ^ "]"))
       [Atom_feed.authors [Atom_feed.author author#!name];
        (match self.url with
          | Some url ->
              Atom_feed.links [Atom_feed.link url]
          | _ -> Atom_feed.links []);
+       Atom_feed.links (List.map (fun x -> Atom_feed.link x) self.tags)
       ]
   )
