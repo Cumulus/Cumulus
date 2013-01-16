@@ -41,6 +41,7 @@ type feed_generator =
     unit ->
     feeds_and_tags Lwt.t
 
+val get_tree_feeds : int32 -> feed_generator
 val get_links_feeds : feed_generator
 val get_root_feeds : feed_generator
 val get_feeds : feed_generator

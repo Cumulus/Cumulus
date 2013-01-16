@@ -106,16 +106,18 @@ let to_html self =
          (let n = Int64.to_int comments#!n
          in match n with
            | 0
-           | 1 -> [Html.pcdata ((string_of_int n) ^ " commentaire ")]
-           | n -> [Html.pcdata ((string_of_int n) ^ " commentaires ")])
+           | 1 -> [Html.pcdata ((string_of_int n) ^ " commentaire")]
+           | n -> [Html.pcdata ((string_of_int n) ^ " commentaires")])
          (* [Html.pcdata (string_to_int (Int64.to_int comments)) " commentaires "] *)
          (* url_of_title or url_of_desc ? *)
          (Int32.to_int self.id, Utils.strip self.description);
        Html.a
          ~service:Services.comment
-         [Html.pcdata "Poster un commentaire "]
+         [Html.pcdata " Poster un commentaire "]
          (Int32.to_int self.id, Utils.strip self.description);
       ]; tags;
+      [Html.a ~service:Services.atom_feed
+        [Html.pcdata " [Flux Atom du lien]"] (Int32.to_int self.id)];
       (if is_author then
           [Html.a ~service:Services.delete_feed [Html.pcdata " (supprimer ?)"] self.id]
        else []

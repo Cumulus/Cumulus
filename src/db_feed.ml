@@ -106,6 +106,11 @@ let get_feeds_aux ~starting ~number ~feeds_filter ~tags_filter () =
   >>= fun tags ->
   Lwt.return (feeds, tags)
 
+let get_tree_feeds feed_id ~starting ~number () =
+  let feeds_filter f = (<:value< f.root = $int32:feed_id$ || f.parent = $int32:feed_id$ >>) in
+  let tags_filter _ _ = (<:value< true >>) in
+  get_feeds_aux ~starting ~number ~feeds_filter ~tags_filter ()
+
 let get_links_feeds ~starting ~number () =
   let feeds_filter f = (<:value< is_not_null f.url >>) in
   let tags_filter _ _ = (<:value< true >>) in

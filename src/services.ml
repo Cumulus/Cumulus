@@ -25,6 +25,12 @@ let atom =
     ~get_params: Eliom_parameter.unit
     ()
 
+let atom_feed =
+  Eliom_service.service
+    ~path: ["atom"]
+    ~get_params: Eliom_parameter.(suffix (int "feed_id"))
+    ()
+
 let main =
   Eliom_service.service
     ~path: [""]
