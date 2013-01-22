@@ -481,7 +481,7 @@ let user ?(page=0) ~service username =
       Html.a ~service:Services.author_feed [
         Html.pcdata name
       ] (param, username)
-      )
+    )
     (Db_feed.get_feeds_with_author username)
     (Db_feed.count_feeds_with_author username)
 
@@ -494,6 +494,16 @@ let tag ?(page=0) ~service tag =
      )
     (Db_feed.get_feeds_with_tag tag)
     (Db_feed.count_feeds_with_tag tag)
+
+let fav_feed ?(page=0) ~service username =
+  feed_list ~service page
+    (fun name param ->
+      Html.a ~service:Services.fav_feed [
+        Html.pcdata name
+      ] (username, param)
+    )
+    (Db_feed.get_fav_with_username username)
+    (Db_feed.count_fav_with_username username)
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =

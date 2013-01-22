@@ -48,6 +48,14 @@ let () =
       in
       Templates.user ?page ~service username
     );
+  Cumulus_appl.register
+    ~service: Services.fav_feed
+    (fun (username, page) () ->
+      let service =
+        Eliom_service.preapply ~service:Services.fav_feed (username, page)
+      in
+      Templates.fav_feed ?page ~service username
+    );
   Eliom_registration.Action.register
     ~service:Services.append_feed
     (fun () data ->

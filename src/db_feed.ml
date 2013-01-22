@@ -38,6 +38,14 @@ class type tag = object
   method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
 end
 
+
+class type fav = object
+  method id : (Sql.int32_t, Sql.non_nullable) Db.t
+  method id_user : (Sql.int32_t, Sql.non_nullable) Db.t
+  method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
+end
+
+
 type feeds_and_tags = feed list * tag list
 
 type feed_generator =
@@ -45,6 +53,16 @@ type feed_generator =
     number:int32 ->
     unit ->
     feeds_and_tags Lwt.t
+
+
+type favs_and_tags = fav list * tag list
+
+type fav_generator =
+    starting:int32 ->
+    number:int32 ->
+    unit ->
+    favs_and_tags Lwt.t
+
 
 let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
 
@@ -63,6 +81,14 @@ let feeds_tags_id_seq = (<:sequence< serial "feeds_tags_id_seq" >>)
 let feeds_tags = (<:table< feeds_tags (
   id integer NOT NULL DEFAULT(nextval $feeds_tags_id_seq$),
   tag text NOT NULL,
+  id_feed integer NOT NULL
+) >>)
+
+let favs_id_seq = (<:sequence< serial "favs_id_seq" >>)
+
+let favs = (<:table< favs (
+  id integer NOT NULL DEFAULT(nextval $favs_id_seq$),
+  id_user integer NOT NULL,
   id_feed integer NOT NULL
 ) >>)
 
@@ -317,3 +343,61 @@ let delete_feed ~feed ~userid () =
           (<:delete< f in $feeds_tags$ | $feeds_filter$ f >>)
     | false ->
         Lwt.return ()
+
+let get_fav_aux ~starting ~number ~feeds_filter ~tags_filter () =
+  Db.view
+    (<:view< {
+      f.id;
+      f.id_user;
+      f.id_feed;
+     } order by f.id desc
+        limit $int32:number$
+        offset $int32:starting$ |
+            f in $favs$;
+    $feeds_filter$ f;
+    >>)
+  >>= fun favs ->
+  Db.view
+    (<:view< {
+      f.id;
+      f.url;
+      f.description;
+      f.timedate;
+      f.author;
+      f.parent;
+      f.root;
+     } | f in $feeds$;
+    >>)
+  >>= fun feeds ->
+  Db.view
+    (<:view< {
+      t.tag;
+      t.id_feed;
+    } | t in $feeds_tags$;
+    $tags_filter feeds$ t;
+    >>)
+  >>= fun tags ->
+  let get_fav l id = List.filter (fun x -> x#!id = id) l in
+  let favorites acc  = List.map (fun x -> acc @ get_fav feeds x#!id) favs in
+  favorites []
+  >>= fun result ->
+  Lwt.return (feeds, tags)
+
+let count_fav_aux ~filter () =
+  Db.view_one
+    (<:view< group {
+      n = count[f];
+     } | f in $favs$;
+    $filter$ f;
+    >>)
+
+let get_fav_with_username name ~starting ~number () =
+  Db_user.get_user_id_with_name name >>= fun author ->
+  let feeds_filter f = (<:value< f.id_user = $int32:author#!id$ >>) in
+  let tags_filter favs t = filter_feeds_id t favs in
+  get_fav_aux ?starting ?number ~feeds_filter ~tags_filter ()
+
+let count_fav_with_username name =
+  Db_user.get_user_id_with_name name >>= fun author ->
+  let filter f = (<:value< f.id_user = $int32:author#!id$ >>) in
+  count_fav_aux ~filter ()
