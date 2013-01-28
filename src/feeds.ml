@@ -97,7 +97,7 @@ let tree_to_atom id () =
       Atom_feed.feed
         ~updated: (Calendar.make 2012 6 9 17 40 30)
         ~id:"http://cumulus.org"
-        ~title: (Atom_feed.plain "An Atom flux")
+        ~title: (Atom_feed.plain ("Cumulus (id: " ^ Int32.to_string id ^ ")"))
         tmp
     )
   )
@@ -112,7 +112,7 @@ let to_atom () =
       Atom_feed.feed
         ~updated: (Calendar.make 2012 6 9 17 40 30)
         ~id:"http://cumulus.org"
-        ~title: (Atom_feed.plain "An Atom flux")
+        ~title: (Atom_feed.plain "Cumulus")
         tmp
     )
   )
