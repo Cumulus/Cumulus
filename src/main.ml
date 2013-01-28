@@ -50,9 +50,9 @@ let () =
     );
   Cumulus_appl.register
     ~service: Services.fav_feed
-    (fun (page, username) () ->
+    (fun (username, page) () ->
       let service =
-        Eliom_service.preapply ~service:Services.fav_feed (page, username)
+        Eliom_service.preapply ~service:Services.fav_feed (username, page)
       in
       Templates.fav_feed ?page ~service username
     );
