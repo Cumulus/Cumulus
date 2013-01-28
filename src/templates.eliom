@@ -500,7 +500,7 @@ let fav_feed ?(page=0) ~service username =
     (fun name param ->
       Html.a ~service:Services.fav_feed [
         Html.pcdata name
-      ] (username, param)
+      ] (param, username)
     )
     (Db_feed.get_fav_with_username username)
     (Db_feed.count_fav_with_username username)

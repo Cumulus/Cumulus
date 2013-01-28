@@ -357,31 +357,9 @@ let get_fav_aux ~starting ~number ~feeds_filter ~tags_filter () =
     $feeds_filter$ f;
     >>)
   >>= fun favs ->
-  Db.view
-    (<:view< {
-      f.id;
-      f.url;
-      f.description;
-      f.timedate;
-      f.author;
-      f.parent;
-      f.root;
-     } | f in $feeds$;
-    >>)
-  >>= fun feeds ->
-  Db.view
-    (<:view< {
-      t.tag;
-      t.id_feed;
-    } | t in $feeds_tags$;
-    $tags_filter feeds$ t;
-    >>)
-  >>= fun tags ->
-  let get_fav l id = List.filter (fun x -> x#!id = id) l in
-  let favorites acc  = List.map (fun x -> acc @ get_fav feeds x#!id) favs in
-  favorites []
-  >>= fun result ->
-  Lwt.return (feeds, tags)
+  let feeds_filter f =
+    (<:value< $Db.in'$ f.id $List.map (fun x -> x#id) favs$ >>) in
+  get_feeds_aux ?starting ?number ~feeds_filter ~tags_filter ()
 
 let count_fav_aux ~filter () =
   Db.view_one
