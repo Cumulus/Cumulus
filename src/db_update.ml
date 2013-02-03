@@ -71,9 +71,8 @@ let () =
     >>= fun () ->
     update 4
       (fun () ->
-        Db.alter "CREATE TABLE favs (id integer NOT NULL, \
+        Db.alter "CREATE TABLE favs (\
                 id_user integer NOT NULL, \
-                id_feed integer NOT NULL);" >>= fun () ->
-        Db.alter "CREATE SEQUENCE favs_id_seq;"
+                id_feed integer NOT NULL);"
       )
   end
