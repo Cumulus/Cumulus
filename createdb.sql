@@ -32,7 +32,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE favs (
-  id integer NOT NULL,
+  -- id integer NOT NULL,
   id_user integer NOT NULL,
   id_feed integer NOT NULL
 );
@@ -40,6 +40,6 @@ CREATE TABLE favs (
 CREATE SEQUENCE users_id_seq;
 CREATE SEQUENCE feeds_id_seq;
 CREATE SEQUENCE feeds_tags_id_seq;
-CREATE SEQUENCE favs_id_seq;
+-- CREATE SEQUENCE favs_id_seq;
 
 INSERT INTO options VALUES ('dbversion', '4');

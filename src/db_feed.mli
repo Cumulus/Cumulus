@@ -35,7 +35,7 @@ class type tag = object
 end
 
 class type fav = object
-  method id : (Sql.int32_t, Sql.non_nullable) Db.t
+  (* method id : (Sql.int32_t, Sql.non_nullable) Db.t *)
   method id_user : (Sql.int32_t, Sql.non_nullable) Db.t
   method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
 end
@@ -46,14 +46,6 @@ type feed_generator =
     number:int32 ->
     unit ->
     feeds_and_tags Lwt.t
-
-type favs_and_tags = fav list * tag list
-type fav_generator =
-    starting:int32 ->
-    number:int32 ->
-    unit ->
-    favs_and_tags Lwt.t
-
 
 val get_tree_feeds : int32 -> feed_generator
 val get_links_feeds : feed_generator
@@ -109,6 +101,18 @@ val is_feed_author :
 
 val delete_feed :
   feed:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
+
+val add_fav :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
+
+val del_fav :
+  feedid:int32 ->
   userid:int32 ->
   unit ->
   unit Lwt.t

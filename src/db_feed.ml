@@ -40,7 +40,7 @@ end
 
 
 class type fav = object
-  method id : (Sql.int32_t, Sql.non_nullable) Db.t
+  (* method id : (Sql.int32_t, Sql.non_nullable) Db.t *)
   method id_user : (Sql.int32_t, Sql.non_nullable) Db.t
   method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
 end
@@ -53,16 +53,6 @@ type feed_generator =
     number:int32 ->
     unit ->
     feeds_and_tags Lwt.t
-
-
-type favs_and_tags = fav list * tag list
-
-type fav_generator =
-    starting:int32 ->
-    number:int32 ->
-    unit ->
-    favs_and_tags Lwt.t
-
 
 let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
 
@@ -84,10 +74,10 @@ let feeds_tags = (<:table< feeds_tags (
   id_feed integer NOT NULL
 ) >>)
 
-let favs_id_seq = (<:sequence< serial "favs_id_seq" >>)
+(* let favs_id_seq = (<:sequence< serial "favs_id_seq" >>) *)
 
 let favs = (<:table< favs (
-  id integer NOT NULL DEFAULT(nextval $favs_id_seq$),
+  (* id integer NOT NULL DEFAULT(nextval $favs_id_seq$), *)
   id_user integer NOT NULL,
   id_feed integer NOT NULL
 ) >>)
@@ -347,10 +337,10 @@ let delete_feed ~feed ~userid () =
 let get_fav_aux ~starting ~number ~feeds_filter ~tags_filter () =
   Db.view
     (<:view< {
-      f.id;
+      (* f.id; *)
       f.id_user;
       f.id_feed;
-     } order by f.id desc
+     } order by f.id_feed desc
         limit $int32:number$
         offset $int32:starting$ |
             f in $favs$;
@@ -358,7 +348,7 @@ let get_fav_aux ~starting ~number ~feeds_filter ~tags_filter () =
     >>)
   >>= fun favs ->
   let feeds_filter f =
-    (<:value< $Db.in'$ f.id $List.map (fun x -> x#id) favs$ >>) in
+    (<:value< $Db.in'$ f.id $List.map (fun x -> x#id_user) favs$ >>) in
   get_feeds_aux ?starting ?number ~feeds_filter ~tags_filter ()
 
 let count_fav_aux ~filter () =
@@ -379,3 +369,29 @@ let count_fav_with_username name =
   Db_user.get_user_id_with_name name >>= fun author ->
   let filter f = (<:value< f.id_user = $int32:author#!id$ >>) in
   count_fav_aux ~filter ()
+
+let add_fav ~feedid ~userid () =
+  Db.query
+    (<:insert< $favs$ := {
+      (* id; *)
+      id_user = $int32:userid$;
+      id_feed = $int32:feedid$;
+    } >>)  
+
+let del_fav ~feedid ~userid () =
+  Db.query
+    (<:delete< f in $favs$ | f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
+
+let is_fav ~feedid ~userid () =
+  try_lwt begin
+    Db.view_one
+      (<:view< {
+        f.id_user;
+        f.id_feed;
+      } | f in $favs$; f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
+    >>= fun _ ->
+    Lwt.return true
+  end
+  with exn ->
+    Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
+    Lwt.return false  
