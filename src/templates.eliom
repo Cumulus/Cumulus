@@ -103,6 +103,11 @@ let user_information user =
               [ Html.p
                   [ Html.a
                       ~a:[Html.a_class ["nav"]]
+                      ~service:Services.fav_feed
+                      [Html.pcdata "Favoris"]
+                      (Sql.get user#name, Some 0);
+                    Html.a
+                      ~a:[Html.a_class ["nav"]]
                       ~service:Services.preferences
                       [Html.pcdata "Préférences"]
                       ();
