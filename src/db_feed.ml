@@ -348,7 +348,7 @@ let get_fav_aux ~starting ~number ~feeds_filter ~tags_filter () =
     >>)
   >>= fun favs ->
   let feeds_filter f =
-    (<:value< $Db.in'$ f.id $List.map (fun x -> x#id_user) favs$ >>) in
+    (<:value< $Db.in'$ f.id $List.map (fun x -> x#id_feed) favs$ >>) in
   get_feeds_aux ?starting ?number ~feeds_filter ~tags_filter ()
 
 let count_fav_aux ~filter () =
@@ -371,16 +371,34 @@ let count_fav_with_username name =
   count_fav_aux ~filter ()
 
 let add_fav ~feedid ~userid () =
-  Db.query
-    (<:insert< $favs$ := {
+  Db.view_opt
+    (<:view< {
+      f.id_user;
+      f.id_feed;
+    } | f in $favs$;
+    f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
+    >>) >>= function
+      | Some _ -> Lwt.return ()
+      | None ->
+          Db.query
+            (<:insert< $favs$ := {
       (* id; *)
-      id_user = $int32:userid$;
-      id_feed = $int32:feedid$;
-    } >>)  
-
+              id_user = $int32:userid$;
+              id_feed = $int32:feedid$;
+            } >>)  
+            
 let del_fav ~feedid ~userid () =
-  Db.query
-    (<:delete< f in $favs$ | f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
+  Db.view_opt
+    (<:view< {
+      f.id_user;
+      f.id_feed;
+    } | f in $favs$;
+    f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
+    >>) >>= function
+      | None -> Lwt.return ()
+      | Some _ ->
+          Db.query
+            (<:delete< f in $favs$ | f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
 
 let is_fav ~feedid ~userid () =
   try_lwt begin
