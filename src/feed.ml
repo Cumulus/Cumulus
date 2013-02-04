@@ -98,7 +98,7 @@ let to_html self =
           ();
        (if is_fav then
            (Html.a ~service:Services.del_fav_feed [Html.pcdata "★"] self.id)
-        else (Html.a ~service:Services.add_fav_feed [Html.pcdata "★"] self.id)
+        else (Html.a ~service:Services.add_fav_feed [Html.pcdata "☆"] self.id)
        );
        content;
        Html.br ();
