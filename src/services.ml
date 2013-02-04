@@ -64,13 +64,13 @@ let fav_feed =
     ()
 
 let add_fav_feed =
-  Eliom_service.post_coservice'
-    ~post_params: (Eliom_parameter.int32 "feed_id")
+  Eliom_service.coservice'
+    ~get_params: (Eliom_parameter.int32 "feed_id")
     ()
 
 let del_fav_feed =
-  Eliom_service.post_coservice'
-    ~post_params: (Eliom_parameter.int32 "feed_id")
+  Eliom_service.coservice'
+    ~get_params: (Eliom_parameter.int32 "feed_id")
     ()
 
 let tag_feed =

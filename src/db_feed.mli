@@ -116,3 +116,9 @@ val del_fav :
   userid:int32 ->
   unit ->
   unit Lwt.t
+
+val is_fav :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  bool Lwt.t

@@ -183,14 +183,14 @@ let () =
     );
   Eliom_registration.Action.register
     ~service:Services.add_fav_feed
-    (fun () feedid ->
+    (fun feedid () ->
       User.get_userid () >>= function
         | None -> Lwt.return ()
         | Some userid -> Db_feed.add_fav ~feedid ~userid ()
     );
   Eliom_registration.Action.register
     ~service:Services.del_fav_feed
-    (fun () feedid ->
+    (fun feedid () ->
       User.get_userid () >>= function
         | None -> Lwt.return ()
         | Some userid -> Db_feed.del_fav ~feedid ~userid ()
