@@ -81,6 +81,11 @@ let to_html self =
   )
   >>= fun is_author ->
   Db_feed.count_comments self.id >>= fun comments ->
+  User.get_userid () >>= (function
+    | None -> Lwt.return false
+    | Some userid -> Db_feed.is_fav ~feedid:self.id ~userid ()
+  )
+  >>= fun is_fav ->
   Lwt.return (
     List.flatten [
       [Html.img
@@ -91,6 +96,10 @@ let to_html self =
               ~service: (Utils.get_gravatar (author#!email)) (40, "identicon")
           )
           ();
+       (if is_fav then
+           (Html.a ~service:Services.del_fav_feed [Html.pcdata "★"] self.id)
+        else (Html.a ~service:Services.add_fav_feed [Html.pcdata "☆"] self.id)
+       );
        content;
        Html.br ();
        Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");

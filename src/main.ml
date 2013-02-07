@@ -48,6 +48,14 @@ let () =
       in
       Templates.user ?page ~service username
     );
+  Cumulus_appl.register
+    ~service: Services.fav_feed
+    (fun (username, page) () ->
+      let service =
+        Eliom_service.preapply ~service:Services.fav_feed (username, page)
+      in
+      Templates.fav_feed ?page ~service username
+    );
   Eliom_registration.Action.register
     ~service:Services.append_feed
     (fun () data ->
@@ -172,4 +180,19 @@ let () =
       User.get_userid () >>= function
         | None -> Lwt.return ()
         | Some userid -> Db_feed.delete_feed ~feed ~userid ()
+    );
+  Eliom_registration.Action.register
+    ~service:Services.add_fav_feed
+    (fun feedid () ->
+      User.get_userid () >>= function
+        | None -> Lwt.return ()
+        | Some userid -> Db_feed.add_fav ~feedid ~userid ()
+    );
+  Eliom_registration.Action.register
+    ~service:Services.del_fav_feed
+    (fun feedid () ->
+      User.get_userid () >>= function
+        | None -> Lwt.return ()
+        | Some userid -> Db_feed.del_fav ~feedid ~userid ()
     )
+

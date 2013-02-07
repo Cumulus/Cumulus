@@ -8,6 +8,11 @@ val user :
   service:'a ->
   string ->
   [> `Html ] Html.elt Lwt.t
+val fav_feed :
+  ?page:int->
+  service:'a ->
+  string ->
+  [> `Html ] Html.elt Lwt.t
 val tag :
   ?page:int ->
   service:'a ->

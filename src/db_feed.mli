@@ -34,6 +34,12 @@ class type tag = object
   method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
 end
 
+class type fav = object
+  (* method id : (Sql.int32_t, Sql.non_nullable) Db.t *)
+  method id_user : (Sql.int32_t, Sql.non_nullable) Db.t
+  method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
+end
+
 type feeds_and_tags = feed list * tag list
 type feed_generator =
     starting:int32 ->
@@ -47,6 +53,7 @@ val get_root_feeds : feed_generator
 val get_feeds : feed_generator
 val get_feeds_with_author : string -> feed_generator
 val get_feeds_with_tag : string -> feed_generator
+val get_fav_with_username : string -> feed_generator
 val get_feed_url_with_url :
   string ->
   < url : < get : unit; nul : Sql.nullable; t : Sql.string_t > Sql.t >
@@ -61,6 +68,9 @@ val count_root_feeds :
   unit ->
   < n : (Sql.int64_t, Sql.non_nullable) Db.t > Lwt.t
 val count_feeds_with_author :
+  string ->
+  < n : (Sql.int64_t, Sql.non_nullable) Db.t > Lwt.t
+val count_fav_with_username :
   string ->
   < n : (Sql.int64_t, Sql.non_nullable) Db.t > Lwt.t
 val count_feeds_with_tag :
@@ -94,3 +104,21 @@ val delete_feed :
   userid:int32 ->
   unit ->
   unit Lwt.t
+
+val add_fav :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
+
+val del_fav :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
+
+val is_fav :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  bool Lwt.t

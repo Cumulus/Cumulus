@@ -56,6 +56,23 @@ let author_feed =
     ~get_params: Eliom_parameter.(opt (int "page") ** string "username")
     ()
 
+let fav_feed =
+  Eliom_service.service
+    ~path:["fav"]
+    (* ~get_params: Eliom_parameter.(suffix (string "username") ** int "page") *)
+    ~get_params: Eliom_parameter.(suffix_prod (string "name") (opt (int "page")))
+    ()
+
+let add_fav_feed =
+  Eliom_service.coservice'
+    ~get_params: (Eliom_parameter.int32 "feed_id")
+    ()
+
+let del_fav_feed =
+  Eliom_service.coservice'
+    ~get_params: (Eliom_parameter.int32 "feed_id")
+    ()
+
 let tag_feed =
   Eliom_service.service
     ~path: [""]
