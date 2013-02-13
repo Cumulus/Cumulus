@@ -69,6 +69,7 @@ let to_html self =
   let tags = match self.url with
     | Some _ -> (Html.pcdata "Tags: ") :: links_of_tags self.tags
     | None -> [] in
+  User.is_connected () >>= fun state ->
   Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
@@ -96,9 +97,12 @@ let to_html self =
               ~service: (Utils.get_gravatar (author#!email)) (40, "identicon")
           )
           ();
-       (if is_fav then
-           (Html.a ~service:Services.del_fav_feed [Html.pcdata "★"] self.id)
-        else (Html.a ~service:Services.add_fav_feed [Html.pcdata "☆"] self.id)
+       (if not state then
+          (Html.pcdata "")
+        else
+          (if is_fav = true then
+              (Html.a ~service:Services.del_fav_feed [Html.pcdata "★"] self.id)
+           else (Html.a ~service:Services.add_fav_feed [Html.pcdata "☆"] self.id))
        );
        content;
        Html.br ();
