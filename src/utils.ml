@@ -88,5 +88,5 @@ let split =
   )
 
 let troncate str =
-  let str = Utils.strip str in
+  let str = strip str in
   String.sub str 0 (min 20 (String.length str))
