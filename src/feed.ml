@@ -151,15 +151,20 @@ let to_atom self =
              Atom_feed.links [Atom_feed.link url]
          | _ -> Atom_feed.links []);
        Atom_feed.summary (Atom_feed.html5 (
-         (Html.a ~service:Services.view_feed [Html.pcdata "Suivre la discussion sur cumulus"]
-            (Int32.to_int self.id, Utils.strip self.description))
+         (Html.a
+            ~service:Services.view_feed
+            [Html.pcdata "Suivre la discussion sur cumulus"]
+            (Int32.to_int self.id,
+             String.sub (Utils.strip self.description) 0 20
+            )
+         )
          :: (Html.br ())
          :: (Html.a ~service:Services.atom_feed [Html.pcdata "Flux atom du lien"]
             (Int32.to_int self.id))
          :: (Html.br ())
          :: (Html.pcdata "Tags : ")
          :: (links_of_tags self.tags)
-       )                     
+       )
        )
       ]
   )
