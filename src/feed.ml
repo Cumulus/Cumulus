@@ -123,7 +123,9 @@ let to_html self =
            | n -> [Html.pcdata ((string_of_int n) ^ " commentaires")])
          (* [Html.pcdata (string_to_int (Int64.to_int comments)) " commentaires "] *)
          (* url_of_title or url_of_desc ? *)
-         (Int32.to_int self.id, Utils.strip self.description);
+         (Int32.to_int self.id,
+          String.sub (Utils.strip self.description) 0 20
+         );
        Html.a
          ~service:Services.comment
          [Html.pcdata " Poster un commentaire "]
