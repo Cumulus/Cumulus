@@ -123,10 +123,7 @@ let to_html self =
            | n -> [Html.pcdata ((string_of_int n) ^ " commentaires")])
          (* [Html.pcdata (string_to_int (Int64.to_int comments)) " commentaires "] *)
          (* url_of_title or url_of_desc ? *)
-         (Int32.to_int self.id,
-          let str = Utils.strip self.description in
-          String.sub str 0 (min 20 (String.length str))
-         );
+         (Int32.to_int self.id, Utils.troncate self.description);
        Html.a
          ~service:Services.comment
          [Html.pcdata " Poster un commentaire "]
@@ -157,10 +154,7 @@ let to_atom self =
          (Html.a
             ~service:Services.view_feed
             [Html.pcdata "Suivre la discussion sur cumulus"]
-            (Int32.to_int self.id,
-             let str = Utils.strip self.description in
-             String.sub str 0 (min 20 (String.length str))
-            )
+            (Int32.to_int self.id, Utils.troncate self.description)
          )
          :: (Html.br ())
          :: (Html.a ~service:Services.atom_feed [Html.pcdata "Flux atom du lien"]

@@ -86,3 +86,7 @@ let split =
   (fun str ->
     Str.split regexp str
   )
+
+let troncate str =
+  let str = Utils.strip str in
+  String.sub str 0 (min 20 (String.length str))
