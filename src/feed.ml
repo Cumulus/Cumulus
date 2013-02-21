@@ -124,7 +124,8 @@ let to_html self =
          (* [Html.pcdata (string_to_int (Int64.to_int comments)) " commentaires "] *)
          (* url_of_title or url_of_desc ? *)
          (Int32.to_int self.id,
-          String.sub (Utils.strip self.description) 0 20
+          let str = Utils.strip self.description in
+          String.sub str 0 (min 20 (String.length str))
          );
        Html.a
          ~service:Services.comment
@@ -157,7 +158,8 @@ let to_atom self =
             ~service:Services.view_feed
             [Html.pcdata "Suivre la discussion sur cumulus"]
             (Int32.to_int self.id,
-             String.sub (Utils.strip self.description) 0 20
+             let str = Utils.strip self.description in
+             String.sub str 0 (min 20 (String.length str))
             )
          )
          :: (Html.br ())
