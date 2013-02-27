@@ -72,8 +72,7 @@ let (get_user, set_user, unset_user) =
      in
      Eliom_state.set_persistent_data_cookie_exp_date
        ~cookie_scope
-       (Some (Unix.time () +. 4320000.))
-     (* 4320000 = 60 * 60 * 24 * 50 = 50 days *)
+       (Some (Int32.to_float Int32.max_int))
      >>= fun () ->
      Eliom_reference.set eref (Some user)
    ),
