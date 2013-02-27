@@ -4,8 +4,7 @@ Build Requirements
  * Eliom >= 3.0
  * Lwt >= 2.4
  * OCaml-safepass >= 1.2
- * Batteries >= 1.5
- * PG'OCaml compiled with batteries >= 1.6
+ * PG'OCaml >= 1.7
  * MaCaQue >= 0.6
 
 Run Requirements

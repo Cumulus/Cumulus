@@ -20,7 +20,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
 module Calendar = CalendarLib.Calendar
-module UTF8 = Batteries.UTF8
+module UTF8 = CamomileLibraryDefault.Camomile.CaseMap.Make(CamomileLibrary.UTF8)
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
@@ -124,7 +124,7 @@ let (event, call_event) =
 
 let strip_and_lowercase x =
   (* (List.map (fun x -> String.lowercase (Utils.strip x)) (Str.split (Str.regexp "[,]+") tags)) *)
-  UTF8.to_string (UTF8.lowercase (UTF8.of_string (Utils.strip x)))
+  UTF8.lowercase (Utils.strip x)
 
 let updating_and_ret () =
   call_event ();

@@ -30,7 +30,14 @@ Library cumulus
     Feeds,
     _server/Templates,
     Main
-  BuildDepends: eliom.server, macaque.syntax, batteries, lwt.syntax, safepass
+  BuildDepends:
+    eliom.server (>= 3.0.3),
+    macaque.syntax (>= 0.6),
+    batteries (>= 2.0),
+    camomile,
+    pgocaml (>= 1.7),
+    lwt.syntax (>= 2.4),
+    safepass (>= 1.2)
 #  ByteOpt: -w A
 #  NativeOpt: -w A
 
