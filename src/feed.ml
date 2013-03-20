@@ -166,3 +166,20 @@ let to_atom self =
        )
       ]
   )
+
+let get_edit_url feed =
+  match feed#?url with
+  | Some f -> f
+  | None -> "Url"
+
+let get_edit_tags tags =
+  let tags_str = List.map (fun t -> t#!tag) tags in
+  String.concat ", " tags_str
+
+let get_edit_infos id =
+  Db_feed.is_url ~feedid:id () >>= fun is_url ->
+  Db_feed.get_feed_with_id id >>= fun (feed, tags) ->
+  let desc = feed#!description in
+  let url = get_edit_url feed in
+  let tags_str = get_edit_tags tags in
+  Lwt.return (is_url, desc, url, tags_str)

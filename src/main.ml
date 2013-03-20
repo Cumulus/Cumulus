@@ -174,6 +174,9 @@ let () =
   Cumulus_appl.register
     ~service: Services.comment
     (fun (id, _) () -> Templates.comment id);
+  Cumulus_appl.register
+    ~service: Services.edit_feed
+    (fun (id, _) () -> Templates.edit_feed id);
   Eliom_registration.Action.register
     ~service:Services.delete_feed
     (fun feed () ->

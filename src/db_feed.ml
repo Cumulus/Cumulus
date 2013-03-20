@@ -370,6 +370,16 @@ let count_fav_with_username name =
   let filter f = (<:value< f.id_user = $int32:author#!id$ >>) in
   count_fav_aux ~filter ()
 
+let is_url ~feedid () =
+  Db.view_opt
+    (<:view< {
+      f.url;
+    } | f in $feeds$;
+    f.id = $int32:feedid$;
+    >>) >>= function
+      | Some d -> Lwt.return (if d#?url <> None then true else false)
+      | None -> Lwt.return false
+
 let add_fav ~feedid ~userid () =
   Db.view_opt
     (<:view< {
@@ -385,8 +395,8 @@ let add_fav ~feedid ~userid () =
       (* id; *)
               id_user = $int32:userid$;
               id_feed = $int32:feedid$;
-            } >>)  
-            
+            } >>)
+
 let del_fav ~feedid ~userid () =
   Db.view_opt
     (<:view< {
@@ -412,4 +422,4 @@ let is_fav ~feedid ~userid () =
   end
   with exn ->
     Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
-    Lwt.return false  
+    Lwt.return false

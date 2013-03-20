@@ -149,3 +149,9 @@ let delete_feed =
   Eliom_service.coservice'
     ~get_params:(Eliom_parameter.int32 "id")
     ()
+
+let edit_feed =
+  Eliom_service.service
+    ~path: ["edit"]
+    ~get_params: Eliom_parameter.(suffix ((int "id") ** string "name"))
+    ()

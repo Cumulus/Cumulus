@@ -122,3 +122,8 @@ val is_fav :
   userid:int32 ->
   unit ->
   bool Lwt.t
+
+val is_url :
+  feedid:int32 ->
+  unit ->
+  bool Lwt.t

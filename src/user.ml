@@ -169,3 +169,4 @@ let update_feeds_per_page feeds_per_page =
 let get_offset () =
   get_user_feeds_per_page () >>= fun off ->
   Lwt.return (Eliom_lib.Option.get (fun () -> Utils.offset) off)
+
