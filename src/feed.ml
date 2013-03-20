@@ -132,7 +132,14 @@ let to_html self =
       [Html.a ~service:Services.atom_feed
         [Html.pcdata " [Flux Atom du lien]"] (Int32.to_int self.id)];
       (if is_author then
-          [Html.a ~service:Services.delete_feed [Html.pcdata " (supprimer ?)"] self.id]
+          [ Html.br ();
+	    Html.pcdata " (";
+	    Html.a ~service:Services.delete_feed [Html.pcdata "supprimer"] self.id ;
+	    Html.pcdata " | ";
+	    Html.a ~service:Services.edit_feed [Html.pcdata "editer"]
+       	      (Int32.to_int self.id, Utils.strip self.description);
+	    Html.pcdata ")"
+	  ]
        else []
       );
     ]
