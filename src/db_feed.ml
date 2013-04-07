@@ -189,6 +189,20 @@ let get_feed_url_with_url url =
     f.url = $string:url$;
     >>)
 
+let get_feed_with_url url =
+  Db.view_opt
+    (<:view< {
+      f.id;
+      f.url;
+      f.description;
+      f.timedate;
+      f.author;
+      f.parent;
+      f.root;
+    } | f in $feeds$;
+    f.url = $string:url$;
+    >>)
+
 let get_feed_with_id id =
   Db.view_one
     (<:view< {
@@ -423,3 +437,26 @@ let is_fav ~feedid ~userid () =
   with exn ->
     Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
     Lwt.return false
+
+(* Il faut delete tous les tags du lien et ajouter les nouveaux *)
+let update ~feedid ~url ~description ~tags () =
+  Db.query
+    (<:update< f in $feeds$ := {
+      description = $string:description$;
+      url = $string:url$;
+    } | f.id = $int32:feedid$; >>)
+  >>= fun _ ->
+  Db.query
+    (<:delete< t in $feeds_tags$ | t.id_feed = $int32:feedid$ >>)
+  >>= fun _ ->
+  Lwt_list.iter_p
+    (fun tag ->
+      Db.query
+        (<:insert< $feeds_tags$ := {
+            id = feeds_tags?id;
+            tag = $string:tag$;
+            id_feed = $int32:feedid$;
+          } >>)
+    )
+    tags
+    

@@ -58,6 +58,8 @@ val get_feed_url_with_url :
   string ->
   < url : < get : unit; nul : Sql.nullable; t : Sql.string_t > Sql.t >
     option Lwt.t
+val get_feed_with_url :
+  string -> feed option Lwt.t
 val get_feed_with_id :
   int32 ->
   (feed * tag list) Lwt.t
@@ -127,3 +129,11 @@ val is_url :
   feedid:int32 ->
   unit ->
   bool Lwt.t
+
+val update :
+  feedid:int32 ->
+  url:string ->
+  description:string ->
+  tags:string list ->
+  unit ->
+  unit Lwt.t

@@ -479,7 +479,7 @@ let private_edit_feed id =
 	  if is_url then 
 	    (Html.post_form
                ~a:[Html.a_class ["box"]]
-               ~service:Services.append_link_comment
+               ~service:Services.edit_link_comment
                (fun (parent, (url, (desc, tags))) -> [
 		 Html.h1 [Html.pcdata "Lien"] ;
 		 Html.p [
@@ -516,7 +516,7 @@ let private_edit_feed id =
 	  else
 	    (Html.post_form
                ~a:[Html.a_class ["box"]]
-               ~service:Services.append_desc_comment
+               ~service:Services.edit_desc_comment
                (fun (parent, desc) -> [
 		 Html.h1 [Html.pcdata "Commentaire"];
 		 Html.p [

@@ -193,3 +193,43 @@ let append_desc_comment (id, description) =
         ()
       >>= updating_and_ret
     )
+
+let edit_feed_aux ~id ~url ~description ~tags f =
+  append_feed_aux_base ~description
+    (fun ~author () ->
+      if Utils.string_is_empty tags then
+        Lwt.return Empty
+      else if Utils.is_invalid_url url then
+        Lwt.return Invalid_url
+      else
+        Db_feed.get_feed_with_id id >>= (fun (feed, _) ->
+	  if feed#?url <> Some url then
+            Db_feed.get_feed_url_with_url url >>= function
+            | Some _ -> Lwt.return Already_exist
+            | None -> f () >>= updating_and_ret
+	  else
+	    f () >>= updating_and_ret)
+    )
+
+let edit_link_comment (id, (url, (description, tags))) =
+  edit_feed_aux ~url ~description ~tags
+    (fun () ->
+      Db_feed.update
+	~feedid:(Int32.of_int id)
+	~url
+        ~description
+        ~tags:(List.map strip_and_lowercase (Utils.split tags))
+        ()
+    )
+
+let edit_desc_comment (id, description) =
+  append_feed_aux_base ~description
+    (fun ~author () ->
+      Db_feed.update
+	~feedid:(Int32.of_int id)
+	~description
+        ~tags:[]
+	~url:""
+        ()
+      >>= updating_and_ret
+    )

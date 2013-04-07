@@ -93,6 +93,30 @@ let () =
       >>= Errors.set_error
     );
   Eliom_registration.Action.register
+    ~service:Services.edit_link_comment
+    (fun () data ->
+      Feeds.edit_link_comment data >>= (function
+        | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
+        | Feeds.Empty -> Lwt.return "L'un des champs est vide"
+        | Feeds.Invalid_url -> Lwt.return "LOL" (* Impossible *)
+        | Feeds.Already_exist -> Lwt.return "LOL" (* Impossible *)
+        | Feeds.Ok -> Lwt.return "Le commentaire a bien été ajouté"
+      )
+      >>= Errors.set_error
+    );
+  Eliom_registration.Action.register
+    ~service:Services.edit_desc_comment
+    (fun () data ->
+      Feeds.edit_desc_comment data >>= (function
+        | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
+        | Feeds.Empty -> Lwt.return "L'un des champs est vide"
+        | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
+        | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
+        | Feeds.Ok -> Lwt.return "Le lien a bien été ajouté"
+      )
+      >>= Errors.set_error
+    );
+  Eliom_registration.Action.register
     ~service: Services.auth
     (fun () (username, password) ->
       User.connect username password >>= (function

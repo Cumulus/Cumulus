@@ -155,3 +155,17 @@ let edit_feed =
     ~path: ["edit"]
     ~get_params: Eliom_parameter.(suffix ((int "id") ** string "name"))
     ()
+
+let edit_link_comment =
+  Eliom_service.post_coservice'
+    ~post_params: Eliom_parameter.((int "id") **
+                                   (string "url") **
+                                   (string "desc") **
+                                   (string "tags"))
+    ()
+
+let edit_desc_comment =
+  Eliom_service.post_coservice'
+    ~post_params: Eliom_parameter.((int "id") **
+                                   (string "desc"))
+    ()
