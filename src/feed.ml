@@ -127,7 +127,7 @@ let to_html self =
        Html.a
          ~service:Services.comment
          [Html.pcdata " Poster un commentaire "]
-         (Int32.to_int self.id, Utils.strip self.description);
+         (Int32.to_int self.id, Utils.troncate self.description);
       ]; tags;
       [Html.a ~service:Services.atom_feed
         [Html.pcdata " [Flux Atom du lien]"] (Int32.to_int self.id)];
@@ -137,7 +137,7 @@ let to_html self =
 	    Html.a ~service:Services.delete_feed [Html.pcdata "supprimer"] self.id ;
 	    Html.pcdata " | ";
 	    Html.a ~service:Services.edit_feed [Html.pcdata "editer"]
-       	      (Int32.to_int self.id, Utils.strip self.description);
+       	      (Int32.to_int self.id, Utils.troncate self.description);
 	    Html.pcdata ")"
 	  ]
        else []
