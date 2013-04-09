@@ -202,7 +202,7 @@ let edit_feed_aux ~id ~url ~description ~tags f =
       else if Utils.is_invalid_url url then
         Lwt.return Invalid_url
       else
-        Db_feed.get_feed_with_id id >>= (fun (feed, _) ->
+        Db_feed.get_feed_with_id (Int32.of_int id) >>= (fun (feed, _) ->
 	  if feed#?url <> Some url then
             Db_feed.get_feed_url_with_url url >>= function
             | Some _ -> Lwt.return Already_exist
@@ -212,7 +212,7 @@ let edit_feed_aux ~id ~url ~description ~tags f =
     )
 
 let edit_link_comment (id, (url, (description, tags))) =
-  edit_feed_aux ~url ~description ~tags
+  edit_feed_aux ~id ~url ~description ~tags
     (fun () ->
       Db_feed.update
 	~feedid:(Int32.of_int id)
