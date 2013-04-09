@@ -216,7 +216,7 @@ let edit_link_comment (id, (url, (description, tags))) =
     (fun () ->
       Db_feed.update
 	~feedid:(Int32.of_int id)
-	~url
+	~url:(Some url)
         ~description
         ~tags:(List.map strip_and_lowercase (Utils.split tags))
         ()
@@ -229,7 +229,7 @@ let edit_desc_comment (id, description) =
 	~feedid:(Int32.of_int id)
 	~description
         ~tags:[]
-	~url:""
+	~url:None
         ()
       >>= updating_and_ret
     )

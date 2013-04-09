@@ -440,11 +440,18 @@ let is_fav ~feedid ~userid () =
 
 (* Il faut delete tous les tags du lien et ajouter les nouveaux *)
 let update ~feedid ~url ~description ~tags () =
-  Db.query
-    (<:update< f in $feeds$ := {
-      description = $string:description$;
-      url = $string:url$;
-    } | f.id = $int32:feedid$; >>)
+  match url with
+  | Some u ->
+    Db.query
+      (<:update< f in $feeds$ := {
+        description = $string:description$;
+        url = $string:u$;
+      } | f.id = $int32:feedid$; >>)
+  | None ->
+    Db.query
+      (<:update< f in $feeds$ := {
+        description = $string:description$;
+      } | f.id = $int32:feedid$; >>)
   >>= fun _ ->
   Db.query
     (<:delete< t in $feeds_tags$ | t.id_feed = $int32:feedid$ >>)

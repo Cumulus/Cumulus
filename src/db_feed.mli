@@ -132,7 +132,7 @@ val is_url :
 
 val update :
   feedid:int32 ->
-  url:string ->
+  url:string option ->
   description:string ->
   tags:string list ->
   unit ->
