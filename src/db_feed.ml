@@ -442,28 +442,29 @@ let is_fav ~feedid ~userid () =
 let update ~feedid ~url ~description ~tags () =
   match url with
   | Some u ->
-    Db.query
+    (Db.query
       (<:update< f in $feeds$ := {
         description = $string:description$;
         url = $string:u$;
       } | f.id = $int32:feedid$; >>)
+     >>= fun _ ->
+     Db.query
+       (<:delete< t in $feeds_tags$ | t.id_feed = $int32:feedid$ >>)
+     >>= fun _ ->
+     Lwt_list.iter_p
+       (fun tag ->
+	 Db.query
+           (<:insert< $feeds_tags$ := {
+             id = feeds_tags?id;
+             tag = $string:tag$;
+             id_feed = $int32:feedid$;
+           } >>)
+       )
+       tags
+    )
   | None ->
     Db.query
       (<:update< f in $feeds$ := {
         description = $string:description$;
       } | f.id = $int32:feedid$; >>)
-  >>= fun _ ->
-  Db.query
-    (<:delete< t in $feeds_tags$ | t.id_feed = $int32:feedid$ >>)
-  >>= fun _ ->
-  Lwt_list.iter_p
-    (fun tag ->
-      Db.query
-        (<:insert< $feeds_tags$ := {
-            id = feeds_tags?id;
-            tag = $string:tag$;
-            id_feed = $int32:feedid$;
-          } >>)
-    )
-    tags
     
