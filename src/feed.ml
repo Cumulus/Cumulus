@@ -202,3 +202,11 @@ let get_edit_infos id =
   let url = get_edit_url feed in
   let tags_str = get_edit_tags tags in
   Lwt.return (is_url, desc, url, tags_str)
+
+let delete_feed_check ~feed ~userid () =
+  User.is_admin () >>= fun is_admin ->
+  Db_feed.is_feed_author ~feed ~userid () >>= fun is_author ->
+  if is_admin or is_author then
+    Db_feed.delete_feed ~feed ~userid ()
+  else
+    Lwt.return ()

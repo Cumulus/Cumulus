@@ -332,21 +332,17 @@ let list_of_depend_feed id =
                      Lwt.return (aux root comments)
 
 let delete_feed ~feed ~userid () =
-  is_feed_author ~feed ~userid () >>= function
-    | true ->
-        list_of_depend_feed feed
-        >>= fun dfeeds ->
-          let feeds_filter f =
-            (<:value< $Db.in'$ f.id $List.map (fun x -> x#id) dfeeds$ >>) in
-        Db.query
-          (<:delete< f in $feeds$ | $feeds_filter$ f; >>)
-        >>= fun () ->
-          let feeds_filter f =
-            (<:value< $Db.in'$ f.id_feed $List.map (fun x -> x#id) dfeeds$ >>) in
-        Db.query
-          (<:delete< f in $feeds_tags$ | $feeds_filter$ f >>)
-    | false ->
-        Lwt.return ()
+  list_of_depend_feed feed
+  >>= fun dfeeds ->
+  let feeds_filter f =
+    (<:value< $Db.in'$ f.id $List.map (fun x -> x#id) dfeeds$ >>) in
+  Db.query
+    (<:delete< f in $feeds$ | $feeds_filter$ f; >>)
+  >>= fun () ->
+  let feeds_filter f =
+    (<:value< $Db.in'$ f.id_feed $List.map (fun x -> x#id) dfeeds$ >>) in
+  Db.query
+    (<:delete< f in $feeds_tags$ | $feeds_filter$ f >>)
 
 let get_fav_aux ~starting ~number ~feeds_filter ~tags_filter () =
   Db.view

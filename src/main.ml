@@ -206,7 +206,7 @@ let () =
     (fun feed () ->
       User.get_userid () >>= function
         | None -> Lwt.return ()
-        | Some userid -> Db_feed.delete_feed ~feed ~userid ()
+        | Some userid -> Feed.delete_feed_check ~feed ~userid ()
     );
   Eliom_registration.Action.register
     ~service:Services.add_fav_feed

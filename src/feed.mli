@@ -39,3 +39,9 @@ val to_atom : feed -> Atom_feed.entry Lwt.t
 
 val get_edit_infos : int32 ->
   (bool * string * string * string) Lwt.t
+
+val delete_feed_check :
+  feed:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
