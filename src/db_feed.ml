@@ -397,21 +397,21 @@ let is_url ~feedid () =
 let is_root ~feedid () =
   Db.view_opt
     (<:view< {
-      f.parent;
+      f.root;
     } | f in $feeds$;
     f.id = $int32:feedid$;
     >>) >>= function
-    | Some d -> Lwt.return (if d#?parent <> None then false else true)
+    | Some feed -> Lwt.return (if feed#?root <> None then false else true)
     | None -> Lwt.return false
 
 let get_root ~feedid () =
   Db.view_opt
     (<:view< {
-      f.parent;
+      f.root;
     } | f in $feeds$;
     f.id = $int32:feedid$;
     >>) >>= function
-    | Some d -> (match d#?parent with
+    | Some feed -> (match feed#?root with
       | Some id -> Db.view_opt
         (<:view< {
           f.id;
@@ -423,7 +423,7 @@ let get_root ~feedid () =
           f.root;
         } | f in $feeds$;
         f.id = $int32:id$;
-    >>)
+        >>)
       | None -> Lwt.return None)
     | None -> Lwt.return None
 
