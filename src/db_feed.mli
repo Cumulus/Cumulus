@@ -136,7 +136,9 @@ val is_root :
   bool Lwt.t
 
 val get_root :
-  feedid:int32 -> unit-> feed option Lwt.t
+  feedid:int32 ->
+  unit->
+  feed option Lwt.t
 
 val update :
   feedid:int32 ->
