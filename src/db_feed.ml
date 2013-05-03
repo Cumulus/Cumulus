@@ -394,6 +394,41 @@ let is_url ~feedid () =
       | Some d -> Lwt.return (if d#?url <> None then true else false)
       | None -> Lwt.return false
 
+let is_root ~feedid () =
+  Db.view_opt
+    (<:view< {
+      f.parent;
+    } | f in $feeds$;
+    f.id = $int32:feedid$;
+    >>) >>= function
+      | Some d -> Lwt.return (if d#?parent <> None then false else true)
+      | None -> Lwt.return false
+
+let get_root ~feedid () =
+  Db.view_opt
+    (<:view< {
+      f.parent;
+    } | f in $feeds$;
+    f.id = $int32:feedid$;
+    >>) >>= function
+      | Some d -> ( match d#?parent with
+| Some id ->
+      Db.view_opt
+    (<:view< {
+	           f.id;
+      f.url;
+      f.description;
+      f.timedate;
+      f.author;
+      f.parent;
+      f.root;
+    } | f in $feeds$;
+    f.id = $int32:id$;
+    >>)
+      | None -> Lwt.return None)
+      | None -> Lwt.return None
+
+
 let add_fav ~feedid ~userid () =
   Db.view_opt
     (<:view< {

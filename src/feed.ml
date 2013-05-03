@@ -146,12 +146,17 @@ let to_html self =
   )
 
 let to_atom self =
+Db_feed.get_root self.id () >>= fun root_feed ->
   Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
+let title = match root_feed with
+	   | Some root_feed' -> "<RE: " ^ (Utils.troncate root_feed'#!description) ^ "> " ^ self.description
+| None -> self.description
+in
   Lwt.return (
     Atom_feed.entry
       ~updated: self.date
       ~id:(Int32.to_string self.id)
-      ~title: (Atom_feed.plain (self.description))
+      ~title: (Atom_feed.plain (title))
       [Atom_feed.authors [Atom_feed.author author#!name];
        (match self.url with
          | Some url ->
@@ -169,6 +174,13 @@ let to_atom self =
          :: (Html.br ())
          :: (Html.pcdata "Tags : ")
          :: (links_of_tags self.tags)
+	 @ [(Html.br ())]
+	 @ (match root_feed with
+	   | Some root_feed' -> [Html.pcdata "ce message est une réponse à : "; 
+Html.a ~service:Services.view_feed [Html.pcdata root_feed'#!description] (Int32.to_int root_feed'#!id, Utils.troncate root_feed'#!description)]
+| None -> [])
+(*	 @ (if is_root = true then [Html.pcdata "root"]
+	       else [Html.pcdata "pas root"]) *)
        )
        )
       ]

@@ -130,6 +130,14 @@ val is_url :
   unit ->
   bool Lwt.t
 
+val is_root :
+  feedid:int32 ->
+  unit ->
+  bool Lwt.t
+
+val get_root :
+  feedid:int32 -> unit-> feed option Lwt.t
+
 val update :
   feedid:int32 ->
   url:string option ->
