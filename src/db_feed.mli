@@ -147,3 +147,8 @@ val update :
   tags:string list ->
   unit ->
   unit Lwt.t
+
+val exist :
+  feedid:int32 ->
+  unit ->
+  bool Lwt.t

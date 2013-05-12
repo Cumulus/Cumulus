@@ -498,3 +498,12 @@ let update ~feedid ~url ~description ~tags () =
         description = $string:description$;
       } | f.id = $int32:feedid$; >>)
     
+let exist ~feedid () =
+  Db.view_opt
+    (<:view< {
+      f.id;
+    } | f in $feeds$;
+    f.id = $int32:feedid$;
+    >>) >>= function
+      | None -> Lwt.return false
+      | Some _ -> Lwt.return true

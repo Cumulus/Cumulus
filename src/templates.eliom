@@ -464,7 +464,7 @@ let private_edit_feed id =
   User.is_connected () >>= fun state ->
   Feeds.branch_to_html id >>= fun branch ->
   Feed.get_edit_infos id >>= fun (is_url, edit_desc, edit_url, edit_tags) ->
-  User.get_userid () >>= (function 
+  User.get_userid () >>= (function
   | None -> Lwt.return true
   | Some uid -> Db_feed.is_feed_author ~feed:id ~userid:uid ())
   >>= fun is_author ->
@@ -476,7 +476,7 @@ let private_edit_feed id =
         ]
       else
         [ branch;
-	  if is_url then 
+	  if is_url then
 	    (Html.post_form
                ~a:[Html.a_class ["box"]]
                ~service:Services.edit_link_comment
@@ -592,8 +592,17 @@ let fav_feed ?(page=0) ~service username =
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =
-  Feeds.comments_to_html (Int32.of_int id) >>= (fun feed ->
-    main_style [feed] [])
+  Db_feed.exist ~feedid:(Int32.of_int id) () >>= fun exist ->
+  if exist then
+    Feeds.comments_to_html (Int32.of_int id) >>= (fun feed ->
+      main_style [feed] [])
+  else
+    main_style
+      [Html.div
+          ~a:[Html.a_class ["box"]]
+          [Html.pcdata "Ce lien n'existe pas."]
+      ]
+      []
 
 let register () =
   private_register ()
