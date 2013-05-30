@@ -184,7 +184,7 @@ let main_style content footer =
             Html.css_link
               ~uri: (Html.make_uri
                        ~service: (Eliom_service.static_dir ())
-                       ["forms.css"]
+                       ["cumulus.css"]
               ) ();
           ]
        )
