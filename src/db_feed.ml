@@ -82,6 +82,12 @@ let favs = (<:table< favs (
   id_feed integer NOT NULL
 ) >>)
 
+let votes = (<:table< votes (
+  id_user integer NOT NULL,
+  id_feed integer NOT NULL,
+  score integer NOT NULL
+) >>)
+
 let filter_tags_id f tags =
   (<:value< $Db.in'$ f.id $List.map (fun x -> x#id_feed) tags$ >>)
 let filter_feeds_id t feeds =
@@ -453,6 +459,53 @@ let del_fav ~feedid ~userid () =
       | Some _ ->
           Db.query
             (<:delete< f in $favs$ | f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
+
+let upvote ~feedid ~userid () =
+  Db.view_opt
+    (<:view< {
+      f.id_user;
+      f.id_feed;
+    } | f in $votes$;
+    f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
+    >>) >>= function
+      | Some _ -> Lwt.return ()
+      | None ->
+          Db.query
+            (<:insert< $votes$ := {
+              id_user = $int32:userid$;
+              id_feed = $int32:feedid$;
+              score = $int32:Int32.of_int(1)$
+            } >>)
+
+let downvote ~feedid ~userid () =
+  Db.view_opt
+    (<:view< {
+      f.id_user;
+      f.id_feed;
+    } | f in $votes$;
+    f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
+    >>) >>= function
+      | Some _ -> Lwt.return ()
+      | None ->
+          Db.query
+            (<:insert< $votes$ := {
+              id_user = $int32:userid$;
+              id_feed = $int32:feedid$;
+              score = $int32:Int32.of_int(-1)$
+            } >>)
+
+let cancelvote ~feedid ~userid () =
+  Db.view_opt
+    (<:view< {
+      f.id_user;
+      f.id_feed;
+    } | f in $votes$;
+    f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
+    >>) >>= function
+      | None -> Lwt.return ()
+      | Some _ ->
+          Db.query
+            (<:delete< f in $votes$ | f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
 
 let is_fav ~feedid ~userid () =
   try_lwt begin

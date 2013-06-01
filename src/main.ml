@@ -221,5 +221,25 @@ let () =
       User.get_userid () >>= function
         | None -> Lwt.return ()
         | Some userid -> Db_feed.del_fav ~feedid ~userid ()
+    );
+  Eliom_registration.Action.register
+    ~service:Services.upvote_feed
+    (fun feedid () ->
+      User.get_userid () >>= function
+        | None -> Lwt.return ()
+        | Some userid -> Db_feed.upvote ~feedid ~userid ()
+    );
+  Eliom_registration.Action.register
+    ~service:Services.downvote_feed
+    (fun feedid () ->
+      User.get_userid () >>= function
+        | None -> Lwt.return ()
+        | Some userid -> Db_feed.downvote ~feedid ~userid ()
+    );
+  Eliom_registration.Action.register
+    ~service:Services.cancelvote_feed
+    (fun feedid () ->
+      User.get_userid () >>= function
+        | None -> Lwt.return ()
+        | Some userid -> Db_feed.cancelvote ~feedid ~userid ()
     )
-

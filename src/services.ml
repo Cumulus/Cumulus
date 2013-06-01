@@ -73,6 +73,21 @@ let del_fav_feed =
     ~get_params: (Eliom_parameter.int32 "feed_id")
     ()
 
+let upvote_feed =
+  Eliom_service.coservice'
+    ~get_params: (Eliom_parameter.int32 "feed_id")
+    ()
+
+let downvote_feed =
+  Eliom_service.coservice'
+    ~get_params: (Eliom_parameter.int32 "feed_id")
+    ()
+
+let cancelvote_feed =
+  Eliom_service.coservice'
+    ~get_params: (Eliom_parameter.int32 "feed_id")
+    ()
+
 let tag_feed =
   Eliom_service.service
     ~path: [""]

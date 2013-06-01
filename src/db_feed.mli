@@ -119,6 +119,24 @@ val del_fav :
   unit ->
   unit Lwt.t
 
+val upvote :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
+
+val downvote :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
+
+val cancelvote :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
+
 val is_fav :
   feedid:int32 ->
   userid:int32 ->

@@ -75,4 +75,12 @@ let () =
                 id_user integer NOT NULL, \
                 id_feed integer NOT NULL);"
       )
+    >>= fun () ->
+    update 5
+      (fun () ->
+        Db.alter "CREATE TABLE votes (\
+                id_user integer NOT NULL, \
+                id_feed integer NOT NULL, \
+                score interger NOT NULL);"
+      )
   end
