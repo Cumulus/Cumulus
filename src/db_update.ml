@@ -81,6 +81,6 @@ let () =
         Db.alter "CREATE TABLE votes (\
                 id_user integer NOT NULL, \
                 id_feed integer NOT NULL, \
-                score interger NOT NULL);"
+                score integer NOT NULL);"
       )
   end

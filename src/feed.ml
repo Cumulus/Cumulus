@@ -87,6 +87,13 @@ let to_html self =
     | Some userid -> Db_feed.is_fav ~feedid:self.id ~userid ()
   )
   >>= fun is_fav ->
+  User.get_userid () >>= (function
+    | None -> Lwt.return (Int32.of_int 0)
+    | Some userid -> Db_feed.user_vote ~feedid:self.id ~userid ()
+  )
+  >>= fun user_score ->
+  Db_feed.score ~feedid:self.id ()
+  >>= fun feed_score ->
   Lwt.return (
     List.flatten [
       [Html.img
@@ -104,6 +111,21 @@ let to_html self =
               (Html.a ~service:Services.del_fav_feed [Html.pcdata "★"] self.id)
            else (Html.a ~service:Services.add_fav_feed [Html.pcdata "☆"] self.id))
        );
+       (if not state then
+          (Html.pcdata "")
+        else if user_score <> (Int32.of_int 1) then
+           (Html.a ~service:Services.upvote_feed [Html.pcdata "⬆"] self.id)
+         else
+           (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
+       );
+       (if not state then
+          (Html.pcdata "")
+        else if user_score <> (Int32.of_int (-1)) then
+           (Html.a ~service:Services.downvote_feed [Html.pcdata "⬇"] self.id)
+         else
+           (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
+       );
+       Html.pcdata ("[" ^ (string_of_int (Int32.to_int feed_score)) ^ "] ");
        content;
        Html.br ();
        Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");

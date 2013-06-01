@@ -137,6 +137,17 @@ val cancelvote :
   unit ->
   unit Lwt.t
 
+val user_vote :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  int32 Lwt.t
+
+val score :
+  feedid:int32 ->
+  unit ->
+  int32 Lwt.t
+
 val is_fav :
   feedid:int32 ->
   userid:int32 ->

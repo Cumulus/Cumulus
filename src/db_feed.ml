@@ -468,7 +468,11 @@ let upvote ~feedid ~userid () =
     } | f in $votes$;
     f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
     >>) >>= function
-      | Some _ -> Lwt.return ()
+      | Some _ ->
+        Db.query
+          (<:update< f in $votes$ := {
+            score = $int32:Int32.of_int(1)$
+          } | f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$; >>)
       | None ->
           Db.query
             (<:insert< $votes$ := {
@@ -485,7 +489,11 @@ let downvote ~feedid ~userid () =
     } | f in $votes$;
     f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
     >>) >>= function
-      | Some _ -> Lwt.return ()
+      | Some _ ->
+        Db.query
+          (<:update< f in $votes$ := {
+            score = $int32:Int32.of_int(-1)$
+          } | f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$; >>)
       | None ->
           Db.query
             (<:insert< $votes$ := {
@@ -506,6 +514,26 @@ let cancelvote ~feedid ~userid () =
       | Some _ ->
           Db.query
             (<:delete< f in $votes$ | f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
+
+let user_vote ~feedid ~userid () =
+  Db.view_opt
+    (<:view< {
+      f.score;
+    } | f in $votes$;
+    f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
+    >>) >>= function
+      | None -> Lwt.return (Int32.of_int 0)
+      | Some vote -> Lwt.return vote#!score
+
+let score ~feedid () =
+  Db.view
+    (<:view< {
+      f.score;
+    } | f in $votes$;
+    f.id_feed = $int32:feedid$;
+    >>) >>= fun votes ->
+  Lwt_list.fold_left_s (fun acc vote ->
+    Lwt.return (Int32.add acc vote#!score)) (Int32.of_int 0) votes
 
 let is_fav ~feedid ~userid () =
   try_lwt begin
@@ -550,7 +578,7 @@ let update ~feedid ~url ~description ~tags () =
       (<:update< f in $feeds$ := {
         description = $string:description$;
       } | f.id = $int32:feedid$; >>)
-    
+
 let exist ~feedid () =
   Db.view_opt
     (<:view< {
