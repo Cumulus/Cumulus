@@ -226,20 +226,38 @@ let () =
     ~service:Services.upvote_feed
     (fun feedid () ->
       User.get_userid () >>= function
-        | None -> Lwt.return ()
-        | Some userid -> Db_feed.upvote ~feedid ~userid ()
+      | Some userid ->
+        Db_feed.is_feed_author ~feed:feedid ~userid ()
+        >>= fun is_author ->
+        if not is_author then
+          Db_feed.upvote ~feedid ~userid ()
+        else
+          Lwt.return ()
+      | None -> Lwt.return ()
     );
   Eliom_registration.Action.register
     ~service:Services.downvote_feed
     (fun feedid () ->
       User.get_userid () >>= function
-        | None -> Lwt.return ()
-        | Some userid -> Db_feed.downvote ~feedid ~userid ()
+      | Some userid ->
+        Db_feed.is_feed_author ~feed:feedid ~userid ()
+        >>= fun is_author ->
+        if not is_author then
+          Db_feed.downvote ~feedid ~userid ()
+        else
+          Lwt.return ()
+      | None -> Lwt.return ()
     );
   Eliom_registration.Action.register
     ~service:Services.cancelvote_feed
     (fun feedid () ->
       User.get_userid () >>= function
-        | None -> Lwt.return ()
-        | Some userid -> Db_feed.cancelvote ~feedid ~userid ()
+      | Some userid ->
+        Db_feed.is_feed_author ~feed:feedid ~userid ()
+        >>= fun is_author ->
+        if not is_author then
+          Db_feed.cancelvote ~feedid ~userid ()
+        else
+          Lwt.return ()
+      | None -> Lwt.return ()
     )

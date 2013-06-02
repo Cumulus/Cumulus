@@ -75,12 +75,10 @@ let to_html self =
     | None -> Lwt.return false
     | Some userid ->
         Db_feed.is_feed_author ~feed:self.id ~userid ()
-        >>= fun x ->
-        User.is_admin ()
-        >>= fun y ->
-        Lwt.return (x || y)
   )
   >>= fun is_author ->
+  User.is_admin ()
+  >>= fun is_admin ->
   Db_feed.count_comments self.id >>= fun comments ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
@@ -111,14 +109,14 @@ let to_html self =
               (Html.a ~service:Services.del_fav_feed [Html.pcdata "★"] self.id)
            else (Html.a ~service:Services.add_fav_feed [Html.pcdata "☆"] self.id))
        );
-       (if not state then
+       (if not state or is_author then
           (Html.pcdata "")
         else if user_score <> (Int32.of_int 1) then
            (Html.a ~service:Services.upvote_feed [Html.pcdata "⬆"] self.id)
          else
            (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
        );
-       (if not state then
+       (if not state or is_author then
           (Html.pcdata "")
         else if user_score <> (Int32.of_int (-1)) then
            (Html.a ~service:Services.downvote_feed [Html.pcdata "⬇"] self.id)
@@ -153,7 +151,7 @@ let to_html self =
       ]; tags;
       [Html.a ~service:Services.atom_feed
         [Html.pcdata " [Flux Atom du lien]"] (Int32.to_int self.id)];
-      (if is_author then
+      (if is_author or is_admin then
           [ Html.br ();
 	    Html.pcdata " (";
 	    Html.a ~service:Services.delete_feed [Html.pcdata "supprimer"] self.id ;
