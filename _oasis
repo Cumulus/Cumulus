@@ -33,6 +33,7 @@ Library cumulus
   BuildDepends:
     eliom.server (>= 3.0.3),
     macaque.syntax (>= 0.6),
+    macaque_lwt,
     batteries (>= 2.0),
     camomile,
     pgocaml (>= 1.7),

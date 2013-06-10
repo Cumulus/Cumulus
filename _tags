@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: a8b7b555dacb2d86bfe60ed1a022670c)
+# DO NOT EDIT (digest: 9993dc5b5e7ce1e4648352c7805703d9)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -17,6 +17,7 @@
 "src/cumulus.cmxs": use_cumulus
 <src/*.ml{,i}>: pkg_eliom.server
 <src/*.ml{,i}>: pkg_macaque.syntax
+<src/*.ml{,i}>: pkg_macaque_lwt
 <src/*.ml{,i}>: pkg_batteries
 <src/*.ml{,i}>: pkg_camomile
 <src/*.ml{,i}>: pkg_pgocaml
@@ -24,6 +25,7 @@
 <src/*.ml{,i}>: pkg_safepass
 <src/_server/*.ml{,i}>: pkg_eliom.server
 <src/_server/*.ml{,i}>: pkg_macaque.syntax
+<src/_server/*.ml{,i}>: pkg_macaque_lwt
 <src/_server/*.ml{,i}>: pkg_batteries
 <src/_server/*.ml{,i}>: pkg_camomile
 <src/_server/*.ml{,i}>: pkg_pgocaml
