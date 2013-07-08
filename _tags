@@ -40,4 +40,3 @@
 <src/_client/*.ml{,i}>: pkg_eliom.client
 <src/_client/*.ml{,i}>: pkg_eliom.syntax
 # OASIS_STOP
-<src/*.ml{,i}>: thread, syntax_camlp4o
