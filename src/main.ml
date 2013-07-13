@@ -100,7 +100,7 @@ let () =
         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
         | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
         | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
-        | Feeds.Ok -> Lwt.return "édition réussie"
+        | Feeds.Ok -> Lwt.return "Édition réussie"
       )
       >>= Errors.set_error
     );
@@ -112,7 +112,7 @@ let () =
         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
         | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
         | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
-        | Feeds.Ok -> Lwt.return "édition réussie"
+        | Feeds.Ok -> Lwt.return "Édition réussie"
       )
       >>= Errors.set_error
     );
