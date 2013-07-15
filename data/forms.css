@@ -181,3 +181,7 @@ header .nav:hover {
 header p {
   margin-top: 0px;
 }
+
+.lamalama p {
+  font-size: 100%;
+}
