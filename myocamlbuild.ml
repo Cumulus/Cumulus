@@ -581,7 +581,8 @@ end) = struct
     let tag_byte_file () =
       match Client.exec with
         | None -> ()
-        | Some (module Client) ->
+        | Some client ->
+            let module Client = (val client : Exec) in
             let file = Pathname.update_extension "ml" Client.dep in
             tag_file
               Client.dep
@@ -602,7 +603,8 @@ end) = struct
     let () =
       match Client.exec with
         | None -> ()
-        | Some (module Client) ->
+        | Some client ->
+            let module Client = (val client : Exec) in
             dep ["file:" ^ Client.package] [Client.name];
                 rule "js_of_ocaml: .byte -> .js" ~dep:Client.dep ~prod:Client.name
                   (fun env _ ->
