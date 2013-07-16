@@ -40,7 +40,13 @@ class type fav = object
   method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
 end
 
-type feeds_and_tags = feed list * tag list
+class type vote = object
+  method score : (Sql.int32_t, Sql.non_nullable) Db.t
+  method id_user : (Sql.int32_t, Sql.non_nullable) Db.t
+  method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
+end
+
+type feeds_and_tags = feed list * tag list * vote list
 type feed_generator =
     starting:int32 ->
     number:int32 ->
@@ -62,7 +68,7 @@ val get_feed_with_url :
   string -> feed option Lwt.t
 val get_feed_with_id :
   int32 ->
-  (feed * tag list) Lwt.t
+  (feed * tag list * vote list) Lwt.t
 val count_feeds :
   unit ->
   < n : (Sql.int64_t, Sql.non_nullable) Db.t > Lwt.t
@@ -140,11 +146,6 @@ val cancelvote :
 val user_vote :
   feedid:int32 ->
   userid:int32 ->
-  unit ->
-  int32 Lwt.t
-
-val score :
-  feedid:int32 ->
   unit ->
   int32 Lwt.t
 

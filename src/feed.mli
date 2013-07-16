@@ -29,10 +29,11 @@ type feed = {
   author : int32;
   parent : int32 option;
   root : int32 option;
-  tags: string list
+  tags: string list;
+  score : int;
 }
 
-val feed_new : Db_feed.feed -> string list -> feed
+val feed_new : Db_feed.feed -> string list -> int -> feed
 val to_html : feed ->
   (([> `A of [> `PCDATA ] | `Br | `Div | `Img | `PCDATA ] Html.elt) list) Lwt.t
 val to_atom : feed -> Atom_feed.entry Lwt.t

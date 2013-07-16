@@ -29,13 +29,14 @@ type feed = {
   author : int32;
   parent : int32 option;
   root : int32 option;
-  tags: string list
+  tags: string list;
+  score : int;
 }
 
 type tree = Sheet of feed | Node of feed * tree list
 let (>>=) = Lwt.(>>=)
 
-let feed_new data tags = {
+let feed_new data tags score = {
   id = data#!id;
   url = data#?url;
   description = data#!description;
@@ -43,7 +44,8 @@ let feed_new data tags = {
   author = data#!author;
   parent = data#?parent;
   root = data#?root;
-  tags = tags
+  tags;
+  score;
 }
 
 let links_of_tags tags =
@@ -105,8 +107,6 @@ let to_html self =
     | Some userid -> Db_feed.user_vote ~feedid:self.id ~userid ()
   )
   >>= fun user_score ->
-  Db_feed.score ~feedid:self.id ()
-  >>= fun feed_score ->
   Lwt.return (
     List.flatten [
       [Html.img
@@ -138,7 +138,7 @@ let to_html self =
          else
            (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
        );
-       Html.pcdata ("[" ^ (string_of_int (Int32.to_int feed_score)) ^ "] ");
+       Html.pcdata ("[" ^ string_of_int self.score ^ "] ");
        content;
        Html.br ();
        Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
@@ -185,7 +185,7 @@ let to_atom self =
   Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   let title, root_infos = match root_feed with
     | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'#!description) ^ "] " ^ self.description,
-			  [Html.pcdata "ce message est une réponse à : "; 
+			  [Html.pcdata "ce message est une réponse à : ";
 			   Html.a ~service:Services.view_feed
 			     [Html.pcdata root_feed'#!description]
 			     (Int32.to_int root_feed'#!id,
@@ -232,7 +232,7 @@ let get_edit_tags tags =
 
 let get_edit_infos id =
   Db_feed.is_url ~feedid:id () >>= fun is_url ->
-  Db_feed.get_feed_with_id id >>= fun (feed, tags) ->
+  Db_feed.get_feed_with_id id >>= fun (feed, tags, _) ->
   let desc = feed#!description in
   let url = get_edit_url feed in
   let tags_str = get_edit_tags tags in
