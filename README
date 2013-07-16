@@ -8,6 +8,8 @@ Build Requirements
  * MaCaQue >= 0.6
  * Macaque_lwt
  * OCaml-markdown >= 0.1.1
+ * Camomile
+ * sqlite3-ocaml
 
 Run Requirements
 ================
