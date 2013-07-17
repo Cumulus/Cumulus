@@ -462,7 +462,7 @@ let private_comment id =
                submit_input ~value:"Envoyer !" ()
               ]
             ])
-            ()
+            (Int32.to_int id, "")
         ]) []
 
 let private_edit_feed id =
@@ -524,7 +524,7 @@ let private_edit_feed id =
                    submit_input ~value:"Envoyer !" ()
                  ]
                ])
-               ();)
+               (Int32.to_int id, ""))
           else
             (Html.post_form
                ~a:[Html.a_class ["box"]]
@@ -547,7 +547,7 @@ let private_edit_feed id =
                    submit_input ~value:"Envoyer !" ()
                  ]
                ])
-               ())
+               (Int32.to_int id, ""))
         ]
     )
     []
