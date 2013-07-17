@@ -28,7 +28,7 @@ textarea {
 	min-height: 5em;
 	font-size: 1.75em;
 	vertical-align: top;
-	resize: vertical;
+	width: 100%;
 }
 button, input[type="button"], input[type="reset"], input[type="submit"] {
 	cursor: pointer;
@@ -184,4 +184,8 @@ header p {
 
 .lamalama p {
   font-size: 100%;
+}
+
+.lamalama a {
+  color: #4C9BFF;
 }
