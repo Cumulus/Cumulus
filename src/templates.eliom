@@ -392,9 +392,16 @@ let private_preferences () =
     []
 
 let private_comment id =
+  Db_feed.exist ~feedid:id () >>= fun exist ->
+  if not exist then
+        main_style [Html.div
+            ~a:[Html.a_class ["box"]]
+            [Html.pcdata "Ce commentaire n'existe pas."]
+        ] []
+  else
   User.is_connected () >>= fun state ->
   Feeds.branch_to_html id >>= fun branch ->
-  main_style
+    main_style
     ( if not state then
         [Html.div
             ~a:[Html.a_class ["box"]]
@@ -456,11 +463,16 @@ let private_comment id =
               ]
             ])
             ()
-        ]
-    )
-    []
+        ]) []
 
 let private_edit_feed id =
+  Db_feed.exist ~feedid:id () >>= fun exist ->
+  if not exist then
+        main_style [Html.div
+            ~a:[Html.a_class ["box"]]
+            [Html.pcdata "Ce commentaire n'existe pas."]
+        ] []
+  else
   User.is_connected () >>= fun state ->
   Feeds.branch_to_html id >>= fun branch ->
   Feed.get_edit_infos id >>= fun (is_url, edit_desc, edit_url, edit_tags) ->
@@ -477,31 +489,31 @@ let private_edit_feed id =
       else
         [ branch;
 	  if is_url then
-	    (Html.post_form
+            (Html.post_form
                ~a:[Html.a_class ["box"]]
                ~service:Services.edit_link_comment
                (fun (parent, (url, (desc, tags))) -> [
-		 Html.h1 [Html.pcdata "Lien"] ;
-		 Html.p [
+                 Html.h1 [Html.pcdata "Lien"] ;
+                 Html.p [
                    string_input_box
                      ~a:[ Html.a_placeholder "URL"]
                      ~input_type:`Text
                      ~name:url
-		     ~value:edit_url
+                     ~value:edit_url
                      ();
                    Html.br ();
                    string_input_box
                      ~a:[ Html.a_placeholder "Titre" ]
                      ~input_type:`Text
                      ~name:desc
-		     ~value:edit_desc
+                     ~value:edit_desc
                      ();
                    Html.br ();
                    string_input_box
                      ~a:[ Html.a_placeholder "Tags" ]
                      ~input_type:`Text
                      ~name:tags
-		     ~value:edit_tags
+                     ~value:edit_tags
                      ();
                    Html.br ();
                    Html.int_input
@@ -510,30 +522,30 @@ let private_edit_feed id =
                      ~value:(Int32.to_int id)
                      ();
                    submit_input ~value:"Envoyer !" ()
-		 ]
+                 ]
                ])
                ();)
-	  else
-	    (Html.post_form
+          else
+            (Html.post_form
                ~a:[Html.a_class ["box"]]
                ~service:Services.edit_desc_comment
                (fun (parent, desc) -> [
-		 Html.h1 [Html.pcdata "Commentaire"];
-		 Html.p [
+                 Html.h1 [Html.pcdata "Commentaire"];
+                 Html.p [
                    Html.textarea
                      ~a:[Html.a_class ["input-box"];
-			 Html.a_placeholder "Comment" ]
+                         Html.a_placeholder "Comment" ]
                      ~name:desc
-		     ~value:edit_desc
+                     ~value:edit_desc
                      () ;
-		   Html.int_input
+                   Html.int_input
                      ~input_type:`Hidden
                      ~name:parent
                      ~value:(Int32.to_int id)
                      ();
-		   Html.br ();
-		   submit_input ~value:"Envoyer !" ()
-		 ]
+                   Html.br ();
+                   submit_input ~value:"Envoyer !" ()
+                 ]
                ])
                ())
         ]

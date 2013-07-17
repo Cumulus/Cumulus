@@ -74,8 +74,8 @@ let () =
       Feeds.append_link_comment data >>= (function
         | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
-        | Feeds.Invalid_url -> Lwt.return "LOL" (* Impossible *)
-        | Feeds.Already_exist -> Lwt.return "LOL" (* Impossible *)
+        | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
+        | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
         | Feeds.Ok -> Lwt.return "Le commentaire a bien été ajouté"
       )
       >>= Errors.set_error
@@ -98,9 +98,9 @@ let () =
       Feeds.edit_link_comment data >>= (function
         | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
-        | Feeds.Invalid_url -> Lwt.return "LOL" (* Impossible *)
-        | Feeds.Already_exist -> Lwt.return "LOL" (* Impossible *)
-        | Feeds.Ok -> Lwt.return "édition réussie"
+        | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
+        | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
+        | Feeds.Ok -> Lwt.return "Édition réussie"
       )
       >>= Errors.set_error
     );
@@ -112,7 +112,7 @@ let () =
         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
         | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
         | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
-        | Feeds.Ok -> Lwt.return "édition réussie"
+        | Feeds.Ok -> Lwt.return "Édition réussie"
       )
       >>= Errors.set_error
     );
@@ -221,5 +221,43 @@ let () =
       User.get_userid () >>= function
         | None -> Lwt.return ()
         | Some userid -> Db_feed.del_fav ~feedid ~userid ()
+    );
+  Eliom_registration.Action.register
+    ~service:Services.upvote_feed
+    (fun feedid () ->
+      User.get_userid () >>= function
+      | Some userid ->
+        Db_feed.is_feed_author ~feed:feedid ~userid ()
+        >>= fun is_author ->
+        if not is_author then
+          Db_feed.upvote ~feedid ~userid ()
+        else
+          Lwt.return ()
+      | None -> Lwt.return ()
+    );
+  Eliom_registration.Action.register
+    ~service:Services.downvote_feed
+    (fun feedid () ->
+      User.get_userid () >>= function
+      | Some userid ->
+        Db_feed.is_feed_author ~feed:feedid ~userid ()
+        >>= fun is_author ->
+        if not is_author then
+          Db_feed.downvote ~feedid ~userid ()
+        else
+          Lwt.return ()
+      | None -> Lwt.return ()
+    );
+  Eliom_registration.Action.register
+    ~service:Services.cancelvote_feed
+    (fun feedid () ->
+      User.get_userid () >>= function
+      | Some userid ->
+        Db_feed.is_feed_author ~feed:feedid ~userid ()
+        >>= fun is_author ->
+        if not is_author then
+          Db_feed.cancelvote ~feedid ~userid ()
+        else
+          Lwt.return ()
+      | None -> Lwt.return ()
     )
-

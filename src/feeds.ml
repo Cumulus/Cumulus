@@ -26,18 +26,22 @@ type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
 let (>>=) = Lwt.(>>=)
 
-let feed_of_db (feed, tags) =
-  Lwt.return
-    (Feed.feed_new
-       feed
-       (List.map
-          (fun elm -> elm#!tag)
-          (List.filter (fun elm -> elm#!id_feed = feed#!id) tags)
-       )
-    )
+let feed_of_db (feed, tags, votes) =
+  let tags =
+    List.map
+      (fun elm -> elm#!tag)
+      (List.filter (fun elm -> elm#!id_feed = feed#!id) tags)
+  in
+  let votes =
+    List.fold_left
+      (fun acc elm -> acc + Int32.to_int elm#!score)
+      0
+      (List.filter (fun elm -> elm#!id_feed = feed#!id) votes)
+  in
+  Lwt.return (Feed.feed_new feed tags votes)
 
-let feeds_of_db feeds =
-  Lwt_list.map_s (fun x -> feed_of_db (x, snd feeds)) (fst feeds)
+let feeds_of_db (feeds, tags, votes) =
+  Lwt_list.map_s (fun x -> feed_of_db (x, tags, votes)) feeds
 
 let to_somthing f data =
   Lwt_list.map_p (fun feed -> f feed) data
@@ -163,8 +167,7 @@ let append_feed (url, (description, tags)) =
     )
 
 let get_root_and_parent id =
-  Db_feed.get_feed_with_id (Int32.of_int id) >>= fun feeds_list ->
-  let feed = fst feeds_list in
+  Db_feed.get_feed_with_id (Int32.of_int id) >>= fun (feed, _, _) ->
   let parent = feed#!id in
   let root = match feed#?root with
     | Some root -> root
@@ -202,7 +205,7 @@ let edit_feed_aux ~id ~url ~description ~tags f =
       else if Utils.is_invalid_url url then
         Lwt.return Invalid_url
       else
-        Db_feed.get_feed_with_id (Int32.of_int id) >>= (fun (feed, _) ->
+        Db_feed.get_feed_with_id (Int32.of_int id) >>= (fun (feed, _, _) ->
 	  if feed#?url <> Some url then
             Db_feed.get_feed_url_with_url url >>= function
             | Some _ -> Lwt.return Already_exist

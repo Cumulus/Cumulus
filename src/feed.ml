@@ -29,13 +29,14 @@ type feed = {
   author : int32;
   parent : int32 option;
   root : int32 option;
-  tags: string list
+  tags: string list;
+  score : int;
 }
 
 type tree = Sheet of feed | Node of feed * tree list
 let (>>=) = Lwt.(>>=)
 
-let feed_new data tags = {
+let feed_new data tags score = {
   id = data#!id;
   url = data#?url;
   description = data#!description;
@@ -43,7 +44,8 @@ let feed_new data tags = {
   author = data#!author;
   parent = data#?parent;
   root = data#?root;
-  tags = tags
+  tags;
+  score;
 }
 
 let links_of_tags tags =
@@ -58,6 +60,11 @@ let links_of_tags tags =
     acc @ [Html.pcdata " "; link]
   ) [] tags
 
+module H = Xhtml_f.Make(Eliom_content.Xml)
+module M = MarkdownHTML.Make_xhtml(H)
+
+let conv : 'a H.elt list -> 'a Html.elt list = fun x -> Html.totl (H.toeltl x)
+
 let to_html self =
   let content = match self.url with
     | Some url -> Html.Raw.a
@@ -65,7 +72,17 @@ let to_html self =
                         Html.a_href (Html.uri_of_string (fun () -> url));
                        ]
                   [Html.pcdata self.description]
-    | None -> Html.pcdata self.description in
+    | None ->
+        let markdown = Markdown.parse_text self.description in
+        let render_pre ~kind s = H.pre [H.pcdata s] in
+        let render_link {Markdown.href_target; href_desc} =
+          H.a ~a:[H.a_href (H.uri_of_string href_target)] [H.pcdata href_desc]
+        in
+        let render_img {Markdown.img_src; img_alt} =
+          H.img ~src:(H.uri_of_string img_src) ~alt:img_alt ()
+        in
+        Html.div ~a:[Html.a_class ["lamalama"]] (conv (M.to_html ~render_pre ~render_link ~render_img markdown))
+  in
   let tags = match self.url with
     | Some _ -> (Html.pcdata "Tags: ") :: links_of_tags self.tags
     | None -> [] in
@@ -75,18 +92,21 @@ let to_html self =
     | None -> Lwt.return false
     | Some userid ->
         Db_feed.is_feed_author ~feed:self.id ~userid ()
-        >>= fun x ->
-        User.is_admin ()
-        >>= fun y ->
-        Lwt.return (x || y)
   )
   >>= fun is_author ->
+  User.is_admin ()
+  >>= fun is_admin ->
   Db_feed.count_comments self.id >>= fun comments ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
     | Some userid -> Db_feed.is_fav ~feedid:self.id ~userid ()
   )
   >>= fun is_fav ->
+  User.get_userid () >>= (function
+    | None -> Lwt.return (Int32.of_int 0)
+    | Some userid -> Db_feed.user_vote ~feedid:self.id ~userid ()
+  )
+  >>= fun user_score ->
   Lwt.return (
     List.flatten [
       [Html.img
@@ -104,6 +124,21 @@ let to_html self =
               (Html.a ~service:Services.del_fav_feed [Html.pcdata "★"] self.id)
            else (Html.a ~service:Services.add_fav_feed [Html.pcdata "☆"] self.id))
        );
+       (if not state or is_author then
+          (Html.pcdata "")
+        else if user_score <> (Int32.of_int 1) then
+           (Html.a ~service:Services.upvote_feed [Html.pcdata "⬆"] self.id)
+         else
+           (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
+       );
+       (if not state or is_author then
+          (Html.pcdata "")
+        else if user_score <> (Int32.of_int (-1)) then
+           (Html.a ~service:Services.downvote_feed [Html.pcdata "⬇"] self.id)
+         else
+           (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
+       );
+       Html.pcdata ("[" ^ string_of_int self.score ^ "] ");
        content;
        Html.br ();
        Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
@@ -131,7 +166,7 @@ let to_html self =
       ]; tags;
       [Html.a ~service:Services.atom_feed
         [Html.pcdata " [Flux Atom du lien]"] (Int32.to_int self.id)];
-      (if is_author then
+      (if is_author or is_admin then
           [ Html.br ();
 	    Html.pcdata " (";
 	    Html.a ~service:Services.delete_feed [Html.pcdata "supprimer"] self.id ;
@@ -150,7 +185,7 @@ let to_atom self =
   Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   let title, root_infos = match root_feed with
     | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'#!description) ^ "] " ^ self.description,
-			  [Html.pcdata "ce message est une réponse à : "; 
+			  [Html.pcdata "ce message est une réponse à : ";
 			   Html.a ~service:Services.view_feed
 			     [Html.pcdata root_feed'#!description]
 			     (Int32.to_int root_feed'#!id,
@@ -197,7 +232,7 @@ let get_edit_tags tags =
 
 let get_edit_infos id =
   Db_feed.is_url ~feedid:id () >>= fun is_url ->
-  Db_feed.get_feed_with_id id >>= fun (feed, tags) ->
+  Db_feed.get_feed_with_id id >>= fun (feed, tags, _) ->
   let desc = feed#!description in
   let url = get_edit_url feed in
   let tags_str = get_edit_tags tags in

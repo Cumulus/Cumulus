@@ -6,6 +6,10 @@ Build Requirements
  * OCaml-safepass >= 1.2
  * PG'OCaml >= 1.7
  * MaCaQue >= 0.6
+ * Macaque_lwt
+ * OCaml-markdown >= 0.1.1
+ * Camomile
+ * sqlite3-ocaml
 
 Run Requirements
 ================

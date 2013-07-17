@@ -1,7 +1,7 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 3135102608a00b288e1bfc0d5a71b809) *)
+(* DO NOT EDIT (digest: 17fcf0c8071fa32a6e0e517ad7ce819e) *)
 module OASISGettext = struct
-(* # 21 "/var/tmp/portage/dev-ml/oasis-0.3.0/work/oasis-0.3.0/src/oasis/OASISGettext.ml" *)
+(* # 21 "src/oasis/OASISGettext.ml" *)
 
   let ns_ str =
     str
@@ -24,7 +24,7 @@ module OASISGettext = struct
 end
 
 module OASISExpr = struct
-(* # 21 "/var/tmp/portage/dev-ml/oasis-0.3.0/work/oasis-0.3.0/src/oasis/OASISExpr.ml" *)
+(* # 21 "src/oasis/OASISExpr.ml" *)
 
 
 
@@ -116,7 +116,7 @@ end
 
 # 117 "myocamlbuild.ml"
 module BaseEnvLight = struct
-(* # 21 "/var/tmp/portage/dev-ml/oasis-0.3.0/work/oasis-0.3.0/src/base/BaseEnvLight.ml" *)
+(* # 21 "src/base/BaseEnvLight.ml" *)
 
   module MapString = Map.Make(String)
 
@@ -214,7 +214,7 @@ end
 
 # 215 "myocamlbuild.ml"
 module MyOCamlbuildFindlib = struct
-(* # 21 "/var/tmp/portage/dev-ml/oasis-0.3.0/work/oasis-0.3.0/src/plugins/ocamlbuild/MyOCamlbuildFindlib.ml" *)
+(* # 21 "src/plugins/ocamlbuild/MyOCamlbuildFindlib.ml" *)
 
   (** OCamlbuild extension, copied from 
     * http://brion.inria.fr/gallium/index.php/Using_ocamlfind_with_ocamlbuild
@@ -323,7 +323,7 @@ module MyOCamlbuildFindlib = struct
 end
 
 module MyOCamlbuildBase = struct
-(* # 21 "/var/tmp/portage/dev-ml/oasis-0.3.0/work/oasis-0.3.0/src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
+(* # 21 "src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
 
   (** Base functions for writing myocamlbuild.ml
       @author Sylvain Le Gall
@@ -339,7 +339,7 @@ module MyOCamlbuildBase = struct
   type name = string 
   type tag = string 
 
-(* # 56 "/var/tmp/portage/dev-ml/oasis-0.3.0/work/oasis-0.3.0/src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
+(* # 56 "src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
 
   type t =
       {
@@ -498,10 +498,14 @@ let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 # 499 "myocamlbuild.ml"
 (* OASIS_STOP *)
 
-module Ocamlbuild_eliom (Client : sig
+module type Exec = sig
   val name : string
   val dep : string
   val package : string
+end
+
+module Ocamlbuild_eliom (Client : sig
+  val exec : (module Exec) option
   val dispatch_default : Ocamlbuild_plugin.hook -> unit
 end) = struct
   open Ocamlbuild_plugin
@@ -575,11 +579,15 @@ end) = struct
       Pack.Slurp.fold f entries ()
     in
     let tag_byte_file () =
-      let file = Pathname.update_extension "ml" Client.dep in
-      tag_file
-        Client.dep
-        (Tags.elements (tags_of_pathname file));
-      tag_file Client.dep ["-thread"];
+      match Client.exec with
+        | None -> ()
+        | Some client ->
+            let module Client = (val client : Exec) in
+            let file = Pathname.update_extension "ml" Client.dep in
+            tag_file
+              Client.dep
+              (Tags.elements (tags_of_pathname file));
+            tag_file Client.dep ["-thread"]
     in
     let () =
       let use_type_file need =
@@ -592,18 +600,26 @@ end) = struct
       in
       List.iter (fun tags -> pflag tags "need_eliom_type" use_type_file) tags
     in
+    let () =
+      match Client.exec with
+        | None -> ()
+        | Some client ->
+            let module Client = (val client : Exec) in
+            dep ["file:" ^ Client.package] [Client.name];
+                rule "js_of_ocaml: .byte -> .js" ~dep:Client.dep ~prod:Client.name
+                  (fun env _ ->
+                    let eliom_client_js =
+                      Pathname.concat
+                        (Pack.Findlib.query "eliom.client").Pack.Findlib.location
+                        "eliom_client.js"
+                    in
+                    Cmd (S [A "js_of_ocaml"; A "-pretty"; A "-noinline"; P eliom_client_js;
+                            A Client.dep; A "-o"; A Client.name])
+                  );
+    in
     flag ["ocaml"; "infer_interface"; "thread"] (A "-thread");
-    dep ["file:" ^ Client.package] [Client.name];
-    rule "js_of_ocaml: .byte -> .js" ~dep:Client.dep ~prod:Client.name
-      (fun env _ ->
-        let eliom_client_js =
-          Pathname.concat
-            (Pack.Findlib.query "eliom.client").Pack.Findlib.location
-            "eliom_client.js"
-        in
-        Cmd (S [A "js_of_ocaml"; A "-pretty"; A "-noinline"; P eliom_client_js;
-                A Client.dep; A "-o"; A Client.name])
-      );
+    flag ["ocaml"; "compile"] (S [A "-thread"; A "-syntax"; A "camlp4o"]);
+    flag ["ocaml"; "ocamldep"] (S [A "-syntax"; A "camlp4o"]);
     dispatch
       (fun hook ->
         Client.dispatch_default hook;
@@ -646,9 +662,13 @@ end) = struct
 end;;
 
 module M = Ocamlbuild_eliom(struct
-  let name = "src/_client/cumulus.js"
-  let dep  = "src/_client/templates.byte"
-  let package = "cumulus_client.cma"
+  let exec =
+    let module Res = struct
+      let name = "src/_client/cumulus.js"
+      let dep  = "src/_client/templates.byte"
+      let package = "cumulus_client.cma"
+    end in
+    Some (module Res : Exec)
   let dispatch_default = dispatch_default
 end);;
 
