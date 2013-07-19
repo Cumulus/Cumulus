@@ -121,6 +121,20 @@ let to_atom () =
     )
   )
 
+let comments_to_atom () =
+  Db_feed.get_comments_feeds ~starting:0l ~number:Utils.offset ()
+  >>= feeds_of_db
+  >>= to_somthing Feed.to_atom
+  >>= (fun tmp ->
+    Lwt.return (
+      Atom_feed.feed
+        ~updated: (Calendar.make 2012 6 9 17 40 30)
+        ~id:"http://cumulus.org"
+        ~title: (Atom_feed.plain "Cumulus")
+        tmp
+    )
+  )
+
 let (event, call_event) =
   let (private_event, call_event) = React.E.create () in
   let event = Eliom_react.Down.of_react private_event in

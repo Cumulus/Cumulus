@@ -25,6 +25,12 @@ let atom =
     ~get_params: Eliom_parameter.unit
     ()
 
+let comments_atom =
+  Eliom_service.service
+    ~path: ["cumulus-comments.atom"]
+    ~get_params: Eliom_parameter.unit
+    ()
+
 let atom_feed =
   Eliom_service.service
     ~path: ["atom"]
