@@ -108,7 +108,8 @@ let add_user =
     ()
 
 let append_link_comment =
-  Eliom_service.post_coservice'
+  Eliom_service.post_coservice
+    ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
                                    (string "url") **
                                    (string "desc") **

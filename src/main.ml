@@ -70,7 +70,7 @@ let () =
     );
   Eliom_registration.Action.register
     ~service:Services.append_link_comment
-    (fun () data ->
+    (fun (_, _) data ->
       Feeds.append_link_comment data >>= (function
         | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
         | Feeds.Empty -> Lwt.return "L'un des champs est vide"

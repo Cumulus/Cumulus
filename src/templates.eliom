@@ -440,7 +440,7 @@ let private_comment id =
                 submit_input ~value:"Envoyer !" ()
               ]
             ])
-            ();
+            (Int32.to_int id, "");
           Html.post_form
             ~a:[Html.a_class ["box"]]
             ~service:Services.append_desc_comment
