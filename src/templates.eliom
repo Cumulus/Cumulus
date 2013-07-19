@@ -132,23 +132,54 @@ let user_information user =
 
 let user_info () =
   User.get_user_and_email () >>= (function
-    | Some user -> user_information user
-    | None -> user_form ()
-  )
+      | Some user -> user_information user
+      | None -> user_form ()
+    )
   >>= fun content ->
   Lwt.return
-    [ Html.header
-        ~a:[Html.a_class ["line mod"]]
-        ( [ Html.div
-              ~a:[Html.a_class ["mod left"]]
-              [ Html.a
-                  ~a:[Html.a_class ["title"]]
-                  ~service: Services.main
-                  [Html.pcdata "Cumulus Project"]
-                  None;
-              ];
-          ]
-          @ content
+    [ Html.section
+        ~a:[Html.a_class ["flex flex-h header"]]
+        ( [
+          Html.aside
+            ~a:[Html.a_class [""]]
+            [ Html.img
+                ~alt:("Cumulus Project")
+                ~src:(
+                  Html.make_uri
+                    ~service: (Eliom_service.static_dir ())
+                    ["logo.png"]
+                )
+                ();
+            ];
+          Html.aside
+            ~a:[Html.a_class ["w75 dash"]]
+             ([ Html.post_form
+                ~service:Services.append_feed
+                (fun (url_name, (title_name, tags_name)) -> [
+                     Html.string_input
+                       ~a:[Html.a_placeholder "URL"; Html.a_class["url"]]
+                       ~input_type:`Text
+                       ~name:url_name
+                       ();
+                     Html.string_input
+                       ~a:[Html.a_placeholder "Titre"]
+                       ~input_type:`Text
+                       ~name:title_name
+                       ();
+                     Html.string_input
+                       ~a:[Html.a_placeholder "Tags"]
+                       ~input_type:`Text
+                       ~name:tags_name
+                       ();
+                     Html.string_input
+                       ~a:[Html.a_class [""]]
+                       ~input_type:`Submit
+                       ~value: "ENVOYER !"
+                       ()
+                   ])
+                ()
+            ])
+        ];
         )
     ]
 
@@ -192,36 +223,6 @@ let main_style content footer =
          [ Html.div
              ~a: [Html.a_class ["container"]]
              (user
-              @ [ Html.div
-                    ~a:[Html.a_class ["dash"]]
-                    [ Html.post_form
-                        ~service:Services.append_feed
-                        (fun (url_name, (title_name, tags_name)) -> [
-                          Html.string_input
-                            ~a:[Html.a_placeholder "URL"]
-                            ~input_type:`Text
-                            ~name:url_name
-                            ();
-                          Html.string_input
-                            ~a:[Html.a_placeholder "Titre"]
-                            ~input_type:`Text
-                            ~name:title_name
-                            ();
-                          Html.string_input
-                            ~a:[Html.a_placeholder "Tags"]
-                            ~input_type:`Text
-                            ~name:tags_name
-                            ();
-                          Html.string_input
-                            ~a:[Html.a_class ["btn btn-primary"]]
-                            ~input_type:`Submit
-                            ~value: "Envoyer !"
-                            ()
-                         ])
-                        ()
-                    ];
-                  error_frame;
-                ]
               @ content
               @ [Html.div ~a: [Html.a_class ["navigation"]]footer]
               @ [ Html.footer
