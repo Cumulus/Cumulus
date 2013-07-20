@@ -243,8 +243,13 @@ let main_style content footer =
                                           )
                                       ]
                           [Html.pcdata "OCaml web framework Ocsigen"];
+                        Html.pcdata "    (";
                         Html.a ~service:Services.atom
-                          [Html.pcdata "    (Flux Atom du site)"] ();
+                          [Html.pcdata "Flux Atom du site"] ();
+                        Html.pcdata ", ";
+                        Html.a ~service:Services.comments_atom
+                          [Html.pcdata "Flux Atom des commentaires"] ();
+                        Html.pcdata ")";
                       ]
                     )
                 ]

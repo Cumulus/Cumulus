@@ -183,16 +183,6 @@ let to_html self =
 let to_atom self =
   Db_feed.get_root self.id () >>= fun root_feed ->
   Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
-  let markdown = Markdown.parse_text self.description in
-  let render_pre ~kind s = H.pre [H.pcdata s] in
-  let render_link {Markdown.href_target; href_desc} =
-    H.a ~a:[H.a_href (H.uri_of_string href_target)] [H.pcdata href_desc]
-  in
-  let render_img {Markdown.img_src; img_alt} =
-    H.img ~src:(H.uri_of_string img_src) ~alt:img_alt ()
-  in
-  let format_content = Html.div ~a:[Html.a_class ["lamalama"]] (conv (M.to_html ~render_pre ~render_link ~render_img markdown))
-  in
   let title, root_infos = match root_feed with
     | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'#!description) ^
                             "] " ^ Utils.troncate self.description,
@@ -214,7 +204,19 @@ let to_atom self =
           Atom_feed.links [Atom_feed.link url]
         | _ -> Atom_feed.links []);
        Atom_feed.summary (Atom_feed.html5 (
-           format_content
+           (match self.url with
+            | Some url -> Html.pcdata ""
+            | None ->
+              let markdown = Markdown.parse_text self.description in
+              let render_pre ~kind s = H.pre [H.pcdata s] in
+              let render_link {Markdown.href_target; href_desc} =
+                H.a ~a:[H.a_href (H.uri_of_string href_target)] [H.pcdata href_desc]
+              in
+              let render_img {Markdown.img_src; img_alt} =
+                H.img ~src:(H.uri_of_string img_src) ~alt:img_alt ()
+              in
+              Html.div ~a:[Html.a_class ["lamalama"]] (conv (M.to_html ~render_pre
+                                                               ~render_link ~render_img markdown)))
            :: (Html.br ())
            :: (Html.a
                  ~service:Services.view_feed
