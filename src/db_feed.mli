@@ -55,6 +55,7 @@ type feed_generator =
 
 val get_tree_feeds : int32 -> feed_generator
 val get_links_feeds : feed_generator
+val get_comments_feeds : feed_generator
 val get_root_feeds : feed_generator
 val get_feeds : feed_generator
 val get_feeds_with_author : string -> feed_generator

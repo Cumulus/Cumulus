@@ -89,4 +89,4 @@ let split =
 
 let troncate str =
   let str = strip str in
-  String.sub str 0 (min 20 (String.length str))
+  String.sub str 0 (min 40 (String.length str))

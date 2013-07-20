@@ -30,6 +30,9 @@ let () =
     ~service: Services.atom
     (fun () () -> Feeds.to_atom ());
   Eliom_atom.Reg.register
+    ~service: Services.comments_atom
+    (fun () () -> Feeds.comments_to_atom ());
+  Eliom_atom.Reg.register
     ~service: Services.atom_feed
     (fun (feed_id) () -> Feeds.tree_to_atom (Int32.of_int feed_id) ());
   Cumulus_appl.register
@@ -70,7 +73,7 @@ let () =
     );
   Eliom_registration.Action.register
     ~service:Services.append_link_comment
-    (fun () data ->
+    (fun (_, _) data ->
       Feeds.append_link_comment data >>= (function
         | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
@@ -82,7 +85,7 @@ let () =
     );
   Eliom_registration.Action.register
     ~service:Services.append_desc_comment
-    (fun () data ->
+    (fun (_, _) data ->
       Feeds.append_desc_comment data >>= (function
         | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
@@ -94,7 +97,7 @@ let () =
     );
   Eliom_registration.Action.register
     ~service:Services.edit_link_comment
-    (fun () data ->
+    (fun (_, _) data ->
       Feeds.edit_link_comment data >>= (function
         | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
@@ -106,7 +109,7 @@ let () =
     );
   Eliom_registration.Action.register
     ~service:Services.edit_desc_comment
-    (fun () data ->
+    (fun (_, _) data ->
       Feeds.edit_desc_comment data >>= (function
         | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
         | Feeds.Empty -> Lwt.return "L'un des champs est vide"

@@ -25,6 +25,12 @@ let atom =
     ~get_params: Eliom_parameter.unit
     ()
 
+let comments_atom =
+  Eliom_service.service
+    ~path: ["cumulus-comments.atom"]
+    ~get_params: Eliom_parameter.unit
+    ()
+
 let atom_feed =
   Eliom_service.service
     ~path: ["atom"]
@@ -108,7 +114,8 @@ let add_user =
     ()
 
 let append_link_comment =
-  Eliom_service.post_coservice'
+  Eliom_service.post_coservice
+    ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
                                    (string "url") **
                                    (string "desc") **
@@ -116,7 +123,8 @@ let append_link_comment =
     ()
 
 let append_desc_comment =
-  Eliom_service.post_coservice'
+  Eliom_service.post_coservice
+    ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
                                    (string "desc"))
     ()
@@ -172,7 +180,8 @@ let edit_feed =
     ()
 
 let edit_link_comment =
-  Eliom_service.post_coservice'
+  Eliom_service.post_coservice
+    ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
                                    (string "url") **
                                    (string "desc") **
@@ -180,7 +189,8 @@ let edit_link_comment =
     ()
 
 let edit_desc_comment =
-  Eliom_service.post_coservice'
+  Eliom_service.post_coservice
+    ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
                                    (string "desc"))
     ()

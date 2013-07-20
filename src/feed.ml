@@ -184,13 +184,14 @@ let to_atom self =
   Db_feed.get_root self.id () >>= fun root_feed ->
   Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   let title, root_infos = match root_feed with
-    | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'#!description) ^ "] " ^ self.description,
-			  [Html.pcdata "ce message est une réponse à : ";
-			   Html.a ~service:Services.view_feed
-			     [Html.pcdata root_feed'#!description]
-			     (Int32.to_int root_feed'#!id,
-			      Utils.troncate root_feed'#!description)])
-    | None -> (self.description, [])
+    | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'#!description) ^
+                            "] " ^ Utils.troncate self.description,
+                          [Html.pcdata "ce message est une réponse à : ";
+                           Html.a ~service:Services.view_feed
+                             [Html.pcdata root_feed'#!description]
+                             (Int32.to_int root_feed'#!id,
+                              Utils.troncate root_feed'#!description)])
+    | None -> (Utils.troncate self.description, [])
   in
   Lwt.return (
     Atom_feed.entry
@@ -199,25 +200,39 @@ let to_atom self =
       ~title: (Atom_feed.plain (title))
       [Atom_feed.authors [Atom_feed.author author#!name];
        (match self.url with
-       | Some url ->
-         Atom_feed.links [Atom_feed.link url]
-       | _ -> Atom_feed.links []);
+        | Some url ->
+          Atom_feed.links [Atom_feed.link url]
+        | _ -> Atom_feed.links []);
        Atom_feed.summary (Atom_feed.html5 (
-         (Html.a
-            ~service:Services.view_feed
-            [Html.pcdata "Suivre la discussion sur cumulus"]
-            (Int32.to_int self.id, Utils.troncate self.description)
+           (match self.url with
+            | Some url -> Html.pcdata ""
+            | None ->
+              let markdown = Markdown.parse_text self.description in
+              let render_pre ~kind s = H.pre [H.pcdata s] in
+              let render_link {Markdown.href_target; href_desc} =
+                H.a ~a:[H.a_href (H.uri_of_string href_target)] [H.pcdata href_desc]
+              in
+              let render_img {Markdown.img_src; img_alt} =
+                H.img ~src:(H.uri_of_string img_src) ~alt:img_alt ()
+              in
+              Html.div ~a:[Html.a_class ["lamalama"]] (conv (M.to_html ~render_pre
+                                                               ~render_link ~render_img markdown)))
+           :: (Html.br ())
+           :: (Html.a
+                 ~service:Services.view_feed
+                 [Html.pcdata "Suivre la discussion sur cumulus"]
+                 (Int32.to_int self.id, Utils.troncate self.description)
+              )
+           :: (Html.br ())
+           :: (Html.a ~service:Services.atom_feed [Html.pcdata "Flux atom du lien"]
+                 (Int32.to_int self.id))
+           :: (Html.br ())
+           :: (Html.pcdata "Tags : ")
+           :: (links_of_tags self.tags)
+           @ [(Html.br ())]
+           @ root_infos
          )
-         :: (Html.br ())
-         :: (Html.a ~service:Services.atom_feed [Html.pcdata "Flux atom du lien"]
-               (Int32.to_int self.id))
-         :: (Html.br ())
-         :: (Html.pcdata "Tags : ")
-         :: (links_of_tags self.tags)
-	 @ [(Html.br ())]
-	 @ root_infos
-       )
-       )
+         )
       ]
   )
 
