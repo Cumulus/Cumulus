@@ -154,6 +154,12 @@ let get_links_feeds ~starting ~number () =
   let votes_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~starting ~number ~feeds_filter ~tags_filter ~votes_filter
 
+let get_comments_feeds ~starting ~number () =
+  let feeds_filter f = (<:value< is_null f.url >>) in
+  let tags_filter _ _ = (<:value< true >>) in
+  let votes_filter _ _ = (<:value< true >>) in
+  get_feeds_aux ~starting ~number ~feeds_filter ~tags_filter ~votes_filter
+
 let get_root_feeds ~starting ~number () =
   let feeds_filter f = (<:value< is_null f.root || is_null f.parent >>) in
   let tags_filter _ _ = (<:value< true >>) in
