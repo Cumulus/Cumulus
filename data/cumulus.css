@@ -1,74 +1,237 @@
 .container {
-	background-color: #ebebeb;
-	padding-right: 0.25%x;
-	padding-left: 0.25%;
-	padding-top: 4px;
+    background-color: #ebebeb;
+    width: 100%;
+    height: 100%;
+    padding-left: 0.25%;
+    padding-top: 4px;
 }
 
 .header {
-  background: #00b1be;
-  color: #fff;
-  border-radius: 5px;
-  margin: auto;
-  padding-left: 45px;
-  padding-top: 15px;
-  padding-bottom: 15px;
-  width: 99.75%;
+    background: #00b1be;
+    color: #fff;
+    border-radius: 5px;
+    margin: auto;
+    padding-left: 45px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    width: 99.75%;
 }
 
 
 .dash {
-  padding-left: 45px;
-  height: 35px;
-  width: 100%;
-  line-height: 35px;
-  vertical-align: middle;
+    padding-left: 45px;
+    height: 35px;
+    width: 100%;
+    line-height: 35px;
+    color: #fff;
+    vertical-align: middle;
+
 }
 
 .flex .flex-h {
-  width: 99.75%
+    width: 99.75%
+    color: #fff;
 }
 
 .dash input[type="submit"] {
-  padding: 1px 1.2em;
-  height: 37px;
-  border-radius: 4px;
-  border: 1px solid #eee;
-  font-size: 12px;
-  margin-left: 5px;
-  background-color: #006e74;
-  border-color: #25868c;
-  color: #fff;
-  font-weight: 550;
-  width: 15%;
+    padding: 1px 1.2em;
+    height: 37px;
+    border-radius: 4px;
+    border: 1px solid #eee;
+    font-size: 12px;
+    margin-left: 5px;
+    background-color: #006e74;
+    border-color: #25868c;
+    color: #fff;
+    font-weight: 550;
+    width: 15%;
+}
+
+.dash input::-webkit-input-placeholder {
+  color: #eee;
+}
+
+.userbox input::-webkit-input-placeholder {
+  color: #eee;
+}
+
+.loggedbox input::-webkit-input-placeholder {
+  color: #eee;
 }
 
 body {
-  font-family : Verdana, "Bitstream Vera Sans", "DejaVu Sans", Tahoma, Geneva, Arial, Sans-serif;
-
+    font-family : Verdana, "Bitstream Vera Sans", "DejaVu Sans", Tahoma, Geneva, Arial, Sans-serif;
+    background-color: #ebebeb;
 }
 
-.dash textarea, input[type="text"] {
-  padding: 1px 1.2em;
-  height: 37px;
-  border-radius: 4px;
-  width: 20%;
-  border: 1px solid #eee;
-  font-size: 12px;
-  margin-left: 10px;
-  background-color: #7fccd5;
-  border-color: #5dbec4;
-  color: #fff;
-  font-weight: bold;
-  font-style: italic;
+
+.dash textarea, .dash input[type="text"] {
+    padding: 1px 1.2em;
+    height: 37px;
+    border-radius: 4px;
+    width: 20%;
+    border: 1px solid #eee;
+    font-size: 12px;
+    margin-left: 10px;
+    background-color: #7fccd5;
+    border-color: #5dbec4;
+    color: #fff;
+    font-weight: bold;
+    font-style: italic;
 }
 
 .dash .url {
-  width: 30%;
+    width: 30%;
+    color: #fff;
 }
 
 button, input, select {
-      font-size: 100%;
-          margin: 0;
-              vertical-align: baseline;
-            }
+    font-size: 100%;
+    margin: 0;
+    font-color: #fff;
+    vertical-align: baseline;
+}
+
+.userbox {
+    border-bottom-right-radius: 15px;
+    margin-right: 0.25%;
+    background:#444;
+    height: 150px;
+    width: 200px;
+}
+
+.userbox textarea, .userbox input[type="text"], .userbox input[type="password"] {
+    height: 37px;
+    border-radius: 4px;
+    width: 100%;
+    margin-left: 20px;
+    font-size: 1em;
+    margin: 5px 0px;
+    padding: 10px;
+    background-color: #777;
+    border-color: #777;
+    color: #fff;
+    border-radius: 4px;
+    border: none;
+}
+
+.userbox a, .userbox input[type="submit"]
+{
+  height: 37px;
+  font-size: 1em;
+  width: 50%;
+  font-style: none;
+  text-decoration: none;
+}
+
+.userbox input[type="submit"]:hover {
+  background-color: #444;
+  font-size: 1em;
+  border: 0px solid #eee;
+  color: #ccc;
+  border-right: 1px solid #666;
+}
+
+.userbox input[type="submit"] {
+  background-color: #444;
+  font-size: 1em;
+  color: #ccc;
+  border: 0px solid #eee;
+  border-right: 1px solid #666;
+}
+
+.userbox a {
+  border: 1px;
+  font-size: 0.9em;
+  padding-left: 15px;
+}
+
+.userbox a:visited {
+  text-decoration: none;
+  color: #ccc;
+}
+
+.userbox a:link {
+  text-decoration: none;
+  color: #ccc;
+}
+
+.loginlinks {
+  position: center;
+}
+
+.logged a {
+  width: 100%;
+}
+
+.userboxcontent {
+  padding: 10px;
+}
+
+.loggedbox {
+    margin-right: 0.25%;
+    padding-left: 15px;
+    padding-right: 5px;
+    border-bottom-right-radius: 30px;
+    background:#444;
+    height: 150px;
+    width: 200px;
+}
+
+.loggedbox a {
+  border: 1px;
+  width: 100%;
+  margin-bottom: 30px;
+  font-size: 0.9em;
+}
+
+.loggedbox a:visited {
+  text-decoration: none;
+  color: #ccc;
+}
+
+.loggedbox a:link {
+  text-decoration: none;
+  color: #ccc;
+}
+
+.loggedavatar
+{
+  display: block;
+  width: 50px;
+  height: 50px;
+  margin: 1em auto;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  -webkit-border-radius: 99em;
+  -moz-border-radius: 99em;
+  border-radius: 99em;
+}
+
+
+.loggedbox input[type="submit"]:hover {
+  background-color: #444;
+  color: #ccc;
+  text-align: left;
+  font-size: 1em;
+  width: 100%;
+  border: 0px solid #aaa;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #aaa;
+  margin-bottom: 5px;
+  padding-left: 0px;
+}
+
+.loggedbox input[type="submit"] {
+  background-color: #444;
+  width: 100%;
+  text-align: left;
+  color: #ccc;
+  margin-bottom: 5px;
+  font-size: 1em;
+  border: 0px solid #888;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #aaa;
+  padding-left: 0px;
+}
