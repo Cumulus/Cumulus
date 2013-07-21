@@ -235,3 +235,9 @@ button, input, select {
   border-bottom: 1px solid #aaa;
   padding-left: 0px;
 }
+
+.bottom-box {
+    position: fixed;
+    bottom: 2em;
+    right: 2em;
+}

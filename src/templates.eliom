@@ -67,8 +67,8 @@ let submit_input ?(a=[]) =
 
 let user_form () =
   Lwt.return
-    [ Html.div
-        ~a: [Html.a_class ["userbox"; "right"]][
+    (Html.div
+        ~a: [Html.a_class ["userbox"; "right"; "bottom-box"]][
         Html.post_form
           ~a: [Html.a_class ["userboxcontent"]]
           ~service: Services.auth
@@ -94,12 +94,12 @@ let user_form () =
           )
           ()
       ]
-    ]
+    )
 
 let user_logged user =
   Lwt.return
-    [ Html.div
-        ~a:[Html.a_class ["loggedbox"; "right"]]
+    (Html.div
+        ~a:[Html.a_class ["loggedbox"; "right"; "bottom-box"]]
         [ Html.post_form
             ~a:[Html.a_class ["userboxcontent"]]
             ~service:Services.disconnect
@@ -136,7 +136,7 @@ let user_logged user =
             )
             ()
         ]
-    ]
+    )
 
 let userbox () =
   User.get_user_and_email () >>= (function
@@ -239,9 +239,9 @@ let main_style content footer =
               ~a: [Html.a_class ["container"]]
               (header
                @ content
-               @ userbox
-               @ [Html.div ~a: [Html.a_class ["navigation"]]footer]
-               @ [ Html.footer
+               @ [ userbox;
+                   Html.div ~a: [Html.a_class ["navigation"]]footer;
+                   Html.footer
                      ( [ Html.br ();
                          Html.br ();
                          Html.pcdata "(not so) Proudly propulsed by the inglorious ";
