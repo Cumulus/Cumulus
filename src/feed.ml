@@ -20,6 +20,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
 module Calendar = CalendarLib.Calendar
+module Uri = Eliom_uri
 
 type feed = {
   id : int32;
@@ -203,13 +204,19 @@ let to_atom self =
       ~id:(Int32.to_string self.id)
       ~title: (Atom_feed.plain (title))
       [Atom_feed.authors [Atom_feed.author author#!name];
-       (match self.url with
-        | Some url ->
-          Atom_feed.links [Atom_feed.link url]
-        | _ -> Atom_feed.links []);
+       Atom_feed.links [Atom_feed.link (Uri.make_string_uri ~absolute:true
+                                          ~service:Services.view_feed
+                                          (Int32.to_int self.id,
+                                           Utils.troncate self.description))];
        Atom_feed.summary (Atom_feed.html5 (
            (match self.url with
-            | Some url -> Html.pcdata ""
+            | Some url -> Html.Raw.a ~a:
+                            [Html.a_href
+                               (Html.uri_of_string
+                                  (fun () -> url)
+                               )
+                            ]
+                            [Html.pcdata self.description]
             | None ->
               let markdown = Markdown.parse_text self.description in
               let render_pre ~kind s = H.pre [H.pcdata s] in
@@ -220,13 +227,8 @@ let to_atom self =
                 H.img ~src:(H.uri_of_string img_src) ~alt:img_alt ()
               in
               Html.div ~a:[Html.a_class ["lamalama"]] (conv (M.to_html ~render_pre
-                                                               ~render_link ~render_img markdown)))
-           :: (Html.br ())
-           :: (Html.a
-                 ~service:Services.view_feed
-                 [Html.pcdata "Suivre la discussion sur cumulus"]
-                 (Int32.to_int self.id, Utils.troncate self.description)
-              )
+                                                               ~render_link ~render_img markdown))
+           )
            :: (Html.br ())
            :: (Html.a ~service:Services.atom_feed [Html.pcdata "Flux atom du lien"]
                  (Int32.to_int self.id))
