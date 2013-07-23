@@ -14,6 +14,7 @@
     padding-left: 45px;
     padding-top: 15px;
     padding-bottom: 15px;
+    margin-bottom: 15px;
     width: 99.75%;
 }
 
@@ -240,4 +241,38 @@ button, input, select {
     position: fixed;
     bottom: 2em;
     right: 2em;
+  }
+.post {
+  margin: 5px;
+  width: 65%;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+.postimg {
+  display: block;
+  width: 55px;
+  height: 55px;
+  margin: 1em auto;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  -webkit-border-radius: 99em;
+  -moz-border-radius: 99em;
+  border-radius: 99em;
+}
+
+
+.post_avatar { position: relative; background: #fff; border: 2px solid #ccc; }
+
+.post_avatar:after, .post_avatar:before { left: 100%; border: solid transparent; content: " "; height: 0; width: 0; position: absolute; pointer-events: none; }
+
+.post_avatar:after { border-color: rgba(255, 255, 255, 0); border-left-color: #fff; border-width: 5px; top: 50%; margin-top: -5px; }
+
+.post_avatar:before {
+  border-color: rgba(204, 204, 204, 0);
+  border-left-color: #ccc;
+  border-width: 8px;
+  top: 50%;
+  margin-top: -8px;
 }

@@ -110,11 +110,11 @@ let to_html self =
   Lwt.return (
     List.flatten [
       [Html.img
-          ~a: [Html.a_class ["left"]]
+          ~a: [Html.a_class ["postimg";"left"]]
           ~alt: (author#!name)
           ~src: (
             Html.make_uri
-              ~service: (Utils.get_gravatar (author#!email)) (40, "identicon")
+              ~service: (Utils.get_gravatar (author#!email)) (65, "identicon")
           )
           ();
        (if not state then
