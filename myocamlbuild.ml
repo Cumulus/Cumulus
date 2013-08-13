@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 17fcf0c8071fa32a6e0e517ad7ce819e) *)
+(* DO NOT EDIT (digest: 48ec7ccd101b4e101fb50bc41b2d9d53) *)
 module OASISGettext = struct
 (* # 21 "src/oasis/OASISGettext.ml" *)
 
@@ -30,9 +30,9 @@ module OASISExpr = struct
 
   open OASISGettext
 
-  type test = string 
+  type test = string
 
-  type flag = string 
+  type flag = string
 
   type t =
     | EBool of bool
@@ -41,9 +41,9 @@ module OASISExpr = struct
     | EOr of t * t
     | EFlag of flag
     | ETest of test * string
-    
 
-  type 'a choices = (t * 'a) list 
+
+  type 'a choices = (t * 'a) list
 
   let eval var_get t =
     let rec eval' =
@@ -334,10 +334,10 @@ module MyOCamlbuildBase = struct
   open Ocamlbuild_plugin
   module OC = Ocamlbuild_pack.Ocaml_compiler
 
-  type dir = string 
-  type file = string 
-  type name = string 
-  type tag = string 
+  type dir = string
+  type file = string
+  type name = string
+  type tag = string
 
 (* # 56 "src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
 
@@ -350,7 +350,7 @@ module MyOCamlbuildBase = struct
          * directory.
          *)
         includes:  (dir * dir list) list; 
-      } 
+      }
 
   let env_filename =
     Pathname.basename 
@@ -507,76 +507,78 @@ end
 module Ocamlbuild_eliom (Client : sig
   val exec : (module Exec) option
   val dispatch_default : Ocamlbuild_plugin.hook -> unit
+  val server_dir : string
+  val type_dir : string
+  val client_dir : string
 end) = struct
   open Ocamlbuild_plugin
   module Pack = Ocamlbuild_pack
 
   let init () =
     let copy_with_header src prod =
-      let dir = Filename.dirname prod in
-      let mkdir = Cmd (Sh ("mkdir -p " ^ dir)) in
       let contents = Pathname.read src in
       let header = "# 1 \"" ^ src ^ "\"\n" in
-      Seq [mkdir; Echo ([header; contents], prod)]
+      Pack.Shell.mkdir_p (Filename.dirname prod);
+      Echo ([header; contents], prod)
     in
-    let copy_rule_with_header name ?(deps=[]) src prod =
+    let copy_rule_with_header f name ?(deps=[]) src prod =
       rule name ~deps:(src :: deps) ~prod
         (fun env _ ->
           let prod = env prod in
           let src = env src in
+          f env (Pathname.dirname prod) (Pathname.basename prod) prod;
           copy_with_header src prod
         )
     in
-    let tag_eliom_files () =
-      let entries = Pack.Slurp.slurp "." in
-      let entries =
-        Pack.Slurp.filter
-          (fun path _ _ ->
-            not (Pathname.is_prefix "_build" path)
-            && not (Pathname.is_prefix "_darcs" path)
-          )
-          entries
+    let flag_infer file type_inferred =
+      let tags =
+        [["ocaml"; "ocamldep"; "file:" ^ file];
+         ["ocaml"; "compile"; "file:" ^ file];
+         ["ocaml"; "infer_interface"; "file:" ^ file];
+        ]
       in
-      let f path name () () =
-        let tag_file ml_name =
-          let client_dir = Pathname.concat path "_client" in
-          let server_dir = Pathname.concat path "_server" in
-          let type_dir = Pathname.concat path "_type" in
-          let client_file = Pathname.concat client_dir ml_name in
-          let server_file = Pathname.concat server_dir ml_name in
-          let type_file = Pathname.concat type_dir ml_name in
-          let type_inferred =
-            Pathname.concat type_dir
-              (Pathname.update_extension "inferred.mli" name)
-          in
-          tag_file client_file
-            [ "pkg_eliom.client"; "pkg_eliom.syntax.client"; "thread";
-              Printf.sprintf "need_eliom_type(%s)" type_inferred;
-              "syntax_camlp4o";
-            ];
-          tag_file server_file
+      List.iter (fun tags -> flag tags (S [A "-ppopt"; A "-type"; A "-ppopt"; P type_inferred])) tags;
+      flag ["ocaml"; "doc"; "file:" ^ file] (S [A "-ppopt"; A "-notype"]);
+    in
+    let copy_rule_server =
+      copy_rule_with_header
+        (fun env dir name file ->
+          let path = env "%(path)" in
+          let type_inferred = Pathname.concat (Pathname.concat path Client.type_dir) (Pathname.update_extension "inferred.mli" name) in
+          tag_file file
             [ "pkg_eliom.server"; "pkg_eliom.syntax.server"; "thread";
-              Printf.sprintf "need_eliom_type(%s)" type_inferred;
               "syntax_camlp4o";
             ];
-          tag_file type_file
-            ( "pkg_eliom.syntax.type"
+          flag_infer file type_inferred;
+          Pathname.define_context dir [path];
+          Pathname.define_context path [dir];
+        )
+    in
+    let copy_rule_client =
+      copy_rule_with_header
+        (fun env dir name file ->
+          let path = env "%(path)" in
+          let type_inferred = Pathname.concat (Pathname.concat path Client.type_dir) (Pathname.update_extension "inferred.mli" name) in
+          tag_file file
+            [ "pkg_eliom.client"; "pkg_eliom.syntax.client"; "thread";
+              "syntax_camlp4o";
+            ];
+          flag_infer file type_inferred;
+          Pathname.define_context dir [path];
+        )
+    in
+    let copy_rule_type =
+      copy_rule_with_header
+        (fun env dir name file ->
+          let path = env "%(path)" in
+          let server_dir = Pathname.concat path Client.server_dir in
+          let server_file = Pathname.concat server_dir name in
+          tag_file file
+            ( "pkg_eliom.syntax.type" :: "thread" :: "syntax_camlp4o"
               :: Tags.elements (tags_of_pathname server_file)
             );
-          tag_file type_file ["-pkg_eliom.syntax.server"];
-          Pathname.define_context type_dir [path];
-          Pathname.define_context server_dir [path];
-          Pathname.define_context client_dir [path];
-          Pathname.define_context path [server_dir];
-        in
-        if Pathname.get_extension name = "eliom" then
-          let ml_name = (Pathname.update_extension "ml" name) in
-          tag_file ml_name
-        else if Pathname.get_extension name = "eliomi" then
-          let ml_name = (Pathname.update_extension "mli" name) in
-          tag_file ml_name
-      in
-      Pack.Slurp.fold f entries ()
+          Pathname.define_context dir [path; server_dir];
+        )
     in
     let tag_byte_file () =
       match Client.exec with
@@ -588,17 +590,6 @@ end) = struct
               Client.dep
               (Tags.elements (tags_of_pathname file));
             tag_file Client.dep ["-thread"]
-    in
-    let () =
-      let use_type_file need =
-        S [A "-ppopt"; A "-type"; A "-ppopt"; P need] in
-      let tags =
-        [["ocaml"; "ocamldep"];
-         ["ocaml"; "compile"];
-         ["ocaml"; "infer_interface"];
-        ]
-      in
-      List.iter (fun tags -> pflag tags "need_eliom_type" use_type_file) tags
     in
     let () =
       match Client.exec with
@@ -620,42 +611,42 @@ end) = struct
     flag ["ocaml"; "infer_interface"; "thread"] (A "-thread");
     flag ["ocaml"; "compile"] (S [A "-thread"; A "-syntax"; A "camlp4o"]);
     flag ["ocaml"; "ocamldep"] (S [A "-syntax"; A "camlp4o"]);
+    flag ["ocaml"; "doc"; "pkg_threads"] & A "-thread";
     dispatch
       (fun hook ->
         Client.dispatch_default hook;
         (match hook with
           | After_rules ->
-              tag_eliom_files ();
               tag_byte_file ();
-              copy_rule_with_header "*.eliom -> **/_server/*.ml"
-                ~deps:["%(path)/_type/%(file).inferred.mli"]
-                "%(path)/%(file).eliom" "%(path)/_server/%(file:<*>).ml";
-              copy_rule_with_header "*.eliomi -> **/_server/*.mli"
-                "%(path)/%(file).eliomi" "%(path)/_server/%(file:<*>).mli";
-              copy_rule_with_header "*.eliom -> **/_type/*.ml"
-                "%(path)/%(file).eliom" "%(path)/_type/%(file:<*>).ml";
-              copy_rule_with_header "*.eliomi -> **/_type/*.mli"
-                "%(path)/%(file).eliomi" "%(path)/_type/%(file:<*>).mli";
-              copy_rule_with_header "*.eliom -> **/_client/*.ml"
-                ~deps:["%(path)/_type/%(file).inferred.mli"]
-                "%(path)/%(file).eliom" "%(path)/_client/%(file:<*>).ml";
-              copy_rule_with_header "*.eliomi -> **/_client/*.mli"
-                "%(path)/%(file).eliomi" "%(path)/_client/%(file:<*>).mli";
+              copy_rule_server "*.eliom -> **/_server/*.ml"
+                ~deps:["%(path)/" ^ Client.type_dir ^ "/%(file).inferred.mli"]
+                "%(path)/%(file).eliom" ("%(path)/" ^ Client.server_dir ^ "/%(file:<*>).ml");
+              copy_rule_server "*.eliomi -> **/_server/*.mli"
+                "%(path)/%(file).eliomi" ("%(path)/" ^ Client.server_dir ^ "/%(file:<*>).mli");
+              copy_rule_type "*.eliom -> **/_type/*.ml"
+                "%(path)/%(file).eliom" ("%(path)/" ^ Client.type_dir ^ "/%(file:<*>).ml");
+              copy_rule_type "*.eliomi -> **/_type/*.mli"
+                "%(path)/%(file).eliomi" ("%(path)/" ^ Client.type_dir ^ "/%(file:<*>).mli");
+              copy_rule_client "*.eliom -> **/_client/*.ml"
+                ~deps:["%(path)/" ^ Client.type_dir ^ "/%(file).inferred.mli"]
+                "%(path)/%(file).eliom" ("%(path)/" ^ Client.client_dir ^ "/%(file:<*>).ml");
+              copy_rule_client "*.eliomi -> **/_client/*.mli"
+                "%(path)/%(file).eliomi" ("%(path)/" ^ Client.client_dir ^ "/%(file:<*>).mli");
 
-              copy_rule_with_header "*.eliom -> _server/*.ml"
-                ~deps:["_type/%(file).inferred.mli"]
-                "%(file).eliom" "_server/%(file:<*>).ml";
-              copy_rule_with_header "*.eliomi -> _server/*.mli"
-                "%(file).eliomi" "_server/%(file:<*>).mli";
-              copy_rule_with_header "*.eliom -> _type/*.ml"
-                "%(file).eliom" "_type/%(file:<*>).ml";
-              copy_rule_with_header "*.eliomi -> _type/*.mli"
-                "%(file).eliomi" "_type/%(file:<*>).mli";
-              copy_rule_with_header "*.eliom -> _client/*.ml"
-                ~deps:["_type/%(file).inferred.mli"]
-                "%(file).eliom" "_client/%(file:<*>).ml";
-              copy_rule_with_header "*.eliomi -> _client/*.mli"
-                "%(file).eliomi" "_client/%(file:<*>).mli";
+              copy_rule_server "*.eliom -> _server/*.ml"
+                ~deps:[Client.type_dir ^ "/%(file).inferred.mli"]
+                "%(file).eliom" (Client.server_dir ^ "/%(file:<*>).ml");
+              copy_rule_server "*.eliomi -> _server/*.mli"
+                "%(file).eliomi" (Client.server_dir ^ "/%(file:<*>).mli");
+              copy_rule_type "*.eliom -> _type/*.ml"
+                "%(file).eliom" (Client.type_dir ^ "/%(file:<*>).ml");
+              copy_rule_type "*.eliomi -> _type/*.mli"
+                "%(file).eliomi" (Client.type_dir ^ "/%(file:<*>).mli");
+              copy_rule_client "*.eliom -> _client/*.ml"
+                ~deps:[Client.type_dir ^ "/%(file).inferred.mli"]
+                "%(file).eliom" (Client.client_dir ^ "/%(file:<*>).ml");
+              copy_rule_client "*.eliomi -> _client/*.mli"
+                "%(file).eliomi" (Client.client_dir ^ "/%(file:<*>).mli");
           | _ -> ()
         );
       );
@@ -670,6 +661,9 @@ module M = Ocamlbuild_eliom(struct
     end in
     Some (module Res : Exec)
   let dispatch_default = dispatch_default
+  let client_dir = "_client"
+  let server_dir = "_server"
+  let type_dir = "_type"
 end);;
 
 M.init ();;
