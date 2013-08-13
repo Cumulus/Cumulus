@@ -5767,4 +5767,21 @@ let setup () = BaseSetup.setup setup_t;;
 
 # 5769 "setup.ml"
 (* OASIS_STOP *)
+
+let () =
+  let open OASISContext in
+  let check_msg = function
+    | "Cannot find source file matching module 'src/_client/Templates' in library cumulus_client"
+    | "Cannot find source file matching module '_server/Templates' in library cumulus" ->
+        true
+    | _ -> false
+  in
+  let def = !default in
+  let printf level s = match level with
+    | `Warning when check_msg s -> ()
+    | level -> def.printf level s
+  in
+  default := {def with printf}
+;;
+
 let () = setup ();;
