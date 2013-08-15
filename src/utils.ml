@@ -87,6 +87,9 @@ let split =
     Str.split regexp str
   )
 
-let troncate str =
+let troncate' len str =
   let str = strip str in
-  String.sub str 0 (min 40 (String.length str))
+  String.sub str 0 (min len (String.length str))
+
+let troncate str =
+  troncate' 40 str
