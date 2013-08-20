@@ -185,7 +185,11 @@ let to_atom self =
   Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   let title, root_infos = match root_feed with
     | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'#!description) ^
-                            "] " ^ Utils.troncate' 200 self.description,
+                            "] " ^ (
+                            match self.url with
+                            | Some url -> self.description
+                            | None -> Utils.troncate self.description
+                          ),
                           [Html.pcdata "ce message est une réponse à : ";
                            Html.a ~service:Services.view_feed
                              [Html.pcdata root_feed'#!description]
