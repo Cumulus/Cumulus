@@ -46,7 +46,7 @@ let main =
 let view_feed' =
   Eliom_service.service
     ~path:["view"]
-    ~get_params: Eliom_parameter.(suffix_prod (int "id" ** string "name") (opt Eliom_parameter.any))
+    ~get_params: Eliom_parameter.(suffix_prod (int "id" ** string "name") (opt any))
     ()
 
 let view_feed =
