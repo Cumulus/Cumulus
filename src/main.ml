@@ -140,9 +140,14 @@ let () =
       >>= Errors.set_error
     );
   Cumulus_appl.register
+    ~service: Services.view_feed'
+    (fun ((id, _), _) () ->
+       Templates.view_feed id
+    );
+  Cumulus_appl.register
     ~service: Services.view_feed
     (fun (id, _) () ->
-      Templates.view_feed id
+       Templates.view_feed id
     );
   Eliom_registration.Action.register
     ~service:Services.add_user
