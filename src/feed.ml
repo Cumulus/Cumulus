@@ -116,7 +116,7 @@ let to_html self =
             Html.make_uri
               ~service: (Utils.get_gravatar (author#!email)) (65, "identicon")
           )
-          ();
+          ()];
        (if not state then
           (Html.pcdata "")
         else
