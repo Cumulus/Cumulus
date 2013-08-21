@@ -206,8 +206,8 @@ let to_atom self =
       [Atom_feed.authors [Atom_feed.author author#!name];
        Atom_feed.links [Atom_feed.link (Uri.make_string_uri ~absolute:true
                                           ~service:Services.view_feed
-                                          (Int32.to_int self.id,
-                                           Utils.troncate self.description))];
+                                          (Int32.to_int self.id, "")
+                                          )];
        Atom_feed.summary (Atom_feed.html5 (
            (match self.url with
             | Some url -> Html.Raw.a ~a:
