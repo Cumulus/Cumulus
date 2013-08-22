@@ -33,8 +33,14 @@ let comments_atom =
 
 let atom_feed =
   Eliom_service.service
-    ~path: ["atom"]
+    ~path: ["atom"; "feed"]
     ~get_params: Eliom_parameter.(suffix (int "feed_id"))
+    ()
+
+let atom_tag =
+  Eliom_service.service
+    ~path: ["atom"; "tag"]
+    ~get_params: Eliom_parameter.(suffix (string "tag"))
     ()
 
 let main =
@@ -58,8 +64,8 @@ let view_feed =
 let append_feed =
   Eliom_service.post_coservice'
     ~post_params: Eliom_parameter.((string "url") **
-                                      (string "desc") **
-                                      (string "tags"))
+                                     (string "desc") **
+                                     (string "tags"))
     ()
 
 let author_feed =
@@ -114,25 +120,25 @@ let auth =
 let add_user =
   Eliom_service.post_coservice'
     ~post_params: Eliom_parameter.((string "username") **
-                                      (string "password") **
-                                      (string "password_check") **
-                                      (string "email"))
+                                     (string "password") **
+                                     (string "password_check") **
+                                     (string "email"))
     ()
 
 let append_link_comment =
   Eliom_service.post_coservice
     ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
-                                   (string "url") **
-                                   (string "desc") **
-                                   (string "tags"))
+                                     (string "url") **
+                                     (string "desc") **
+                                     (string "tags"))
     ()
 
 let append_desc_comment =
   Eliom_service.post_coservice
     ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
-                                   (string "desc"))
+                                     (string "desc"))
     ()
 
 let update_user_mail =
@@ -143,7 +149,7 @@ let update_user_mail =
 let update_user_password =
   Eliom_service.post_coservice'
     ~post_params: Eliom_parameter.((string "password") **
-                                      (string "password_check"))
+                                     (string "password_check"))
     ()
 
 let update_user_feeds_per_page =
@@ -166,7 +172,7 @@ let preferences =
   Eliom_service.service
     ~path: ["preferences"]
     ~get_params: Eliom_parameter.unit
-   ()
+    ()
 
 let comment =
   Eliom_service.service
@@ -189,14 +195,14 @@ let edit_link_comment =
   Eliom_service.post_coservice
     ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
-                                   (string "url") **
-                                   (string "desc") **
-                                   (string "tags"))
+                                     (string "url") **
+                                     (string "desc") **
+                                     (string "tags"))
     ()
 
 let edit_desc_comment =
   Eliom_service.post_coservice
     ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
-                                   (string "desc"))
+                                     (string "desc"))
     ()
