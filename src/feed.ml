@@ -110,15 +110,17 @@ let to_html self =
   >>= fun user_score ->
   Lwt.return (
     List.flatten [
-      [Html.div (
-        [Html.img
-           ~a: [Html.a_class ["postimg";"left"]]
-           ~alt: (author#!name)
-           ~src: (
-             Html.make_uri
-               ~service: (Utils.get_gravatar (author#!email)) (65, "identicon")
-           )
-           ()]);
+      [Html.div ~a: [Html.a_class["mod";"left"]]
+         [Html.div ~a: [Html.a_class["post_avatar"]]
+            [Html.img
+               ~a: [Html.a_class ["postimg"]]
+               ~alt: (author#!name)
+               ~src: (
+                 Html.make_uri
+                   ~service: (Utils.get_gravatar (author#!email)) (65, "identicon")
+               )
+               ()]]];
+      [Html.div ~a: [Html.a_class["mod"]][
       (if not state then
          (Html.pcdata "")
        else
@@ -148,7 +150,7 @@ let to_html self =
         ~service:Services.author_feed
         [Html.pcdata author#!name]
         (None, author#!name);
-      ];
+      ]];
       [Html.br ();
        (* TODO : afficher "n commentaire(s)" *)
        Html.a

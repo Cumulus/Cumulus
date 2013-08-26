@@ -237,14 +237,17 @@ button, input, select {
   padding-left: 0px;
 }
 
-.bottom-box {
+.bottom-box
+{
     position: fixed;
     bottom: 2em;
     right: 2em;
-  }
+}
+
 .post {
   margin: 5px;
   width: 65%;
+  height: 100px;
   border-radius: 5px;
   background-color: #fff;
 }
@@ -253,7 +256,6 @@ button, input, select {
   display: block;
   width: 55px;
   height: 55px;
-  margin: 1em auto;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;
@@ -262,17 +264,38 @@ button, input, select {
   border-radius: 99em;
 }
 
+.post_avatar {
+  padding: 22.5px;
+  height: 100px;
+  width: 100px;
+  margin-right: 35px;
+  position: relative;
+  background: #fff;
+  border-right: 2px solid #eee;
+}
 
-.post_avatar { position: relative; background: #fff; border: 2px solid #ccc; }
+.post_avatar:after, .post_avatar:before {
+  left: 100%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
 
-.post_avatar:after, .post_avatar:before { left: 100%; border: solid transparent; content: " "; height: 0; width: 0; position: absolute; pointer-events: none; }
-
-.post_avatar:after { border-color: rgba(255, 255, 255, 0); border-left-color: #fff; border-width: 5px; top: 50%; margin-top: -5px; }
+.post_avatar:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-left-color: #ffffff;
+  border-width: 13px;
+  top: 50%;
+  margin-top: -13px;
+}
 
 .post_avatar:before {
-  border-color: rgba(204, 204, 204, 0);
-  border-left-color: #ccc;
-  border-width: 8px;
+  border-color: rgba(238, 238, 238, 0);
+  border-left-color: #eee;
+  border-width: 16px;
   top: 50%;
-  margin-top: -8px;
+  margin-top: -16px;
 }
