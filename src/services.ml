@@ -25,6 +25,18 @@ let atom =
     ~get_params: Eliom_parameter.unit
     ()
 
+let comments_atom =
+  Eliom_service.service
+    ~path: ["cumulus-comments.atom"]
+    ~get_params: Eliom_parameter.unit
+    ()
+
+let atom_feed =
+  Eliom_service.service
+    ~path: ["atom"]
+    ~get_params: Eliom_parameter.(suffix (int "feed_id"))
+    ()
+
 let main =
   Eliom_service.Appl.service
     ~path: [""]
@@ -50,6 +62,38 @@ let author_feed =
     ~get_params: Eliom_parameter.(opt (int "page") ** string "username")
     ()
 
+let fav_feed =
+  Eliom_service.service
+    ~path:["fav"]
+    (* ~get_params: Eliom_parameter.(suffix (string "username") ** int "page") *)
+    ~get_params: Eliom_parameter.(suffix_prod (string "name") (opt (int "page")))
+    ()
+
+let add_fav_feed =
+  Eliom_service.coservice'
+    ~get_params: (Eliom_parameter.int32 "feed_id")
+    ()
+
+let del_fav_feed =
+  Eliom_service.coservice'
+    ~get_params: (Eliom_parameter.int32 "feed_id")
+    ()
+
+let upvote_feed =
+  Eliom_service.coservice'
+    ~get_params: (Eliom_parameter.int32 "feed_id")
+    ()
+
+let downvote_feed =
+  Eliom_service.coservice'
+    ~get_params: (Eliom_parameter.int32 "feed_id")
+    ()
+
+let cancelvote_feed =
+  Eliom_service.coservice'
+    ~get_params: (Eliom_parameter.int32 "feed_id")
+    ()
+
 let tag_feed =
   Eliom_service.Appl.service
     ~path: [""]
@@ -70,7 +114,8 @@ let add_user =
     ()
 
 let append_link_comment =
-  Eliom_service.post_coservice'
+  Eliom_service.post_coservice
+    ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
                                    (string "url") **
                                    (string "desc") **
@@ -78,7 +123,8 @@ let append_link_comment =
     ()
 
 let append_desc_comment =
-  Eliom_service.post_coservice'
+  Eliom_service.post_coservice
+    ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
                                    (string "desc"))
     ()
@@ -125,4 +171,26 @@ let comment =
 let delete_feed =
   Eliom_service.Http.coservice'
     ~get_params:(Eliom_parameter.int32 "id")
+    ()
+
+let edit_feed =
+  Eliom_service.service
+    ~path: ["edit"]
+    ~get_params: Eliom_parameter.(suffix ((int "id") ** string "name"))
+    ()
+
+let edit_link_comment =
+  Eliom_service.post_coservice
+    ~fallback:view_feed
+    ~post_params: Eliom_parameter.((int "id") **
+                                   (string "url") **
+                                   (string "desc") **
+                                   (string "tags"))
+    ()
+
+let edit_desc_comment =
+  Eliom_service.post_coservice
+    ~fallback:view_feed
+    ~post_params: Eliom_parameter.((int "id") **
+                                   (string "desc"))
     ()

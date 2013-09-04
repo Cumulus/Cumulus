@@ -103,6 +103,11 @@ let user_information user =
               [ Html.p
                   [ Html.a
                       ~a:[Html.a_class ["nav"]]
+                      ~service:Services.fav_feed
+                      [Html.pcdata "Favoris"]
+                      (Sql.get user#name, Some 0);
+                    Html.a
+                      ~a:[Html.a_class ["nav"]]
                       ~service:Services.preferences
                       [Html.pcdata "Préférences"]
                       ();
@@ -238,8 +243,13 @@ let main_style content footer =
                                           )
                                       ]
                           [Html.pcdata "OCaml web framework Ocsigen"];
+                        Html.pcdata "    (";
                         Html.a ~service:Services.atom
-                          [Html.pcdata "    (Flux Atom du site)"] ();
+                          [Html.pcdata "Flux Atom du site"] ();
+                        Html.pcdata ", ";
+                        Html.a ~service:Services.comments_atom
+                          [Html.pcdata "Flux Atom des commentaires"] ();
+                        Html.pcdata ")";
                       ]
                     )
                 ]
@@ -248,17 +258,12 @@ let main_style content footer =
        )
     )
 
-let link_footer ~link min max page = 
-  let _ = Ocsigen_messages.warning
-  ("min: " ^ (string_of_int min) ^ " max: " ^ (string_of_int max) ^ " page: " ^
-  (string_of_int page)) in 
-  match page with
-  | n when n = min && n < max -> [ link "Suivant" (Some (page + 1)) ]
-  | n when n = max && n > min -> [ link "Précédent" (Some (page - 1)) ]
-  | n ->
-      if n > min && n < max then
-        [ link "Précédent" (Some (page - 1)); link "Suivant" (Some (page + 1)) ]
-      else []
+let link_footer ~link min max = function
+  | page when page = min && page < max -> [ link "Suivant" (Some (page + 1)) ]
+  | page when page = max && page > min -> [ link "Précédent" (Some (page - 1)) ]
+  | page when page > min && page < max ->
+      [ link "Précédent" (Some (page - 1)); link "Suivant" (Some (page + 1)) ]
+  | _ -> []
 
 let private_main ~page ~link ~service feeds count =
   feeds >>= fun feeds ->
@@ -392,9 +397,16 @@ let private_preferences () =
     []
 
 let private_comment id =
+  Db_feed.exist ~feedid:id () >>= fun exist ->
+  if not exist then
+        main_style [Html.div
+            ~a:[Html.a_class ["box"]]
+            [Html.pcdata "Ce commentaire n'existe pas."]
+        ] []
+  else
   User.is_connected () >>= fun state ->
   Feeds.branch_to_html id >>= fun branch ->
-  main_style
+    main_style
     ( if not state then
         [Html.div
             ~a:[Html.a_class ["box"]]
@@ -433,7 +445,7 @@ let private_comment id =
                 submit_input ~value:"Envoyer !" ()
               ]
             ])
-            ();
+            (Int32.to_int id, "");
           Html.post_form
             ~a:[Html.a_class ["box"]]
             ~service:Services.append_desc_comment
@@ -455,7 +467,92 @@ let private_comment id =
                submit_input ~value:"Envoyer !" ()
               ]
             ])
-            ()
+            (Int32.to_int id, "")
+        ]) []
+
+let private_edit_feed id =
+  Db_feed.exist ~feedid:id () >>= fun exist ->
+  if not exist then
+        main_style [Html.div
+            ~a:[Html.a_class ["box"]]
+            [Html.pcdata "Ce commentaire n'existe pas."]
+        ] []
+  else
+  User.is_connected () >>= fun state ->
+  Feeds.branch_to_html id >>= fun branch ->
+  Feed.get_edit_infos id >>= fun (is_url, edit_desc, edit_url, edit_tags) ->
+  User.get_userid () >>= (function
+  | None -> Lwt.return true
+  | Some uid -> Db_feed.is_feed_author ~feed:id ~userid:uid ())
+  >>= fun is_author ->
+  main_style
+    ( if (not state) or (not is_author) then
+        [Html.div
+            ~a:[Html.a_class ["box"]]
+            [Html.pcdata "Vous n'avez pas le droit d'editer ce lien."]
+        ]
+      else
+        [ branch;
+	  if is_url then
+            (Html.post_form
+               ~a:[Html.a_class ["box"]]
+               ~service:Services.edit_link_comment
+               (fun (parent, (url, (desc, tags))) -> [
+                 Html.h1 [Html.pcdata "Lien"] ;
+                 Html.p [
+                   string_input_box
+                     ~a:[ Html.a_placeholder "URL"]
+                     ~input_type:`Text
+                     ~name:url
+                     ~value:edit_url
+                     ();
+                   Html.br ();
+                   string_input_box
+                     ~a:[ Html.a_placeholder "Titre" ]
+                     ~input_type:`Text
+                     ~name:desc
+                     ~value:edit_desc
+                     ();
+                   Html.br ();
+                   string_input_box
+                     ~a:[ Html.a_placeholder "Tags" ]
+                     ~input_type:`Text
+                     ~name:tags
+                     ~value:edit_tags
+                     ();
+                   Html.br ();
+                   Html.int_input
+                     ~input_type:`Hidden
+                     ~name:parent
+                     ~value:(Int32.to_int id)
+                     ();
+                   submit_input ~value:"Envoyer !" ()
+                 ]
+               ])
+               (Int32.to_int id, ""))
+          else
+            (Html.post_form
+               ~a:[Html.a_class ["box"]]
+               ~service:Services.edit_desc_comment
+               (fun (parent, desc) -> [
+                 Html.h1 [Html.pcdata "Commentaire"];
+                 Html.p [
+                   Html.textarea
+                     ~a:[Html.a_class ["input-box"];
+                         Html.a_placeholder "Comment" ]
+                     ~name:desc
+                     ~value:edit_desc
+                     () ;
+                   Html.int_input
+                     ~input_type:`Hidden
+                     ~name:parent
+                     ~value:(Int32.to_int id)
+                     ();
+                   Html.br ();
+                   submit_input ~value:"Envoyer !" ()
+                 ]
+               ])
+               (Int32.to_int id, ""))
         ]
     )
     []
@@ -486,7 +583,7 @@ let user ?(page=0) ~service username =
       Html.a ~service:Services.author_feed [
         Html.pcdata name
       ] (param, username)
-      )
+    )
     (Db_feed.get_feeds_with_author username)
     (Db_feed.count_feeds_with_author username)
 
@@ -500,10 +597,29 @@ let tag ?(page=0) ~service tag =
     (Db_feed.get_feeds_with_tag tag)
     (Db_feed.count_feeds_with_tag tag)
 
+let fav_feed ?(page=0) ~service username =
+  feed_list ~service page
+    (fun name param ->
+      Html.a ~service:Services.fav_feed [
+        Html.pcdata name
+      ] (username, param)
+    )
+    (Db_feed.get_fav_with_username username)
+    (Db_feed.count_fav_with_username username)
+
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =
-  Feeds.comments_to_html (Int32.of_int id) >>= (fun feed ->
-    main_style [feed] [])
+  Db_feed.exist ~feedid:(Int32.of_int id) () >>= fun exist ->
+  if exist then
+    Feeds.comments_to_html (Int32.of_int id) >>= (fun feed ->
+      main_style [feed] [])
+  else
+    main_style
+      [Html.div
+          ~a:[Html.a_class ["box"]]
+          [Html.pcdata "Ce lien n'existe pas."]
+      ]
+      []
 
 let register () =
   private_register ()
@@ -513,3 +629,6 @@ let preferences () =
 
 let comment id =
   private_comment (Int32.of_int id)
+
+let edit_feed id =
+  private_edit_feed (Int32.of_int id)

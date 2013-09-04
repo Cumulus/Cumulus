@@ -68,4 +68,19 @@ let () =
         Db.alter "ALTER TABLE feeds ADD COLUMN root integer" >>= fun () ->
         Db.alter "ALTER TABLE feeds RENAME COLUMN title TO description"
       )
+    >>= fun () ->
+    update 4
+      (fun () ->
+        Db.alter "CREATE TABLE favs (\
+                id_user integer NOT NULL, \
+                id_feed integer NOT NULL);"
+      )
+    >>= fun () ->
+    update 5
+      (fun () ->
+        Db.alter "CREATE TABLE votes (\
+                id_user integer NOT NULL, \
+                id_feed integer NOT NULL, \
+                score integer NOT NULL);"
+      )
   end

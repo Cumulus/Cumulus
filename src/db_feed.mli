@@ -34,24 +34,42 @@ class type tag = object
   method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
 end
 
-type feeds_and_tags = feed list * tag list
+class type fav = object
+  (* method id : (Sql.int32_t, Sql.non_nullable) Db.t *)
+  method id_user : (Sql.int32_t, Sql.non_nullable) Db.t
+  method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
+end
+
+class type vote = object
+  method score : (Sql.int32_t, Sql.non_nullable) Db.t
+  method id_user : (Sql.int32_t, Sql.non_nullable) Db.t
+  method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
+end
+
+type feeds_and_tags = feed list * tag list * vote list
 type feed_generator =
     starting:int32 ->
     number:int32 ->
     unit ->
     feeds_and_tags Lwt.t
 
+val get_tree_feeds : int32 -> feed_generator
+val get_links_feeds : feed_generator
+val get_comments_feeds : feed_generator
 val get_root_feeds : feed_generator
 val get_feeds : feed_generator
 val get_feeds_with_author : string -> feed_generator
 val get_feeds_with_tag : string -> feed_generator
+val get_fav_with_username : string -> feed_generator
 val get_feed_url_with_url :
   string ->
   < url : < get : unit; nul : Sql.nullable; t : Sql.string_t > Sql.t >
     option Lwt.t
+val get_feed_with_url :
+  string -> feed option Lwt.t
 val get_feed_with_id :
   int32 ->
-  (feed * tag list) Lwt.t
+  (feed * tag list * vote list) Lwt.t
 val count_feeds :
   unit ->
   < n : (Sql.int64_t, Sql.non_nullable) Db.t > Lwt.t
@@ -59,6 +77,9 @@ val count_root_feeds :
   unit ->
   < n : (Sql.int64_t, Sql.non_nullable) Db.t > Lwt.t
 val count_feeds_with_author :
+  string ->
+  < n : (Sql.int64_t, Sql.non_nullable) Db.t > Lwt.t
+val count_fav_with_username :
   string ->
   < n : (Sql.int64_t, Sql.non_nullable) Db.t > Lwt.t
 val count_feeds_with_tag :
@@ -92,3 +113,73 @@ val delete_feed :
   userid:int32 ->
   unit ->
   unit Lwt.t
+
+val add_fav :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
+
+val del_fav :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
+
+val upvote :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
+
+val downvote :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
+
+val cancelvote :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  unit Lwt.t
+
+val user_vote :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  int32 Lwt.t
+
+val is_fav :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  bool Lwt.t
+
+val is_url :
+  feedid:int32 ->
+  unit ->
+  bool Lwt.t
+
+val is_root :
+  feedid:int32 ->
+  unit ->
+  bool Lwt.t
+
+val get_root :
+  feedid:int32 ->
+  unit->
+  feed option Lwt.t
+
+val update :
+  feedid:int32 ->
+  url:string option ->
+  description:string ->
+  tags:string list ->
+  unit ->
+  unit Lwt.t
+
+val exist :
+  feedid:int32 ->
+  unit ->
+  bool Lwt.t

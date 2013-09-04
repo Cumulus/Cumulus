@@ -19,10 +19,10 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-module UTF8 = Batteries.UTF8
+module UTF8 = CamomileLibraryDefault.Camomile.CaseMap.Make(CamomileLibrary.UTF8)
 
 type tree =
-  | Sheet of Feed.feed 
+  | Sheet of Feed.feed
   | Node of Feed.feed * tree list
 
 let (>>=) = Lwt.(>>=)

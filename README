@@ -1,12 +1,15 @@
 Build Requirements
 ==================
 
- * Eliom >= 2.2
+ * Eliom >= 3.0
  * Lwt >= 2.4
  * OCaml-safepass >= 1.2
- * Batteries >= 1.5
- * PG'OCaml compiled with batteries >= 1.6
+ * PG'OCaml >= 1.7
  * MaCaQue >= 0.6
+ * Macaque_lwt
+ * OCaml-markdown >= 0.1.1
+ * Camomile
+ * sqlite3-ocaml
 
 Run Requirements
 ================

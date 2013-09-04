@@ -31,8 +31,21 @@ CREATE TABLE users (
   feeds_per_page integer NOT NULL DEFAULT(10)
 );
 
+CREATE TABLE favs (
+  -- id integer NOT NULL,
+  id_user integer NOT NULL,
+  id_feed integer NOT NULL
+);
+
+CREATE TABLE votes (
+  id_user integer NOT NULL,
+  id_feed integer NOT NULL,
+  score integer NOT NULL
+);
+
 CREATE SEQUENCE users_id_seq;
 CREATE SEQUENCE feeds_id_seq;
 CREATE SEQUENCE feeds_tags_id_seq;
+-- CREATE SEQUENCE favs_id_seq;
 
-INSERT INTO options VALUES ('dbversion', '3');
+INSERT INTO options VALUES ('dbversion', '5');

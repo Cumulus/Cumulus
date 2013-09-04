@@ -37,12 +37,11 @@ setup.data:
 
 # OASIS_STOP
 
-STATIC_DIR = /tmp/cumulus
+STATIC_DIR = data
 
 $(STATIC_DIR):
 	mkdir -p $(STATIC_DIR)
 
 run: $(STATIC_DIR)
 	cp _build/src/_client/cumulus.js $(STATIC_DIR)
-	cp data/* $(STATIC_DIR)
 	ocsigenserver -c ocsigenserver.conf -v

@@ -50,6 +50,7 @@ let add = function
         || Utils.is_invalid_email email ->
       Lwt.return false
   | (name, (email, (password, _))) ->
+      let name = BatString.trim name in
       Db_user.get_user_with_name name >>= function
         | Some _ -> Lwt.return false
         | None ->
@@ -58,11 +59,24 @@ let add = function
             Lwt.return true
 
 let (get_user, set_user, unset_user) =
+  let session_scope = Eliom_common.default_session_scope in
   let eref =
-    Eliom_reference.eref ~scope:Eliom_common.default_session_scope None
+    Eliom_reference.eref
+      ~scope:session_scope
+      ~persistent:"cumulus_user_v1"
+      None
   in
   ((fun () -> Eliom_reference.get eref),
-   (fun user -> Eliom_reference.set eref (Some user)),
+   (fun user ->
+     let cookie_scope =
+       Eliom_common.cookie_scope_of_user_scope session_scope
+     in
+     Eliom_state.set_persistent_data_cookie_exp_date
+       ~cookie_scope
+       (Some (Int32.to_float Int32.max_int))
+     >>= fun () ->
+     Eliom_reference.set eref (Some user)
+   ),
    (fun () -> Eliom_reference.unset eref)
   )
 

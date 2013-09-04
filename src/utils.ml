@@ -19,17 +19,14 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-module Calendar = CalendarLib.Calendar
+module Calendar = struct
+  include CalendarLib.Calendar
+  module Printer = CalendarLib.Printer.Calendar
+end
 
 let offset = 10l
 
-let string_of_calendar cal =
-  (string_of_int (Calendar.day_of_month cal)) ^ "/" ^
-    (string_of_int (Calendar.Date.int_of_month (Calendar.month cal))) ^ "/" ^
-    (string_of_int (Calendar.year cal)) ^ " à " ^
-    (string_of_int (Calendar.hour cal)) ^ ":" ^
-    (string_of_int (Calendar.minute cal)) ^ ":" ^
-    (string_of_int (Calendar.second cal))
+let string_of_calendar cal = Calendar.Printer.sprint "%d/%m/%Y à %T" cal
 
 let string_is_empty str =
   let length = String.length str in
@@ -48,7 +45,7 @@ let msg str = [
 
 let is_invalid_url =
   let regexp_match_url =
-    let legit_chars = "[]0-9A-Za-z_~().,+=&%-]" in
+    let legit_chars = "[]0-9A-Za-z_~().,+=&%-|]" in
     let num = "[0-9]?" in
     "^\\(https?\\|ftp\\)://" ^                         (* Protocol *)
       "\\(" ^ legit_chars ^ "*?" ^                     (* Username *)
@@ -89,3 +86,7 @@ let split =
   (fun str ->
     Str.split regexp str
   )
+
+let troncate str =
+  let str = strip str in
+  String.sub str 0 (min 40 (String.length str))

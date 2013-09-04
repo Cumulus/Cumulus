@@ -20,24 +20,28 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
 module Calendar = CalendarLib.Calendar
-module UTF8 = Batteries.UTF8
+module UTF8 = CamomileLibraryDefault.Camomile.CaseMap.Make(CamomileLibrary.UTF8)
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
 let (>>=) = Lwt.(>>=)
 
-let feed_of_db (feed, tags) =
-  Lwt.return
-    (Feed.feed_new
-       feed
-       (List.map
-          (fun elm -> elm#!tag)
-          (List.filter (fun elm -> elm#!id_feed = feed#!id) tags)
-       )
-    )
+let feed_of_db (feed, tags, votes) =
+  let tags =
+    List.map
+      (fun elm -> elm#!tag)
+      (List.filter (fun elm -> elm#!id_feed = feed#!id) tags)
+  in
+  let votes =
+    List.fold_left
+      (fun acc elm -> acc + Int32.to_int elm#!score)
+      0
+      (List.filter (fun elm -> elm#!id_feed = feed#!id) votes)
+  in
+  Lwt.return (Feed.feed_new feed tags votes)
 
-let feeds_of_db feeds =
-  Lwt_list.map_s (fun x -> feed_of_db (x, snd feeds)) (fst feeds)
+let feeds_of_db (feeds, tags, votes) =
+  Lwt_list.map_s (fun x -> feed_of_db (x, tags, votes)) feeds
 
 let to_somthing f data =
   Lwt_list.map_p (fun feed -> f feed) data
@@ -88,9 +92,8 @@ let feed_id_to_html id =
   >>= fun feed ->
   private_to_html [feed]
 
-(* FIXME? should atom feed return only a limited number of links ? *)
-let to_atom () =
-  Db_feed.get_feeds ~starting:0l ~number:Utils.offset ()
+let tree_to_atom id () =
+  Db_feed.get_tree_feeds id ~starting:0l ~number:Utils.offset ()
   >>= feeds_of_db
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
@@ -98,7 +101,36 @@ let to_atom () =
       Atom_feed.feed
         ~updated: (Calendar.make 2012 6 9 17 40 30)
         ~id:"http://cumulus.org"
-        ~title: (Atom_feed.plain "An Atom flux")
+        ~title: (Atom_feed.plain ("Cumulus (id: " ^ Int32.to_string id ^ ")"))
+        tmp
+    )
+  )
+
+(* FIXME? should atom feed return only a limited number of links ? *)
+let to_atom () =
+  Db_feed.get_links_feeds ~starting:0l ~number:Utils.offset ()
+  >>= feeds_of_db
+  >>= to_somthing Feed.to_atom
+  >>= (fun tmp ->
+    Lwt.return (
+      Atom_feed.feed
+        ~updated: (Calendar.make 2012 6 9 17 40 30)
+        ~id:"http://cumulus.org"
+        ~title: (Atom_feed.plain "Cumulus")
+        tmp
+    )
+  )
+
+let comments_to_atom () =
+  Db_feed.get_comments_feeds ~starting:0l ~number:Utils.offset ()
+  >>= feeds_of_db
+  >>= to_somthing Feed.to_atom
+  >>= (fun tmp ->
+    Lwt.return (
+      Atom_feed.feed
+        ~updated: (Calendar.make 2012 6 9 17 40 30)
+        ~id:"http://cumulus.org"
+        ~title: (Atom_feed.plain "Cumulus")
         tmp
     )
   )
@@ -110,7 +142,7 @@ let (event, call_event) =
 
 let strip_and_lowercase x =
   (* (List.map (fun x -> String.lowercase (Utils.strip x)) (Str.split (Str.regexp "[,]+") tags)) *)
-  UTF8.to_string (UTF8.lowercase (UTF8.of_string (Utils.strip x)))
+  UTF8.lowercase (Utils.strip x)
 
 let updating_and_ret () =
   call_event ();
@@ -149,8 +181,7 @@ let append_feed (url, (description, tags)) =
     )
 
 let get_root_and_parent id =
-  Db_feed.get_feed_with_id (Int32.of_int id) >>= fun feeds_list ->
-  let feed = fst feeds_list in
+  Db_feed.get_feed_with_id (Int32.of_int id) >>= fun (feed, _, _) ->
   let parent = feed#!id in
   let root = match feed#?root with
     | Some root -> root
@@ -176,6 +207,46 @@ let append_desc_comment (id, description) =
       f ~description
         ~tags:[]
         ~userid:author
+        ()
+      >>= updating_and_ret
+    )
+
+let edit_feed_aux ~id ~url ~description ~tags f =
+  append_feed_aux_base ~description
+    (fun ~author () ->
+      if Utils.string_is_empty tags then
+        Lwt.return Empty
+      else if Utils.is_invalid_url url then
+        Lwt.return Invalid_url
+      else
+        Db_feed.get_feed_with_id (Int32.of_int id) >>= (fun (feed, _, _) ->
+	  if feed#?url <> Some url then
+            Db_feed.get_feed_url_with_url url >>= function
+            | Some _ -> Lwt.return Already_exist
+            | None -> f () >>= updating_and_ret
+	  else
+	    f () >>= updating_and_ret)
+    )
+
+let edit_link_comment (id, (url, (description, tags))) =
+  edit_feed_aux ~id ~url ~description ~tags
+    (fun () ->
+      Db_feed.update
+	~feedid:(Int32.of_int id)
+	~url:(Some url)
+        ~description
+        ~tags:(List.map strip_and_lowercase (Utils.split tags))
+        ()
+    )
+
+let edit_desc_comment (id, description) =
+  append_feed_aux_base ~description
+    (fun ~author () ->
+      Db_feed.update
+	~feedid:(Int32.of_int id)
+	~description
+        ~tags:[]
+	~url:None
         ()
       >>= updating_and_ret
     )
