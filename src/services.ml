@@ -26,25 +26,25 @@ let atom =
     ()
 
 let comments_atom =
-  Eliom_service.service
+  Eliom_service.Http.service
     ~path: ["cumulus-comments.atom"]
     ~get_params: Eliom_parameter.unit
     ()
 
 let atom_feed =
-  Eliom_service.service
+  Eliom_service.Http.service
     ~path: ["atom"]
     ~get_params: Eliom_parameter.(suffix (int "feed_id"))
     ()
 
 let main =
-  Eliom_service.Appl.service
+  Eliom_service.App.service
     ~path: [""]
     ~get_params: (Eliom_parameter.opt (Eliom_parameter.int "page"))
     ()
 
 let view_feed =
-  Eliom_service.Appl.service
+  Eliom_service.App.service
     ~path:["view"]
     ~get_params: Eliom_parameter.(suffix (int "id" ** string "name"))
     ()
@@ -57,45 +57,45 @@ let append_feed =
     ()
 
 let author_feed =
-  Eliom_service.Appl.service
+  Eliom_service.App.service
     ~path: [""]
     ~get_params: Eliom_parameter.(opt (int "page") ** string "username")
     ()
 
 let fav_feed =
-  Eliom_service.service
+  Eliom_service.App.service
     ~path:["fav"]
     (* ~get_params: Eliom_parameter.(suffix (string "username") ** int "page") *)
     ~get_params: Eliom_parameter.(suffix_prod (string "name") (opt (int "page")))
     ()
 
 let add_fav_feed =
-  Eliom_service.coservice'
+  Eliom_service.Http.coservice'
     ~get_params: (Eliom_parameter.int32 "feed_id")
     ()
 
 let del_fav_feed =
-  Eliom_service.coservice'
+  Eliom_service.Http.coservice'
     ~get_params: (Eliom_parameter.int32 "feed_id")
     ()
 
 let upvote_feed =
-  Eliom_service.coservice'
+  Eliom_service.Http.coservice'
     ~get_params: (Eliom_parameter.int32 "feed_id")
     ()
 
 let downvote_feed =
-  Eliom_service.coservice'
+  Eliom_service.Http.coservice'
     ~get_params: (Eliom_parameter.int32 "feed_id")
     ()
 
 let cancelvote_feed =
-  Eliom_service.coservice'
+  Eliom_service.Http.coservice'
     ~get_params: (Eliom_parameter.int32 "feed_id")
     ()
 
 let tag_feed =
-  Eliom_service.Appl.service
+  Eliom_service.App.service
     ~path: [""]
     ~get_params: Eliom_parameter.(opt (int "page") ** string "tag")
     ()
@@ -114,7 +114,7 @@ let add_user =
     ()
 
 let append_link_comment =
-  Eliom_service.post_coservice
+  Eliom_service.Http.post_coservice
     ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
                                    (string "url") **
@@ -123,7 +123,7 @@ let append_link_comment =
     ()
 
 let append_desc_comment =
-  Eliom_service.post_coservice
+  Eliom_service.Http.post_coservice
     ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
                                    (string "desc"))
@@ -141,12 +141,12 @@ let update_user_password =
     ()
 
 let update_user_feeds_per_page =
-  Eliom_service.post_coservice'
+  Eliom_service.Http.post_coservice'
     ~post_params: Eliom_parameter.((int "feeds_per_page"))
     ()
 
 let registration =
-  Eliom_service.Appl.service
+  Eliom_service.App.service
     ~path: ["registration"]
     ~get_params: Eliom_parameter.unit
     ()
@@ -157,13 +157,13 @@ let disconnect =
     ()
 
 let preferences =
-  Eliom_service.Appl.service
+  Eliom_service.App.service
     ~path: ["preferences"]
     ~get_params: Eliom_parameter.unit
    ()
 
 let comment =
-  Eliom_service.service
+  Eliom_service.App.service
     ~path: ["comment"]
     ~get_params: Eliom_parameter.(suffix ((int "id") ** string "name"))
     ()
@@ -174,13 +174,13 @@ let delete_feed =
     ()
 
 let edit_feed =
-  Eliom_service.service
+  Eliom_service.App.service
     ~path: ["edit"]
     ~get_params: Eliom_parameter.(suffix ((int "id") ** string "name"))
     ()
 
 let edit_link_comment =
-  Eliom_service.post_coservice
+  Eliom_service.Http.post_coservice
     ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
                                    (string "url") **
@@ -189,7 +189,7 @@ let edit_link_comment =
     ()
 
 let edit_desc_comment =
-  Eliom_service.post_coservice
+  Eliom_service.Http.post_coservice
     ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
                                    (string "desc"))
