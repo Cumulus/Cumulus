@@ -33,14 +33,26 @@ let comments_atom =
 
 let atom_feed =
   Eliom_service.Http.service
-    ~path: ["atom"]
+    ~path: ["atom"; "feed"]
     ~get_params: Eliom_parameter.(suffix (int "feed_id"))
+    ()
+
+let atom_tag =
+  Eliom_service.Http.service
+    ~path: ["atom"; "tag"]
+    ~get_params: Eliom_parameter.(suffix (string "tag"))
     ()
 
 let main =
   Eliom_service.App.service
     ~path: [""]
     ~get_params: (Eliom_parameter.opt (Eliom_parameter.int "page"))
+    ()
+
+let view_feed' =
+  Eliom_service.App.service
+    ~path:["view"]
+    ~get_params: Eliom_parameter.(suffix_prod (int "id" ** string "name") (opt any))
     ()
 
 let view_feed =

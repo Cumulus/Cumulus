@@ -142,11 +142,22 @@ let get_feeds_aux ~starting ~number ~feeds_filter ~tags_filter ~votes_filter =
   >>= fun votes ->
   Lwt.return (feeds, tags, votes)
 
-let get_tree_feeds feed_id ~starting ~number () =
-  let feeds_filter f = (<:value< f.root = $int32:feed_id$ || f.parent = $int32:feed_id$ >>) in
+let rec get_tree_feeds feed_id ~starting ~number () =
+  let feeds_filter f = (<:value< f.parent = $int32:feed_id$ >>) in
   let tags_filter _ _ = (<:value< true >>) in
   let votes_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~starting ~number ~feeds_filter ~tags_filter ~votes_filter
+  >>= (fun (feeds, tags, votes) ->
+      (Lwt_list.fold_left_s
+         (fun (acc_feeds, acc_tags, acc_votes) feed ->
+            get_tree_feeds feed#!id ~starting ~number () >>=
+            (fun (cfeeds, ctags, cvotes) ->
+               Lwt.return (acc_feeds@cfeeds, acc_tags@ctags, acc_votes@cvotes))
+         )
+         (feeds, tags, votes)
+         feeds
+      )
+    )
 
 let get_links_feeds ~starting ~number () =
   let feeds_filter f = (<:value< is_not_null f.url >>) in

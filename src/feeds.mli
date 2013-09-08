@@ -30,6 +30,7 @@ val comments_to_html :
 val branch_to_html :
   int32 -> [< Html5_types.div_content_fun > `A `Br `Div `Img `P `PCDATA ] Html.elt Lwt.t
 val tree_to_atom : int32 -> unit -> Atom_feed.feed Lwt.t
+val tag_to_atom: string -> unit -> Atom_feed.feed Lwt.t
 val to_atom : unit -> Atom_feed.feed Lwt.t
 val comments_to_atom : unit -> Atom_feed.feed Lwt.t
 val append_feed : (string * (string * string)) -> append_state Lwt.t
