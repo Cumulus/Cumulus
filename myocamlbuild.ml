@@ -585,11 +585,20 @@ end) = struct
         | None -> ()
         | Some client ->
             let module Client = (val client : Exec) in
-            tag_file Client.package (Tags.elements (tags_of_pathname Client.main_file));
-            flag ["file:" ^ Client.package] (A "-linkall");
-            rule "js_of_eliom: .cma -> .js" ~dep:Client.package ~prod:Client.name
-              (fun env _ ->
-                 Cmd (S [A "js_of_eliom"; A Client.package; A "-o"; A Client.name])
+            let linker tags deps out =
+              Cmd (S [A "js_of_eliom"; T tags;
+                      Command.atomize_paths deps; A "-o"; Px out])
+            in
+            let dep = Pathname.update_extension "cmo" Client.main_file in
+            rule "js_of_eliom: .cmo -> .js" ~dep ~prod:"%.js"
+              (Pack.Ocaml_compiler.link_gen
+                 "cmo" "cma" "cma" ["cmo"; "cmi"] linker
+                 (fun tags ->
+                    Tags.union
+                      (tags_of_pathname Client.main_file)
+                      (tags++"ocaml"++"link"++"byte"++"jslink"++"js_of_eliom")
+                 )
+                 dep "%.js"
               );
     in
     let modify_targets () =
@@ -612,6 +621,7 @@ end) = struct
               modify_targets ();
           | After_rules ->
               js_rule ();
+
               copy_rule_server "*.eliom -> **/_server/*.ml"
                 ~deps:["%(path)/" ^ Client.type_dir ^ "/%(file).inferred.mli"]
                 "%(path)/%(file).eliom" ("%(path)/" ^ Client.server_dir ^ "/%(file:<*>).ml");
