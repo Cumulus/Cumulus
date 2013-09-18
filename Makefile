@@ -43,5 +43,5 @@ $(STATIC_DIR):
 	mkdir -p $(STATIC_DIR)
 
 run: $(STATIC_DIR)
-	cp _build/src/_client/cumulus.js $(STATIC_DIR)
+	cp _build/src/client/cumulus.js $(STATIC_DIR)
 	ocsigenserver -c ocsigenserver.conf -v
