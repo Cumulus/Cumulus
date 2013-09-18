@@ -416,7 +416,7 @@ let get_fav_with_username name ~starting ~number () =
   Db_user.get_user_id_with_name name >>= fun author ->
   let feeds_filter f = (<:value< f.id_user = $int32:author#!id$ >>) in
   let tags_filter favs t = filter_feeds_id t favs in
-  get_fav_aux ?starting ?number ~feeds_filter ~tags_filter ()
+  get_fav_aux ~starting ~number ~feeds_filter ~tags_filter ()
 
 let count_fav_with_username name =
   Db_user.get_user_id_with_name name >>= fun author ->

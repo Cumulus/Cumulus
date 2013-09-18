@@ -1,4 +1,18 @@
-For init the database, just execute initdb.sh with the user postgres.
-And add the following line in /etc/postgresql/<maybe sub-dir>/pg_hba.conf:
+For init the database, just execute (with the user postgres):
+
+$ createuser -P cumulus
+$ createdb -E UTF-8 -O cumulus cumulus
+
+then add the following line in /etc/postgresql/<maybe sub-dir>/pg_hba.conf:
 
 local cumulus cumulus password
+
+and then execute (with the user postgres):
+
+$ psql -U cumulus -d cumulus -f createdb.sql
+
+The final part is to modify the password in src/db.ml to the password you gave,
+and recompile the project with « make »
+
+Then either you can do « make install » and setuping your server or do
+« make run » for testing.

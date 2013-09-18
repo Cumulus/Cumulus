@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 48ec7ccd101b4e101fb50bc41b2d9d53) *)
+(* DO NOT EDIT (digest: df3c982ef5c2023c5b7a3d4e3dc29312) *)
 module OASISGettext = struct
 (* # 21 "src/oasis/OASISGettext.ml" *)
 
@@ -477,35 +477,20 @@ end
 open Ocamlbuild_plugin;;
 let package_default =
   {
-     MyOCamlbuildBase.lib_ocaml =
-       [
-          ("cumulus", ["src"; "src/_server"]);
-          ("cumulus_client", ["src/_client"])
-       ];
+     MyOCamlbuildBase.lib_ocaml = [("cumulus", ["src"; "src/server"])];
      lib_c = [];
      flags = [];
-     includes =
-       [
-          ("src/_server", ["src"]);
-          ("src", ["src/_server"]);
-          ("", ["src/_client"])
-       ];
+     includes = [("src/server", ["src"]); ("src", ["src/server"])];
      }
   ;;
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 499 "myocamlbuild.ml"
+# 490 "myocamlbuild.ml"
 (* OASIS_STOP *)
 
-module type Exec = sig
-  val name : string
-  val main_file : string
-  val package : string
-end
-
 module Ocamlbuild_eliom (Client : sig
-  val exec : (module Exec) option
+  val client_exec : string option
   val dispatch_default : Ocamlbuild_plugin.hook -> unit
   val server_dir : string
   val type_dir : string
@@ -530,17 +515,18 @@ end) = struct
       )
 
   let flag_infer file type_inferred =
+    let file_tag = "file:" ^ file in
     let tags =
-      [["ocaml"; "ocamldep"; "file:" ^ file];
-       ["ocaml"; "compile"; "file:" ^ file];
-       ["ocaml"; "infer_interface"; "file:" ^ file];
+      [["ocaml"; "ocamldep"; file_tag];
+       ["ocaml"; "compile"; file_tag];
+       ["ocaml"; "infer_interface"; file_tag];
       ]
     in
     let f tags =
       flag tags (S [A "-ppopt"; A "-type"; A "-ppopt"; P type_inferred])
     in
     List.iter f tags;
-    flag ["ocaml"; "doc"; "file:" ^ file] (S [A "-ppopt"; A "-notype"])
+    flag ["ocaml"; "doc"; file_tag] (S [A "-ppopt"; A "-notype"])
 
   let copy_rule_server =
     copy_rule_with_header
@@ -591,45 +577,33 @@ end) = struct
       )
 
   let js_rule () =
-    match Client.exec with
-      | None -> ()
-      | Some client ->
-          let module Client = (val client : Exec) in
-          let linker tags deps out =
-            Cmd (S [A "js_of_eliom"; T tags;
-                    Command.atomize_paths deps; A "-o"; Px out])
-          in
-          let dep = Pathname.update_extension "cmo" Client.main_file in
-          rule "js_of_eliom: .cmo -> .js" ~dep ~prod:"%.js"
-            (Pack.Ocaml_compiler.link_gen
-               "cmo" "cma" "cma" ["cmo"; "cmi"] linker
-               (fun tags ->
-                  Tags.union
-                    (tags_of_pathname Client.main_file)
-                    (tags++"ocaml"++"link"++"byte"++"jslink"++"js_of_eliom")
-               )
-               dep "%.js"
-            )
+    let linker tags deps out =
+      Cmd (S [A "js_of_eliom"; T tags;
+              Command.atomize_paths deps; A "-o"; Px out])
+    in
+    rule "js_of_eliom: .cmo -> .js" ~dep:"%.cmo" ~prod:"%.js"
+      (fun env ->
+         Pack.Ocaml_compiler.link_gen
+           "cmo" "cma" "cma" ["cmo"; "cmi"] linker
+           (fun tags ->
+              Tags.union
+                (tags_of_pathname (env "%.ml"))
+                (tags++"ocaml"++"link"++"byte"++"jslink"++"js_of_eliom")
+           )
+           "%.cmo" "%.js"
+           env
+      )
 
-  let modify_targets () =
-    match Client.exec with
+  let add_to_targets () =
+    match Client.client_exec with
       | None -> ()
-      | Some client ->
-          let module Client = (val client : Exec) in
-          let f x = if x = Client.package then Client.name else x in
-          Options.targets @:= List.map f !Options.targets
-
-  let () =
-    flag ["ocaml"; "infer_interface"; "thread"] (A "-thread");
-    flag ["ocaml"; "compile"] (S [A "-thread"; A "-syntax"; A "camlp4o"]);
-    flag ["ocaml"; "ocamldep"] (S [A "-syntax"; A "camlp4o"]);
-    flag ["ocaml"; "doc"; "pkg_threads"] & A "-thread"
+      | Some x -> Options.targets @:= [x]
 
   let dispatch_default hook =
     Client.dispatch_default hook;
     match hook with
       | After_options ->
-          modify_targets ();
+          add_to_targets ();
       | After_rules ->
           js_rule ();
 
@@ -672,17 +646,11 @@ end) = struct
 end;;
 
 module M = Ocamlbuild_eliom(struct
-  let exec =
-    let module Res = struct
-      let name = "src/_client/cumulus.js"
-      let main_file = "src/_client/templates.ml"
-      let package = "cumulus_client.cma"
-    end in
-    Some (module Res : Exec)
+  let client_exec = Some "src/client/cumulus.js"
   let dispatch_default = dispatch_default
-  let client_dir = "_client"
-  let server_dir = "_server"
-  let type_dir = "_type"
+  let client_dir = "client"
+  let server_dir = "server"
+  let type_dir = "type"
 end);;
 
 Ocamlbuild_plugin.dispatch M.dispatch_default;;
