@@ -41,3 +41,4 @@
 # OASIS_STOP
 <src/*.ml>: syntax_camlp4o
 true: thread
+"src/client/cumulus.js": package(eliom.client)
