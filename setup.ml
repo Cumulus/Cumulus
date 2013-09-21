@@ -5254,7 +5254,7 @@ module OCamlbuildCommon = struct
   let fix_args args extra_argv =
     List.flatten
       [
-        ["-use-ocamlfind"; "-plugin-tags"; "\"package(eliom.ocamlbuild),package(js_of_ocaml.ocamlbuild)\""];
+        ["-use-ocamlfind"; "-plugin-tags"; "\"package(eliom.ocamlbuild)\""];
         if (os_type ()) = "Win32" then
           [
             "-classic-display";

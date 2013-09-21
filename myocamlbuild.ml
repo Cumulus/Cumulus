@@ -500,7 +500,6 @@ let () =
     (fun hook ->
        dispatch_default hook;
        M.dispatcher hook;
-       Ocamlbuild_js_of_ocaml.dispatcher hook;
        match hook with
          | After_options -> Options.targets @:= ["src/client/cumulus.js"]
          | _ -> ()
