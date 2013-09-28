@@ -1,7 +1,7 @@
 # OASIS_START
-# DO NOT EDIT (digest: 42c5f90ac1a397cd4de9987d71fba046)
-# Ignore VCS directories, you can use the same kind of rule outside 
-# OASIS_START/STOP if you want to exclude directories that contains 
+# DO NOT EDIT (digest: 32ef7d62894605552e2c63efa37c99e6)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
 <**/.svn>: -traverse
 <**/.svn>: not_hygienic
@@ -15,30 +15,30 @@
 "_darcs": not_hygienic
 # Library cumulus
 "src/cumulus.cmxs": use_cumulus
-<src/*.ml{,i}>: pkg_eliom.server
-<src/*.ml{,i}>: pkg_macaque.syntax
-<src/*.ml{,i}>: pkg_macaque_lwt
-<src/*.ml{,i}>: pkg_batteries
-<src/*.ml{,i}>: pkg_camomile
-<src/*.ml{,i}>: pkg_pgocaml
-<src/*.ml{,i}>: pkg_lwt.syntax
-<src/*.ml{,i}>: pkg_safepass
-<src/*.ml{,i}>: pkg_markdown.html
-<src/server/*.ml{,i}>: pkg_eliom.server
-<src/server/*.ml{,i}>: pkg_macaque.syntax
-<src/server/*.ml{,i}>: pkg_macaque_lwt
-<src/server/*.ml{,i}>: pkg_batteries
-<src/server/*.ml{,i}>: pkg_camomile
-<src/server/*.ml{,i}>: pkg_pgocaml
-<src/server/*.ml{,i}>: pkg_lwt.syntax
-<src/server/*.ml{,i}>: pkg_safepass
-<src/server/*.ml{,i}>: pkg_markdown.html
+<src/*.ml{,i}>: package(eliom.server)
+<src/*.ml{,i}>: package(macaque.syntax)
+<src/*.ml{,i}>: package(macaque_lwt)
+<src/*.ml{,i}>: package(batteries)
+<src/*.ml{,i}>: package(camomile)
+<src/*.ml{,i}>: package(pgocaml)
+<src/*.ml{,i}>: package(lwt.syntax)
+<src/*.ml{,i}>: package(safepass)
+<src/*.ml{,i}>: package(markdown.html)
+<src/server/*.ml{,i}>: package(eliom.server)
+<src/server/*.ml{,i}>: package(macaque.syntax)
+<src/server/*.ml{,i}>: package(macaque_lwt)
+<src/server/*.ml{,i}>: package(batteries)
+<src/server/*.ml{,i}>: package(camomile)
+<src/server/*.ml{,i}>: package(pgocaml)
+<src/server/*.ml{,i}>: package(lwt.syntax)
+<src/server/*.ml{,i}>: package(safepass)
+<src/server/*.ml{,i}>: package(markdown.html)
 # Executable cumulus
-"src/client/cumulus.byte": pkg_eliom.client
-"src/client/cumulus.byte": pkg_eliom.syntax
-<src/client/*.ml{,i}>: pkg_eliom.client
-<src/client/*.ml{,i}>: pkg_eliom.syntax
+"src/client/cumulus.byte": package(eliom.client)
+"src/client/cumulus.byte": package(eliom.syntax)
+<src/client/*.ml{,i}>: package(eliom.client)
+<src/client/*.ml{,i}>: package(eliom.syntax)
 # OASIS_STOP
-<src/*.ml>: syntax_camlp4o
+<src/*.ml>: syntax(camlp4o)
 true: thread
 "src/client/cumulus.js": package(eliom.client)

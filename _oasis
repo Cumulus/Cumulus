@@ -11,8 +11,10 @@ Authors:
   xarch,
   Alexis Cassaigne
 License: MIT
-BuildTools: ocamlbuild
 Plugins: DevFiles (0.3), META (0.3)
+BuildTools: ocamlbuild
+XOCamlbuildPluginTags: package(eliom.ocamlbuild)
+OCamlVersion: >= 4.01
 
 Library cumulus
   Path: src
@@ -51,7 +53,7 @@ Library cumulus
     ../_build/src/client/cumulus.js
 
 Executable cumulus
-  Build: false
+  Install: false
   Path: src/client
   MainIs: cumulus.ml
   BuildDepends:
