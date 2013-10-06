@@ -40,5 +40,5 @@
 <src/client/*.ml{,i}>: package(eliom.syntax)
 # OASIS_STOP
 <src/*.ml>: syntax(camlp4o)
-true: thread
+<src/*.ml{,i}>: thread
 "src/client/cumulus.js": package(eliom.client)
