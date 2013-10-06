@@ -57,8 +57,7 @@ Executable cumulus
   Path: src/client
   MainIs: cumulus.ml
   BuildDepends:
-    eliom.client,
-    eliom.syntax
+    eliom.client
   CompiledObject: byte
 #  ByteOpt: -w A
 #  NativeOpt: -w A

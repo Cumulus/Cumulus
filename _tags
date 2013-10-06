@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 32ef7d62894605552e2c63efa37c99e6)
+# DO NOT EDIT (digest: cd06b2ec8c71552a9e69c184ee37f123)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -35,9 +35,7 @@
 <src/server/*.ml{,i}>: package(markdown.html)
 # Executable cumulus
 "src/client/cumulus.byte": package(eliom.client)
-"src/client/cumulus.byte": package(eliom.syntax)
 <src/client/*.ml{,i}>: package(eliom.client)
-<src/client/*.ml{,i}>: package(eliom.syntax)
 # OASIS_STOP
 <src/*.ml>: syntax(camlp4o)
 <src/*.ml{,i}>: thread
