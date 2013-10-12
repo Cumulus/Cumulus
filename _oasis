@@ -19,30 +19,10 @@ OCamlVersion: >= 4.01
 Library cumulus
   Path: src
   Modules:
-    Db_update,
-    Html,
-    Utils,
-    Db,
-    Db_feed,
-    Db_user,
-    Services,
-    Errors,
-    User,
-    Feed,
-    Comments,
-    Feeds,
     server/Templates,
     Main
   BuildDepends:
-    eliom.server (>= 3.0.3),
-    macaque.syntax (>= 0.6),
-    macaque_lwt,
-    batteries (>= 2.0),
-    camomile,
-    pgocaml (>= 1.7),
-    lwt.syntax (>= 2.4),
-    safepass (>= 1.2),
-    markdown.html (>= 0.1.1)
+    cumulus.base
 #  ByteOpt: -w A
 #  NativeOpt: -w A
   DataFiles:
@@ -51,6 +31,44 @@ Library cumulus
     ../data/*.png,
     ../data/*.svg,
     ../_build/src/client/cumulus.js
+
+Library base
+  Path: src/base
+  FindlibParent: cumulus
+  Modules:
+    Services,
+    Html,
+    Utils,
+    Errors,
+    User,
+    Feed,
+    Comments,
+    Feeds
+  BuildDepends:
+    cumulus.db,
+    camomile,
+    markdown.html (>= 0.1.1)
+#  ByteOpt: -w A
+#  NativeOpt: -w A
+
+Library db
+  Path: src/base/db
+  FindlibParent: cumulus
+  Modules:
+    Db_update,
+    Db,
+    Db_feed,
+    Db_user
+  BuildDepends:
+    eliom.server (>= 3.0.3),
+    batteries (>= 2.0),
+    macaque.syntax (>= 0.6),
+    macaque_lwt,
+    pgocaml (>= 1.7),
+    lwt.syntax (>= 2.4),
+    safepass (>= 1.2)
+#  ByteOpt: -w A
+#  NativeOpt: -w A
 
 Executable cumulus
   Install: false

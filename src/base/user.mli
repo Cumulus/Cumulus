@@ -19,15 +19,28 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-include Macaque_lwt
-include Macaque_lwt.Utils
-include Macaque_lwt.Make(struct
-  let connect () =
-    Lwt_PGOCaml.connect
-      ~database:"cumulus"
-      ~host:"localhost"
-      ~password:"mdp"
-      ~user:"cumulus"
-      ()
-  let pool_number = 16
-end)
+type user_state = Already_connected | Ok | Bad_password | Not_found
+
+type user = {
+  id : int32;
+  name : string;
+  password : Db_user.password;
+  email : string;
+  is_admin : bool;
+  feeds_per_page : int32;
+}
+
+val add : string * (string * (string * string)) -> bool Lwt.t
+val get_user : unit -> (user option) Lwt.t
+val get_userid : unit -> (int32 option) Lwt.t
+val get_user_feeds_per_page : unit -> (int32 option) Lwt.t
+val is_connected : unit -> bool Lwt.t
+val is_admin : unit -> bool Lwt.t
+val connect : string -> string -> user_state Lwt.t
+val disconnect : unit -> bool Lwt.t
+val get_user_and_email : unit -> < email : string; name : string > option Lwt.t
+val update_password : string * string -> bool Lwt.t
+val update_email : string -> bool Lwt.t
+val update_feeds_per_page : int32 -> bool Lwt.t
+
+val get_offset : unit -> int32 Lwt.t

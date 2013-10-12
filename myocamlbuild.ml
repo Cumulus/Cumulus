@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 0e13646b766a7489029c6b250f31c7eb) *)
+(* DO NOT EDIT (digest: e4a9464ab779472b69dd6af3b8cbc1ee) *)
 module OASISGettext = struct
 (* # 21 "src/oasis/OASISGettext.ml" *)
 
@@ -496,16 +496,26 @@ end
 open Ocamlbuild_plugin;;
 let package_default =
   {
-     MyOCamlbuildBase.lib_ocaml = [("cumulus", ["src"; "src/server"], [])];
+     MyOCamlbuildBase.lib_ocaml =
+       [
+          ("db", ["src/base/db"], []);
+          ("base", ["src/base"], []);
+          ("cumulus", ["src"; "src/server"], [])
+       ];
      lib_c = [];
      flags = [];
-     includes = [("src/server", ["src"]); ("src", ["src/server"])];
+     includes =
+       [
+          ("src/server", ["src"; "src/base"]);
+          ("src/base", ["src/base/db"]);
+          ("src", ["src/base"; "src/server"])
+       ];
      }
   ;;
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 509 "myocamlbuild.ml"
+# 519 "myocamlbuild.ml"
 (* OASIS_STOP *)
 
 module M = Ocamlbuild_eliom.Make(struct

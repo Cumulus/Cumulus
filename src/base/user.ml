@@ -120,6 +120,10 @@ let get_user_and_email () =
     | None -> Lwt.return None
     | Some id ->
       Db_user.get_user_name_and_email_with_id id >>= fun user ->
+      let user = object
+        method name = user#!name
+        method email = user#!email
+      end in
       Lwt.return (Some user)
 
 let disconnect () =
