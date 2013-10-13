@@ -264,3 +264,6 @@ let edit_desc_comment (id, description) =
         ()
       >>= updating_and_ret
     )
+
+(* TODO: Remove this ugly thing *)
+let to_html' ~starting ~number feeds = feeds ~starting ~number () >>= to_html

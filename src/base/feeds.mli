@@ -39,3 +39,10 @@ val append_desc_comment : (int * string) -> append_state Lwt.t
 val feed_id_to_html : int32 -> (([> Html5_types.div ] Html.elt) list) Lwt.t
 val edit_link_comment : (int * (string * (string * string))) -> append_state Lwt.t
 val edit_desc_comment : (int * string) -> append_state Lwt.t
+
+(* TODO: Remove this ugly thing *)
+val to_html' :
+  starting:int32 ->
+  number:int32 ->
+  Db_feed.feed_generator ->
+  [> Html5_types.div ] Html.elt list Lwt.t
