@@ -1,0 +1,17 @@
+S src
+S src/base
+S src/base/db
+S src/server
+
+B _build/src
+B _build/src/base
+B _build/src/base/db
+B _build/src/server
+
+PKG eliom.server
+PKG macaque_lwt
+PKG safepass
+PKG camomile
+PKG markdown.html
+
+SYN lwt
