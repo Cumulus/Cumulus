@@ -1,20 +1,23 @@
 OASISFormat: 0.3
-Name:        cumulus
-Version:     1.0
-Synopsis:    Buzz erl^WOCaml, le retour
-Authors:     Enguerrand Decorne,
-             Jacques-Pascal Deplaix,
-             Romain Calascibetta,
-             Louis Roche,
-             Poulet,
-             xarch,
-             Alexis Cassaigne
-License:     MIT
-Plugins:     DevFiles (0.3), META (0.3)
+Name: cumulus
+Version: 1.0
+Synopsis: Buzz erl^WOCaml, le retour
+Authors:
+  Enguerrand Decorne,
+  Jacques-Pascal Deplaix,
+  Romain Calascibetta,
+  Louis Roche,
+  Poulet,
+  xarch,
+  Alexis Cassaigne
+License: MIT
+Plugins: DevFiles (0.3), META (0.3)
+BuildTools: ocamlbuild
+XOCamlbuildPluginTags: package(eliom.ocamlbuild)
+OCamlVersion: >= 4.01
 
 Library cumulus
   Path: src
-  BuildTools: ocamlbuild
   Modules:
     Db_update,
     Html,
@@ -28,7 +31,7 @@ Library cumulus
     Feed,
     Comments,
     Feeds,
-    _server/Templates,
+    server/Templates,
     Main
   BuildDepends:
     eliom.server (>= 3.0.3),
@@ -42,18 +45,19 @@ Library cumulus
     markdown.html (>= 0.1.1)
 #  ByteOpt: -w A
 #  NativeOpt: -w A
+  DataFiles:
+    ../data/*.ico,
+    ../data/*.css,
+    ../data/*.png,
+    ../data/*.svg,
+    ../_build/src/client/cumulus.js
 
-Library cumulus_client
-  Path: .
-  BuildTools: ocamlbuild
-  Modules:
-    src/_client/Templates
+Executable cumulus
+  Install: false
+  Path: src/client
+  MainIs: cumulus.ml
   BuildDepends:
-    eliom.client,
-    eliom.syntax
+    eliom.client
   CompiledObject: byte
 #  ByteOpt: -w A
 #  NativeOpt: -w A
-  DataFiles:
-    data/*,
-    _build/src/_client/cumulus.js

@@ -106,6 +106,20 @@ let tree_to_atom id () =
     )
   )
 
+let tag_to_atom tag () =
+  Db_feed.get_feeds_with_tag tag ~starting:0l ~number:Utils.offset ()
+  >>= feeds_of_db
+  >>= to_somthing Feed.to_atom
+  >>= (fun tmp ->
+    Lwt.return (
+      Atom_feed.feed
+        ~updated: (Calendar.make 2012 6 9 17 40 30)
+        ~id:"http://cumulus.org"
+        ~title: (Atom_feed.plain ("Cumulus (tag: " ^ tag ^ ")"))
+        tmp
+    )
+  )
+
 (* FIXME? should atom feed return only a limited number of links ? *)
 let to_atom () =
   Db_feed.get_links_feeds ~starting:0l ~number:Utils.offset ()
