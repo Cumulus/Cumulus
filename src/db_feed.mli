@@ -48,10 +48,10 @@ end
 
 type feeds_and_tags = feed list * tag list * vote list
 type feed_generator =
-    starting:int32 ->
-    number:int32 ->
-    unit ->
-    feeds_and_tags Lwt.t
+  starting:int32 ->
+  number:int32 ->
+  unit ->
+  feeds_and_tags Lwt.t
 
 val get_tree_feeds : int32 -> feed_generator
 val get_links_feeds : feed_generator

@@ -35,11 +35,11 @@ let rec has_parent id = function
 
 let rec append_tree tree id = function
   | Sheet elm -> begin match id = elm.Feed.id with
-                   | true -> Node (elm, [tree])
-                   | false -> Sheet elm
-                 end
+    | true -> Node (elm, [tree])
+    | false -> Sheet elm
+  end
   | Node (elm, childs) ->
-    match id = elm.Feed.id with
+      match id = elm.Feed.id with
       | true -> Node (elm, tree :: childs)
       | false ->
           let childs = List.map (fun x -> append_tree tree id x) childs in
@@ -65,8 +65,8 @@ let rec tree_comments stack comments =
     | Sheet elm
     | Node (elm, _) ->
         match elm.Feed.parent with
-          | None -> 0l
-          | Some n -> n
+        | None -> 0l
+        | Some n -> n
   in
   let rec scan tree stack acc = match stack with
     | [] -> acc @ [ tree ]
@@ -76,40 +76,40 @@ let rec tree_comments stack comments =
         else scan tree r (x :: acc)
   in
   match comments with
-    | [] -> begin match stack with
-              | [] -> None
-              | [ x ] -> Some x
-              | x :: r -> tree_comments (scan x r []) []
-            end
-    | x :: r -> tree_comments (scan (Sheet x) stack []) r
+  | [] -> begin match stack with
+    | [] -> None
+    | [ x ] -> Some x
+    | x :: r -> tree_comments (scan x r []) []
+  end
+  | x :: r -> tree_comments (scan (Sheet x) stack []) r
 
 let rec branch_comments root comments =
   let get = function
     | Sheet elm
     | Node (elm, _) -> match elm.Feed.parent with
-        | None -> 0l
-        | Some n -> n
+      | None -> 0l
+      | Some n -> n
   in
   let is_root = function
     | Sheet elm
     | Node (elm, _) -> match elm.Feed.parent with
-        | None -> true
-        | Some _ -> false
+      | None -> true
+      | Some _ -> false
   in
   match comments with
-    | [] -> root
-    | l when (is_root root) -> root
-    | x :: r ->
-        if x.Feed.id = (get root)
-        then branch_comments (Node (x, [root])) r
-        else branch_comments root (r @ [x])
+  | [] -> root
+  | l when (is_root root) -> root
+  | x :: r ->
+      if x.Feed.id = (get root)
+      then branch_comments (Node (x, [root])) r
+      else branch_comments root (r @ [x])
 
 let rec to_html tree =
   match tree with
-    | Sheet feed ->
+  | Sheet feed ->
       Feed.to_html feed >>= fun elm ->
       Lwt.return (Html.div ~a: [Html.a_class ["line post"]] elm)
-    | Node (feed, childs) ->
+  | Node (feed, childs) ->
       Feed.to_html feed >>= fun elm ->
       Lwt_util.map to_html childs >>= fun childs ->
       Lwt.return (Html.div ~a: [Html.a_class ["line post"]] (elm @ childs))

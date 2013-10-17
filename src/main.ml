@@ -41,106 +41,106 @@ let () =
   Cumulus_appl.register
     ~service: Services.main
     (fun page () ->
-      let service =
-        Eliom_service.preapply ~service:Services.main page
-      in
-      Templates.main ?page ~service ()
+       let service =
+         Eliom_service.preapply ~service:Services.main page
+       in
+       Templates.main ?page ~service ()
     );
   Cumulus_appl.register
     ~service: Services.author_feed
     (fun (page, username) () ->
-      let service =
-        Eliom_service.preapply ~service:Services.author_feed (page, username)
-      in
-      Templates.user ?page ~service username
+       let service =
+         Eliom_service.preapply ~service:Services.author_feed (page, username)
+       in
+       Templates.user ?page ~service username
     );
   Cumulus_appl.register
     ~service: Services.fav_feed
     (fun (username, page) () ->
-      let service =
-        Eliom_service.preapply ~service:Services.fav_feed (username, page)
-      in
-      Templates.fav_feed ?page ~service username
+       let service =
+         Eliom_service.preapply ~service:Services.fav_feed (username, page)
+       in
+       Templates.fav_feed ?page ~service username
     );
   Eliom_registration.Action.register
     ~service:Services.append_feed
     (fun () data ->
-      Feeds.append_feed data >>= (function
-        | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
-        | Feeds.Empty -> Lwt.return "L'un des champs est vide"
-        | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
-        | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
-        | Feeds.Ok -> Lwt.return "Le lien a bien été ajouté"
-      )
-      >>= Errors.set_error
+       Feeds.append_feed data >>= (function
+         | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
+         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
+         | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
+         | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
+         | Feeds.Ok -> Lwt.return "Le lien a bien été ajouté"
+       )
+       >>= Errors.set_error
     );
   Eliom_registration.Action.register
     ~service:Services.append_link_comment
     (fun (_, _) data ->
-      Feeds.append_link_comment data >>= (function
-        | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
-        | Feeds.Empty -> Lwt.return "L'un des champs est vide"
-        | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
-        | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
-        | Feeds.Ok -> Lwt.return "Le commentaire a bien été ajouté"
-      )
-      >>= Errors.set_error
+       Feeds.append_link_comment data >>= (function
+         | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
+         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
+         | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
+         | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
+         | Feeds.Ok -> Lwt.return "Le commentaire a bien été ajouté"
+       )
+       >>= Errors.set_error
     );
   Eliom_registration.Action.register
     ~service:Services.append_desc_comment
     (fun (_, _) data ->
-      Feeds.append_desc_comment data >>= (function
-        | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
-        | Feeds.Empty -> Lwt.return "L'un des champs est vide"
-        | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
-        | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
-        | Feeds.Ok -> Lwt.return "Le lien a bien été ajouté"
-      )
-      >>= Errors.set_error
+       Feeds.append_desc_comment data >>= (function
+         | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
+         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
+         | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
+         | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
+         | Feeds.Ok -> Lwt.return "Le lien a bien été ajouté"
+       )
+       >>= Errors.set_error
     );
   Eliom_registration.Action.register
     ~service:Services.edit_link_comment
     (fun (_, _) data ->
-      Feeds.edit_link_comment data >>= (function
-        | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
-        | Feeds.Empty -> Lwt.return "L'un des champs est vide"
-        | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
-        | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
-        | Feeds.Ok -> Lwt.return "Édition réussie"
-      )
-      >>= Errors.set_error
+       Feeds.edit_link_comment data >>= (function
+         | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
+         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
+         | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
+         | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
+         | Feeds.Ok -> Lwt.return "Édition réussie"
+       )
+       >>= Errors.set_error
     );
   Eliom_registration.Action.register
     ~service:Services.edit_desc_comment
     (fun (_, _) data ->
-      Feeds.edit_desc_comment data >>= (function
-        | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
-        | Feeds.Empty -> Lwt.return "L'un des champs est vide"
-        | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
-        | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
-        | Feeds.Ok -> Lwt.return "Édition réussie"
-      )
-      >>= Errors.set_error
+       Feeds.edit_desc_comment data >>= (function
+         | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
+         | Feeds.Empty -> Lwt.return "L'un des champs est vide"
+         | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
+         | Feeds.Already_exist -> Lwt.return "Le lien existe déjà"
+         | Feeds.Ok -> Lwt.return "Édition réussie"
+       )
+       >>= Errors.set_error
     );
   Eliom_registration.Action.register
     ~service: Services.auth
     (fun () (username, password) ->
-      User.connect username password >>= (function
-        | User.Already_connected -> Lwt.return "Déjà connecté"
-        | User.Ok -> Lwt.return "Connecté"
-        | User.Bad_password -> Lwt.return "Mauvais mot de passe"
-        | User.Not_found -> Lwt.return "Utilisateur non trouvé"
-      )
-      >>= Errors.set_error
+       User.connect username password >>= (function
+         | User.Already_connected -> Lwt.return "Déjà connecté"
+         | User.Ok -> Lwt.return "Connecté"
+         | User.Bad_password -> Lwt.return "Mauvais mot de passe"
+         | User.Not_found -> Lwt.return "Utilisateur non trouvé"
+       )
+       >>= Errors.set_error
     );
   Eliom_registration.Action.register
     ~service: Services.disconnect
     (fun () () ->
-      User.disconnect () >>= (function
-        | true -> Lwt.return "Déconnecté"
-        | false -> Lwt.return "Quoi la baise ?"
-      )
-      >>= Errors.set_error
+       User.disconnect () >>= (function
+         | true -> Lwt.return "Déconnecté"
+         | false -> Lwt.return "Quoi la baise ?"
+       )
+       >>= Errors.set_error
     );
   Cumulus_appl.register
     ~service: Services.view_feed'
@@ -155,42 +155,42 @@ let () =
   Eliom_registration.Action.register
     ~service:Services.add_user
     (fun () data ->
-      User.add data >>= (function
-        | true -> Lwt.return "Vous êtes bien enregistré"
-        | false ->
-            Lwt.return
-              "L'utilisateur existe deja, ou une information est invalide"
-      )
-      >>= Errors.set_error
+       User.add data >>= (function
+         | true -> Lwt.return "Vous êtes bien enregistré"
+         | false ->
+             Lwt.return
+               "L'utilisateur existe deja, ou une information est invalide"
+       )
+       >>= Errors.set_error
     );
   Eliom_registration.Action.register
     ~service:Services.update_user_mail
     (fun () data ->
-      User.update_email data >>= (function
-        | true -> Lwt.return "Modification de l'adresse mail effectuée"
-        | false -> Lwt.return "Adresse invalide"
-      )
-      >>= Errors.set_error
+       User.update_email data >>= (function
+         | true -> Lwt.return "Modification de l'adresse mail effectuée"
+         | false -> Lwt.return "Adresse invalide"
+       )
+       >>= Errors.set_error
     );
   Eliom_registration.Action.register
     ~service:Services.update_user_feeds_per_page
     (fun () data ->
-      User.update_feeds_per_page (Int32.of_int data) >>= (function
-        | true -> Lwt.return "Nombre de liens par page modifié"
-        | false -> Lwt.return "Nombre invalide"
-      )
-      >>= Errors.set_error
+       User.update_feeds_per_page (Int32.of_int data) >>= (function
+         | true -> Lwt.return "Nombre de liens par page modifié"
+         | false -> Lwt.return "Nombre invalide"
+       )
+       >>= Errors.set_error
     );
   Eliom_registration.Action.register
     ~service:Services.update_user_password
     (fun () data ->
-      User.update_password data >>= (function
-        | true -> Lwt.return "Mot de passe changé."
-        | false ->
-            Lwt.return
-              "Les mots de passe sont invalides ou ne correspondent pas."
-      )
-      >>= Errors.set_error
+       User.update_password data >>= (function
+         | true -> Lwt.return "Mot de passe changé."
+         | false ->
+             Lwt.return
+               "Les mots de passe sont invalides ou ne correspondent pas."
+       )
+       >>= Errors.set_error
     );
   Cumulus_appl.register
     ~service: Services.registration
@@ -198,10 +198,10 @@ let () =
   Cumulus_appl.register
     ~service: Services.tag_feed
     (fun (page, tag) () ->
-      let service =
-        Eliom_service.preapply ~service:Services.tag_feed (page, tag)
-      in
-      Templates.tag ?page ~service tag
+       let service =
+         Eliom_service.preapply ~service:Services.tag_feed (page, tag)
+       in
+       Templates.tag ?page ~service tag
     );
   Cumulus_appl.register
     ~service: Services.preferences
@@ -215,9 +215,9 @@ let () =
   Eliom_registration.Action.register
     ~service:Services.delete_feed
     (fun feed () ->
-      User.get_userid () >>= function
-        | None -> Lwt.return ()
-        | Some userid -> Feed.delete_feed_check ~feed ~userid ()
+       User.get_userid () >>= function
+       | None -> Lwt.return ()
+       | Some userid -> Feed.delete_feed_check ~feed ~userid ()
     );
   Eliom_registration.Action.register
     ~service:Services.add_fav_feed
