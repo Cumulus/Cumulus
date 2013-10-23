@@ -19,14 +19,6 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-class type ['a, 'b] macaque_type = object
-  method get : unit
-  method nul : 'b
-  method t : 'a
-end
-
-type ('a, 'b) t = ('a, 'b) macaque_type Sql.t
-
 val view : ('a, 'b) Sql.view -> 'a list Lwt.t
 
 val view_one : ('a, 'b) Sql.view -> 'a Lwt.t

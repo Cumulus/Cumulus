@@ -19,15 +19,32 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-include Macaque_lwt
-include Macaque_lwt.Utils
-include Macaque_lwt.Make(struct
-  let connect () =
-    Lwt_PGOCaml.connect
-      ~database:"cumulus"
-      ~host:"localhost"
-      ~password:"mdp"
-      ~user:"cumulus"
-      ()
-  let pool_number = 16
-end)
+module Lwt_thread = struct
+  include Lwt
+  include Lwt_chan
+end
+module Lwt_PGOCaml = PGOCaml_generic.Make(Lwt_thread)
+module Lwt_Query = Query.Make_with_Db(Lwt_thread)(Lwt_PGOCaml)
+
+let connect =
+  Lwt_PGOCaml.connect
+    ~database:"cumulus"
+    ~host:"localhost"
+    ~password:"mdp"
+    ~user:"cumulus"
+
+let pool = Lwt_pool.create 16 ~validate:Lwt_PGOCaml.alive connect
+
+let use f = Lwt_pool.use pool f
+
+let view x = use (fun db -> Lwt_Query.view db x)
+let view_opt x = use (fun db -> Lwt_Query.view_opt db x)
+let view_one x = use (fun db -> Lwt_Query.view_one db x)
+let query x = use (fun db -> Lwt_Query.query db x)
+let value x = use (fun db -> Lwt_Query.value db x)
+let value_opt x = use (fun db -> Lwt_Query.value_opt db x)
+let alter x = use (fun db -> Lwt_PGOCaml.alter db x)
+
+let rec in' value = function
+  | [] -> Sql.Value.bool false
+  | x::xs -> Sql.Op.(||) (Sql.Op.(=) x value) (in' value xs)

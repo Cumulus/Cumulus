@@ -24,31 +24,30 @@ module Option = Eliom_lib.Option
 let (>>=) = Lwt.(>>=)
 
 class type feed = object
-  method author : (Sql.int32_t, Sql.non_nullable) Db.t
-  method id : (Sql.int32_t, Sql.non_nullable) Db.t
-  method timedate : (Sql.timestamp_t, Sql.non_nullable) Db.t
-  method description : (Sql.string_t, Sql.non_nullable) Db.t
-  method url : (Sql.string_t, Sql.nullable) Db.t
-  method parent : (Sql.int32_t, Sql.nullable) Db.t
-  method root : (Sql.int32_t, Sql.nullable) Db.t
+  method author : Sql.int32_t Sql.non_nullable_data
+  method id : Sql.int32_t Sql.non_nullable_data
+  method timedate : Sql.timestamp_t Sql.non_nullable_data
+  method description : Sql.string_t Sql.non_nullable_data
+  method url : Sql.string_t Sql.nullable_data
+  method parent : Sql.int32_t Sql.nullable_data
+  method root : Sql.int32_t Sql.nullable_data
 end
 
 class type tag = object
-  method tag : (Sql.string_t, Sql.non_nullable) Db.t
-  method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
+  method tag : Sql.string_t Sql.non_nullable_data
+  method id_feed : Sql.int32_t Sql.non_nullable_data
 end
 
-
 class type fav = object
-  (* method id : (Sql.int32_t, Sql.non_nullable) Db.t *)
-  method id_user : (Sql.int32_t, Sql.non_nullable) Db.t
-  method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
+  (* method id : Sql.int32_t Sql.non_nullable_data *)
+  method id_user : Sql.int32_t Sql.non_nullable_data
+  method id_feed : Sql.int32_t Sql.non_nullable_data
 end
 
 class type vote = object
-  method score : (Sql.int32_t, Sql.non_nullable) Db.t
-  method id_user : (Sql.int32_t, Sql.non_nullable) Db.t
-  method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
+  method score : Sql.int32_t Sql.non_nullable_data
+  method id_user : Sql.int32_t Sql.non_nullable_data
+  method id_feed : Sql.int32_t Sql.non_nullable_data
 end
 
 type feeds_and_tags = feed list * tag list * vote list
