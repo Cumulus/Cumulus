@@ -311,18 +311,20 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
   Lwt.join [feed; tag]
 
 let is_feed_author ~feed ~userid () =
-  try_lwt begin
-    Db.view_one
-      (<:view< f | f in $feeds$;
-              f.id = $int32:feed$;
-              f.author = $int32:userid$;
-       >>)
-    >>= fun _ ->
-    Lwt.return true
-  end
-  with exn ->
-      Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
-      Lwt.return false
+  Lwt.catch
+    (fun () ->
+       Db.view_one
+         (<:view< f | f in $feeds$;
+                 f.id = $int32:feed$;
+                 f.author = $int32:userid$;
+          >>)
+       >>= fun _ ->
+       Lwt.return true
+    )
+    (fun exn ->
+       Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
+       Lwt.return false
+    )
 
 let get_comments root =
   let feeds_filter f =
@@ -562,18 +564,20 @@ let user_vote ~feedid ~userid () =
   | Some vote -> Lwt.return vote#!score
 
 let is_fav ~feedid ~userid () =
-  try_lwt begin
-    Db.view_one
-      (<:view< {
-              f.id_user;
-              f.id_feed;
-              } | f in $favs$; f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
-    >>= fun _ ->
-    Lwt.return true
-  end
-  with exn ->
-      Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
-      Lwt.return false
+  Lwt.catch
+    (fun () ->
+       Db.view_one
+         (<:view< {
+                 f.id_user;
+                 f.id_feed;
+                 } | f in $favs$; f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
+       >>= fun _ ->
+       Lwt.return true
+    )
+  (fun exn ->
+    Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
+    Lwt.return false
+  )
 
 (* Il faut delete tous les tags du lien et ajouter les nouveaux *)
 let update ~feedid ~url ~description ~tags () =
