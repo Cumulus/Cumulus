@@ -1,7 +1,29 @@
+How to get the dependencies
+===========================
+
+First you need opam (or you know what you are doing), and do:
+
+ $ opam repository add ocsigendev http://ocsigen.org/opam
+ $ opam repository add cumulus https://github.com/Cumulus/opam-cumulus.git
+ $ opam update
+ $ opam install cumulus-deps
+
+You will still need to install with your packages manager
+(aptitude, apt-get, pacman, …) the following packages:
+
+ * postgresql
+ * All the system packages needed by the opam packages:
+   * libpcre3-dev
+   * libssl-dev
+   * And maybe I forgot some deps
+
+How to setup the database and build
+===================================
+
 For init the database, just execute (with the user postgres):
 
-$ createuser -P cumulus
-$ createdb -E UTF-8 -O cumulus cumulus
+ $ createuser -P cumulus
+ $ createdb -E UTF-8 -O cumulus cumulus
 
 then add the following line in /etc/postgresql/<maybe sub-dir>/pg_hba.conf:
 
@@ -9,7 +31,7 @@ local cumulus cumulus password
 
 and then execute (with the user postgres):
 
-$ psql -U cumulus -d cumulus -f createdb.sql
+ $ psql -U cumulus -d cumulus -f createdb.sql
 
 The final part is to modify the password in src/db.ml to the password you gave,
 and recompile the project with « make »

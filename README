@@ -17,4 +17,6 @@ Run Requirements
  * Ocsigenserver
  * PostgreSQL
 
+See the INSTALL file to know how to get them.
+
 A running demo is available at: http://cumulus.mirai.fr/
