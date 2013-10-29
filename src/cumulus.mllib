@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 3f472db04ecb42f2c77cff261f9a8b36)
+# DO NOT EDIT (digest: 250f60bea2204a68d5e17ae95e4ae8c9)
 Db_update
 Html
 Utils
@@ -13,5 +13,6 @@ Feed
 Comments
 Feeds
 server/Templates
+Configfile
 Main
 # OASIS_STOP

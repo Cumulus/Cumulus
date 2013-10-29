@@ -32,6 +32,7 @@ Library cumulus
     Comments,
     Feeds,
     server/Templates,
+    Configfile,
     Main
   BuildDepends:
     eliom.server (>= 3.0.3),
