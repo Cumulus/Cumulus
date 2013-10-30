@@ -24,6 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     and (=<<) = Lwt.(=<<)
   }}
 
+<<<<<<< HEAD
   {client{
       let display_error error_frame =
         let id_timeout = ref None in
@@ -54,6 +55,39 @@ let () =
          )
          stream
     )
+=======
+{client{
+  let display_error error_frame =
+    let id_timeout = ref None in
+    id_timeout :=
+      Some
+        (Dom_html.window##setTimeout
+           (Js.wrap_callback
+              (fun () ->
+                 Eliom_content.Html5.Manip.removeAllChild error_frame;
+                 match !id_timeout with
+                 | None -> () (* It cannot happen *)
+                 | Some id ->
+                     Dom_html.window##clearTimeout (id)
+              ),
+            5_000.
+           )
+        )
+
+  (* Reloading feeds*)
+  let () =
+    let service = Eliom_service.void_coservice' in
+    let event = %Feeds.event in
+    let stream = Lwt_react.E.to_stream event in
+    Lwt.async
+      (fun () ->
+         Lwt_stream.iter_s
+           (fun () ->
+              Eliom_client.change_page ~service () ()
+           )
+           stream
+      )
+>>>>>>> 90eda67213b1dbff0d84e26eecd98d1f7096f8b8
 }}
 
 let string_input_box ?(a=[]) =
@@ -67,10 +101,17 @@ let submit_input ?(a=[]) =
 
 let user_form () =
   Lwt.return
+<<<<<<< HEAD
     (Html.div
         ~a: [Html.a_class ["userbox"; "right"; "bottom-box"]][
         Html.post_form
           ~a: [Html.a_class ["userboxcontent"]]
+=======
+    [ Html.div
+        ~a: [Html.a_class ["mod";"right"]][
+        Html.post_form
+          ~a: [Html.a_class ["right"]]
+>>>>>>> 90eda67213b1dbff0d84e26eecd98d1f7096f8b8
           ~service: Services.auth
           (fun (user_name, password_name) -> [
                Html.string_input
@@ -81,6 +122,7 @@ let user_form () =
                  ~a: [Html.a_placeholder "Mot de passe"]
                  ~input_type: `Password
                  ~name: password_name ();
+<<<<<<< HEAD
                Html.div ~a: [Html.a_class ["loginlinks"]] [
                  Html.string_input
                    ~input_type: `Submit
@@ -90,11 +132,24 @@ let user_form () =
                    ~service: Services.registration
                    [Html.pcdata "Inscription"] ();
                ]
+=======
+               Html.string_input
+                 ~input_type: `Submit
+                 ~value: "Connexion" ();
+               Html.a
+                 ~a: [Html.a_class ["nav"]]
+                 ~service: Services.registration
+                 [Html.pcdata "Inscription"] ();
+>>>>>>> 90eda67213b1dbff0d84e26eecd98d1f7096f8b8
              ]
           )
           ()
       ]
+<<<<<<< HEAD
     )
+=======
+    ]
+>>>>>>> 90eda67213b1dbff0d84e26eecd98d1f7096f8b8
 
 let user_logged user =
   Lwt.return
@@ -104,6 +159,7 @@ let user_logged user =
             ~a:[Html.a_class ["userboxcontent"]]
             ~service:Services.disconnect
             (fun () ->
+<<<<<<< HEAD
                [
                  Html.string_input
                    ~input_type:`Submit
@@ -132,6 +188,32 @@ let user_logged user =
                        (50, "identicon")
                    )
                    ();
+=======
+               [ Html.p
+                   [ Html.a
+                       ~a:[Html.a_class ["nav"]]
+                       ~service:Services.fav_feed
+                       [Html.pcdata "Favoris"]
+                       (Sql.get user#name, Some 0);
+                     Html.a
+                       ~a:[Html.a_class ["nav"]]
+                       ~service:Services.preferences
+                       [Html.pcdata "Préférences"]
+                       ();
+                     Html.string_input
+                       ~input_type:`Submit
+                       ~value:"Déconnexion"
+                       ();
+                     Html.img
+                       ~alt:(Sql.get user#name)
+                       ~src:(
+                         Html.make_uri
+                           ~service: (Utils.get_gravatar (Sql.get user#email))
+                           (30, "identicon")
+                       )
+                       ();
+                   ]
+>>>>>>> 90eda67213b1dbff0d84e26eecd98d1f7096f8b8
                ]
             )
             ()
@@ -266,8 +348,7 @@ let main_style content footer =
                         Html.a ~service:Services.comments_atom
                           [Html.pcdata "Flux Atom des commentaires"] ();
                         Html.pcdata ")";
-
-                       ]
+                                                ]
                      )
                  ]
               )

@@ -56,13 +56,13 @@ let is_invalid_url =
       "\\(\\?" ^ legit_chars ^ "*\\)?" ^               (* Parameters *)
       "\\(#"   ^ legit_chars ^ "*\\)?$"                (* Anchor *) in
   (fun input ->
-    not (Str.string_match (Str.regexp regexp_match_url) input 0)
+     not (Str.string_match (Str.regexp regexp_match_url) input 0)
   )
 
 let is_invalid_email =
   let email_regexp = Str.regexp "\\([^<>(),; \t]+@[^<>(),; \t]+\\)" in
   (fun email ->
-    not (Str.string_match email_regexp email 0)
+     not (Str.string_match email_regexp email 0)
   )
 
 let get_gravatar email =
@@ -77,14 +77,14 @@ let strip =
   let regexp_begin = Str.regexp "^[ ]+" in
   let regexp_end = Str.regexp "[ ]+$" in
   (fun str ->
-    let str = Str.replace_first regexp_begin "" str in
-    Str.replace_first regexp_end "" str
+     let str = Str.replace_first regexp_begin "" str in
+     Str.replace_first regexp_end "" str
   )
 
 let split =
   let regexp = Str.regexp "[,]+" in
   (fun str ->
-    Str.split regexp str
+     Str.split regexp str
   )
 
 let troncate' len str =

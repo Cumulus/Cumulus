@@ -210,17 +210,17 @@ let to_atom self =
        Atom_feed.links [Atom_feed.link (Uri.make_string_uri ~absolute:true
                                           ~service:Services.view_feed
                                           (Int32.to_int self.id, "")
-                                          )];
+                                       )];
        Atom_feed.summary (Atom_feed.html5 (
-           (match self.url with
-            | Some url -> Html.Raw.a ~a:
-                            [Html.a_href
-                               (Html.uri_of_string
-                                  (fun () -> url)
-                               )
-                            ]
-                            [Html.pcdata self.description]
-            | None ->
+         (match self.url with
+          | Some url -> Html.Raw.a ~a:
+                          [Html.a_href
+                             (Html.uri_of_string
+                                (fun () -> url)
+                             )
+                          ]
+                          [Html.pcdata self.description]
+          | None ->
               let markdown = Markdown.parse_text self.description in
               let render_pre ~kind s = H.pre [H.pcdata s] in
               let render_link {Markdown.href_target; href_desc} =
@@ -231,17 +231,17 @@ let to_atom self =
               in
               Html.div ~a:[Html.a_class ["lamalama"]] (conv (M.to_html ~render_pre
                                                                ~render_link ~render_img markdown))
-           )
-           :: (Html.br ())
-           :: (Html.a ~service:Services.atom_feed [Html.pcdata "Flux atom du lien"]
-                 (Int32.to_int self.id))
-           :: (Html.br ())
-           :: (Html.pcdata "Tags : ")
-           :: (links_of_tags self.tags)
-           @ [(Html.br ())]
-           @ root_infos
          )
-         )
+         :: (Html.br ())
+         :: (Html.a ~service:Services.atom_feed [Html.pcdata "Flux atom du lien"]
+               (Int32.to_int self.id))
+         :: (Html.br ())
+         :: (Html.pcdata "Tags : ")
+         :: (links_of_tags self.tags)
+         @ [(Html.br ())]
+         @ root_infos
+       )
+       )
       ]
   )
 
