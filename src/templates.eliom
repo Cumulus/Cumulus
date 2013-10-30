@@ -150,8 +150,7 @@ let userbox () =
 
 let header () =
   Lwt.return
-    [ Html.div ~a: [Html.a_class ["test"]] [
-         Html.section
+    [   Html.section
            ~a:[Html.a_class ["flex flex-h header"]]
            ( [
              Html.aside
@@ -196,7 +195,6 @@ let header () =
            ];
            )
        ]
-    ]
 
 let main_style content footer =
   userbox () >>= fun userbox ->

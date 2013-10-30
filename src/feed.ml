@@ -68,11 +68,12 @@ let conv : 'a H.elt list -> 'a Html.elt list = fun x -> Html.totl (H.toeltl x)
 
 let to_html self =
   let content = match self.url with
-    | Some url -> Html.Raw.a
+    | Some url -> Html.div ~a:[Html.a_class["line_title"]][
+                    Html.Raw.a
                     ~a:[Html.a_class ["postitle"];
                         Html.a_href (Html.uri_of_string (fun () -> url));
                        ]
-                    [Html.pcdata self.description]
+                    [Html.pcdata self.description]]
     | None ->
       let markdown = Markdown.parse_text self.description in
       let render_pre ~kind s = H.pre [H.pcdata s] in
@@ -120,7 +121,16 @@ let to_html self =
                    ~service: (Utils.get_gravatar (author#!email)) (65, "identicon")
                )
                ()]]];
-      [Html.div ~a: [Html.a_class["mod"]][
+      [Html.div ~a: [Html.a_class["mod post_info"]][
+       Html.div ~a: [Html.a_class["line_author"]][
+
+      Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
+      Html.a
+        ~service:Services.author_feed
+        [Html.pcdata author#!name]
+        (None, author#!name);
+       ];
+      (*
       (if not state then
          (Html.pcdata "")
        else
@@ -142,14 +152,9 @@ let to_html self =
        else
          (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
       );
-      Html.pcdata ("[" ^ string_of_int self.score ^ "] ");
+      Html.pcdata ("[" ^ string_of_int self.score ^ "] ");*)
       content;
       Html.br ();
-      Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
-      Html.a
-        ~service:Services.author_feed
-        [Html.pcdata author#!name]
-        (None, author#!name);
       ]];
       [Html.br ();
        (* TODO : afficher "n commentaire(s)" *)
