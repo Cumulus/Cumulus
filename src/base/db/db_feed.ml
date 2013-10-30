@@ -24,31 +24,30 @@ module Option = Eliom_lib.Option
 let (>>=) = Lwt.(>>=)
 
 class type feed = object
-  method author : (Sql.int32_t, Sql.non_nullable) Db.t
-  method id : (Sql.int32_t, Sql.non_nullable) Db.t
-  method timedate : (Sql.timestamp_t, Sql.non_nullable) Db.t
-  method description : (Sql.string_t, Sql.non_nullable) Db.t
-  method url : (Sql.string_t, Sql.nullable) Db.t
-  method parent : (Sql.int32_t, Sql.nullable) Db.t
-  method root : (Sql.int32_t, Sql.nullable) Db.t
+  method author : Sql.int32_t Sql.non_nullable_data
+  method id : Sql.int32_t Sql.non_nullable_data
+  method timedate : Sql.timestamp_t Sql.non_nullable_data
+  method description : Sql.string_t Sql.non_nullable_data
+  method url : Sql.string_t Sql.nullable_data
+  method parent : Sql.int32_t Sql.nullable_data
+  method root : Sql.int32_t Sql.nullable_data
 end
 
 class type tag = object
-  method tag : (Sql.string_t, Sql.non_nullable) Db.t
-  method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
+  method tag : Sql.string_t Sql.non_nullable_data
+  method id_feed : Sql.int32_t Sql.non_nullable_data
 end
 
-
 class type fav = object
-  (* method id : (Sql.int32_t, Sql.non_nullable) Db.t *)
-  method id_user : (Sql.int32_t, Sql.non_nullable) Db.t
-  method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
+  (* method id : Sql.int32_t Sql.non_nullable_data *)
+  method id_user : Sql.int32_t Sql.non_nullable_data
+  method id_feed : Sql.int32_t Sql.non_nullable_data
 end
 
 class type vote = object
-  method score : (Sql.int32_t, Sql.non_nullable) Db.t
-  method id_user : (Sql.int32_t, Sql.non_nullable) Db.t
-  method id_feed : (Sql.int32_t, Sql.non_nullable) Db.t
+  method score : Sql.int32_t Sql.non_nullable_data
+  method id_user : Sql.int32_t Sql.non_nullable_data
+  method id_feed : Sql.int32_t Sql.non_nullable_data
 end
 
 type feeds_and_tags = feed list * tag list * vote list
@@ -312,18 +311,20 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
   Lwt.join [feed; tag]
 
 let is_feed_author ~feed ~userid () =
-  try_lwt begin
-    Db.view_one
-      (<:view< f | f in $feeds$;
-              f.id = $int32:feed$;
-              f.author = $int32:userid$;
-       >>)
-    >>= fun _ ->
-    Lwt.return true
-  end
-  with exn ->
-      Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
-      Lwt.return false
+  Lwt.catch
+    (fun () ->
+       Db.view_one
+         (<:view< f | f in $feeds$;
+                 f.id = $int32:feed$;
+                 f.author = $int32:userid$;
+          >>)
+       >>= fun _ ->
+       Lwt.return true
+    )
+    (fun exn ->
+       Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
+       Lwt.return false
+    )
 
 let get_comments root =
   let feeds_filter f =
@@ -563,18 +564,20 @@ let user_vote ~feedid ~userid () =
   | Some vote -> Lwt.return vote#!score
 
 let is_fav ~feedid ~userid () =
-  try_lwt begin
-    Db.view_one
-      (<:view< {
-              f.id_user;
-              f.id_feed;
-              } | f in $favs$; f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
-    >>= fun _ ->
-    Lwt.return true
-  end
-  with exn ->
-      Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
-      Lwt.return false
+  Lwt.catch
+    (fun () ->
+       Db.view_one
+         (<:view< {
+                 f.id_user;
+                 f.id_feed;
+                 } | f in $favs$; f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
+       >>= fun _ ->
+       Lwt.return true
+    )
+  (fun exn ->
+    Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
+    Lwt.return false
+  )
 
 (* Il faut delete tous les tags du lien et ajouter les nouveaux *)
 let update ~feedid ~url ~description ~tags () =

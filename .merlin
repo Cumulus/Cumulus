@@ -9,7 +9,7 @@ B _build/src/base/db
 B _build/src/server
 
 PKG eliom.server
-PKG macaque_lwt
+PKG macaque
 PKG safepass
 PKG camomile
 PKG markdown.html
