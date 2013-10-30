@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 4cdeb961c86a6e091783a05cb3535630)
+# DO NOT EDIT (digest: 094397850e239c274f4d22994cdf0d29)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -13,28 +13,56 @@
 ".git": not_hygienic
 "_darcs": -traverse
 "_darcs": not_hygienic
+# Library db
+"src/base/db/db.cmxs": use_db
+<src/base/db/*.ml{,i}>: package(camomile)
+<src/base/db/*.ml{,i}>: package(markdown.html)
+<src/base/db/*.ml{,i}>: package(eliom.server)
+<src/base/db/*.ml{,i}>: package(batteries)
+<src/base/db/*.ml{,i}>: package(macaque.syntax)
+<src/base/db/*.ml{,i}>: package(pgocaml)
+<src/base/db/*.ml{,i}>: package(lwt)
+<src/base/db/*.ml{,i}>: package(safepass)
+# Library base
+"src/base/base.cmxs": use_base
+<src/base/*.ml{,i}>: use_db
+<src/base/*.ml{,i}>: package(camomile)
+<src/base/*.ml{,i}>: package(markdown.html)
+<src/base/*.ml{,i}>: package(eliom.server)
+<src/base/*.ml{,i}>: package(batteries)
+<src/base/*.ml{,i}>: package(macaque.syntax)
+<src/base/*.ml{,i}>: package(pgocaml)
+<src/base/*.ml{,i}>: package(lwt)
+<src/base/*.ml{,i}>: package(safepass)
 # Library cumulus
 "src/cumulus.cmxs": use_cumulus
-<src/*.ml{,i}>: package(eliom.server)
-<src/*.ml{,i}>: package(macaque.syntax)
-<src/*.ml{,i}>: package(batteries)
+<src/*.ml{,i}>: use_base
+<src/*.ml{,i}>: use_db
 <src/*.ml{,i}>: package(camomile)
+<src/*.ml{,i}>: package(markdown.html)
+<src/*.ml{,i}>: package(eliom.server)
+<src/*.ml{,i}>: package(batteries)
+<src/*.ml{,i}>: package(macaque.syntax)
 <src/*.ml{,i}>: package(pgocaml)
 <src/*.ml{,i}>: package(lwt)
 <src/*.ml{,i}>: package(safepass)
-<src/*.ml{,i}>: package(markdown.html)
-<src/server/*.ml{,i}>: package(eliom.server)
-<src/server/*.ml{,i}>: package(macaque.syntax)
-<src/server/*.ml{,i}>: package(batteries)
+<src/server/*.ml{,i}>: use_base
+<src/server/*.ml{,i}>: use_db
 <src/server/*.ml{,i}>: package(camomile)
+<src/server/*.ml{,i}>: package(markdown.html)
+<src/server/*.ml{,i}>: package(eliom.server)
+<src/server/*.ml{,i}>: package(batteries)
+<src/server/*.ml{,i}>: package(macaque.syntax)
 <src/server/*.ml{,i}>: package(pgocaml)
 <src/server/*.ml{,i}>: package(lwt)
 <src/server/*.ml{,i}>: package(safepass)
-<src/server/*.ml{,i}>: package(markdown.html)
 # Executable cumulus
 "src/client/cumulus.byte": package(eliom.client)
 <src/client/*.ml{,i}>: package(eliom.client)
 # OASIS_STOP
-<src/*.ml>: syntax(camlp4o)
-<src/*.ml{,i}>: thread
+<src/**/*.ml>: syntax(camlp4o)
+<src/**/*.ml{,i}>: thread
+<src/client/*.ml>: -syntax(camlp4o)
+<src/*.ml{,i}>: -use_db
+<src/server/*.ml{,i}>: -use_db
 "src/client/cumulus.js": package(eliom.client)

@@ -116,7 +116,7 @@ let user_logged user =
                     ~a:[Html.a_class ["loggedentry"]]
                     ~service:Services.fav_feed
                     [Html.pcdata "Favoris"]
-                    (Sql.get user#name, Some 0)];
+                    (user#name, Some 0)];
 
                 Html.div ~a: [Html.a_class ["loggedlink"]] [
                   Html.a
@@ -126,10 +126,10 @@ let user_logged user =
                     ()];
                 Html.img
                   ~a: [Html.a_class ["loggedavatar";"right"]]
-                  ~alt:(Sql.get user#name)
+                  ~alt:user#name
                   ~src:(
                     Html.make_uri
-                      ~service: (Utils.get_gravatar (Sql.get user#email))
+                      ~service: (Utils.get_gravatar user#email)
                       (50, "identicon")
                   )
                   ();
@@ -286,7 +286,7 @@ let private_main ~page ~link ~service feeds count =
   User.get_offset () >>= fun off ->
   main_style
     feeds
-    (let n = Int64.to_int (Sql.get count#n) in
+    (let n = Int64.to_int count in
      let offset = Int32.to_int off in
      link_footer
        ~link
@@ -412,7 +412,7 @@ let private_preferences () =
     []
 
 let private_comment id =
-  Db_feed.exist ~feedid:id () >>= fun exist ->
+  Feed.exist ~feedid:id () >>= fun exist ->
   if not exist then
     main_style [Html.div
                   ~a:[Html.a_class ["box"]]
@@ -486,7 +486,7 @@ let private_comment id =
           ]) []
 
 let private_edit_feed id =
-  Db_feed.exist ~feedid:id () >>= fun exist ->
+  Feed.exist ~feedid:id () >>= fun exist ->
   if not exist then
     main_style [Html.div
                   ~a:[Html.a_class ["box"]]
@@ -498,7 +498,7 @@ let private_edit_feed id =
     Feed.get_edit_infos id >>= fun (is_url, edit_desc, edit_url, edit_tags) ->
     User.get_userid () >>= (function
       | None -> Lwt.return true
-      | Some uid -> Db_feed.is_feed_author ~feed:id ~userid:uid ())
+      | Some uid -> Feed.is_feed_author ~feed:id ~userid:uid ())
     >>= fun is_author ->
     main_style
       ( if (not state) or (not is_author) then
@@ -575,10 +575,9 @@ let private_edit_feed id =
 let feed_list ~service page link feeds nb_feeds =
   User.get_offset () >>= fun off ->
   let starting = Int32.mul (Int32.of_int page) off in
-  feeds ~starting ~number:off () >>= fun feedlist ->
   private_main ~page ~link
     ~service
-    (Feeds.to_html feedlist)
+    (Feeds.to_html' ~starting ~number:off feeds)
     nb_feeds
 
 (* see TODO [1] *)
@@ -589,8 +588,8 @@ let main ?(page=0) ~service () =
          Html.pcdata name
        ] param
     )
-    (Db_feed.get_root_feeds)
-    (Db_feed.count_root_feeds ())
+    (Feed.get_root_feeds)
+    (Feed.count_root_feeds ())
 
 let user ?(page=0) ~service username =
   feed_list ~service page
@@ -599,8 +598,8 @@ let user ?(page=0) ~service username =
          Html.pcdata name
        ] (param, username)
     )
-    (Db_feed.get_feeds_with_author username)
-    (Db_feed.count_feeds_with_author username)
+    (Feed.get_feeds_with_author username)
+    (Feed.count_feeds_with_author username)
 
 let tag ?(page=0) ~service tag =
   feed_list ~service page
@@ -609,8 +608,8 @@ let tag ?(page=0) ~service tag =
          Html.pcdata name
        ] (param, tag)
     )
-    (Db_feed.get_feeds_with_tag tag)
-    (Db_feed.count_feeds_with_tag tag)
+    (Feed.get_feeds_with_tag tag)
+    (Feed.count_feeds_with_tag tag)
 
 let fav_feed ?(page=0) ~service username =
   feed_list ~service page
@@ -619,12 +618,12 @@ let fav_feed ?(page=0) ~service username =
          Html.pcdata name
        ] (username, param)
     )
-    (Db_feed.get_fav_with_username username)
-    (Db_feed.count_fav_with_username username)
+    (Feed.get_fav_with_username username)
+    (Feed.count_fav_with_username username)
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =
-  Db_feed.exist ~feedid:(Int32.of_int id) () >>= fun exist ->
+  Feed.exist ~feedid:(Int32.of_int id) () >>= fun exist ->
   if exist then
     Feeds.comments_to_html (Int32.of_int id) >>= (fun feed ->
       main_style [feed] [])

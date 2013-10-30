@@ -1,18 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 250f60bea2204a68d5e17ae95e4ae8c9)
-Db_update
-Html
-Utils
-Db
-Db_feed
-Db_user
-Services
-Errors
-User
-Feed
-Comments
-Feeds
+# DO NOT EDIT (digest: 9ead9568e451ca6c9f58bff20a2d5a1e)
 server/Templates
-Configfile
 Main
 # OASIS_STOP

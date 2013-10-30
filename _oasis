@@ -19,23 +19,50 @@ OCamlVersion: >= 4.01
 Library cumulus
   Path: src
   Modules:
-    Db_update,
+    server/Templates,
+    Main
+  BuildDepends:
+    cumulus.base
+#  ByteOpt: -w A
+#  NativeOpt: -w A
+  DataFiles:
+    ../data/*.ico,
+    ../data/*.css,
+    ../data/*.png,
+    ../data/*.svg,
+    ../_build/src/client/cumulus.js
+
+Library base
+  Path: src/base
+  FindlibParent: cumulus
+  Modules:
+    Services,
     Html,
     Utils,
-    Db,
-    Db_feed,
-    Db_user,
-    Services,
     Errors,
     User,
     Feed,
     Comments,
-    Feeds,
-    server/Templates,
+    Feeds
+  BuildDepends:
+    cumulus.db,
+    camomile,
+    markdown.html (>= 0.1.1)
+#  ByteOpt: -w A
+#  NativeOpt: -w A
+
+Library db
+  Path: src/base/db
+  FindlibParent: cumulus
+  Modules:
     Configfile,
-    Main
+    Db,
+    Db_update,
+    Db_feed,
+    Db_user
   BuildDepends:
     eliom.server (>= 3.0.3),
+    batteries (>= 2.0),
     macaque.syntax (>= 0.6),
     batteries (>= 2.0),
     camomile,
@@ -45,12 +72,6 @@ Library cumulus
     markdown.html (>= 0.1.1)
 #  ByteOpt: -w A
 #  NativeOpt: -w A
-  DataFiles:
-    ../data/*.ico,
-    ../data/*.css,
-    ../data/*.png,
-    ../data/*.svg,
-    ../_build/src/client/cumulus.js
 
 Executable cumulus
   Install: false
