@@ -69,81 +69,81 @@ let submit_input ?(a=[]) =
 let user_form () =
   Lwt.return
     (Html.div
-        ~a: [Html.a_class ["userbox"; "right"; "bottom-box"]][
-        Html.post_form
-          ~a: [Html.a_class ["userboxcontent"]]
-          ~service: Services.auth
-          (fun (user_name, password_name) -> [
-               Html.string_input
-                 ~a: [Html.a_placeholder "Pseudo"]
-                 ~input_type: `Text
-                 ~name: user_name ();
-               Html.string_input
-                 ~a: [Html.a_placeholder "Mot de passe"]
-                 ~input_type: `Password
-                 ~name: password_name ();
-               Html.div ~a: [Html.a_class ["loginlinks"]] [
-                 Html.string_input
-                   ~input_type: `Submit
-                   ~value: "Connexion" ();
-                 Html.a
-                   ~a: [Html.a_class ["nav"]]
-                   ~service: Services.registration
-                   [Html.pcdata "Inscription"] ();
-               ]
-             ]
-          )
-          ()
-      ]
+       ~a: [Html.a_class ["userbox"; "right"; "bottom-box"]][
+       Html.post_form
+         ~a: [Html.a_class ["userboxcontent"]]
+         ~service: Services.auth
+         (fun (user_name, password_name) -> [
+              Html.string_input
+                ~a: [Html.a_placeholder "Pseudo"]
+                ~input_type: `Text
+                ~name: user_name ();
+              Html.string_input
+                ~a: [Html.a_placeholder "Mot de passe"]
+                ~input_type: `Password
+                ~name: password_name ();
+              Html.div ~a: [Html.a_class ["loginlinks"]] [
+                Html.string_input
+                  ~input_type: `Submit
+                  ~value: "Connexion" ();
+                Html.a
+                  ~a: [Html.a_class ["nav"]]
+                  ~service: Services.registration
+                  [Html.pcdata "Inscription"] ();
+              ]
+            ]
+         )
+         ()
+     ]
     )
 
 let user_logged user =
   Lwt.return
     (Html.div
-        ~a:[Html.a_class ["loggedbox"; "right"; "bottom-box"]]
-        [ Html.post_form
-            ~a:[Html.a_class ["userboxcontent"]]
-            ~service:Services.disconnect
-            (fun () ->
-               [
-                 Html.string_input
-                   ~input_type:`Submit
-                   ~value:"Déconnexion"
-                   ();
+       ~a:[Html.a_class ["loggedbox"; "right"; "bottom-box"]]
+       [ Html.post_form
+           ~a:[Html.a_class ["userboxcontent"]]
+           ~service:Services.disconnect
+           (fun () ->
+              [
+                Html.string_input
+                  ~input_type:`Submit
+                  ~value:"Déconnexion"
+                  ();
 
-                 Html.div ~a: [Html.a_class ["loggedlink"]] [
-                 Html.a
-                   ~a:[Html.a_class ["loggedentry"]]
-                   ~service:Services.fav_feed
-                   [Html.pcdata "Favoris"]
-                 (Sql.get user#name, Some 0)];
+                Html.div ~a: [Html.a_class ["loggedlink"]] [
+                  Html.a
+                    ~a:[Html.a_class ["loggedentry"]]
+                    ~service:Services.fav_feed
+                    [Html.pcdata "Favoris"]
+                    (Sql.get user#name, Some 0)];
 
-                 Html.div ~a: [Html.a_class ["loggedlink"]] [
-                 Html.a
-                   ~a:[Html.a_class ["loggedentry"]]
-                   ~service:Services.preferences
-                   [Html.pcdata "Préférences"]
-                 ()];
-                 Html.img
-                   ~a: [Html.a_class ["loggedavatar";"right"]]
-                   ~alt:(Sql.get user#name)
-                   ~src:(
-                     Html.make_uri
-                       ~service: (Utils.get_gravatar (Sql.get user#email))
-                       (50, "identicon")
-                   )
-                   ();
-               ]
-            )
-            ()
-        ]
+                Html.div ~a: [Html.a_class ["loggedlink"]] [
+                  Html.a
+                    ~a:[Html.a_class ["loggedentry"]]
+                    ~service:Services.preferences
+                    [Html.pcdata "Préférences"]
+                    ()];
+                Html.img
+                  ~a: [Html.a_class ["loggedavatar";"right"]]
+                  ~alt:(Sql.get user#name)
+                  ~src:(
+                    Html.make_uri
+                      ~service: (Utils.get_gravatar (Sql.get user#email))
+                      (50, "identicon")
+                  )
+                  ();
+              ]
+           )
+           ()
+       ]
     )
 
 let userbox () =
   User.get_user_and_email () >>= (function
-      | Some user -> user_logged user
-      | None -> user_form ()
-    )
+    | Some user -> user_logged user
+    | None -> user_form ()
+  )
   >>= fun userb ->
   Lwt.return
     userb
@@ -151,50 +151,50 @@ let userbox () =
 let header () =
   Lwt.return
     [   Html.section
-           ~a:[Html.a_class ["flex flex-h header"]]
-           ( [
-             Html.aside
-               ~a:[Html.a_class [""]]
-               [ Html.img
-                   ~alt:("Cumulus Project")
-                   ~src:(
-                     Html.make_uri
-                       ~service: (Eliom_service.static_dir ())
-                       ["logo.png"]
-                   )
-                   ();
-               ];
-             Html.aside
-               ~a:[Html.a_class ["w75 dash"]]
-               ([ Html.post_form
-                    ~service:Services.append_feed
-                    (fun (url_name, (title_name, tags_name)) -> [
-                         Html.string_input
-                           ~a:[Html.a_placeholder "URL"; Html.a_class["url"]]
-                           ~input_type:`Text
-                           ~name:url_name
-                           ();
-                         Html.string_input
-                           ~a:[Html.a_placeholder "Titre"]
-                           ~input_type:`Text
-                           ~name:title_name
-                           ();
-                         Html.string_input
-                           ~a:[Html.a_placeholder "Tags"]
-                           ~input_type:`Text
-                           ~name:tags_name
-                           ();
-                         Html.string_input
-                           ~a:[Html.a_class [""]]
-                           ~input_type:`Submit
-                           ~value: "ENVOYER !"
-                           ()
-                       ])
-                    ()
-                ])
-           ];
-           )
-       ]
+          ~a:[Html.a_class ["flex flex-h header"]]
+          ( [
+            Html.aside
+              ~a:[Html.a_class [""]]
+              [ Html.img
+                  ~alt:("Cumulus Project")
+                  ~src:(
+                    Html.make_uri
+                      ~service: (Eliom_service.static_dir ())
+                      ["logo.png"]
+                  )
+                  ();
+              ];
+            Html.aside
+              ~a:[Html.a_class ["w75 dash"]]
+              ([ Html.post_form
+                   ~service:Services.append_feed
+                   (fun (url_name, (title_name, tags_name)) -> [
+                        Html.string_input
+                          ~a:[Html.a_placeholder "URL"; Html.a_class["url"]]
+                          ~input_type:`Text
+                          ~name:url_name
+                          ();
+                        Html.string_input
+                          ~a:[Html.a_placeholder "Titre"]
+                          ~input_type:`Text
+                          ~name:title_name
+                          ();
+                        Html.string_input
+                          ~a:[Html.a_placeholder "Tags"]
+                          ~input_type:`Text
+                          ~name:tags_name
+                          ();
+                        Html.string_input
+                          ~a:[Html.a_class [""]]
+                          ~input_type:`Submit
+                          ~value: "ENVOYER !"
+                          ()
+                      ])
+                   ()
+               ])
+          ];
+          )
+    ]
 
 let main_style content footer =
   userbox () >>= fun userbox ->
@@ -204,16 +204,16 @@ let main_style content footer =
       ~a:[Html.a_class ["msghandler"]]
   in
   Errors.get_error () >>= (function
-      | Some error ->
+    | Some error ->
         let error_frame =
           base_error_frame [Html.p [Html.pcdata error]]
         in
         ignore {unit{
-            display_error %error_frame
-          }};
+          display_error %error_frame
+        }};
         Lwt.return error_frame
-      | None -> Lwt.return (base_error_frame [])
-    )
+    | None -> Lwt.return (base_error_frame [])
+  )
   >>= fun error_frame ->
   Lwt.return
     (Html.html
@@ -261,11 +261,11 @@ let main_style content footer =
                            [Html.pcdata "OCaml web framework Ocsigen"];
                          Html.a ~service:Services.atom
                            [Html.pcdata "    (Flux Atom du site)"] ();
-                           Html.pcdata ", ";
-                        Html.a ~service:Services.comments_atom
-                          [Html.pcdata "Flux Atom des commentaires"] ();
-                        Html.pcdata ")";
-                                                ]
+                         Html.pcdata ", ";
+                         Html.a ~service:Services.comments_atom
+                           [Html.pcdata "Flux Atom des commentaires"] ();
+                         Html.pcdata ")";
+                       ]
                      )
                  ]
               )
@@ -277,7 +277,7 @@ let link_footer ~link min max = function
   | page when page = min && page < max -> [ link "Suivant" (Some (page + 1)) ]
   | page when page = max && page > min -> [ link "Précédent" (Some (page - 1)) ]
   | page when page > min && page < max ->
-    [ link "Précédent" (Some (page - 1)); link "Suivant" (Some (page + 1)) ]
+      [ link "Précédent" (Some (page - 1)); link "Suivant" (Some (page + 1)) ]
   | _ -> []
 
 let private_main ~page ~link ~service feeds count =
@@ -343,71 +343,71 @@ let private_preferences () =
   main_style
     (match user with
      | None ->
-       [Html.div
-          ~a:[Html.a_class ["box"]]
-          [Html.pcdata "Veuillez vous connecter pour accéder aux préférences."]
-       ]
+         [Html.div
+            ~a:[Html.a_class ["box"]]
+            [Html.pcdata "Veuillez vous connecter pour accéder aux préférences."]
+         ]
      | Some usr ->
-       [ Html.post_form
-           ~a:[Html.a_class ["box"]]
-           ~service:Services.update_user_password
-           (fun (password_name, password_check) -> [
-                Html.h1 [Html.pcdata "Modifier le mot de passe"] ;
-                Html.p [
-                  string_input_box
-                    ~a:[Html.a_placeholder "Nouveau mot de passe"]
-                    ~input_type:`Password
-                    ~name:password_name
-                    ();
-                  Html.br ();
-                  string_input_box
-                    ~a:[Html.a_placeholder "Confirmer le nouveau mot de passe"]
-                    ~input_type:`Password
-                    ~name:password_check
-                    ();
-                  Html.br ();
-                  submit_input ~value:"Valider" ()
-                ]
-              ])
-           ();
-         Html.post_form
-           ~a:[Html.a_class ["box"]]
-           ~service:Services.update_user_mail
-           (fun email_name -> [
-                Html.h1 [Html.pcdata "Changer d'adresse mail"];
-                Html.p [
-                  string_input_box
-                    ~a:[Html.a_placeholder User.(usr.email);
-                        Html.a_id "new_email"
-                       ]
-                    ~input_type:`Text
-                    ~name:email_name
-                    ();
-                  Html.br ();
-                  submit_input ~value:"Valider" ()
-                ]
-              ])
-           ();
-         Html.post_form
-           ~a:[Html.a_class ["box"]]
-           ~service:Services.update_user_feeds_per_page
-           (fun nb_feeds_name -> [
-                Html.h1 [Html.pcdata "Changer le nombre de liens par page"];
-                Html.p [
-                  Html.int_input
-                    ~a:[Html.a_class ["input-box"];
-                        Html.a_placeholder (Int32.to_string
-                                              User.(usr.feeds_per_page))
-                       ]
-                    ~input_type:`Text
-                    ~name:nb_feeds_name
-                    ();
-                  Html.br ();
-                  submit_input ~value:"Valider" ()
-                ]
-              ])
-           ()
-       ]
+         [ Html.post_form
+             ~a:[Html.a_class ["box"]]
+             ~service:Services.update_user_password
+             (fun (password_name, password_check) -> [
+                  Html.h1 [Html.pcdata "Modifier le mot de passe"] ;
+                  Html.p [
+                    string_input_box
+                      ~a:[Html.a_placeholder "Nouveau mot de passe"]
+                      ~input_type:`Password
+                      ~name:password_name
+                      ();
+                    Html.br ();
+                    string_input_box
+                      ~a:[Html.a_placeholder "Confirmer le nouveau mot de passe"]
+                      ~input_type:`Password
+                      ~name:password_check
+                      ();
+                    Html.br ();
+                    submit_input ~value:"Valider" ()
+                  ]
+                ])
+             ();
+           Html.post_form
+             ~a:[Html.a_class ["box"]]
+             ~service:Services.update_user_mail
+             (fun email_name -> [
+                  Html.h1 [Html.pcdata "Changer d'adresse mail"];
+                  Html.p [
+                    string_input_box
+                      ~a:[Html.a_placeholder User.(usr.email);
+                          Html.a_id "new_email"
+                         ]
+                      ~input_type:`Text
+                      ~name:email_name
+                      ();
+                    Html.br ();
+                    submit_input ~value:"Valider" ()
+                  ]
+                ])
+             ();
+           Html.post_form
+             ~a:[Html.a_class ["box"]]
+             ~service:Services.update_user_feeds_per_page
+             (fun nb_feeds_name -> [
+                  Html.h1 [Html.pcdata "Changer le nombre de liens par page"];
+                  Html.p [
+                    Html.int_input
+                      ~a:[Html.a_class ["input-box"];
+                          Html.a_placeholder (Int32.to_string
+                                                User.(usr.feeds_per_page))
+                         ]
+                      ~input_type:`Text
+                      ~name:nb_feeds_name
+                      ();
+                    Html.br ();
+                    submit_input ~value:"Valider" ()
+                  ]
+                ])
+             ()
+         ]
     )
     []
 
@@ -429,38 +429,38 @@ let private_comment id =
           ]
         else
           [ branch; Html.post_form
-              ~a:[Html.a_class ["box"]]
-              ~service:Services.append_link_comment
-              (fun (parent, (url, (desc, tags))) -> [
-                   Html.h1 [Html.pcdata "Lien"] ;
-                   Html.p [
-                     string_input_box
-                       ~a:[Html.a_placeholder "URL"]
-                       ~input_type:`Text
-                       ~name:url
-                       ();
-                     Html.br ();
-                     string_input_box
-                       ~a:[Html.a_placeholder "Titre"]
-                       ~input_type:`Text
-                       ~name:desc
-                       ();
-                     Html.br ();
-                     string_input_box
-                       ~a:[Html.a_placeholder "Tags"]
-                       ~input_type:`Text
-                       ~name:tags
-                       ();
-                     Html.br ();
-                     Html.int_input
-                       ~input_type:`Hidden
-                       ~name:parent
-                       ~value:(Int32.to_int id)
-                       ();
-                     submit_input ~value:"Envoyer !" ()
-                   ]
-                 ])
-              (Int32.to_int id, "");
+                      ~a:[Html.a_class ["box"]]
+                      ~service:Services.append_link_comment
+                      (fun (parent, (url, (desc, tags))) -> [
+                           Html.h1 [Html.pcdata "Lien"] ;
+                           Html.p [
+                             string_input_box
+                               ~a:[Html.a_placeholder "URL"]
+                               ~input_type:`Text
+                               ~name:url
+                               ();
+                             Html.br ();
+                             string_input_box
+                               ~a:[Html.a_placeholder "Titre"]
+                               ~input_type:`Text
+                               ~name:desc
+                               ();
+                             Html.br ();
+                             string_input_box
+                               ~a:[Html.a_placeholder "Tags"]
+                               ~input_type:`Text
+                               ~name:tags
+                               ();
+                             Html.br ();
+                             Html.int_input
+                               ~input_type:`Hidden
+                               ~name:parent
+                               ~value:(Int32.to_int id)
+                               ();
+                             submit_input ~value:"Envoyer !" ()
+                           ]
+                         ])
+                      (Int32.to_int id, "");
             Html.post_form
               ~a:[Html.a_class ["box"]]
               ~service:Services.append_desc_comment
@@ -497,8 +497,8 @@ let private_edit_feed id =
     Feeds.branch_to_html id >>= fun branch ->
     Feed.get_edit_infos id >>= fun (is_url, edit_desc, edit_url, edit_tags) ->
     User.get_userid () >>= (function
-        | None -> Lwt.return true
-        | Some uid -> Db_feed.is_feed_author ~feed:id ~userid:uid ())
+      | None -> Lwt.return true
+      | Some uid -> Db_feed.is_feed_author ~feed:id ~userid:uid ())
     >>= fun is_author ->
     main_style
       ( if (not state) or (not is_author) then
@@ -627,7 +627,7 @@ let view_feed id =
   Db_feed.exist ~feedid:(Int32.of_int id) () >>= fun exist ->
   if exist then
     Feeds.comments_to_html (Int32.of_int id) >>= (fun feed ->
-        main_style [feed] [])
+      main_style [feed] [])
   else
     main_style
       [Html.div
