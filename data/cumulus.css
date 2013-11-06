@@ -268,11 +268,12 @@ button, input, select {
 }
 
 .post_avatar {
-  padding: 22.5px;
-  height: 100%;
+  padding: 15% 10px 15% 10px;
+  height: auto;
   border-radius: 5px 0 0 5px;
-  width: auto;
+  width: 100px;
   margin-right: 35px;
+  margin-left: 25px;
   position: relative;
   background: #fff;
   border-right: 2px solid #eee;

@@ -87,9 +87,8 @@ let to_html self =
       Html.div ~a:[Html.a_class ["lamalama"]] (conv (M.to_html ~render_pre ~render_link ~render_img markdown))
   in
   let tags = match self.url with
-    | Some _ -> [Html.div ~a:[Html.a_class["tag_line"]] (links_of_tags
-    self.tags)]
-    | None -> [] in
+    | Some _ -> Html.div ~a:[Html.a_class["tag_line"]] (links_of_tags self.tags)
+    | None -> Html.div ~a:[Html.a_class["error"]][] in
   User.is_connected () >>= fun state ->
   Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   User.get_userid () >>= (function
@@ -112,8 +111,8 @@ let to_html self =
     )
   >>= fun user_score ->
   Lwt.return (
-    List.flatten [
-      [Html.div ~a: [Html.a_class["mod";"left"]]
+    [
+      Html.div ~a: [Html.a_class["col";"w20"]]
          [Html.div ~a: [Html.a_class["post_avatar"]]
             [Html.img
                ~a: [Html.a_class ["postimg"]]
@@ -122,8 +121,8 @@ let to_html self =
                  Html.make_uri
                    ~service: (Utils.get_gravatar (author#!email)) (65, "identicon")
                )
-               ()]]];
-      [Html.div ~a: [Html.a_class["mod post_info"]][
+               ()]];
+      Html.div ~a: [Html.a_class["col";"post_info"]][
        Html.div ~a: [Html.a_class["line_author"]][
 
       Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
@@ -156,7 +155,8 @@ let to_html self =
       );
       Html.pcdata ("[" ^ string_of_int self.score ^ "] ");*)
       content;
-      ]];
+      tags;
+      ];
       (*[
        (* TODO : afficher "n commentaire(s)" *)
        Html.a
@@ -174,7 +174,6 @@ let to_html self =
          [Html.pcdata " Poster un commentaire "]
          (Int32.to_int self.id, Utils.troncate self.description);
       ]; *)
-      tags;
      (* [Html.a ~service:Services.atom_feed
          [Html.pcdata " [Flux Atom du lien]"] (Int32.to_int self.id)];
       (if is_author or is_admin then
