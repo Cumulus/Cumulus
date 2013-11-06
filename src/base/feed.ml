@@ -155,9 +155,8 @@ let to_html self =
       );
       Html.pcdata ("[" ^ string_of_int self.score ^ "] ");*)
       content;
-      Html.br ();
       ]];
-      [Html.br ();
+      [
        (* TODO : afficher "n commentaire(s)" *)
        Html.a
          ~service:Services.view_feed

@@ -246,7 +246,9 @@ button, input, select {
 }
 
 .post {
-  margin: 5px;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  margin-left: 5px;
   width: 65%;
   height: 100px;
   border-radius: 5px;
@@ -305,7 +307,7 @@ button, input, select {
 .line_author {
   color: #ccc;
   font-size: 0.7em;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 .mod>*>a{
@@ -313,10 +315,15 @@ button, input, select {
   text-decoration: none;
 }
 .line_title {
-  color: #ccc;
-  font-size:1.3em;
+  color: #b2b4b5;
+  font-size:1.35em;
 }
 .mod.post_info {
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.tag_line {
+  margin-top: 3px;
+  margin-bottom: 3px;
 }
