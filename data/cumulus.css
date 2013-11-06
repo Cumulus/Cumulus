@@ -250,7 +250,7 @@ button, input, select {
   margin-bottom: 5px;
   margin-left: 5px;
   width: 65%;
-  height: 100px;
+  height: auto;
   border-radius: 5px;
   background-color: #fff;
 }
@@ -269,9 +269,9 @@ button, input, select {
 
 .post_avatar {
   padding: 22.5px;
-  height: 100px;
+  height: 100%;
   border-radius: 5px 0 0 5px;
-  width: 100px;
+  width: auto;
   margin-right: 35px;
   position: relative;
   background: #fff;
@@ -310,12 +310,17 @@ button, input, select {
   margin-top: 15px;
 }
 
-.mod>*>a{
-  color: #ccc;
+a.postitle{
+  color: #8a8a8a;
   text-decoration: none;
 }
+
+.line_author>a {
+  text-decoration: none;
+  color: #ccc;
+}
+
 .line_title {
-  color: #b2b4b5;
   font-size:1.35em;
 }
 .mod.post_info {
@@ -327,3 +332,13 @@ button, input, select {
   margin-top: 3px;
   margin-bottom: 3px;
 }
+
+.tags {
+  background: #00babe;
+  padding: 3px;
+  font-size: 0.8em;
+  text-decoration: none;
+  color: #eee;
+  border-radius: 3px;
+}
+

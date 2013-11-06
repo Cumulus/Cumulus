@@ -87,7 +87,8 @@ let to_html self =
       Html.div ~a:[Html.a_class ["lamalama"]] (conv (M.to_html ~render_pre ~render_link ~render_img markdown))
   in
   let tags = match self.url with
-    | Some _ -> (Html.pcdata "Tags: ") :: links_of_tags self.tags
+    | Some _ -> [Html.div ~a:[Html.a_class["tag_line"]] (links_of_tags
+    self.tags)]
     | None -> [] in
   User.is_connected () >>= fun state ->
   Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
@@ -156,7 +157,7 @@ let to_html self =
       Html.pcdata ("[" ^ string_of_int self.score ^ "] ");*)
       content;
       ]];
-      [
+      (*[
        (* TODO : afficher "n commentaire(s)" *)
        Html.a
          ~service:Services.view_feed
@@ -172,8 +173,9 @@ let to_html self =
          ~service:Services.comment
          [Html.pcdata " Poster un commentaire "]
          (Int32.to_int self.id, Utils.troncate self.description);
-      ]; tags;
-      [Html.a ~service:Services.atom_feed
+      ]; *)
+      tags;
+     (* [Html.a ~service:Services.atom_feed
          [Html.pcdata " [Flux Atom du lien]"] (Int32.to_int self.id)];
       (if is_author or is_admin then
          [ Html.br ();
@@ -185,7 +187,7 @@ let to_html self =
            Html.pcdata ")"
          ]
        else []
-      );
+      ); *)
     ]
   )
 
