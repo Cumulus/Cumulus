@@ -33,6 +33,17 @@ class type feed = object
   method root : Sql.int32_t Sql.nullable_data
 end
 
+class type feed_and_tag = object
+  method author : Sql.int32_t Sql.non_nullable_data
+  method id : Sql.int32_t Sql.non_nullable_data
+  method timedate : Sql.timestamp_t Sql.non_nullable_data
+  method description : Sql.string_t Sql.non_nullable_data
+  method url : Sql.string_t Sql.nullable_data
+  method parent: Sql.int32_t Sql.nullable_data
+  method root : Sql.int32_t Sql.nullable_data
+  method tags : Sql.string_t Sql.non_nullable_data list
+end
+
 class type tag = object
   method tag : Sql.string_t Sql.non_nullable_data
   method id_feed : Sql.int32_t Sql.non_nullable_data
@@ -51,12 +62,18 @@ class type vote = object
 end
 
 type feeds_and_tags = feed list * tag list * vote list
+type feeds_and_tags_ng = feed_and_tag list
 
 type feed_generator =
   starting:int32 ->
   number:int32 ->
   unit ->
   feeds_and_tags Lwt.t
+type feed_generator_ng =
+  starting:int32 ->
+  number:int32 ->
+  unit ->
+  feeds_and_tags_ng Lwt.t
 
 let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
 
@@ -141,6 +158,22 @@ let get_feeds_aux ~starting ~number ~feeds_filter ~tags_filter ~votes_filter =
   >>= fun votes ->
   Lwt.return (feeds, tags, votes)
 
+let get_feeds_ng ~starting ~number ~feeds_filter ~tags_filter ~votes_filter () =
+  Db.view
+    (<:view< {
+      f.id;
+      f.url;
+      f.description;
+      f.timedate;
+      f.author;
+      f.parent;
+      f.root;
+      t.tag;
+    } order by f.id desc limit $int32:number$ offset $int32:starting$
+    | f in $feeds$; $feeds_filter$ f;
+      t in $feeds_tags$; $tags_filter feeds$ t;
+    >>)
+
 let rec get_tree_feeds feed_id ~starting ~number () =
   let feeds_filter f = (<:value< f.parent = $int32:feed_id$ >>) in
   let tags_filter _ _ = (<:value< true >>) in
@@ -175,6 +208,43 @@ let get_root_feeds ~starting ~number () =
   let tags_filter _ _ = (<:value< true >>) in
   let votes_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~starting ~number ~feeds_filter ~tags_filter ~votes_filter
+
+let get_root_feeds_ng ~starting ~number () =
+  let first_object o = object
+    method author = o#author
+    method id = o#id
+    method timedate = o#timedate
+    method description = o#description
+    method url = o#url
+    method parent = o#parent
+    method root = o#root
+    method tags = [o#tag]
+  end in
+  let feeds_filter f = (<:value< is_null f.root || is_null f.parent >>) in
+  let tags_filter _ _ = (<:value< true >>) in
+  let votes_filter _ _ = (<:value< true >>) in
+  get_feeds_ng ~starting ~number ~feeds_filter ~tags_filter ~votes_filter ()
+  >>= (fun feeds_and_tags ->
+    Lwt_list.fold_left_s
+      (fun acc element ->
+        try
+          let value = Lwt_list.find_s
+            (fun e -> Lwt.return (e#!id = element#!id)) acc in
+          let acc = Lwt_list.filter_s
+            (fun e -> Lwt.return (e#!id <> element#!id)) acc in
+          value >>= (fun f -> acc >>= (fun acc ->
+            Lwt.return ((object
+              method id = f#id
+              method author = f#author
+              method timedate = f#timedate
+              method description = f#description
+              method url = f#url
+              method parent = f#parent
+              method root = f#root
+              method tags = (element#tag :: f#tags)
+            end) :: acc)))
+        with _ -> Lwt.return ((first_object element) :: acc))
+  [] feeds_and_tags)
 
 let get_feeds ~starting ~number () =
   let feeds_filter _ = (<:value< true >>) in
