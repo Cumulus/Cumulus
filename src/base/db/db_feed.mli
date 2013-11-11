@@ -55,6 +55,7 @@ class type feed_and_tag = object
   method parent: Sql.int32_t Sql.nullable_data
   method root : Sql.int32_t Sql.nullable_data
   method tags : Sql.string_t Sql.non_nullable_data list
+  method score : < nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
 end
 
 type feeds_and_tags = feed list * tag list * vote list

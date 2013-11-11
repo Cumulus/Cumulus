@@ -42,6 +42,7 @@ class type feed_and_tag = object
   method parent: Sql.int32_t Sql.nullable_data
   method root : Sql.int32_t Sql.nullable_data
   method tags : Sql.string_t Sql.non_nullable_data list
+  method score : < nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
 end
 
 class type tag = object
@@ -169,9 +170,11 @@ let get_feeds_ng ~starting ~number ~feeds_filter ~tags_filter ~votes_filter () =
       f.parent;
       f.root;
       t.tag;
+      v.score;
     } order by f.id desc limit $int32:number$ offset $int32:starting$
     | f in $feeds$; $feeds_filter$ f;
       t in $feeds_tags$; $tags_filter feeds$ t;
+      v in $votes$; $votes_filter feeds$ v;
     >>)
 
 let rec get_tree_feeds feed_id ~starting ~number () =
@@ -219,6 +222,7 @@ let get_root_feeds_ng ~starting ~number () =
     method parent = o#parent
     method root = o#root
     method tags = [o#tag]
+    method score = (Sql.Op.(+) o#score <:value<0>>)
   end in
   let feeds_filter f = (<:value< is_null f.root || is_null f.parent >>) in
   let tags_filter _ _ = (<:value< true >>) in
@@ -242,6 +246,7 @@ let get_root_feeds_ng ~starting ~number () =
               method parent = f#parent
               method root = f#root
               method tags = (element#tag :: f#tags)
+              method score =  (Sql.Op.(+) f#score <:value<1>>)
             end) :: acc)))
         with _ -> Lwt.return ((first_object element) :: acc))
   [] feeds_and_tags)
