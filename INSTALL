@@ -3,7 +3,7 @@ How to get the dependencies
 
 First you need opam (or you know what you are doing), and do:
 
- $ opam repository add ocsigendev http://ocsigen.org/opam
+ $ opam repository add ocsigendev https://github.com/ocsigen/opam-ocsigen.git
  $ opam repository add cumulus https://github.com/Cumulus/opam-cumulus.git
  $ opam update
  $ opam install cumulus-deps
