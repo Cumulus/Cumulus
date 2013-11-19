@@ -57,6 +57,7 @@ Library db
   Modules:
     Configfile,
     Db,
+    Db_table
     Db_all,
     Db_update,
     Db_feed,
