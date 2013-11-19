@@ -213,7 +213,7 @@ let get_root_feeds ~starting ~number () =
   get_feeds_aux ~starting ~number ~feeds_filter ~tags_filter ~votes_filter
 
 let get_root_feeds_ng ~starting ~number () =
-  let first_object o = object
+  let new_object o = object
     method author = o#author
     method id = o#id
     method timedate = o#timedate
@@ -231,24 +231,25 @@ let get_root_feeds_ng ~starting ~number () =
   >>= (fun feeds_and_tags ->
     Lwt_list.fold_left_s
       (fun acc element ->
-        try
-          let value = Lwt_list.find_s
-            (fun e -> Lwt.return (e#!id = element#!id)) acc in
-          let acc = Lwt_list.filter_s
-            (fun e -> Lwt.return (e#!id <> element#!id)) acc in
-          value >>= (fun f -> acc >>= (fun acc ->
-            Lwt.return ((object
-              method id = f#id
-              method author = f#author
-              method timedate = f#timedate
-              method description = f#description
-              method url = f#url
-              method parent = f#parent
-              method root = f#root
-              method tags = (element#tag :: f#tags)
-              method score =  (Sql.Op.(+) f#score <:value<1>>)
-            end) :: acc)))
-        with _ -> Lwt.return ((first_object element) :: acc))
+        Lwt.catch
+          (fun () ->
+            let value = Lwt_list.find_s
+              (fun e -> Lwt.return (e#!id = element#!id)) acc in
+            let acc = Lwt_list.filter_s
+              (fun e -> Lwt.return (e#!id <> element#!id)) acc in
+            value >>= (fun value -> acc >>= (fun acc ->
+              Lwt.return ((object
+                method id = value#id
+                method author = value#author
+                method timedate = value#timedate
+                method description = value#description
+                method url = value#url
+                method parent = value#parent
+                method root = value#root
+                method tags = (element#tag :: value#tags)
+                method score =  (Sql.Op.(+) value#score <:value<1>>)
+              end) :: acc))))
+          (fun _ -> Lwt.return ((new_object element) :: acc)))
   [] feeds_and_tags)
 
 let get_feeds ~starting ~number () =
