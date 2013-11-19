@@ -6000,6 +6000,7 @@ let setup_t =
                         [
                            "Configfile";
                            "Db";
+                           "Db_all";
                            "Db_update";
                            "Db_feed";
                            "Db_user"

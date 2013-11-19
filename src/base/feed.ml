@@ -292,7 +292,6 @@ let downvote = exec_if_not_author Db_feed.downvote
 let cancel_vote = exec_if_not_author Db_feed.cancelvote
 
 (* TODO: Remove the following functions *)
-let get_root_feeds_ng = Db_feed.get_root_feeds_ng
 let get_root_feeds = Db_feed.get_root_feeds
 let count_root_feeds () = Db_feed.count_root_feeds () >|= fun x -> x#!n
 let get_feeds_with_author = Db_feed.get_feeds_with_author

@@ -46,37 +46,18 @@ class type vote = object
   method id_feed : Sql.int32_t Sql.non_nullable_data
 end
 
-class type feed_and_tag = object
-  method author : Sql.int32_t Sql.non_nullable_data
-  method id : Sql.int32_t Sql.non_nullable_data
-  method timedate : Sql.timestamp_t Sql.non_nullable_data
-  method description : Sql.string_t Sql.non_nullable_data
-  method url : Sql.string_t Sql.nullable_data
-  method parent: Sql.int32_t Sql.nullable_data
-  method root : Sql.int32_t Sql.nullable_data
-  method tags : Sql.string_t Sql.non_nullable_data list
-  method score : < nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
-end
-
 type feeds_and_tags = feed list * tag list * vote list
-type feeds_and_tags_ng = feed_and_tag list
 
 type feed_generator =
   starting:int32 ->
   number:int32 ->
   unit ->
   feeds_and_tags Lwt.t
-type feed_generator_ng =
-  starting:int32 ->
-  number:int32 ->
-  unit ->
-  feeds_and_tags_ng Lwt.t
 
 val get_tree_feeds : int32 -> feed_generator
 val get_links_feeds : feed_generator
 val get_comments_feeds : feed_generator
 val get_root_feeds : feed_generator
-val get_root_feeds_ng : feed_generator_ng
 val get_feeds : feed_generator
 val get_feeds_with_author : string -> feed_generator
 val get_feeds_with_tag : string -> feed_generator
