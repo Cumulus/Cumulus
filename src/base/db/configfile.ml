@@ -23,15 +23,6 @@ open Batteries
 
 let fmt = Printf.sprintf
 
-type t =
-  { database : string option
-  ; host : string option
-  ; password : string option
-  ; user : string option
-  ; port : int option
-  ; unix_domain_socket_dir : string option
-  }
-
 let fail_attrib ~tag x =
   let msg = fmt "Unexpected attribute '%s' inside '%s'" x tag in
   raise (Ocsigen_extensions.Error_in_config_file msg)
@@ -48,48 +39,6 @@ let fail_pcdata x =
   let msg = fmt "Unexpected pcdata '%s' inside cumulus" x in
   raise (Ocsigen_extensions.Error_in_config_file msg)
 
-let rec init_fun data = function
-  | Simplexmlparser.Element ("database" as tag, attribs, content)::l ->
-      if content <> [] then
-        fail_content ~tag;
-      let data =
-        List.fold_left
-          (fun data -> function
-             | "name", x -> {data with database = Some x}
-             | "user", x -> {data with user = Some x}
-             | "host", x -> {data with host = Some x}
-             | "port", x ->
-                 begin
-                   try {data with port = Some (int_of_string x)} with
-                   | Failure _ -> fail_attrib ~tag "port"
-                 end
-             | "socket-dir", x -> {data with unix_domain_socket_dir = Some x}
-             | "password-file", x ->
-                 let x =
-                   let file = open_in x in
-                   finally (fun () -> close_in file) input_line file
-                 in
-                 {data with password = Some x}
-             | x, _ -> fail_attrib ~tag x
-          )
-          data
-          attribs
-      in
-      init_fun data l
-  | Simplexmlparser.Element (tag, _, _)::_ -> fail_tag ~tag
-  | Simplexmlparser.PCData pcdata :: _ ->
-      fail_pcdata pcdata
-  | [] -> data
-
-let {database; host; password; user; port; unix_domain_socket_dir} =
-  let data =
-    { database = None
-    ; host = None
-    ; password = None
-    ; user = None
-    ; port = None
-    ; unix_domain_socket_dir = None
-    }
-  in
-  let c = Eliom_config.get_config () in
-  init_fun data c
+let fail_missing ~tag x =
+  let msg = fmt "Missing attribute '%s' inside '%s'" x tag in
+  raise (Ocsigen_extensions.Error_in_config_file msg)

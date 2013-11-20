@@ -206,3 +206,8 @@ let edit_desc_comment =
     ~post_params: Eliom_parameter.((int "id") **
                                      (string "desc"))
     ()
+
+let reset_password =
+  Eliom_service.Http.post_coservice'
+    ~post_params:Eliom_parameter.(string "email")
+    ()

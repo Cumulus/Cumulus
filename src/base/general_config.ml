@@ -19,8 +19,30 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-val fail_attrib : tag:string -> string -> 'a
-val fail_content : tag:string -> 'a
-val fail_tag : tag:string -> 'a
-val fail_pcdata : string -> 'a
-val fail_missing : tag:string -> string -> 'a
+open Batteries
+
+let rec init_fun data = function
+  | Simplexmlparser.Element ("general" as tag, attribs, content)::l ->
+      if content <> [] then
+        Configfile.fail_content ~tag;
+      let data =
+        List.fold_left
+          (fun data -> function
+             | "email", x -> Some x
+             | x, _ -> Configfile.fail_attrib ~tag x
+          )
+          data
+          attribs
+      in
+      init_fun data l
+  | Simplexmlparser.Element (tag, _, _)::_ -> Configfile.fail_tag ~tag
+  | Simplexmlparser.PCData pcdata :: _ ->
+      Configfile.fail_pcdata pcdata
+  | [] -> data
+
+let email =
+  let data = None in
+  let c = Eliom_config.get_config () in
+  Option.default_delayed
+    (fun () -> Configfile.fail_missing ~tag:"general" "email")
+    (init_fun data c)

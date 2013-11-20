@@ -19,6 +19,9 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
+open Batteries
+open Eliom_lib.Lwt_ops
+
 type user = {
   id : int32;
   name : string;
@@ -28,8 +31,6 @@ type user = {
   feeds_per_page : int32;
 }
 type user_state = Already_connected | Ok | Bad_password | Not_found
-
-let (>>=) = Lwt.(>>=)
 
 let user_new data = {
   id = data#!id;
@@ -174,3 +175,19 @@ let update_feeds_per_page feeds_per_page =
 let get_offset () =
   get_user_feeds_per_page () >>= fun off ->
   Lwt.return (Eliom_lib.Option.get (fun () -> Utils.offset) off)
+
+let send_reset_email ~service email =
+  let f x =
+    let service = Html.make_string_uri ~service:(service x) ~absolute:true () in
+    Netsendmail.sendmail
+      (Netsendmail.compose
+         ~from_addr:("Cumulus no-reply", General_config.email)
+         ~to_addrs:[("", email)]
+         ~subject:"Cumulus: Réinitialisation du mot-de-passe"
+         ("Si tu veux vraiment réinitaliser ton mot-de-passe, clique ici: "
+          ^ service)
+      )
+  in
+  Db_user.get_user_with_email email >|= Option.may f
+
+let force_connect user = set_user (user_new user)

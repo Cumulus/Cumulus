@@ -233,4 +233,16 @@ let () =
     (fun feedid () -> Feed.downvote feedid);
   Eliom_registration.Action.register
     ~service:Services.cancelvote_feed
-    (fun feedid () -> Feed.cancel_vote feedid)
+    (fun feedid () -> Feed.cancel_vote feedid);
+  Eliom_registration.Action.register
+    ~service:Services.reset_password
+    (fun () ->
+       let service user =
+         Eliom_registration.Action.register_coservice
+           ~timeout:(float_of_int (60 * 60 * 24 * 30))
+           ~fallback:Services.preferences
+           ~get_params:Eliom_parameter.unit
+           (fun () () -> User.force_connect user)
+       in
+       User.send_reset_email ~service
+    )
