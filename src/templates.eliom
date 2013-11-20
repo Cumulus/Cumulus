@@ -232,7 +232,7 @@ let main_style content footer =
                          Html.Raw.a ~a:[Html.a_href
                                           (Html.uri_of_string
                                              (fun () ->
-                                                "http://bitbucket.org/Engil/cumulus"
+                                                "https://github.com/Cumulus/Cumulus"
                                              )
                                           )
                                        ]
