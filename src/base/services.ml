@@ -211,3 +211,9 @@ let reset_password =
   Eliom_service.Http.post_coservice'
     ~post_params:Eliom_parameter.(string "email")
     ()
+
+let reset_password_form =
+  Eliom_service.App.service
+    ~path:["pwd-reset"]
+    ~get_params:Eliom_parameter.unit
+    ()

@@ -245,4 +245,7 @@ let () =
            (fun () () -> User.force_connect user)
        in
        User.send_reset_email ~service
-    )
+    );
+  Cumulus_appl.register
+    ~service:Services.reset_password_form
+    (fun () () -> Templates.reset_password ())
