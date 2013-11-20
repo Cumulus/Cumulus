@@ -76,44 +76,6 @@ type feed_generator_ng =
   unit ->
   feeds_and_tags_ng Lwt.t
 
-let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
-
-let feeds = (<:table< feeds (
-                     id integer NOT NULL DEFAULT(nextval $feeds_id_seq$),
-                     url text,
-                     description text NOT NULL,
-                     timedate timestamp NOT NULL DEFAULT(current_timestamp),
-                     author integer NOT NULL,
-                     parent integer,
-                     root integer
-                     ) >>)
-
-(*
-let feeds_tags_id_seq = (<:sequence< serial "feeds_tags_id_seq" >>)
-
-let feeds_tags = (<:table< feeds_tags (
-                          id integer NOT NULL DEFAULT(nextval $feeds_tags_id_seq$),
-                          tag text NOT NULL,
-                          id_feed integer NOT NULL
-                          ) >>)
-
-(* let favs_id_seq = (<:sequence< serial "favs_id_seq" >>) *)
-*)
-
-let favs = (<:table< favs (
-                    (* id integer NOT NULL DEFAULT(nextval $favs_id_seq$), *)
-                    id_user integer NOT NULL,
-                    id_feed integer NOT NULL
-                    ) >>)
-
-(*
-let votes = (<:table< votes (
-                     id_user integer NOT NULL,
-                     id_feed integer NOT NULL,
-                     score integer NOT NULL
-                     ) >>)
-*)
-
 let filter_tags_id f tags =
   (<:value< $Db.in'$ f.id $List.map (fun x -> x#id_feed) tags$ >>)
 let filter_feeds_id t feeds =
@@ -313,7 +275,7 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
                 id = $int32:id_feed$;
                 url = of_option $Option.map Sql.Value.string url$;
                 description = $string:description$;
-                timedate = feeds?timedate;
+                timedate = $Db_table.feeds$?timedate;
                 author = $int32:userid$;
                 parent = of_option $Option.map Sql.Value.int32 parent$;
                 root = of_option $Option.map Sql.Value.int32 root$;
@@ -397,7 +359,7 @@ let delete_feed ~feed ~userid () =
   let feeds_filter f =
     (<:value< $Db.in'$ f.id $List.map (fun x -> x#id) dfeeds$ >>) in
   Db.query
-    (<:delete< f in $feeds$ | $feeds_filter$ f; >>)
+    (<:delete< f in $Db_table.feeds$ | $feeds_filter$ f; >>)
   >>= fun () ->
   let feeds_filter f =
     (<:value< $Db.in'$ f.id_feed $List.map (fun x -> x#id) dfeeds$ >>) in
@@ -418,7 +380,7 @@ let get_fav_aux ~starting ~number ~feeds_filter ~tags_filter () =
             } order by f.id_feed desc
             limit $int32:number$
             offset $int32:starting$ |
-            f in $favs$;
+            f in $Db_table.favs$;
             $feeds_filter$ f;
      >>)
   >>= fun favs ->
@@ -431,7 +393,7 @@ let count_fav_aux ~filter () =
   Db.view_one
     (<:view< group {
             n = count[f];
-            } | f in $favs$;
+            } | f in $Db_table.favs$;
             $filter$ f;
      >>)
 
@@ -495,13 +457,13 @@ let add_fav ~feedid ~userid () =
     (<:view< {
             f.id_user;
             f.id_feed;
-            } | f in $favs$;
+            } | f in $Db_table.favs$;
             f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
      >>) >>= function
   | Some _ -> Lwt.return ()
   | None ->
       Db.query
-        (<:insert< $favs$ := {
+        (<:insert< $Db_table.favs$ := {
                   (* id; *)
                   id_user = $int32:userid$;
                   id_feed = $int32:feedid$;
@@ -512,13 +474,13 @@ let del_fav ~feedid ~userid () =
     (<:view< {
             f.id_user;
             f.id_feed;
-            } | f in $favs$;
+            } | f in $Db_table.favs$;
             f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
      >>) >>= function
   | None -> Lwt.return ()
   | Some _ ->
       Db.query
-        (<:delete< f in $favs$ | f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
+        (<:delete< f in $Db_table.favs$ | f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
 
 let upvote ~feedid ~userid () =
   Db.view_opt
@@ -592,7 +554,7 @@ let is_fav ~feedid ~userid () =
          (<:view< {
                  f.id_user;
                  f.id_feed;
-                 } | f in $favs$; f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
+                 } | f in $Db_table.favs$; f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
        >>= fun _ ->
        Lwt.return true
     )

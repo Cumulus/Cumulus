@@ -48,43 +48,6 @@ type feed_generator =
   unit ->
   feeds Lwt.t
 
-let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
-
-let feeds = (<:table< feeds (
-                     id integer NOT NULL DEFAULT(nextval $feeds_id_seq$),
-                     url text,
-                     description text NOT NULL,
-                     timedate timestamp NOT NULL DEFAULT(current_timestamp),
-                     author integer NOT NULL,
-                     parent integer,
-                     root integer
-                     ) >>)
-
-let feeds_tags_id_seq = (<:sequence< serial "feeds_tags_id_seq" >>)
-
-let feeds_tags = (<:table< feeds_tags (
-                          id integer NOT NULL DEFAULT(nextval $feeds_tags_id_seq$),
-                          tag text NOT NULL,
-                          id_feed integer NOT NULL
-                          ) >>)
-
-let votes = (<:table< votes (
-                     id_user integer NOT NULL,
-                     id_feed integer NOT NULL,
-                     score integer NOT NULL
-                     ) >>)
-
-let users_id_seq = (<:sequence< serial "users_id_seq" >>)
-
-let users = (<:table< users (
-                     id integer NOT NULL DEFAULT(nextval $users_id_seq$),
-                     name text NOT NULL,
-                     password text NOT NULL,
-                     email text NOT NULL,
-                     is_admin boolean NOT NULL DEFAULT(false),
-                     feeds_per_page integer NOT NULL DEFAULT(10)
-                     ) >>)
-
 let get_feeds ~starting ~number
   ~feeds_filter
   ~tags_filter
@@ -105,10 +68,10 @@ let get_feeds ~starting ~number
       u.email;
       v.score;
     } order by f.id desc limit $int32:number$ offset $int32:starting$
-    | f in $feeds$; $feeds_filter$ f;
-      t in $feeds_tags$; $tags_filter feeds$ t;
-      v in $votes$; $votes_filter feeds$ v;
-      u in $users$; $users_filter feeds$ u;
+    | f in $Db_table.feeds$; $feeds_filter$ f;
+      t in $Db_table.feeds_tags$; $tags_filter Db_table.feeds$ t;
+      v in $Db_table.votes$; $votes_filter Db_table.feeds$ v;
+      u in $Db_table.users$; $users_filter Db_table.feeds$ u;
     >>)
 
 let get_root_feeds ~starting ~number () =

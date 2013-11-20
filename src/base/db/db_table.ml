@@ -58,4 +58,8 @@ let users = (<:table< users (
                      feeds_per_page integer NOT NULL DEFAULT(10)
                      ) >>)
 
-
+let favs = (<:table< favs (
+                    (* id integer NOT NULL DEFAULT(nextval $favs_id_seq$), *)
+                    id_user integer NOT NULL,
+                    id_feed integer NOT NULL
+                    ) >>)

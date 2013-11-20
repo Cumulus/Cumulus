@@ -59,3 +59,9 @@ val users : (
     is_admin : < nul : Sql.non_nullable; t : Sql.bool_t > Sql.t >
   Sql.writable
 ) Sql.view
+
+val favs : (
+  < id_feed : Sql.int32_t Sql.non_nullable_data;
+    id_user : Sql.int32_t Sql.non_nullable_data >,
+  < > Sql.writable
+) Sql.view
