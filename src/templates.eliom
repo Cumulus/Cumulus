@@ -640,7 +640,7 @@ let reset_password () =
       ~a:[Html.a_class ["box"]]
       ~service:Services.reset_password
       (fun email_name -> [
-           Html.h1 [Html.pcdata "adresse mail associé au compte"];
+           Html.h1 [Html.pcdata "Adresse mail associée au compte"];
            Html.p [
              string_input_box
                ~a:[Html.a_id "new_email"]
