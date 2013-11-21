@@ -50,14 +50,22 @@ let feed_new data tags score = {
   score;
 }
 
+let string_uri_of_tag tag =
+  Uri.make_string_uri
+    ~absolute:true
+    ~service:Services.tag_feed
+    (None, tag)
+
+let link_of_tag tag =
+  Html.a
+    ~a:[Html.a_class ["tags"]]
+    ~service:Services.tag_feed
+    [Html.pcdata tag]
+    (None, tag)
+
 let links_of_tags tags =
   List.fold_left (fun acc tag ->
-    let link =
-      Html.a
-        ~a:[Html.a_class ["tags"]]
-        ~service:Services.tag_feed
-        [Html.pcdata tag]
-        (None, tag)
+    let link = link_of_tag tag
     in
     acc @ [Html.pcdata " "; link]
   ) [] tags
@@ -209,6 +217,14 @@ let to_atom self =
                                           ~service:Services.view_feed
                                           (Int32.to_int self.id, "")
                                        )];
+       Atom_feed.categories (
+         List.map (fun tag ->
+           Atom_feed.category
+             ~scheme:(string_uri_of_tag tag)
+             ~label:tag
+             tag
+             [])
+           self.tags);
        Atom_feed.summary (Atom_feed.html5 (
          (match self.url with
           | Some url -> Html.Raw.a ~a:
