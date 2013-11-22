@@ -1,17 +1,21 @@
 Choses importantes à faire dans Cumulus:
 
-[1] Implémenter le multi-pages (suite) : autoriser les utilisateurs à configurer le
-  nombre de liens par page.
-
 Faire en sorte que le formulaire d'inscription ne se vide pas
    completement quand il y a une erreur.
 
-Implémenter la vue par URL, en vue d'implémenter les commentaires: Une telle vue
-regrouperais donc: l'URL et son résumé, en dessous, le thread de commentaires.
-On y accéderait en cliquant sur « voir les commentaires », sur la page
-principale, par exemple.
 
-Implémenter les commentaires: Pas besoin de faire très compliqué, ceci dit une
-vue par fils de discussions serait très appréciée.
+=== Clean ===
 
-Un formulaire de recuperation de mots de passe.
+* Mettre le tout le code Html séparé dans les modules Templates*
+ * Séparer en modules
+ * Toutes fonctions qui retournent un « [> `Html ] Html.elt Lwt.t » doivent être
+   dans Templates
+* Supprimer tout les objets en dehors des modules Db*
+  (remplacer macaque.syntax par macaque dans base et cumulus)
+* Ne laisser que la gestion de l'abstraction dans base/*
+* Utiliser Batteries partout
+* Ouvrir « Batteries » et « Eliom_lib.Lwt_ops » dans tout les modules
+* Ouvrir « Eliom_service » et « Eliom_parameter » dans Services
+* Ouvrir « Eliom_content.Html5.F » dans Templates*
+* Supprimer le module Html
+* …
