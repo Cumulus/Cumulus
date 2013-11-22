@@ -11,7 +11,7 @@ Faire en sorte que le formulaire d'inscription ne se vide pas
  * Toutes fonctions qui retournent un « [> `Html ] Html.elt Lwt.t » doivent être
    dans Templates
 * Supprimer tout les objets en dehors des modules Db*
-  (remplacer macaque.syntax par macaque dans base et cumulus)
+  (supprimer la dépendance sur macaque{.syntax,} dans base et cumulus)
 * Ne laisser que la gestion de l'abstraction dans base/*
 * Utiliser Batteries partout
 * Ouvrir « Batteries » et « Eliom_lib.Lwt_ops » dans tout les modules
