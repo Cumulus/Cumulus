@@ -20,6 +20,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
 open Batteries
+open Eliom_lib.Lwt_ops
 
 type t =
   { database : string option

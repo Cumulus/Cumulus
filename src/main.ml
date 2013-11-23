@@ -19,11 +19,12 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
+open Batteries
+open Eliom_lib.Lwt_ops
+
 module Cumulus_appl = Eliom_registration.App (struct
   let application_name = "cumulus"
 end)
-
-let (>>=) = Lwt.(>>=)
 
 let () =
   Eliom_atom.Reg.register

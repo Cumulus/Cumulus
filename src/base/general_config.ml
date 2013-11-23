@@ -20,6 +20,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
 open Batteries
+open Eliom_lib.Lwt_ops
 
 let rec init_fun data = function
   | Simplexmlparser.Element ("general" as tag, attribs, content)::l ->
