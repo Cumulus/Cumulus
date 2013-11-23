@@ -19,6 +19,8 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
+open Batteries
+
 module Calendar = struct
   include CalendarLib.Calendar
   module Printer = CalendarLib.Printer.Calendar
@@ -28,14 +30,8 @@ let offset = 10l
 
 let string_of_calendar cal = Calendar.Printer.sprint "%d/%m/%Y à %T" cal
 
-let string_is_empty str =
-  let length = String.length str in
-  let rec inner i =
-    if i < length then
-      (str.[i] = ' ') && inner (i + 1)
-    else
-      true in
-  inner 0
+let string_is_empty =
+  String.fold_left (fun res x -> Char.is_whitespace x && res) true
 
 let msg str = [
   Html.p [
@@ -83,13 +79,10 @@ let strip =
 
 let split =
   let regexp = Str.regexp "[,]+" in
-  (fun str ->
-     Str.split regexp str
-  )
+  Str.split regexp
 
 let troncate' len str =
   let str = strip str in
   String.sub str 0 (min len (String.length str))
 
-let troncate str =
-  troncate' 40 str
+let troncate str = troncate' 40 str
