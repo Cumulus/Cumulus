@@ -51,7 +51,7 @@ let add = function
       || Utils.is_invalid_email email ->
       Lwt.return false
   | (name, (email, (password, _))) ->
-      let name = BatString.trim name in
+      let name = String.trim name in
       Db_user.get_user_with_name name >>= function
       | Some _ -> Lwt.return false
       | None ->
@@ -81,30 +81,14 @@ let (get_user, set_user, unset_user) =
    (fun () -> Eliom_reference.unset eref)
   )
 
-let get_userid () =
-  get_user () >>= function
-  | None -> Lwt.return None
-  | (Some user) -> Lwt.return (Some user.id)
-
-let get_user_feeds_per_page () =
-  get_user () >>= function
-  | None -> Lwt.return None
-  | Some user -> Lwt.return (Some user.feeds_per_page)
-
-let is_connected () =
-  get_user () >>= function
-  | None -> Lwt.return false
-  | _ -> Lwt.return true
-
-let is_admin () =
-  get_user () >>= function
-  | None -> Lwt.return false
-  | Some user -> Lwt.return user.is_admin
+let get_userid () = get_user () >|= Option.map (fun x -> x.id)
+let is_connected () = get_user () >|= Option.is_some
+let is_admin () = get_user () >|= Option.map_default (fun x -> x.is_admin) false
 
 let connect user password =
   Db_user.get_user_with_name user >>= function
   | None -> Lwt.return Not_found
-  | (Some user) ->
+  | Some user ->
       let user = user_new user in
       if Db_user.check_password password user.password then
         is_connected () >>= function
@@ -115,15 +99,14 @@ let connect user password =
       else
         Lwt.return Bad_password
 
+(* TODO: Remove this after the merge of the new ui *)
 let get_user_and_email () =
-  get_userid () >>= fun userid ->
-  match userid with
+  get_user () >>= function
   | None -> Lwt.return None
-  | Some id ->
-      Db_user.get_user_name_and_email_with_id id >>= fun user ->
+  | Some user ->
       let user = object
-        method name = user#!name
-        method email = user#!email
+        method name = user.name
+        method email = user.email
       end in
       Lwt.return (Some user)
 
@@ -134,31 +117,28 @@ let disconnect () =
       Lwt.return true
   | false -> Lwt.return false
 
-let update_password = function
-  | (("" as password), (_ as password_check))
-  | ((_ as password), ("" as password_check))
-  | (password, password_check) when password <> password_check ->
-      Lwt.return false
-  | (password, _) ->
-      get_userid () >>= function
-      | None -> Lwt.return false
-      | Some id ->
-          let password = Db_user.to_password password in
-          Db_user.update_user_password ~userid:id ~password ()
-          >>= fun () ->
-          Lwt.return true
+let update_password (password, password_check) =
+  if String.is_empty password || password <> password_check then
+    Lwt.return false
+  else
+    get_user () >>= function
+    | None -> Lwt.return false
+    | Some user ->
+        let password = Db_user.to_password password in
+        Db_user.update_user_password ~userid:user.id ~password ()
+        >>= fun () ->
+        Lwt.return true
 
-let update_email = function
-  | "" as email
-        | email when Utils.is_invalid_email email ->
-      Lwt.return false
-  | email ->
-      get_user () >>= function
-      | None -> Lwt.return false
-      | Some user ->
-          set_user {user with email} >>= fun () ->
-          Db_user.update_user_email ~userid:user.id ~email () >>= fun () ->
-          Lwt.return true
+let update_email email =
+  if String.is_empty email || Utils.is_invalid_email email then
+    Lwt.return false
+  else
+    get_user () >>= function
+    | None -> Lwt.return false
+    | Some user ->
+        set_user {user with email} >>= fun () ->
+        Db_user.update_user_email ~userid:user.id ~email () >>= fun () ->
+        Lwt.return true
 
 let update_feeds_per_page feeds_per_page =
   get_user () >>= function
@@ -173,8 +153,7 @@ let update_feeds_per_page feeds_per_page =
       Lwt.return true
 
 let get_offset () =
-  get_user_feeds_per_page () >>= fun off ->
-  Lwt.return (Eliom_lib.Option.get (fun () -> Utils.offset) off)
+  get_user () >|= Option.map_default (fun x -> x.feeds_per_page) Utils.offset
 
 let send_reset_email ~service email =
   let f x =

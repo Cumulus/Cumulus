@@ -33,7 +33,6 @@ type user = {
 val add : string * (string * (string * string)) -> bool Lwt.t
 val get_user : unit -> (user option) Lwt.t
 val get_userid : unit -> (int32 option) Lwt.t
-val get_user_feeds_per_page : unit -> (int32 option) Lwt.t
 val is_connected : unit -> bool Lwt.t
 val is_admin : unit -> bool Lwt.t
 val connect : string -> string -> user_state Lwt.t
