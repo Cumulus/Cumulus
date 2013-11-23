@@ -35,7 +35,7 @@ type user =
 let to_password x = Bcrypt.hash x
 let check_password = Bcrypt.verify
 
-let user_to_user_with_password user =
+let user_to_user_with_password =
   let f x = object
     method id = x#id;
     method name = x#name;
@@ -44,7 +44,7 @@ let user_to_user_with_password user =
     method is_admin = x#is_admin;
     method feeds_per_page = x#feeds_per_page;
   end in
-  Option.map f user
+  Option.map f
 
 let users_id_seq = (<:sequence< serial "users_id_seq" >>)
 

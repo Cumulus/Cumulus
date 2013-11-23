@@ -14,8 +14,8 @@ Faire en sorte que le formulaire d'inscription ne se vide pas
   (supprimer la dépendance sur macaque{.syntax,} dans base et cumulus)
 * Ne laisser que la gestion de l'abstraction dans base/*
 * Utiliser Batteries partout
-* Ouvrir « Batteries » et « Eliom_lib.Lwt_ops » dans tout les modules
-* Ouvrir « Eliom_service » et « Eliom_parameter » dans Services
+* Ouvrir « Batteries » et « Eliom_lib.Lwt_ops » dans tous les modules
+* Ouvrir « Eliom_service » et « Eliom_parameter » dans Services ?
 * Ouvrir « Eliom_content.Html5.F » dans Templates*
 * Supprimer le module Html
 * …
