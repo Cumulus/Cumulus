@@ -23,3 +23,4 @@ val view_feed : int -> [> `Html ] Html.elt Lwt.t
 val preferences : unit -> [> `Html ] Html.elt Lwt.t
 val comment : int -> [> `Html ] Html.elt Lwt.t
 val edit_feed : int -> [> `Html ] Html.elt Lwt.t
+val reset_password : unit -> [> `Html ] Html.elt Lwt.t

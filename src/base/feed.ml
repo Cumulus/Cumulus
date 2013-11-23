@@ -19,6 +19,9 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
+open Batteries
+open Eliom_lib.Lwt_ops
+
 module Calendar = CalendarLib.Calendar
 module Uri = Eliom_uri
 
@@ -33,10 +36,6 @@ type feed = {
   tags: string list;
   score : int;
 }
-
-type tree = Sheet of feed | Node of feed * tree list
-let (>>=) = Lwt.(>>=)
-let (>|=) = Lwt.(>|=)
 
 let feed_new data tags score = {
   id = data#!id;

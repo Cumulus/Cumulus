@@ -19,11 +19,12 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
+open Batteries
+open Eliom_lib.Lwt_ops
+
 module Cumulus_appl = Eliom_registration.App (struct
   let application_name = "cumulus"
 end)
-
-let (>>=) = Lwt.(>>=)
 
 let () =
   Eliom_atom.Reg.register
@@ -233,4 +234,19 @@ let () =
     (fun feedid () -> Feed.downvote feedid);
   Eliom_registration.Action.register
     ~service:Services.cancelvote_feed
-    (fun feedid () -> Feed.cancel_vote feedid)
+    (fun feedid () -> Feed.cancel_vote feedid);
+  Eliom_registration.Action.register
+    ~service:Services.reset_password
+    (fun () ->
+       let service user =
+         Eliom_registration.Action.register_coservice
+           ~timeout:(float_of_int (60 * 60 * 24 * 30))
+           ~fallback:Services.preferences
+           ~get_params:Eliom_parameter.unit
+           (fun () () -> User.force_connect user)
+       in
+       User.send_reset_email ~service
+    );
+  Cumulus_appl.register
+    ~service:Services.reset_password_form
+    (fun () () -> Templates.reset_password ())

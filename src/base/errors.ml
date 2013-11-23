@@ -19,6 +19,9 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
+open Batteries
+open Eliom_lib.Lwt_ops
+
 let error = Eliom_reference.eref ~scope:Eliom_common.request_scope None
 
 let get_error () =

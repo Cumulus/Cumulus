@@ -19,14 +19,32 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-module Option = Eliom_lib.Option
-
-let (>>=) = Lwt.(>>=)
+open Batteries
+open Eliom_lib.Lwt_ops
 
 type password = Bcrypt.hash_t
 
+type user =
+  < email : Sql.string_t Sql.non_nullable_data;
+    id : Sql.int32_t Sql.non_nullable_data;
+    name : Sql.string_t Sql.non_nullable_data;
+    password : password;
+    is_admin : Sql.bool_t Sql.non_nullable_data;
+    feeds_per_page : Sql.int32_t Sql.non_nullable_data >
+
 let to_password x = Bcrypt.hash x
 let check_password = Bcrypt.verify
+
+let user_to_user_with_password =
+  let f x = object
+    method id = x#id;
+    method name = x#name;
+    method password = Bcrypt.hash_of_string x#!password
+    method email = x#email;
+    method is_admin = x#is_admin;
+    method feeds_per_page = x#feeds_per_page;
+  end in
+  Option.map f
 
 let get_user_id_with_name name =
   Db.view_one
@@ -57,21 +75,7 @@ let get_user_with_name name =
             } | u in $Db_table.users$;
             u.name = $string:name$;
      >>)
-  >>= fun user ->
-  Lwt.return
-    (Option.map
-       (fun x ->
-          object
-            method id = x#id;
-            method name = x#name;
-            method password = Bcrypt.hash_of_string x#!password
-            method email = x#email;
-            method is_admin = x#is_admin;
-            method feeds_per_page = x#feeds_per_page;
-          end
-       )
-       user
-    )
+  >|= user_to_user_with_password
 
 let add_user ~name ~password ~email () =
   Db.query
@@ -101,3 +105,8 @@ let update_user_feeds_per_page ~userid ~nb_feeds () =
     (<:update< u in $Db_table.users$ := {
               feeds_per_page = $int32:nb_feeds$;
               } | u.id = $int32:userid$; >>)
+
+let get_user_with_email email =
+  Db.view_opt
+    (<:view< u | u in $Db_table.users$; u.email = $string:email$; >>)
+  >|= user_to_user_with_password

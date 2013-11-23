@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: e4a9464ab779472b69dd6af3b8cbc1ee) *)
+(* DO NOT EDIT (digest: d3a280108519ee0f4ece91aab3c29657) *)
 module OASISGettext = struct
 (* # 21 "src/oasis/OASISGettext.ml" *)
 
@@ -257,11 +257,11 @@ module MyOCamlbuildFindlib = struct
       String.before s (String.index s ' ')
     with Not_found -> s
 
-  (* this lists all supported packages *)
+  (* This lists all supported packages. *)
   let find_packages () =
     List.map before_space (split_nl & run_and_read "ocamlfind list")
 
-  (* this is supposed to list available syntaxes, but I don't know how to do it. *)
+  (* Mock to list available syntaxes. *)
   let find_syntaxes () = ["camlp4o"; "camlp4r"]
 
   (* ocamlfind command *)
@@ -270,9 +270,9 @@ module MyOCamlbuildFindlib = struct
   let dispatch =
     function
       | Before_options ->
-          (* by using Before_options one let command line options have an higher priority *)
-          (* on the contrary using After_options will guarantee to have the higher priority *)
-          (* override default commands by ocamlfind ones *)
+          (* By using Before_options one let command line options have an higher
+           * priority on the contrary using After_options will guarantee to have
+           * the higher priority override default commands by ocamlfind ones *)
           Options.ocamlc     := ocamlfind & A"ocamlc";
           Options.ocamlopt   := ocamlfind & A"ocamlopt";
           Options.ocamldep   := ocamlfind & A"ocamldep";
@@ -281,7 +281,8 @@ module MyOCamlbuildFindlib = struct
 
       | After_rules ->
 
-          (* When one link an OCaml library/binary/package, one should use -linkpkg *)
+          (* When one link an OCaml library/binary/package, one should use
+           * -linkpkg *)
           flag ["ocaml"; "link"; "program"] & A"-linkpkg";
 
           (* For each ocamlfind package one inject the -package option when
@@ -292,8 +293,8 @@ module MyOCamlbuildFindlib = struct
               let base_args = [A"-package"; A pkg] in
               let syn_args = [A"-syntax"; A "camlp4o"] in
               let args =
-  			  (* heuristic to identify syntax extensions:
-  				 whether they end in ".syntax"; some might not *)
+          (* Heuristic to identify syntax extensions: whether they end in
+           * ".syntax"; some might not *)
                 if Filename.check_suffix pkg "syntax"
                 then syn_args @ base_args
                 else base_args
@@ -312,7 +313,8 @@ module MyOCamlbuildFindlib = struct
           flag ["ocaml"; "compile";  "syntax_"^syntax] & S[A"-syntax"; A syntax];
           flag ["ocaml"; "ocamldep"; "syntax_"^syntax] & S[A"-syntax"; A syntax];
           flag ["ocaml"; "doc";      "syntax_"^syntax] & S[A"-syntax"; A syntax];
-          flag ["ocaml"; "infer_interface"; "syntax_"^syntax] & S[A"-syntax"; A syntax];
+          flag ["ocaml"; "infer_interface"; "syntax_"^syntax] &
+                S[A"-syntax"; A syntax];
           end (find_syntaxes ());
 
           (* The default "thread" tag is not compatible with ocamlfind.
@@ -492,7 +494,7 @@ module MyOCamlbuildBase = struct
 end
 
 
-# 495 "myocamlbuild.ml"
+# 497 "myocamlbuild.ml"
 open Ocamlbuild_plugin;;
 let package_default =
   {
@@ -515,7 +517,7 @@ let package_default =
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 519 "myocamlbuild.ml"
+# 521 "myocamlbuild.ml"
 (* OASIS_STOP *)
 
 module M = Ocamlbuild_eliom.Make(struct
