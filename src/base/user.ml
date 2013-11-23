@@ -47,7 +47,7 @@ let add = function
   | (_, ((_ as email), (("" as password), (_ as password_check))))
   | (_, ((_ as email), ((_ as password), ("" as password_check))))
   | (_, (email, (password, password_check)))
-    when password <> password_check
+    when not (String.equal password password_check)
       || Utils.is_invalid_email email ->
       Lwt.return false
   | (name, (email, (password, _))) ->
@@ -118,7 +118,7 @@ let disconnect () =
   | false -> Lwt.return false
 
 let update_password (password, password_check) =
-  if String.is_empty password || password <> password_check then
+  if String.is_empty password || not (String.equal password password_check) then
     Lwt.return false
   else
     get_user () >>= function
