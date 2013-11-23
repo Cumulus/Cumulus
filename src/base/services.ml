@@ -19,6 +19,9 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
+open Batteries
+open Eliom_lib.Lwt_ops
+
 let atom =
   Eliom_service.Http.service
     ~path: ["cumulus.atom"]
@@ -205,4 +208,15 @@ let edit_desc_comment =
     ~fallback:view_feed
     ~post_params: Eliom_parameter.((int "id") **
                                      (string "desc"))
+    ()
+
+let reset_password =
+  Eliom_service.Http.post_coservice'
+    ~post_params:Eliom_parameter.(string "email")
+    ()
+
+let reset_password_form =
+  Eliom_service.App.service
+    ~path:["pwd-reset"]
+    ~get_params:Eliom_parameter.unit
     ()

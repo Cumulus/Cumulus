@@ -19,6 +19,9 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
+open Batteries
+open Eliom_lib.Lwt_ops
+
 module Lwt_thread = struct
   include Lwt
   include Lwt_chan
@@ -27,7 +30,7 @@ module Lwt_PGOCaml = PGOCaml_generic.Make(Lwt_thread)
 module Lwt_Query = Query.Make_with_Db(Lwt_thread)(Lwt_PGOCaml)
 
 let connect =
-  let open Configfile in
+  let open Db_config in
   Lwt_PGOCaml.connect
     ?database
     ?host

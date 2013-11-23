@@ -19,30 +19,39 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
+open Batteries
+open Eliom_lib.Lwt_ops
+
 module UTF8 = CamomileLibraryDefault.Camomile.CaseMap.Make(CamomileLibrary.UTF8)
 
 type tree =
   | Sheet of Feed.feed
   | Node of Feed.feed * tree list
 
-let (>>=) = Lwt.(>>=)
+let get = function
+  | Sheet elm
+  | Node (elm, _) -> Option.map_default identity 0l elm.Feed.parent
+
+let is_root = function
+  | Sheet elm
+  | Node (elm, _) -> Option.is_none elm.Feed.parent
 
 let rec has_parent id = function
-  | Sheet elm -> elm.Feed.id = id
+  | Sheet elm -> Int32.equal elm.Feed.id id
   | Node (elm, childs) ->
-      let l = List.map (fun x -> has_parent id x) childs in
-      (elm.Feed.id = id) || (List.fold_left (fun x -> fun y -> x || y) false l)
+      let l = List.map (has_parent id) childs in
+      Int32.equal elm.Feed.id id || List.fold_left (||) false l
 
 let rec append_tree tree id = function
-  | Sheet elm -> begin match id = elm.Feed.id with
+  | Sheet elm -> begin match Int32.equal id elm.Feed.id with
     | true -> Node (elm, [tree])
     | false -> Sheet elm
   end
   | Node (elm, childs) ->
-      match id = elm.Feed.id with
+      match Int32.equal id elm.Feed.id with
       | true -> Node (elm, tree :: childs)
       | false ->
-          let childs = List.map (fun x -> append_tree tree id x) childs in
+          let childs = List.map (append_tree tree id) childs in
           Node (elm, childs)
 
 let string_of_tree root =
@@ -57,17 +66,10 @@ let string_of_tree root =
         List.iter (fun x -> Buffer.add_char buffer ' '; aux x) childs;
         Buffer.add_char buffer ')'
   in
-  let _ = aux root in
+  aux root;
   Buffer.contents buffer
 
 let rec tree_comments stack comments =
-  let get = function
-    | Sheet elm
-    | Node (elm, _) ->
-        match elm.Feed.parent with
-        | None -> 0l
-        | Some n -> n
-  in
   let rec scan tree stack acc = match stack with
     | [] -> acc @ [ tree ]
     | x :: r ->
@@ -83,24 +85,11 @@ let rec tree_comments stack comments =
   end
   | x :: r -> tree_comments (scan (Sheet x) stack []) r
 
-let rec branch_comments root comments =
-  let get = function
-    | Sheet elm
-    | Node (elm, _) -> match elm.Feed.parent with
-      | None -> 0l
-      | Some n -> n
-  in
-  let is_root = function
-    | Sheet elm
-    | Node (elm, _) -> match elm.Feed.parent with
-      | None -> true
-      | Some _ -> false
-  in
-  match comments with
+let rec branch_comments root = function
   | [] -> root
-  | l when (is_root root) -> root
+  | l when is_root root -> root
   | x :: r ->
-      if x.Feed.id = (get root)
+      if Int32.equal x.Feed.id (get root)
       then branch_comments (Node (x, [root])) r
       else branch_comments root (r @ [x])
 

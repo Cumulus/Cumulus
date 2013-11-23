@@ -247,7 +247,7 @@ let main_style content footer =
                          Html.Raw.a ~a:[Html.a_href
                                           (Html.uri_of_string
                                              (fun () ->
-                                                "http://bitbucket.org/Engil/cumulus"
+                                                "https://github.com/Cumulus/Cumulus"
                                              )
                                           )
                                        ]
@@ -264,7 +264,8 @@ let main_style content footer =
                          Html.pcdata ", ";
                          Html.a ~service:Services.comments_atom
                            [Html.pcdata "Flux Atom des commentaires"] ();
-                         Html.pcdata ")";
+                         Html.pcdata ") Si t'as oublié ton mot-de-passe, clique ";
+                         Html.a ~service:Services.reset_password_form [Html.pcdata "ici"] ();
                        ]
                      )
                  ]
@@ -646,3 +647,24 @@ let comment id =
 
 let edit_feed id =
   private_edit_feed (Int32.of_int id)
+
+let reset_password () =
+  let form =
+    Html.post_form
+      ~a:[Html.a_class ["box"]]
+      ~service:Services.reset_password
+      (fun email_name -> [
+           Html.h1 [Html.pcdata "Adresse mail associée au compte"];
+           Html.p [
+             string_input_box
+               ~a:[Html.a_id "new_email"]
+               ~input_type:`Text
+               ~name:email_name
+               ();
+             Html.br ();
+             submit_input ~value:"Valider" ()
+           ]
+         ])
+      ()
+  in
+  main_style [form] []
