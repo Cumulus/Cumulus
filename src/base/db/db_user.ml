@@ -25,25 +25,28 @@ open Eliom_lib.Lwt_ops
 type password = Bcrypt.hash_t
 
 type user =
-  < email : Sql.string_t Sql.non_nullable_data;
-    id : Sql.int32_t Sql.non_nullable_data;
-    name : Sql.string_t Sql.non_nullable_data;
-    password : password;
-    is_admin : Sql.bool_t Sql.non_nullable_data;
-    feeds_per_page : Sql.int32_t Sql.non_nullable_data >
+  { id : int32
+  ; name : string
+  ; password : password
+  ; email : string
+  ; is_admin : bool
+  ; feeds_per_page : int32
+  }
 
 let to_password x = Bcrypt.hash x
 let check_password = Bcrypt.verify
 
+(* TODO: Change the name to « to_user » *)
 let user_to_user_with_password =
-  let f x = object
-    method id = x#id;
-    method name = x#name;
-    method password = Bcrypt.hash_of_string x#!password
-    method email = x#email;
-    method is_admin = x#is_admin;
-    method feeds_per_page = x#feeds_per_page;
-  end in
+  let f x =
+    { id = x#!id
+    ; name = x#!name
+    ; password = Bcrypt.hash_of_string x#!password
+    ; email = x#!email
+    ; is_admin = x#!is_admin
+    ; feeds_per_page = x#!feeds_per_page
+    }
+  in
   Option.map f
 
 let users_id_seq = (<:sequence< serial "users_id_seq" >>)

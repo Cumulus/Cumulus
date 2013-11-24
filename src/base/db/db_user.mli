@@ -22,12 +22,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 type password
 
 type user =
-  < email : Sql.string_t Sql.non_nullable_data;
-    id : Sql.int32_t Sql.non_nullable_data;
-    name : Sql.string_t Sql.non_nullable_data;
-    password : password;
-    is_admin : Sql.bool_t Sql.non_nullable_data;
-    feeds_per_page : Sql.int32_t Sql.non_nullable_data >
+  { id : int32
+  ; name : string
+  ; password : password
+  ; email : string
+  ; is_admin : bool
+  ; feeds_per_page : int32
+  }
 
 val to_password : string -> password
 val check_password : string -> password -> bool
