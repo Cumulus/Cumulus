@@ -40,8 +40,14 @@ let feed_of_db (feed, tags, votes) =
   in
   Lwt.return (Feed.feed_new feed tags votes)
 
+let feed_of_db_ng feed =
+  Lwt.return (Feed.feed_new feed)
+
 let feeds_of_db (feeds, tags, votes) =
   Lwt_list.map_s (fun x -> feed_of_db (x, tags, votes)) feeds
+
+let feeds_of_db_ng feeds =
+  Lwt_list.map_s feed_of_db feeds
 
 let to_somthing f data =
   Lwt_list.map_p (fun feed -> f feed) data
