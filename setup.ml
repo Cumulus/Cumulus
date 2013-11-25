@@ -6001,7 +6001,7 @@ let setup_t =
                            "Configfile";
                            "Db";
                            "Db_table";
-                           "Db_all";
+                           "Db_feed_ng";
                            "Db_update";
                            "Db_feed";
                            "Db_user"
