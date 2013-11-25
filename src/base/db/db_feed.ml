@@ -125,6 +125,10 @@ let get_feeds_aux ~starting ~number ~feeds_filter ~tags_filter ~votes_filter =
   >>= fun votes ->
   Lwt.return (feeds, tags, votes)
 
+(*
+ * TODO: optimization (depend of Feeds.tree_to_atom)
+ *)
+
 let rec get_tree_feeds feed_id ~starting ~number () =
   let feeds_filter f = (<:value< f.parent = $int32:feed_id$ >>) in
   let tags_filter _ _ = (<:value< true >>) in
