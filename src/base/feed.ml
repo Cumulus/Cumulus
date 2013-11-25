@@ -50,6 +50,18 @@ let feed_new data tags score = {
   score;
 }
 
+let feed_new_ng data = {
+  id = data#!id;
+  url = data#?url;
+  description = data#!description;
+  date = data#!timedate;
+  author = data#!author;
+  parent = data#?parent;
+  root = data#?root;
+  tags = List.map Sql.get data#tags;
+  score = 0;
+}
+
 let links_of_tags tags =
   List.fold_left (fun acc tag ->
     let link =
