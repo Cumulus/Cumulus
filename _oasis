@@ -36,6 +36,7 @@ Library base
   Path: src/base
   FindlibParent: cumulus
   Modules:
+    General_config,
     Services,
     Html,
     Utils,
@@ -56,6 +57,7 @@ Library db
   FindlibParent: cumulus
   Modules:
     Configfile,
+    Db_config,
     Db,
     Db_table
     Db_feed_ng,

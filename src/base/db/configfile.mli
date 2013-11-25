@@ -19,9 +19,8 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-val database : string option
-val host : string option
-val password : string option
-val user : string option
-val port : int option
-val unix_domain_socket_dir : string option
+val fail_attrib : tag:string -> string -> 'a
+val fail_content : tag:string -> 'a
+val fail_tag : tag:string -> 'a
+val fail_pcdata : string -> 'a
+val fail_missing : tag:string -> string -> 'a

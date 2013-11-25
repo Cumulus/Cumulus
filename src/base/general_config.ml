@@ -22,24 +22,28 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 open Batteries
 open Eliom_lib.Lwt_ops
 
-let fmt = Printf.sprintf
+let rec init_fun data = function
+  | Simplexmlparser.Element ("general" as tag, attribs, content)::l ->
+      if content <> [] then
+        Configfile.fail_content ~tag;
+      let data =
+        List.fold_left
+          (fun data -> function
+             | "email", x -> Some x
+             | x, _ -> Configfile.fail_attrib ~tag x
+          )
+          data
+          attribs
+      in
+      init_fun data l
+  | Simplexmlparser.Element (tag, _, _)::_ -> Configfile.fail_tag ~tag
+  | Simplexmlparser.PCData pcdata :: _ ->
+      Configfile.fail_pcdata pcdata
+  | [] -> data
 
-let fail_attrib ~tag x =
-  let msg = fmt "Unexpected attribute '%s' inside '%s'" x tag in
-  raise (Ocsigen_extensions.Error_in_config_file msg)
-
-let fail_content ~tag =
-  let msg = fmt "Unexpected content inside '%s'" tag in
-  raise (Ocsigen_extensions.Error_in_config_file msg)
-
-let fail_tag ~tag =
-  let msg = fmt "Unexpected tag '%s'" tag in
-  raise (Ocsigen_extensions.Error_in_config_file msg)
-
-let fail_pcdata x =
-  let msg = fmt "Unexpected pcdata '%s' inside cumulus" x in
-  raise (Ocsigen_extensions.Error_in_config_file msg)
-
-let fail_missing ~tag x =
-  let msg = fmt "Missing attribute '%s' inside '%s'" x tag in
-  raise (Ocsigen_extensions.Error_in_config_file msg)
+let email =
+  let data = None in
+  let c = Eliom_config.get_config () in
+  Option.default_delayed
+    (fun () -> Configfile.fail_missing ~tag:"general" "email")
+    (init_fun data c)

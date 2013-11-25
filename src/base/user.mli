@@ -33,7 +33,6 @@ type user = {
 val add : string * (string * (string * string)) -> bool Lwt.t
 val get_user : unit -> (user option) Lwt.t
 val get_userid : unit -> (int32 option) Lwt.t
-val get_user_feeds_per_page : unit -> (int32 option) Lwt.t
 val is_connected : unit -> bool Lwt.t
 val is_admin : unit -> bool Lwt.t
 val connect : string -> string -> user_state Lwt.t
@@ -44,3 +43,14 @@ val update_email : string -> bool Lwt.t
 val update_feeds_per_page : int32 -> bool Lwt.t
 
 val get_offset : unit -> int32 Lwt.t
+
+val send_reset_email :
+  service:((Db_user.user ->
+            (unit, unit, [< Eliom_service.get_service_kind ],
+             [< Eliom_service.suff ], 'a, unit,
+             [< Eliom_service.registrable ], 'b)
+              Eliom_service.service)) ->
+  string ->
+  unit Lwt.t
+
+val force_connect : Db_user.user -> unit Lwt.t

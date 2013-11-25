@@ -21,6 +21,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 type password
 
+type user =
+  < email : Sql.string_t Sql.non_nullable_data;
+    id : Sql.int32_t Sql.non_nullable_data;
+    name : Sql.string_t Sql.non_nullable_data;
+    password : password;
+    is_admin : Sql.bool_t Sql.non_nullable_data;
+    feeds_per_page : Sql.int32_t Sql.non_nullable_data >
+
 val to_password : string -> password
 val check_password : string -> password -> bool
 
@@ -30,15 +38,7 @@ val get_user_name_and_email_with_id :
     name : Sql.string_t Sql.non_nullable_data >
     Lwt.t
 
-val get_user_with_name :
-  string ->
-  < email : Sql.string_t Sql.non_nullable_data;
-    id : Sql.int32_t Sql.non_nullable_data;
-    name : Sql.string_t Sql.non_nullable_data;
-    password : password;
-    is_admin : Sql.bool_t Sql.non_nullable_data;
-    feeds_per_page : Sql.int32_t Sql.non_nullable_data >
-    option Lwt.t
+val get_user_with_name : string -> user option Lwt.t
 
 val get_user_id_with_name :
   string ->
@@ -68,3 +68,5 @@ val update_user_feeds_per_page :
   nb_feeds:int32 ->
   unit ->
   unit Lwt.t
+
+val get_user_with_email : string -> user option Lwt.t

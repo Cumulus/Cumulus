@@ -19,27 +19,4 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-open Batteries
-open Eliom_lib.Lwt_ops
-
-let fmt = Printf.sprintf
-
-let fail_attrib ~tag x =
-  let msg = fmt "Unexpected attribute '%s' inside '%s'" x tag in
-  raise (Ocsigen_extensions.Error_in_config_file msg)
-
-let fail_content ~tag =
-  let msg = fmt "Unexpected content inside '%s'" tag in
-  raise (Ocsigen_extensions.Error_in_config_file msg)
-
-let fail_tag ~tag =
-  let msg = fmt "Unexpected tag '%s'" tag in
-  raise (Ocsigen_extensions.Error_in_config_file msg)
-
-let fail_pcdata x =
-  let msg = fmt "Unexpected pcdata '%s' inside cumulus" x in
-  raise (Ocsigen_extensions.Error_in_config_file msg)
-
-let fail_missing ~tag x =
-  let msg = fmt "Missing attribute '%s' inside '%s'" x tag in
-  raise (Ocsigen_extensions.Error_in_config_file msg)
+val email : string
