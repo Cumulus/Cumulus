@@ -33,6 +33,7 @@ type feed = {
   score : int;
 }
 
+val feed_new_ng : Db_feed_ng.feed -> feed
 val feed_new : Db_feed.feed -> string list -> int -> feed
 val to_html : feed ->
   (([> `A of [> `PCDATA ] | `Br | `Div | `Img | `PCDATA ] Html.elt) list) Lwt.t
