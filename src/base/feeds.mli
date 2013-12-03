@@ -25,6 +25,8 @@ val event : unit Eliom_react.Down.t
 
 val to_html :
   Db_feed.feeds_and_tags -> (([> Html5_types.div ] Html.elt) list) Lwt.t
+val to_html_ng :
+  Db_feed_ng.feeds -> (([> Html5_types.div ] Html.elt) list) Lwt.t
 val comments_to_html :
   int32 -> [< Html5_types.div_content_fun > `A `Br `Div `Img `P `PCDATA ] Html.elt Lwt.t
 val branch_to_html :
@@ -45,4 +47,10 @@ val to_html' :
   starting:int32 ->
   number:int32 ->
   Db_feed.feed_generator ->
+  [> Html5_types.div ] Html.elt list Lwt.t
+
+val to_html_ng' :
+  starting:int32 ->
+  number:int32 ->
+  Db_feed_ng.feed_generator ->
   [> Html5_types.div ] Html.elt list Lwt.t

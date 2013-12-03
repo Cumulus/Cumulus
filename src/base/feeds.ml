@@ -61,6 +61,9 @@ let private_to_html data =
        )
     ) data
 
+(* Problème entre Db_feed_ng.get_feed_with_id et Db_feed.get_feed_with_id *)
+(* feed option <> feed *)
+
 let comments_to_html id =
   Db_feed.get_feed_with_id id
   >>= feed_of_db
@@ -92,6 +95,7 @@ let branch_to_html id =
       Comments.to_html tree
 
 let to_html feeds = feeds_of_db feeds >>= private_to_html
+let to_html_ng feeds = feeds_of_db_ng feeds >>= private_to_html
 
 let feed_id_to_html id =
   Db_feed.get_feed_with_id id
@@ -274,3 +278,4 @@ let edit_desc_comment (id, description) =
 
 (* TODO: Remove this ugly thing *)
 let to_html' ~starting ~number feeds = feeds ~starting ~number () >>= to_html
+let to_html_ng' ~starting ~number feeds = feeds ~starting ~number () >>= to_html_ng
