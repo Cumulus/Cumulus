@@ -111,7 +111,7 @@ let to_html self =
   >>= fun user_score ->
   Lwt.return (
     [
-      Html.div ~a: [Html.a_class["col";"w200p";"avatarbox"]]
+      Html.aside ~a: [Html.a_class["col";"avatarbox"]]
          [Html.div ~a: [Html.a_class["post_avatar"]]
             [Html.img
                ~a: [Html.a_class ["postimg"]]
@@ -121,7 +121,7 @@ let to_html self =
                    ~service: (Utils.get_gravatar (author#!email)) (65, "identicon")
                )
                ()]];
-      Html.div ~a: [Html.a_class["col";"post_info"]][
+      Html.aside ~a: [Html.a_class["col";"post_info"]][
        Html.div ~a: [Html.a_class["line_author"]][
 
       Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");

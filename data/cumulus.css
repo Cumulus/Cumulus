@@ -259,10 +259,10 @@ button, input, select {
 }
 
 .post {
-  margin-top: 15px;
+  margin-top: 5px;
   margin-bottom: 5px;
   margin-left: 5px;
-  width: 65%;
+  width: 80%;
   height: 100px;
   border-radius: 5px;
   background-color: #fff;
@@ -279,6 +279,7 @@ button, input, select {
 
 .avatarbox {
   height: 100%;
+  width: 150px;
   text-align: center
 }
 
@@ -336,9 +337,11 @@ a.postitle{
 
 .line_title {
   font-size:1.35em;
+  margin-bottom: 5px;
 }
 .col.post_info {
   margin-top: 5px;
+  width: 70%;
   padding-bottom: 15px;
   margin-top: 5px;
 }
