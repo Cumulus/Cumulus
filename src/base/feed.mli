@@ -55,8 +55,10 @@ val cancel_vote : int32 -> unit Lwt.t
 
 (* TODO: Remove the following functions *)
 val get_root_feeds : Db_feed.feed_generator
+val get_root_feeds_ng : Db_feed_ng.feed_generator
 val count_root_feeds : unit -> int64 Lwt.t
 val get_feeds_with_author : string -> Db_feed.feed_generator
+val get_feeds_with_author_ng : string -> Db_feed_ng.feed_generator
 val count_feeds_with_author : string -> int64 Lwt.t
 val get_feeds_with_tag : string -> Db_feed.feed_generator
 val count_feeds_with_tag : string -> int64 Lwt.t
