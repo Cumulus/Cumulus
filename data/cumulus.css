@@ -6,6 +6,7 @@
     padding-top: 4px;
 }
 
+
 .header {
     background: #00b1be;
     color: #fff;
@@ -30,10 +31,12 @@
 
 }
 
+
 .flex .flex-h {
     width: 99.75%
     color: #fff;
 }
+
 
 .dash input[type="submit"] {
     padding: 1px 1.2em;
@@ -49,17 +52,21 @@
     width: 15%;
 }
 
+
 .dash input::-webkit-input-placeholder {
   color: #eee;
 }
+
 
 .userbox input::-webkit-input-placeholder {
   color: #eee;
 }
 
+
 .loggedbox input::-webkit-input-placeholder {
   color: #eee;
 }
+
 
 body {
     font-family : Verdana, "Bitstream Vera Sans", "DejaVu Sans", Tahoma, Geneva, Arial, Sans-serif;
@@ -180,6 +187,7 @@ button, input, select {
     width: 200px;
 }
 
+
 .loggedbox a {
   border: 1px;
   width: 100%;
@@ -187,15 +195,18 @@ button, input, select {
   font-size: 0.9em;
 }
 
+
 .loggedbox a:visited {
   text-decoration: none;
   color: #ccc;
 }
 
+
 .loggedbox a:link {
   text-decoration: none;
   color: #ccc;
 }
+
 
 .loggedavatar
 {
@@ -225,6 +236,7 @@ button, input, select {
   padding-left: 0px;
 }
 
+
 .loggedbox input[type="submit"] {
   background-color: #444;
   width: 100%;
@@ -238,6 +250,7 @@ button, input, select {
   padding-left: 0px;
 }
 
+
 .bottom-box
 {
     position: fixed;
@@ -250,33 +263,33 @@ button, input, select {
   margin-bottom: 5px;
   margin-left: 5px;
   width: 65%;
-  height: auto;
+  height: 100px;
   border-radius: 5px;
   background-color: #fff;
 }
 
+
 .postimg {
-  display: block;
-  width: 55px;
-  height: 55px;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center;
+  width: 65px;
+  height: 65px;
   -webkit-border-radius: 99em;
   -moz-border-radius: 99em;
-  border-radius: 99em;
+  margin: 25% 0 25% 0;
+}
+
+.avatarbox {
+  height: 100%;
+  text-align: center
 }
 
 .post_avatar {
-  padding: 15% 10px 15% 10px;
-  height: auto;
+  height: 100%;
   border-radius: 5px 0 0 5px;
   width: 100px;
-  margin-right: 35px;
-  margin-left: 25px;
+  margin-right: 25px;
   position: relative;
   background: #fff;
-  border-right: 2px solid #eee;
+  border-right: 2px solid #eee
 }
 
 .post_avatar:after, .post_avatar:before {
@@ -324,22 +337,20 @@ a.postitle{
 .line_title {
   font-size:1.35em;
 }
-.mod.post_info {
+.col.post_info {
   margin-top: 5px;
-  margin-bottom: 5px;
-}
-
-.tag_line {
-  margin-top: 3px;
-  margin-bottom: 3px;
+  padding-bottom: 15px;
+  margin-top: 5px;
 }
 
 .tags {
   background: #00babe;
   padding: 3px;
+  white-space: nowrap;
   font-size: 0.8em;
   text-decoration: none;
   color: #eee;
+  line-height: 23px;
   border-radius: 3px;
 }
 

@@ -111,7 +111,7 @@ let to_html self =
   >>= fun user_score ->
   Lwt.return (
     [
-      Html.div ~a: [Html.a_class["col";"w20"]]
+      Html.div ~a: [Html.a_class["col";"w200p";"avatarbox"]]
          [Html.div ~a: [Html.a_class["post_avatar"]]
             [Html.img
                ~a: [Html.a_class ["postimg"]]
@@ -156,6 +156,23 @@ let to_html self =
       content;
       tags;
       ];
+      Html.div ~a: [Html.a_class["col";"post_int"]][
+      (if not state then
+        (Html.pcdata "")
+      else
+        (if is_fav = true then
+          (Html.img
+            ~alt: "favicon"
+            ~src:(
+              Html.make_uri
+                ~service: (Eliom_service.static_dir ())
+                ["fav.png"]
+            )
+            ();
+          )
+        else
+          Html.pcdata "lama"))
+    ];
       (*[
        (* TODO : afficher "n commentaire(s)" *)
        Html.a

@@ -1,6 +1,6 @@
 /*
 * www.KNACSS.com V2.6h @author: Raphael Goetter, Alsacreations
-* Licence CC-BY http://creativecommons.org/licenses/by/3.0/fr/ 
+* Licence CC-BY http://creativecommons.org/licenses/by/3.0/fr/
 */
 
 /* ----------------------------- */
@@ -32,7 +32,7 @@ th,
 label,
 textarea,
 caption,
-details, 
+details,
 figure {
   font-size: 1em; /* equiv 14px */
   line-height: 1.5;
@@ -108,7 +108,7 @@ ol {
 ul.unstyled {
   list-style: none;
 }
-code, 
+code,
 pre,
 samp,
 kbd {
@@ -132,7 +132,7 @@ kbd {
 code {
   padding: 2px 4px;
   background: rgba(0,0,0,.04);
-  color: #b11; 
+  color: #b11;
 }
 mark {
   padding:2px 4px;
@@ -223,7 +223,7 @@ body > script {display: none !important;}
 
 /* float layout */
 /* module, contains floats (.item is the same) */
-.mod, .item { 
+.mod, .item {
   overflow: hidden;
 }
 
@@ -581,9 +581,9 @@ table {
 caption {
   padding: 10px;
   color: #555;
-  font-style: italic; 
+  font-style: italic;
 }
-table { 
+table {
   border: 1px solid #ccc;
 }
 tr > * + * {
@@ -601,8 +601,8 @@ td {
 
 /* alternate tables */
 .alternate { border: 0; }
-.alternate tbody { 
-  border: 1px solid #ccc; 
+.alternate tbody {
+  border: 1px solid #ccc;
 }
 .alternate thead tr > * + * {
   border-left: 0;
@@ -612,7 +612,7 @@ td {
 }
 
 /* alternate-vert tables */
-.alternate-vert { 
+.alternate-vert {
   border: 0;
   border-right: 1px solid #ccc;
 }
@@ -654,7 +654,7 @@ td {
 .success {}
 
 /* forms items */
-label { 
+label {
   display: inline-block;
   vertical-align: middle;
   cursor: pointer;
@@ -790,7 +790,7 @@ input[type='submit']::-moz-focus-inner {
     width: auto !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
-    border: 0;    
+    border: 0;
   }
 
   /* margins for large (l) screens */
@@ -813,7 +813,7 @@ input[type='submit']::-moz-focus-inner {
   .w800p,
   .w960p,
   .mw960p,
-  .small-wauto { width: auto; } 
+  .small-wauto { width: auto; }
 
   /* you shall not pass */
   div, textarea, table, td, th, code, pre, samp {
@@ -858,16 +858,16 @@ input[type='submit']::-moz-focus-inner {
     width: auto !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
-    border: 0;    
+    border: 0;
   }
   /* margins for small (s) screens */
   .small-ma0,
   .small-man { margin: 0 !important; }
 
   /* Responsive grids */
-  .grid4 > * {width: 49% !important; } 
+  .grid4 > * {width: 49% !important; }
   .grid4 > :first-child + * + * {margin-left: 0 !important;}
-  .grid6 > * {width: 32% !important; }  
+  .grid6 > * {width: 32% !important; }
   .grid6 > :first-child + * + * + * {margin-left: 0 !important;}
 }
 
@@ -887,7 +887,7 @@ input[type='submit']::-moz-focus-inner {
     border: 0;
   }
   .w30,
-  .w33, 
+  .w33,
   .w40,
   .w50,
   .w300p,
@@ -895,7 +895,7 @@ input[type='submit']::-moz-focus-inner {
   .w500p {
     width: auto;
   }
-  .row { 
+  .row {
     display: block !important;
     width: 100% !important;
   }
@@ -933,7 +933,7 @@ input[type='submit']::-moz-focus-inner {
   .tiny-w50 { width: 50% !important; }
   .tiny-w66 { width: 66.6666% !important; }
   .tiny-w75 { width: 75% !important; }
-  .tiny-w100 { 
+  .tiny-w100 {
     display: block !important;
     float: none !important;
     clear: none !important;
