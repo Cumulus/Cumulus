@@ -33,8 +33,7 @@ type feed = {
   score : int;
 }
 
-val feed_new_ng : Db_feed_ng.feed -> feed
-val feed_new : Db_feed.feed -> string list -> int -> feed
+val feed_new : Db_feed_ng.feed -> feed
 val to_html : feed ->
   (([> `A of [> `PCDATA ] | `Br | `Div | `Img | `PCDATA ] Html.elt) list) Lwt.t
 val to_atom : feed -> Atom_feed.entry Lwt.t
@@ -55,15 +54,13 @@ val downvote : int32 -> unit Lwt.t
 val cancel_vote : int32 -> unit Lwt.t
 
 (* TODO: Remove the following functions *)
-val get_root_feeds : Db_feed.feed_generator
-val get_root_feeds_ng : Db_feed_ng.feed_generator
+val get_root_feeds : Db_feed_ng.feed_generator
 val count_root_feeds : unit -> int64 Lwt.t
-val get_feeds_with_author : string -> Db_feed.feed_generator
-val get_feeds_with_author_ng : string -> Db_feed_ng.feed_generator
+val get_feeds_with_author : string -> Db_feed_ng.feed_generator
 val count_feeds_with_author : string -> int64 Lwt.t
-val get_feeds_with_tag : string -> Db_feed.feed_generator
+val get_feeds_with_tag : string -> Db_feed_ng.feed_generator
 val count_feeds_with_tag : string -> int64 Lwt.t
-val get_fav_with_username : string -> Db_feed.feed_generator
+val get_fav_with_username : string -> Db_feed_ng.feed_generator
 val count_fav_with_username : string -> int64 Lwt.t
 val exist : feedid:int32 -> unit -> bool Lwt.t
 val is_feed_author : feed:int32 -> userid:int32 -> unit -> bool Lwt.t

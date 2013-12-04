@@ -567,14 +567,6 @@ let feed_list ~service page link feeds nb_feeds =
     (Feeds.to_html' ~starting ~number:off feeds)
     nb_feeds
 
-let feed_list_ng ~service page link feeds nb_feeds =
-  User.get_offset () >>= fun off ->
-  let starting = Int32.mul (Int32.of_int page) off in
-  private_main ~page ~link
-    ~service
-    (Feeds.to_html_ng' ~starting ~number:off feeds)
-    nb_feeds
-
 (* see TODO [1] *)
 let main ?(page=0) ~service () =
   feed_list ~service page
