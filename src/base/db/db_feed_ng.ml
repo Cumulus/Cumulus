@@ -109,6 +109,8 @@ let reduce feeds =
   end in
   Lwt_list.fold_left_s
     (fun acc element ->
+      Ocsigen_messages.console2 ("MANIPULE " ^ (string_of_int (Int32.to_int
+      element#!id)));
       Lwt.catch
         (fun () ->
           let value = Lwt_list.find_s
@@ -116,6 +118,9 @@ let reduce feeds =
           let acc = Lwt_list.filter_s
             (fun e -> Lwt.return (e#!id <> element#!id)) acc in
           value >>= (fun value -> acc >>= (fun acc ->
+            Ocsigen_messages.console2
+            ("MERGE BETWEEN " ^ (string_of_int (Int32.to_int value#!id))
+              ^ " AND " ^ (string_of_int (Int32.to_int element#!id)));
             Lwt.return ((object
               method id = value#id
               method author = value#author
@@ -124,9 +129,11 @@ let reduce feeds =
               method url = value#url
               method parent = value#parent
               method root = value#root
-              method tags = (element#tag :: value#tags)
+              method tags = if List.exists
+                (fun x -> Sql.get x = Sql.get element#tag) value#tags
+                then value#tags else (element#tag :: value#tags)
               method user = value#user
-              method score =  (Sql.Op.(+) value#score <:value<1>>)
+              method score = (Sql.Op.(+) value#score <:value<1>>)
             end) :: acc)
           ))
         )
