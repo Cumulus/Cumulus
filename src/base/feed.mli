@@ -21,22 +21,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 open CalendarLib
 
-type feed = {
-  id : int32;
-  url : string option;
-  description : string;
-  date : CalendarLib.Calendar.t;
-  author : int32;
-  parent : int32 option;
-  root : int32 option;
-  tags: string list;
-  score : int;
-}
+type feed = Db_feed_ng.feed =
+  { author : int32
+  ; id : int32
+  ; date : CalendarLib.Calendar.t
+  ; description : string
+  ; url : string option
+  ; parent: int32 option
+  ; root : int32 option
+  ; tags : string list
+  ; user : < email : string; name : string >
+  ; score : int
+  }
 
-val feed_new : Db_feed_ng.feed -> feed
-val to_html : feed ->
+val to_html : Db_feed_ng.feed ->
   (([> `A of [> `PCDATA ] | `Br | `Div | `Img | `PCDATA ] Html.elt) list) Lwt.t
-val to_atom : feed -> Atom_feed.entry Lwt.t
+val to_atom : Db_feed_ng.feed -> Atom_feed.entry Lwt.t
 
 val get_edit_infos : int32 ->
   (bool * string * string * string) Lwt.t

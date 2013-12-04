@@ -19,26 +19,21 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-module Option = Eliom_lib.Option
+open Batteries
+open Eliom_lib.Lwt_ops
 
-let (>>=) = Lwt.(>>=)
-
-class type feed = object
-  method author : Sql.int32_t Sql.non_nullable_data
-  method id : Sql.int32_t Sql.non_nullable_data
-  method timedate : Sql.timestamp_t Sql.non_nullable_data
-  method description : Sql.string_t Sql.non_nullable_data
-  method url : Sql.string_t Sql.nullable_data
-  method parent: Sql.int32_t Sql.nullable_data
-  method root : Sql.int32_t Sql.nullable_data
-  method tags : Sql.string_t Sql.non_nullable_data list
-  method user :
-    <
-      email : Sql.string_t Sql.non_nullable_data;
-      name : Sql.string_t Sql.non_nullable_data;
-    >
-  method score : < nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
-end
+type feed =
+  { author : int32
+  ; id : int32
+  ; date : CalendarLib.Calendar.t
+  ; description : string
+  ; url : string option
+  ; parent: int32 option
+  ; root : int32 option
+  ; tags : string list
+  ; user : < email : string; name : string >
+  ; score : int
+  }
 
 type feeds = feed list
 
@@ -95,39 +90,35 @@ let filter_feed_author author u f =
  *)
 
 let reduce feeds =
-  let new_object o = object
-    method author = o#author
-    method id = o#id
-    method timedate = o#timedate
-    method description = o#description
-    method url = o#url
-    method parent = o#parent
-    method root = o#root
-    method tags = [o#tag]
-    method user = object method name = o#name method email = o#email end
-    method score = (Sql.Op.(+) o#score <:value<0>>)
-  end in
+  let new_object o =
+    { author = o#!author
+    ; id = o#!id
+    ; date = o#!timedate
+    ; description = o#!description
+    ; url = o#?url
+    ; parent = o#?parent
+    ; root = o#?root
+    ; tags = [o#!tag]
+    ; user = object method name = o#!name method email = o#!email end
+    ; score = Int32.to_int o#!score
+    }
+  in
   Lwt_list.fold_left_s
     (fun acc element ->
       Lwt.catch
         (fun () ->
           let value = Lwt_list.find_s
-            (fun e -> Lwt.return (e#!id = element#!id)) acc in
+            (fun e -> Lwt.return (e.id = element#!id)) acc in
           let acc = Lwt_list.filter_s
-            (fun e -> Lwt.return (e#!id <> element#!id)) acc in
+            (fun e -> Lwt.return (e.id <> element#!id)) acc in
           value >>= (fun value -> acc >>= (fun acc ->
-            Lwt.return ((object
-              method id = value#id
-              method author = value#author
-              method timedate = value#timedate
-              method description = value#description
-              method url = value#url
-              method parent = value#parent
-              method root = value#root
-              method tags = (element#tag :: value#tags)
-              method user = value#user
-              method score =  (Sql.Op.(+) value#score <:value<1>>)
-            end) :: acc)
+            Lwt.return (
+              { value with
+                tags = element#!tag :: value.tags
+              ; score = value.score + Int32.to_int element#!score
+              }
+              :: acc
+            )
           ))
         )
         (fun _ -> Lwt.return ((new_object element) :: acc))
@@ -145,9 +136,9 @@ let rec get_tree_feeds feed_id ~starting ~number () =
   get_feeds_aux ~starting ~number ~feeds_filter ~tags_filter ~votes_filter ~users_filter ()
   >>= reduce >>= (fun feeds ->
     Lwt_list.fold_left_s
-      (fun acc feed -> get_tree_feeds feed#!id ~starting ~number () >>=
+      (fun acc feed -> get_tree_feeds feed.id ~starting ~number () >>=
       (fun child -> Lwt.return (acc @ child))
-    ) feeds feeds (* rajoute les feeds enfants après les feeds parent *)
+      ) feeds feeds (* rajoute les feeds enfants après les feeds parent *)
   )
 
 let get_links_feeds ~starting ~number () =
@@ -256,20 +247,20 @@ let of_feed (feeds, tags, votes) =
     (fun value ->
       Db_user.get_user_name_and_email_with_id value#!author
       >>= (fun user ->
-      Lwt.return (object
-        method id = value#id
-        method author = value#author
-        method timedate = value#timedate
-        method description = value#description
-        method url = value#url
-        method parent = value#parent
-        method root = value#root
-        method tags = List.map (fun e -> e#tag) (search value#!id tags)
-        method user = user
-        method score = List.fold_left
-        (fun a _ -> Sql.Op.(+) a <:value<1>>)
-        <:value<0>> (search value#!id votes)
-      end))) feeds
+      Lwt.return
+        { author = value#!author
+        ; id = value#!id
+        ; date = value#!timedate
+        ; description = value#!description
+        ; url = value#?url
+        ; parent = value#?parent
+        ; root = value#?root
+        ; tags = List.map (fun e -> e#!tag) (search value#!id tags)
+        ; user = object method name = user#!name method email = user#!email end
+        ; score = List.fold_left
+        (fun a _ -> succ a)
+        0 (search value#!id votes)
+        })) feeds
 
 let get_fav_with_username name ~starting ~number () =
   Db_feed.get_fav_with_username name starting number ()

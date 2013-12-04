@@ -25,29 +25,18 @@ open Eliom_lib.Lwt_ops
 module Calendar = CalendarLib.Calendar
 module Uri = Eliom_uri
 
-type feed = {
-  id : int32;
-  url : string option;
-  description : string;
-  date : Calendar.t;
-  author : int32;
-  parent : int32 option;
-  root : int32 option;
-  tags: string list;
-  score : int;
-}
-
-let feed_new data = {
-  id = data#!id;
-  url = data#?url;
-  description = data#!description;
-  date = data#!timedate;
-  author = data#!author;
-  parent = data#?parent;
-  root = data#?root;
-  tags = List.map Sql.get data#tags;
-  score = 0;
-}
+type feed = Db_feed_ng.feed =
+  { author : int32
+  ; id : int32
+  ; date : CalendarLib.Calendar.t
+  ; description : string
+  ; url : string option
+  ; parent: int32 option
+  ; root : int32 option
+  ; tags : string list
+  ; user : < email : string; name : string >
+  ; score : int
+  }
 
 let links_of_tags tags =
   List.fold_left (fun acc tag ->
