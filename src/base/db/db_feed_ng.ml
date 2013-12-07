@@ -62,6 +62,8 @@ let get_feeds_aux ~starting ~number
   () =
   let votes_of_list l =
     List.fold_left (fun a e -> VoteMap.add e#id_feed e a) VoteMap.empty l
+  in let tags_of_list l =
+    List.fold_left (fun a e -> TagMap.add e#id_feed e a) TagMap.empty l
   in
   Db.view
     (<:view< {
@@ -85,15 +87,15 @@ let get_feeds_aux ~starting ~number
   >>= fun votes ->
   Db.view
     (<:view<
-      group { tags = match array_agg[t.tag]
-        with $string_array:[||]$ -> $[||]$
+      group { tags = match string_array_agg[t.tag]
+        with null -> $string_array:[||]$
         | x -> x }
       by { t.id_feed }
       | t in $Db_table.feeds_tags$;
       $Db.in'$ t.id_feed $List.map (fun x -> x#id) feeds$
     >>)
   >>= fun tags
-    Lwt.return (feeds, tags, votes_of_list votes)
+    Lwt.return (feeds, tags_of_list tags, votes_of_list votes)
 
 let filter_tags_feed f tags =
   (<:value< $Db.in'$ f.id $List.map (fun x -> x#id_feed) tags$ >>)
@@ -116,6 +118,7 @@ let filter_feed_author author u f =
  *)
 
 let reduce (feeds, tags, votes) =
+  let split = Str.split (Str.regexp_string " ") in
   let new_object o = Lwt.return
     { author = o#!author
     ; id = o#!id
@@ -124,7 +127,7 @@ let reduce (feeds, tags, votes) =
     ; url = o#?url
     ; parent = o#?parent
     ; root = o#?root
-    ; tags = []
+    ; tags = (try split (TagMap.find o#id tags)#tags with _ -> [])
     ; score = (try Int32.to_int (VoteMap.find o#id votes)#!score with _ -> 0)
     }
   in Lwt_list.map_s new_object feeds

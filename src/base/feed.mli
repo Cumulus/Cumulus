@@ -30,7 +30,6 @@ type feed = Db_feed_ng.feed =
   ; parent: int32 option
   ; root : int32 option
   ; tags : string list
-  ; user : < email : string; name : string >
   ; score : int
   }
 
