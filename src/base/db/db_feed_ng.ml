@@ -35,10 +35,6 @@ type feed =
   ; user : < email : string; name: string >
   }
 
-class type search = object
-  method id_feed : Sql.int32_t Sql.non_nullable_data
-end
-
 type feeds = feed list
 
 type feed_generator =
@@ -97,19 +93,6 @@ let filter_feed_tag tag t f =
   (<:value< t.tag = $string:tag$ && f.id = t.id_feed >>)
 let filter_feed_author author u f =
   (<:value< u.name = $string:author$ && f.author = u.id >>)
-
-(*
- *  Transform:
- *    |id| url | ... |vote| tag |    user    |
- *
- *    [ 1;  url; ... ;   1; toto;  dinosaure ]
- *    [ 1;  url; ... ;   1; tata;  dinosaure ]
- *    [ 1;  url; ... ;   1; tutu;  dinosaure ]
- *    [ 1;  url; ... ;   1; titi;  dinosaure ]
- *  To:
- *    [ 1;  url; ... ;   4; [toto, tata, tutu, titi]; dinosaure ]
- *
- *)
 
 let reduce (feeds, tags, votes) =
   let new_object o =
