@@ -29,6 +29,7 @@ type feed =
   ; root : int32 option
   ; tags : string list
   ; score : int
+  ; user : < email : string; name : string >
   }
 
 type feeds = feed list
