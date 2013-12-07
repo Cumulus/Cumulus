@@ -27,12 +27,6 @@ module UTF8 = CamomileLibraryDefault.Camomile.CaseMap.Make(CamomileLibrary.UTF8)
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
-let feed_of_db feed =
-  Lwt.return (Feed.feed_new feed)
-
-let feeds_of_db feeds =
-  Lwt_list.map_s feed_of_db feeds
-
 let to_somthing f data =
   Lwt_list.map_p (fun feed -> f feed) data
 
@@ -50,10 +44,8 @@ let private_to_html data =
 let comments_to_html id =
   Db_feed_ng.get_feed_with_id id
   >|= Option.get
-  >>= feed_of_db
   >>= fun root ->
   Db_feed_ng.get_comments id
-  >>= feeds_of_db
   >>= fun comments ->
   let result = Comments.tree_comments [Comments.Sheet root] comments
   in match result with
@@ -63,35 +55,30 @@ let comments_to_html id =
 let branch_to_html id =
   Db_feed_ng.get_feed_with_id id
   >|= Option.get
-  >>= feed_of_db
   >>= fun sheet ->
   match sheet.Feed.root with
   | None -> Comments.to_html (Comments.Sheet sheet)
   | Some id ->
       Db_feed_ng.get_feed_with_id id
       >|= Option.get
-      >>= feed_of_db
       >>= fun root ->
       Db_feed_ng.get_comments id
-      >>= feeds_of_db
       >>= fun comments ->
       let tree =
         Comments.branch_comments (Comments.Sheet sheet) (root :: comments)
       in
       Comments.to_html tree
 
-let to_html feeds = feeds_of_db feeds >>= private_to_html
+let to_html = private_to_html
 
 let feed_id_to_html id =
   Db_feed_ng.get_feed_with_id id
   >|= Option.get
-  >>= feed_of_db
   >>= fun feed ->
   private_to_html [feed]
 
 let tree_to_atom id () =
   Db_feed_ng.get_tree_feeds id ~starting:0l ~number:Utils.offset ()
-  >>= feeds_of_db
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -105,7 +92,6 @@ let tree_to_atom id () =
 
 let tag_to_atom tag () =
   Db_feed_ng.get_feeds_with_tag tag ~starting:0l ~number:Utils.offset ()
-  >>= feeds_of_db
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -120,7 +106,6 @@ let tag_to_atom tag () =
 (* FIXME? should atom feed return only a limited number of links ? *)
 let to_atom () =
   Db_feed_ng.get_links_feeds ~starting:0l ~number:Utils.offset ()
-  >>= feeds_of_db
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -134,7 +119,6 @@ let to_atom () =
 
 let comments_to_atom () =
   Db_feed_ng.get_comments_feeds ~starting:0l ~number:Utils.offset ()
-  >>= feeds_of_db
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (

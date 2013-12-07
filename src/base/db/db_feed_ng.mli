@@ -19,22 +19,18 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-class type feed = object
-  method author : Sql.int32_t Sql.non_nullable_data
-  method id : Sql.int32_t Sql.non_nullable_data
-  method timedate : Sql.timestamp_t Sql.non_nullable_data
-  method description : Sql.string_t Sql.non_nullable_data
-  method url : Sql.string_t Sql.nullable_data
-  method parent: Sql.int32_t Sql.nullable_data
-  method root : Sql.int32_t Sql.nullable_data
-  method tags : Sql.string_t Sql.non_nullable_data list
-  method user :
-    <
-      email : Sql.string_t Sql.non_nullable_data;
-      name : Sql.string_t Sql.non_nullable_data;
-    >
-  method score : < nul : Sql.non_nullable; t : Sql.int32_t > Sql.t
-end
+type feed =
+  { author : int32
+  ; id : int32
+  ; date : CalendarLib.Calendar.t
+  ; description : string
+  ; url : string option
+  ; parent: int32 option
+  ; root : int32 option
+  ; tags : string list
+  ; user : < email : string; name : string >
+  ; score : int
+  }
 
 type feeds = feed list
 
@@ -61,5 +57,3 @@ val get_root :
   feedid:int32 ->
   unit ->
   feed option Lwt.t
-
-val of_feed : Db_feed.feeds_and_tags -> feeds Lwt.t
