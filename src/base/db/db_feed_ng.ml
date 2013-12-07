@@ -46,25 +46,12 @@ type feed_generator =
   unit ->
   feeds Lwt.t
 
-module OrderedData = struct
-  type t = Sql.int32_t Sql.non_nullable_data
-  let compare a b = (Int32.to_int (Sql.get a)) - (Int32.to_int (Sql.get b))
-end
-
-module VoteMap = Map.Make(OrderedData)
-module TagMap = Map.Make(OrderedData)
-
 let get_feeds_aux ~starting ~number
   ~feeds_filter
   ~tags_filter
   ~votes_filter
   ~users_filter
   () =
-  let votes_of_list l =
-    List.fold_left (fun a e -> VoteMap.add e#id_feed e a) VoteMap.empty l
-  in let tags_of_list l =
-    List.fold_left (fun a e -> TagMap.add e#id_feed e a) TagMap.empty l
-  in
   Db.view
     (<:view< {
       f.id;
@@ -80,22 +67,25 @@ let get_feeds_aux ~starting ~number
   >>= fun feeds ->
   Db.view
     (<:view<
-      group { score = match sum[v.score] with null -> 0 | x -> x } by { v.id_feed }
+      group {
+        score = match sum[v.score] with null -> 0 | x -> x;
+      }
+      by { v.id_feed }
       | v in $Db_table.votes$;
       $Db.in'$ v.id_feed $List.map (fun x -> x#id) feeds$
     >>)
   >>= fun votes ->
   Db.view
     (<:view<
-      group { tags = match string_array_agg[t.tag]
-        with null -> $string_array:[||]$
-        | x -> x }
+      group {
+        tags = match string_array_agg[t.tag] with null -> $string_array:[||]$ | x -> x;
+      }
       by { t.id_feed }
       | t in $Db_table.feeds_tags$;
       $Db.in'$ t.id_feed $List.map (fun x -> x#id) feeds$
     >>)
-  >>= fun tags
-    Lwt.return (feeds, tags_of_list tags, votes_of_list votes)
+  >>= fun tags ->
+  Lwt.return (feeds, tags, votes)
 
 let filter_tags_feed f tags =
   (<:value< $Db.in'$ f.id $List.map (fun x -> x#id_feed) tags$ >>)
@@ -118,23 +108,10 @@ let filter_feed_author author u f =
  *)
 
 let reduce (feeds, tags, votes) =
-  let split = Str.split (Str.regexp_string " ") in
-  let new_object o = Lwt.return
-    { author = o#!author
-    ; id = o#!id
-    ; date = o#!timedate
-    ; description = o#!description
-    ; url = o#?url
-    ; parent = o#?parent
-    ; root = o#?root
-    ; tags = (try split (TagMap.find o#id tags)#tags with _ -> [])
-    ; score = (try Int32.to_int (VoteMap.find o#id votes)#!score with _ -> 0)
-    }
-  in Lwt_list.map_s new_object feeds
-
-(*
-let reduce feeds =
   let new_object o =
+    let find l =
+      List.Exceptionless.find (fun x -> Int32.equal x#!id_feed o#!id) l
+    in
     { author = o#!author
     ; id = o#!id
     ; date = o#!timedate
@@ -142,33 +119,11 @@ let reduce feeds =
     ; url = o#?url
     ; parent = o#?parent
     ; root = o#?root
-    ; tags = [o#!tag]
-    ; user = object method name = o#!name method email = o#!email end
-    ; score = Int32.to_int o#!score
+    ; tags = Array.to_list (Option.map_default (fun x -> x#!tags) [||] (find tags))
+    ; score = Int32.to_int (Option.map_default (fun x -> x#!score) 0l (find votes))
     }
   in
-  Lwt_list.fold_left_s
-    (fun acc element ->
-      element#!id)));
-      Lwt.catch
-        (fun () ->
-          let value = Lwt_list.find_s
-            (fun e -> Lwt.return (e.id = element#!id)) acc in
-          let acc = Lwt_list.filter_s
-            (fun e -> Lwt.return (e.id <> element#!id)) acc in
-          value >>= (fun value -> acc >>= (fun acc ->
-            Lwt.return (
-              { value with
-                tags = element#!tag :: value.tags
-              ; score = value.score + Int32.to_int element#!score
-              }
-              :: acc
-            )
-          ))
-        )
-        (fun _ -> Lwt.return ((new_object element) :: acc))
-    ) [] feeds
-*)
+ Lwt.return (List.map new_object feeds)
 
 (*
  * TODO: optimization (next gen. of Db_feed.get_tree_feeds)
