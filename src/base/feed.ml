@@ -77,7 +77,6 @@ let to_html self =
     | Some _ -> (Html.pcdata "Tags: ") :: links_of_tags self.tags
     | None -> [] in
   User.is_connected () >>= fun state ->
-  Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
     | Some userid ->
@@ -101,10 +100,10 @@ let to_html self =
     List.flatten [
       [Html.img
          ~a: [Html.a_class ["left"]]
-         ~alt: (author#!name)
+         ~alt: (self.user#name)
          ~src: (
            Html.make_uri
-             ~service: (Utils.get_gravatar (author#!email)) (40, "identicon")
+             ~service: (Utils.get_gravatar (self.user#email)) (40, "identicon")
          )
          ();
        (if not state then
@@ -134,8 +133,8 @@ let to_html self =
        Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
        Html.a
          ~service:Services.author_feed
-         [Html.pcdata author#!name]
-         (None, author#!name);
+         [Html.pcdata self.user#name]
+         (None, self.user#name);
       ];
       [Html.br ();
        (* TODO : afficher "n commentaire(s)" *)
