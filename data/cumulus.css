@@ -272,8 +272,12 @@ button, input, select {
 .postimg {
   width: 65px;
   height: 65px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
   -webkit-border-radius: 99em;
   -moz-border-radius: 99em;
+  border-radius: 99em;
   margin: 25% 0 25% 0;
 }
 
@@ -339,9 +343,17 @@ a.postitle{
   font-size:1.35em;
   margin-bottom: 5px;
 }
+
 .col.post_info {
   margin-top: 5px;
   width: 70%;
+  padding-bottom: 15px;
+  margin-top: 5px;
+}
+
+.col.post_int {
+  padding-top: 25px;
+  width: 20%;
   padding-bottom: 15px;
   margin-top: 5px;
 }
@@ -357,3 +369,59 @@ a.postitle{
   border-radius: 3px;
 }
 
+.circled {
+  padding: 20px;
+  -webkit-border-radius: 99em;
+  -moz-border-radius: 99em;
+  border-radius: 99em;
+}
+
+.circled.gray:hover {
+  background: #00b1be;
+}
+
+.circled.highlighted:hover {
+  background: #00c1be;
+}
+
+.circled.gray {
+  background: #d9d9d9;
+}
+
+.circled.highlighted {
+  background: #00b1be;
+}
+.circled.highlighted.deletable:hover {
+  background: #FF5C85;
+}
+
+.comment_block {
+  float:left;
+  margin-left: 10px;
+  text-align: center;
+  color: #ddd;
+}
+
+.com_wrap {
+  border-bottom: 2px solid #eee;
+  padding-bottom: 5px;
+  margin-right: 7px;
+}
+
+.fav_wrap {
+  margin-right: 7px;
+  margin-left: 10px;
+  float: left;
+}
+
+.upvote_wrap {
+  width: 30px;
+  margin-left: 10px;
+  text-align: center;
+  color: #00b1be;
+  float: left;
+}
+
+.upvote_wrap.gray {
+  color: #ddd;
+}

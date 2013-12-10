@@ -67,6 +67,13 @@ module M = MarkdownHTML.Make_xhtml(H)
 let conv : 'a H.elt list -> 'a Html.elt list = fun x -> Html.totl (H.toeltl x)
 
 let to_html self =
+  let get_image cls imgname =
+   Html.img ~a: [Html.a_class cls]
+                  ~alt: imgname
+                  ~src:(Html.make_uri
+                    ~service: (Eliom_service.static_dir ())
+                  [imgname]
+                    )() in
   let content = match self.url with
     | Some url -> Html.div ~a:[Html.a_class["line_title"]][
                     Html.Raw.a
@@ -112,97 +119,94 @@ let to_html self =
   Lwt.return (
     [
       Html.aside ~a: [Html.a_class["col";"avatarbox"]]
-         [Html.div ~a: [Html.a_class["post_avatar"]]
-            [Html.img
-               ~a: [Html.a_class ["postimg"]]
-               ~alt: (author#!name)
-               ~src: (
-                 Html.make_uri
-                   ~service: (Utils.get_gravatar (author#!email)) (65, "identicon")
-               )
-               ()]];
+        [Html.div ~a: [Html.a_class["post_avatar"]]
+           [Html.img
+              ~a: [Html.a_class ["postimg"]]
+              ~alt: (author#!name)
+              ~src: (
+                Html.make_uri
+                  ~service: (Utils.get_gravatar (author#!email)) (65, "identicon")
+              )
+              ()]];
       Html.aside ~a: [Html.a_class["col";"post_info"]][
-       Html.div ~a: [Html.a_class["line_author"]][
+        Html.div ~a: [Html.a_class["line_author"]][
 
-      Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
-      Html.a
-        ~service:Services.author_feed
-        [Html.pcdata author#!name]
-        (None, author#!name);
-       ];
-      (*
-      (if not state then
-         (Html.pcdata "")
-       else
-         (if is_fav = true then
-            (Html.a ~service:Services.del_fav_feed [Html.pcdata "★"] self.id)
-          else (Html.a ~service:Services.add_fav_feed [Html.pcdata "☆"] self.id))
-      );
-      (if not state or is_author then
-         (Html.pcdata "")
-       else if user_score <> (Int32.of_int 1) then
-         (Html.a ~service:Services.upvote_feed [Html.pcdata "⬆"] self.id)
-       else
-         (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
-      );
-      (if not state or is_author then
-         (Html.pcdata "")
-       else if user_score <> (Int32.of_int (-1)) then
-         (Html.a ~service:Services.downvote_feed [Html.pcdata "⬇"] self.id)
-       else
-         (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
-      );
-      Html.pcdata ("[" ^ string_of_int self.score ^ "] ");*)
-      content;
-      tags;
+          Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
+          Html.a
+            ~service:Services.author_feed
+            [Html.pcdata author#!name]
+            (None, author#!name);
+        ];
+        content;
+        tags;
       ];
       Html.div ~a: [Html.a_class["col";"post_int"]][
-      (if not state then
-        (Html.pcdata "")
-      else
-        (if is_fav = true then
-          (Html.img
-            ~alt: "favicon"
-            ~src:(
-              Html.make_uri
-                ~service: (Eliom_service.static_dir ())
-                ["fav.png"]
-            )
-            ();
-          )
-        else
-          Html.pcdata "lama"))
-    ];
-      (*[
-       (* TODO : afficher "n commentaire(s)" *)
-       Html.a
-         ~service:Services.view_feed
-         (let n = Int64.to_int comments#!n
-          in match n with
-          | 0
-          | 1 -> [Html.pcdata ((string_of_int n) ^ " commentaire")]
-          | n -> [Html.pcdata ((string_of_int n) ^ " commentaires")])
-         (* [Html.pcdata (string_to_int (Int64.to_int comments)) " commentaires "] *)
-         (* url_of_title or url_of_desc ? *)
-         (Int32.to_int self.id, Utils.troncate self.description);
-       Html.a
-         ~service:Services.comment
-         [Html.pcdata " Poster un commentaire "]
-         (Int32.to_int self.id, Utils.troncate self.description);
-      ]; *)
-     (* [Html.a ~service:Services.atom_feed
-         [Html.pcdata " [Flux Atom du lien]"] (Int32.to_int self.id)];
-      (if is_author or is_admin then
-         [ Html.br ();
+
+
+        Html.aside
+          ~a: [Html.a_class["comment_block"]][
+          Html.div ~a: [Html.a_class["com_wrap"]][
+            Html.a
+              ~service:Services.view_feed
+              [if Int64.to_int comments#!n  <= 0 then
+                 get_image ["circled";"gray";"comment_icon"] "comments.png"
+               else
+                 get_image ["circled";"highlighted";"comment_icon"] "comments.png";
+              ]
+              (Int32.to_int self.id, Utils.troncate self.description)];
+          Html.pcdata (string_of_int (Int64.to_int comments#!n ))
+        ];
+
+        Html.div ~a: [Html.a_class ["fav_wrap"]][
+          if is_fav = false then
+            Html.a
+              ~service:Services.add_fav_feed
+              [let n = Int64.to_int comments#!n in
+               get_image ["circled";"gray";] "fav.png";
+              ]
+              (self.id)
+          else
+            Html.a
+              ~service:Services.del_fav_feed
+              [let n = Int64.to_int comments#!n in
+               get_image ["circled";"highlighted";"deletable"] "fav.png";
+              ]
+              (self.id);
+        ];
+        let cl = if self.score <= 0 then ["upvote_wrap";"gray"] else
+            ["upvote_wrap"] in
+        Html.div ~a: [Html.a_class cl][
+          if user_score <> (Int32.of_int 1) then
+            (Html.a ~service:Services.upvote_feed [
+               get_image [] "up.png"] self.id)
+          else
+            (Html.a ~service:Services.cancelvote_feed [
+               get_image [] "upon.png"] self.id);
+          Html.pcdata (string_of_int self.score);
+          if user_score <> (Int32.of_int (-1)) then
+            (Html.a ~service:Services.downvote_feed [
+               get_image [] "down.png"] self.id)
+          else
+            (Html.a ~service:Services.cancelvote_feed [
+               get_image [] "downon.png"] self.id)
+        ];
+
+        (* [Html.pcdata (string_to_int (Int64.to_int comments)) " commentaires "] *)
+        (* url_of_title or url_of_desc ? *)
+        (* [Html.a ~service:Services.atom_feed
+           [Html.pcdata " [Flux Atom du lien]"] (Int32.to_int self.id)];
+           (if is_author or is_admin then
+           [ Html.br ();
            Html.pcdata " (";
            Html.a ~service:Services.delete_feed [Html.pcdata "supprimer"] self.id ;
            Html.pcdata " | ";
            Html.a ~service:Services.edit_feed [Html.pcdata "editer"]
-             (Int32.to_int self.id, Utils.troncate self.description);
+           (Int32.to_int self.id, Utils.troncate self.description);
            Html.pcdata ")"
-         ]
-       else []
-      ); *)
+           ]
+           else []
+           ); *)
+      ]
     ]
   )
 
