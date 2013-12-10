@@ -104,7 +104,8 @@ button, input, select {
 .userbox {
     border-bottom-right-radius: 15px;
     margin-right: 0.25%;
-    background:#444;
+    background:#333;
+    opacity: 0.9;
     height: 150px;
     width: 200px;
 }
@@ -353,7 +354,7 @@ a.postitle{
 
 .col.post_int {
   padding-top: 25px;
-  width: 20%;
+  width: 80px;
   padding-bottom: 15px;
   margin-top: 5px;
 }
@@ -371,6 +372,8 @@ a.postitle{
 
 .circled {
   padding: 20px;
+  width: 64px;
+  height: 64px;
   -webkit-border-radius: 99em;
   -moz-border-radius: 99em;
   border-radius: 99em;
@@ -418,6 +421,7 @@ a.postitle{
   width: 30px;
   margin-left: 10px;
   text-align: center;
+  vertical-align: center;
   color: #00b1be;
   float: left;
 }
