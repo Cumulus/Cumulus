@@ -247,4 +247,5 @@ let edit_desc_comment (id, description) =
     )
 
 (* TODO: Remove this ugly thing *)
-let to_html' ~starting ~number feeds = feeds ~starting ~number () >>= to_html
+let to_html' ~starting ~number ?user feeds =
+  feeds ~starting ~number ?user () >>= to_html

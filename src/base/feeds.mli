@@ -44,5 +44,6 @@ val edit_desc_comment : (int * string) -> append_state Lwt.t
 val to_html' :
   starting:int32 ->
   number:int32 ->
+  ?user:int32 ->
   Db_feed_ng.feed_generator ->
   [> Html5_types.div ] Html.elt list Lwt.t

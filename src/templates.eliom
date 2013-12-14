@@ -561,10 +561,13 @@ let private_edit_feed id =
 
 let feed_list ~service page link feeds nb_feeds =
   User.get_offset () >>= fun off ->
+  User.get_userid () >>= fun is_connected ->
   let starting = Int32.mul (Int32.of_int page) off in
   private_main ~page ~link
     ~service
-    (Feeds.to_html' ~starting ~number:off feeds)
+    (match is_connected with
+      | Some user_id -> (Feeds.to_html' ~starting ~number:off ~user:user_id feeds)
+      | None -> (Feeds.to_html' ~starting ~number:off feeds))
     nb_feeds
 
 (* see TODO [1] *)

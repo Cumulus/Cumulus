@@ -32,6 +32,7 @@ type feed = Db_feed_ng.feed =
   ; tags : string list
   ; score : int
   ; user : < email : string; name : string >
+  ; fav : bool
   }
 
 val to_html : Db_feed_ng.feed ->

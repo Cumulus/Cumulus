@@ -36,6 +36,7 @@ type feed = Db_feed_ng.feed =
   ; tags : string list
   ; score : int
   ; user : < email : string; name : string >
+  ; fav : bool
   }
 
 let links_of_tags tags =
@@ -87,11 +88,6 @@ let to_html self =
   >>= fun is_admin ->
   Db_feed.count_comments self.id >>= fun comments ->
   User.get_userid () >>= (function
-    | None -> Lwt.return false
-    | Some userid -> Db_feed.is_fav ~feedid:self.id ~userid ()
-  )
-  >>= fun is_fav ->
-  User.get_userid () >>= (function
     | None -> Lwt.return (Int32.of_int 0)
     | Some userid -> Db_feed.user_vote ~feedid:self.id ~userid ()
   )
@@ -109,7 +105,7 @@ let to_html self =
        (if not state then
           (Html.pcdata "")
         else
-          (if is_fav = true then
+          (if self.fav = true then
              (Html.a ~service:Services.del_fav_feed [Html.pcdata "★"] self.id)
            else (Html.a ~service:Services.add_fav_feed [Html.pcdata "☆"] self.id))
        );
