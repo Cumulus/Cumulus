@@ -34,6 +34,7 @@ type feed =
   ; score : int
   ; user : < email : string; name: string >
   ; fav : bool
+  ; count : int
   }
 
 type feeds = feed list
@@ -87,6 +88,17 @@ let get_feeds_aux ~starting ~number
       $Db.in'$ t.id_feed $List.map (fun x -> x#id) feeds$
     >>)
   >>= fun tags ->
+  Db.view
+    (<:view<
+      group { c = count[f.root] } by { f.root }
+      | f in $Db_table.feeds$;
+      is_not_null f.root &&
+      is_not_null f.parent &&
+      (match $Db.in'$ f.root
+        $List.map (fun x -> Sql.Op.nullable x#id) feeds$
+      with null -> $bool:false$ | _ -> $bool:true$)
+    >>)
+  >>= fun count ->
   match user with
     | Some user_id ->
       Db.view
@@ -95,8 +107,8 @@ let get_feeds_aux ~starting ~number
         } | f in $Db_table.favs$;
         f.id_user = $int32:user_id$ && $Db.in'$ f.id_feed $List.map (fun x -> x#id) feeds$
         >>)
-      >>= fun favs -> Lwt.return (feeds, tags, votes, favs)
-    | None -> Lwt.return (feeds, tags, votes, [])
+      >>= fun favs -> Lwt.return (feeds, tags, votes, favs, count)
+    | None -> Lwt.return (feeds, tags, votes, [], count)
 
 let filter_tags_feed f tags =
   (<:value< $Db.in'$ f.id $List.map (fun x -> x#id_feed) tags$ >>)
@@ -105,7 +117,7 @@ let filter_feed_tag tag t f =
 let filter_feed_author author u f =
   (<:value< u.name = $string:author$ && f.author = u.id >>)
 
-let reduce (feeds, tags, votes, favs) =
+let reduce (feeds, tags, votes, favs, count) =
   let new_object o =
     let find l =
       List.Exceptionless.find (fun x -> Int32.equal x#!id_feed o#!id) l
@@ -121,6 +133,9 @@ let reduce (feeds, tags, votes, favs) =
     ; score = Int32.to_int (Option.map_default (fun x -> x#!score) 0l (find votes))
     ; user = object method name = o#!name method email = o#!email end
     ; fav = List.exists (fun e -> e#!id_feed = o#!id) favs
+    ; count =
+      try Int64.to_int (List.find (fun e -> match e#?root with Some x -> Int32.equal x o#!id | None -> false) count)#!c
+      with _ -> 0
     }
   in
  Lwt.return (List.map new_object feeds)
@@ -251,6 +266,7 @@ let of_feed (feeds, tags, votes) =
         0 (search value#!id votes)
         ; user = (object method email = user#!email method name = user#!name end)
         ; fav = false (* Not working *)
+        ; count = 0 (* Not working *)
         })) feeds
 
 let get_fav_with_username name ~starting ~number ?user () =

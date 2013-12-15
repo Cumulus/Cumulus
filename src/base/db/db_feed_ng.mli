@@ -31,6 +31,7 @@ type feed =
   ; score : int
   ; user : < email : string; name : string >
   ; fav : bool
+  ; count : int
   }
 
 type feeds = feed list

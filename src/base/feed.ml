@@ -37,6 +37,7 @@ type feed = Db_feed_ng.feed =
   ; score : int
   ; user : < email : string; name : string >
   ; fav : bool
+  ; count : int
   }
 
 let links_of_tags tags =
@@ -86,7 +87,6 @@ let to_html self =
   >>= fun is_author ->
   User.is_admin ()
   >>= fun is_admin ->
-  Db_feed.count_comments self.id >>= fun comments ->
   User.get_userid () >>= (function
     | None -> Lwt.return (Int32.of_int 0)
     | Some userid -> Db_feed.user_vote ~feedid:self.id ~userid ()
@@ -136,7 +136,7 @@ let to_html self =
        (* TODO : afficher "n commentaire(s)" *)
        Html.a
          ~service:Services.view_feed
-         (let n = Int64.to_int comments#!n
+         (let n = self.count
           in match n with
           | 0
           | 1 -> [Html.pcdata ((string_of_int n) ^ " commentaire")]
