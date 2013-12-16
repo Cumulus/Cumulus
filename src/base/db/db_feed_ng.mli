@@ -53,12 +53,20 @@ val get_feeds_with_tag : string -> feed_generator
 val get_feed_with_id : ?user:int32 -> int32 -> feed option Lwt.t
 val get_feed_with_url : ?user:int32 -> string -> feed option Lwt.t
 val get_fav_with_username : string -> feed_generator
+
 val get_comments :
   ?user:int32 ->
   int32 ->
   feeds Lwt.t
+
 val get_root :
   feedid:int32 ->
   ?user:int32 ->
   unit ->
   feed option Lwt.t
+
+val user_voted :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  bool Lwt.t

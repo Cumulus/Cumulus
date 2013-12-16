@@ -236,6 +236,16 @@ let get_root ~feedid ?user () =
   >>= reduce
   >>= (function | [] -> Lwt.return None | x :: _ -> Lwt.return (Some x))
 
+let user_voted ~feedid ~userid () =
+  Db.view_opt
+    (<:view< {
+      f.score;
+      } | f in $Db_table.votes$;
+      f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
+     >>) >>= function
+  | None -> Lwt.return false
+  | Some vote -> Lwt.return true
+
 (*
  *  Cette fonction va disparaître !
  *  Elle est là pour tester sans « modifier » get_fav_with_username

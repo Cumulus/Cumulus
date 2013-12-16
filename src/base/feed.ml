@@ -81,17 +81,14 @@ let to_html self =
   User.is_connected () >>= fun state ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
-    | Some userid ->
-        Db_feed.is_feed_author ~feed:self.id ~userid ()
-  )
+    | Some userid -> Lwt.return (Int32.equal userid self.author))
   >>= fun is_author ->
   User.is_admin ()
   >>= fun is_admin ->
   User.get_userid () >>= (function
-    | None -> Lwt.return (Int32.of_int 0)
-    | Some userid -> Db_feed.user_vote ~feedid:self.id ~userid ()
-  )
-  >>= fun user_score ->
+    | None -> Lwt.return false
+    | Some userid -> Db_feed_ng.user_voted ~feedid:self.id ~userid ())
+  >>= fun user_voted ->
   Lwt.return (
     List.flatten [
       [Html.img
@@ -111,14 +108,14 @@ let to_html self =
        );
        (if not state or is_author then
           (Html.pcdata "")
-        else if user_score <> (Int32.of_int 1) then
+        else if user_voted = false then
           (Html.a ~service:Services.upvote_feed [Html.pcdata "⬆"] self.id)
         else
           (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
        );
        (if not state or is_author then
           (Html.pcdata "")
-        else if user_score <> (Int32.of_int (-1)) then
+        else if user_voted = false then
           (Html.a ~service:Services.downvote_feed [Html.pcdata "⬇"] self.id)
         else
           (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
