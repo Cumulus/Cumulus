@@ -21,18 +21,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 type user_state = Already_connected | Ok | Bad_password | Not_found
 
-type user = {
-  id : int32;
-  name : string;
-  password : Db_user.password;
-  email : string;
-  is_admin : bool;
-  feeds_per_page : int32;
-}
+type user = Db_user.user =
+  { id : int32
+  ; name : string
+  ; password : Db_user.password
+  ; email : string
+  ; is_admin : bool
+  ; feeds_per_page : int32
+  }
 
 val add : string * (string * (string * string)) -> bool Lwt.t
-val get_user : unit -> (user option) Lwt.t
-val get_userid : unit -> (int32 option) Lwt.t
+val get_user : unit -> user option Lwt.t
+val get_userid : unit -> int32 option Lwt.t
 val is_connected : unit -> bool Lwt.t
 val is_admin : unit -> bool Lwt.t
 val connect : string -> string -> user_state Lwt.t

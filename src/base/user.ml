@@ -22,24 +22,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 open Batteries
 open Eliom_lib.Lwt_ops
 
-type user = {
-  id : int32;
-  name : string;
-  password : Db_user.password;
-  email : string;
-  is_admin : bool;
-  feeds_per_page : int32;
-}
+type user = Db_user.user =
+  { id : int32
+  ; name : string
+  ; password : Db_user.password
+  ; email : string
+  ; is_admin : bool
+  ; feeds_per_page : int32
+  }
 type user_state = Already_connected | Ok | Bad_password | Not_found
-
-let user_new data = {
-  id = data#!id;
-  name = data#!name;
-  password = data#password;
-  email = data#!email;
-  is_admin = data#!is_admin;
-  feeds_per_page = data#!feeds_per_page;
-}
 
 let add = function
   | ("", ((_ as email), ((_ as password), (_ as password_check))))
@@ -89,7 +80,6 @@ let connect user password =
   Db_user.get_user_with_name user >>= function
   | None -> Lwt.return Not_found
   | Some user ->
-      let user = user_new user in
       if Db_user.check_password password user.password then
         is_connected () >>= function
         | true -> Lwt.return Already_connected
@@ -169,4 +159,4 @@ let send_reset_email ~service email =
   in
   Db_user.get_user_with_email email >|= Option.may f
 
-let force_connect user = set_user (user_new user)
+let force_connect = set_user
