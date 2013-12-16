@@ -75,3 +75,9 @@ val is_url :
   feedid:int32 ->
   unit ->
   bool Lwt.t
+
+val is_feed_author :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  bool Lwt.t

@@ -256,6 +256,22 @@ let is_url ~feedid () =
   | Some d -> Lwt.return (if d#?url <> None then true else false)
   | None -> Lwt.return false
 
+let is_feed_author ~feedid ~userid () =
+  Lwt.catch
+    (fun () ->
+       Db.view_one
+         (<:view< f | f in $Db_table.feeds$;
+                 f.id = $int32:feedid$;
+                 f.author = $int32:userid$;
+          >>)
+       >>= fun _ ->
+       Lwt.return true
+    )
+    (fun exn ->
+       Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
+       Lwt.return false
+    )
+
 (*
  *  Cette fonction va disparaître !
  *  Elle est là pour tester sans « modifier » get_fav_with_username

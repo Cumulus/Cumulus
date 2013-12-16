@@ -355,8 +355,8 @@ let list_of_depend_feed id =
       >>= fun comments ->
       Lwt.return (aux root comments)
 
-let delete_feed ~feed ~userid () =
-  list_of_depend_feed feed
+let delete_feed ~feedid ~userid () =
+  list_of_depend_feed feedid
   >>= fun dfeeds ->
   let feeds_filter f =
     (<:value< $Db.in'$ f.id $List.map (fun x -> x#id) dfeeds$ >>) in

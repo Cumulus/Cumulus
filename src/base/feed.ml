@@ -234,17 +234,17 @@ let get_edit_tags tags =
 
 let get_edit_infos id =
   Db_feed_ng.is_url ~feedid:id () >>= fun is_url ->
-  Db_feed.get_feed_with_id id >>= fun (feed, tags, _) ->
+  Db_feed.get_feed_with_id id >>= fun (feed, tags, _) -> (* Encore un problème ici *)
   let desc = feed#!description in
   let url = get_edit_url feed in
   let tags_str = get_edit_tags tags in
   Lwt.return (is_url, desc, url, tags_str)
 
-let delete_feed_check ~feed ~userid () =
+let delete_feed_check ~feedid ~userid () =
   User.is_admin () >>= fun is_admin ->
-  Db_feed.is_feed_author ~feed ~userid () >>= fun is_author ->
+  Db_feed_ng.is_feed_author ~feedid ~userid () >>= fun is_author ->
   if is_admin or is_author then
-    Db_feed.delete_feed ~feed ~userid ()
+    Db_feed.delete_feed ~feedid ~userid ()
   else
     Lwt.return ()
 

@@ -109,7 +109,7 @@ val is_feed_author :
   bool Lwt.t
 
 val delete_feed :
-  feed:int32 ->
+  feedid:int32 ->
   userid:int32 ->
   unit ->
   unit Lwt.t

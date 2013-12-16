@@ -44,7 +44,7 @@ val get_edit_infos : int32 ->
   (bool * string * string * string) Lwt.t
 
 val delete_feed_check :
-  feed:int32 ->
+  feedid:int32 ->
   userid:int32 ->
   unit ->
   unit Lwt.t
