@@ -246,6 +246,16 @@ let user_voted ~feedid ~userid () =
   | None -> Lwt.return false
   | Some vote -> Lwt.return true
 
+let is_url ~feedid () =
+  Db.view_opt
+    (<:view< {
+      f.url;
+      } | f in $Db_table.feeds$;
+      f.id = $int32:feedid$;
+     >>) >>= function
+  | Some d -> Lwt.return (if d#?url <> None then true else false)
+  | None -> Lwt.return false
+
 (*
  *  Cette fonction va disparaître !
  *  Elle est là pour tester sans « modifier » get_fav_with_username

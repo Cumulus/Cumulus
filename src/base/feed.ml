@@ -163,7 +163,7 @@ let to_html self =
   )
 
 let to_atom self =
-  Db_feed.get_root self.id () >>= fun root_feed ->
+  Db_feed.get_root self.id () >>= fun root_feed -> (* TODO: On a un sushi ici *)
   Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   let title, root_infos = match root_feed with
     | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'#!description) ^
@@ -233,7 +233,7 @@ let get_edit_tags tags =
   String.concat ", " tags_str
 
 let get_edit_infos id =
-  Db_feed.is_url ~feedid:id () >>= fun is_url ->
+  Db_feed_ng.is_url ~feedid:id () >>= fun is_url ->
   Db_feed.get_feed_with_id id >>= fun (feed, tags, _) ->
   let desc = feed#!description in
   let url = get_edit_url feed in
