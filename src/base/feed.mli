@@ -65,4 +65,4 @@ val count_feeds_with_tag : string -> int64 Lwt.t
 val get_fav_with_username : string -> Db_feed_ng.feed_generator
 val count_fav_with_username : string -> int64 Lwt.t
 val exist : feedid:int32 -> unit -> bool Lwt.t
-val is_feed_author : feed:int32 -> userid:int32 -> unit -> bool Lwt.t
+val is_feed_author : feedid:int32 -> userid:int32 -> unit -> bool Lwt.t

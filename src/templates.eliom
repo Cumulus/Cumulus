@@ -485,7 +485,7 @@ let private_edit_feed id =
     Feed.get_edit_infos id >>= fun (is_url, edit_desc, edit_url, edit_tags) ->
     User.get_userid () >>= (function
       | None -> Lwt.return true
-      | Some uid -> Feed.is_feed_author ~feed:id ~userid:uid ())
+      | Some uid -> Feed.is_feed_author ~feedid:id ~userid:uid ())
     >>= fun is_author ->
     main_style
       ( if (not state) or (not is_author) then

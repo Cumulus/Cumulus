@@ -251,7 +251,7 @@ let delete_feed_check ~feedid ~userid () =
 let exec_if_not_author f feedid =
   User.get_userid () >>= function
   | Some userid ->
-      Db_feed.is_feed_author ~feed:feedid ~userid ()
+      Db_feed_ng.is_feed_author ~feedid ~userid ()
       >>= fun is_author ->
       if not is_author then
         f ~feedid ~userid ()
@@ -281,4 +281,4 @@ let count_feeds_with_tag x = Db_feed.count_feeds_with_tag x >|= fun x -> x#!n
 let get_fav_with_username = Db_feed_ng.get_fav_with_username
 let count_fav_with_username x = Db_feed.count_fav_with_username x >|= fun x -> x#!n
 let exist = Db_feed.exist
-let is_feed_author = Db_feed.is_feed_author
+let is_feed_author = Db_feed_ng.is_feed_author
