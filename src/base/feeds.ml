@@ -42,10 +42,11 @@ let private_to_html data =
 (* feed option <> feed *)
 
 let comments_to_html id =
-  Db_feed.get_feed_with_id id
+  User.get_userid () >>= fun user ->
+  Db_feed.get_feed_with_id ~user id
   >|= Option.get
   >>= fun root ->
-  Db_feed.get_comments id
+  Db_feed.get_comments ~user id
   >>= fun comments ->
   let result = Comments.tree_comments [Comments.Sheet root] comments
   in match result with
@@ -53,16 +54,17 @@ let comments_to_html id =
   | None -> Comments.to_html (Comments.Sheet root)
 
 let branch_to_html id =
-  Db_feed.get_feed_with_id id
+  User.get_userid () >>= fun user ->
+  Db_feed.get_feed_with_id ~user id
   >|= Option.get
   >>= fun sheet ->
   match sheet.Feed.root with
   | None -> Comments.to_html (Comments.Sheet sheet)
   | Some id ->
-      Db_feed.get_feed_with_id id
+      Db_feed.get_feed_with_id ~user id
       >|= Option.get
       >>= fun root ->
-      Db_feed.get_comments id
+      Db_feed.get_comments ~user id
       >>= fun comments ->
       let tree =
         Comments.branch_comments (Comments.Sheet sheet) (root :: comments)
@@ -72,13 +74,15 @@ let branch_to_html id =
 let to_html = private_to_html
 
 let feed_id_to_html id =
-  Db_feed.get_feed_with_id id
+  User.get_userid () >>= fun user ->
+  Db_feed.get_feed_with_id ~user id
   >|= Option.get
   >>= fun feed ->
   private_to_html [feed]
 
 let tree_to_atom id () =
-  Db_feed.get_tree_feeds id ~starting:0l ~number:Utils.offset ()
+  User.get_userid () >>= fun user ->
+  Db_feed.get_tree_feeds ~user id ~starting:0l ~number:Utils.offset ()
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -91,7 +95,8 @@ let tree_to_atom id () =
   )
 
 let tag_to_atom tag () =
-  Db_feed.get_feeds_with_tag tag ~starting:0l ~number:Utils.offset ()
+  User.get_userid () >>= fun user ->
+  Db_feed.get_feeds_with_tag ~user tag ~starting:0l ~number:Utils.offset ()
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -105,7 +110,8 @@ let tag_to_atom tag () =
 
 (* FIXME? should atom feed return only a limited number of links ? *)
 let to_atom () =
-  Db_feed.get_links_feeds ~starting:0l ~number:Utils.offset ()
+  User.get_userid () >>= fun user ->
+  Db_feed.get_links_feeds ~user ~starting:0l ~number:Utils.offset ()
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -118,7 +124,8 @@ let to_atom () =
   )
 
 let comments_to_atom () =
-  Db_feed.get_comments_feeds ~starting:0l ~number:Utils.offset ()
+  User.get_userid () >>= fun user ->
+  Db_feed.get_comments_feeds ~user ~starting:0l ~number:Utils.offset ()
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -176,7 +183,8 @@ let append_feed (url, (description, tags)) =
     )
 
 let get_root_and_parent id =
-  Db_feed.get_feed_with_id (Int32.of_int id)
+  User.get_userid () >>= fun user ->
+  Db_feed.get_feed_with_id ~user (Int32.of_int id)
   >|= Option.get
   >>= fun feeds ->
   let parent = feeds.Feed.id in
@@ -209,6 +217,7 @@ let append_desc_comment (id, description) =
     )
 
 let edit_feed_aux ~id ~url ~description ~tags f =
+  User.get_userid () >>= fun user ->
   append_feed_aux_base ~description
     (fun ~author () ->
        if Utils.string_is_empty tags then
@@ -216,7 +225,7 @@ let edit_feed_aux ~id ~url ~description ~tags f =
        else if Utils.is_invalid_url url then
          Lwt.return Invalid_url
        else
-         Db_feed.get_feed_with_id (Int32.of_int id)
+         Db_feed.get_feed_with_id ~user (Int32.of_int id)
          >|= Option.get
          >>= (fun feeds ->
            if feeds.Feed.url <> Some url then
@@ -251,5 +260,5 @@ let edit_desc_comment (id, description) =
     )
 
 (* TODO: Remove this ugly thing *)
-let to_html' ~starting ~number ?user feeds =
-  feeds ~starting ~number ?user () >>= to_html
+let to_html' ~starting ~number ~user feeds =
+  feeds ~starting ~number ~user () >>= to_html

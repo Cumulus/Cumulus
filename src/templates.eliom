@@ -565,9 +565,7 @@ let feed_list ~service page link feeds nb_feeds =
   let starting = Int32.mul (Int32.of_int page) off in
   private_main ~page ~link
     ~service
-    (match is_connected with
-      | Some user_id -> (Feeds.to_html' ~starting ~number:off ~user:user_id feeds)
-      | None -> (Feeds.to_html' ~starting ~number:off feeds))
+    (Feeds.to_html' ~starting ~number:off ~user:is_connected feeds)
     nb_feeds
 
 (* see TODO [1] *)
