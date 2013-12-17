@@ -33,6 +33,7 @@ type feed = Db_feed.feed =
   ; score : int
   ; user : < email : string; name : string >
   ; fav : bool
+  ; voted : bool
   ; count : int
   }
 

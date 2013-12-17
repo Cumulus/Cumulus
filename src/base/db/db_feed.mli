@@ -31,6 +31,7 @@ type feed =
   ; score : int
   ; user : < email : string; name : string >
   ; fav : bool
+  ; voted : bool
   ; count : int
   }
 
@@ -65,23 +66,12 @@ val get_root :
   unit ->
   feed option Lwt.t
 
-val user_voted :
-  feedid:int32 ->
-  userid:int32 ->
-  unit ->
-  bool Lwt.t
-
-val is_url :
-  feedid:int32 ->
-  unit ->
-  bool Lwt.t
-
 val is_feed_author :
   feedid:int32 ->
   userid:int32 ->
   unit ->
   bool Lwt.t
-(***************)
+
 val get_feed_url_with_url :
   string ->
   < url : Sql.string_t Sql.nullable_data > option Lwt.t
@@ -149,23 +139,6 @@ val cancelvote :
   userid:int32 ->
   unit ->
   unit Lwt.t
-
-val user_vote :
-  feedid:int32 ->
-  userid:int32 ->
-  unit ->
-  int32 Lwt.t
-
-val is_fav :
-  feedid:int32 ->
-  userid:int32 ->
-  unit ->
-  bool Lwt.t
-
-val is_root :
-  feedid:int32 ->
-  unit ->
-  bool Lwt.t
 
 val update :
   feedid:int32 ->

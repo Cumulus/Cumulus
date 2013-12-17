@@ -37,6 +37,7 @@ type feed = Db_feed.feed =
   ; score : int
   ; user : < email : string; name : string >
   ; fav : bool
+  ; voted : bool
   ; count : int
   }
 
@@ -85,10 +86,6 @@ let to_html self =
   >>= fun is_author ->
   User.is_admin ()
   >>= fun is_admin ->
-  User.get_userid () >>= (function
-    | None -> Lwt.return false
-    | Some userid -> Db_feed.user_voted ~feedid:self.id ~userid ())
-  >>= fun user_voted ->
   Lwt.return (
     List.flatten [
       [Html.img
@@ -108,14 +105,14 @@ let to_html self =
        );
        (if not state or is_author then
           (Html.pcdata "")
-        else if user_voted = false then
+        else if not self.voted then
           (Html.a ~service:Services.upvote_feed [Html.pcdata "⬆"] self.id)
         else
           (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
        );
        (if not state or is_author then
           (Html.pcdata "")
-        else if user_voted = false then
+        else if not self.voted then
           (Html.a ~service:Services.downvote_feed [Html.pcdata "⬇"] self.id)
         else
           (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
@@ -233,14 +230,13 @@ let get_edit_tags = String.concat ", "
 
 let get_edit_infos id =
   User.get_userid () >>= fun user ->
-  Db_feed.is_url ~feedid:id () >>= fun is_url ->
   Db_feed.get_feed_with_id ~user id
   >|= Option.get
   >>= fun feeds ->
   let desc = feeds.description in
   let url = get_edit_url feeds in
   let tags_str = get_edit_tags feeds.tags in
-  Lwt.return (is_url, desc, url, tags_str)
+  Lwt.return (Option.is_some feeds.url, desc, url, tags_str)
 
 let delete_feed_check ~feedid ~userid () =
   User.is_admin () >>= fun is_admin ->
