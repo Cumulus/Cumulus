@@ -37,7 +37,7 @@ type feed = Db_feed.feed =
   ; score : int
   ; user : < email : string; name : string >
   ; fav : bool
-  ; voted : bool
+  ; vote : int
   ; count : int
   }
 
@@ -105,14 +105,14 @@ let to_html self =
        );
        (if not state or is_author then
           (Html.pcdata "")
-        else if not self.voted then
+        else if self.vote <> 1 then
           (Html.a ~service:Services.upvote_feed [Html.pcdata "⬆"] self.id)
         else
           (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
        );
        (if not state or is_author then
           (Html.pcdata "")
-        else if not self.voted then
+        else if self.vote <> -1 then
           (Html.a ~service:Services.downvote_feed [Html.pcdata "⬇"] self.id)
         else
           (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
