@@ -1,10 +1,9 @@
 # OASIS_START
-# DO NOT EDIT (digest: 3b7cf2435f8d78ed09dd7fb563f18960)
+# DO NOT EDIT (digest: c7dfe9c617817c0db22c07a2b8d61c8b)
 Configfile
 Db_config
 Db
 Db_table
-Db_feed_ng
 Db_update
 Db_feed
 Db_user

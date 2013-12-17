@@ -38,14 +38,14 @@ let private_to_html data =
        )
     ) data
 
-(* Problème entre Db_feed_ng.get_feed_with_id et Db_feed.get_feed_with_id *)
+(* Problème entre Db_feed.get_feed_with_id et Db_feed.get_feed_with_id *)
 (* feed option <> feed *)
 
 let comments_to_html id =
-  Db_feed_ng.get_feed_with_id id
+  Db_feed.get_feed_with_id id
   >|= Option.get
   >>= fun root ->
-  Db_feed_ng.get_comments id
+  Db_feed.get_comments id
   >>= fun comments ->
   let result = Comments.tree_comments [Comments.Sheet root] comments
   in match result with
@@ -53,16 +53,16 @@ let comments_to_html id =
   | None -> Comments.to_html (Comments.Sheet root)
 
 let branch_to_html id =
-  Db_feed_ng.get_feed_with_id id
+  Db_feed.get_feed_with_id id
   >|= Option.get
   >>= fun sheet ->
   match sheet.Feed.root with
   | None -> Comments.to_html (Comments.Sheet sheet)
   | Some id ->
-      Db_feed_ng.get_feed_with_id id
+      Db_feed.get_feed_with_id id
       >|= Option.get
       >>= fun root ->
-      Db_feed_ng.get_comments id
+      Db_feed.get_comments id
       >>= fun comments ->
       let tree =
         Comments.branch_comments (Comments.Sheet sheet) (root :: comments)
@@ -72,13 +72,13 @@ let branch_to_html id =
 let to_html = private_to_html
 
 let feed_id_to_html id =
-  Db_feed_ng.get_feed_with_id id
+  Db_feed.get_feed_with_id id
   >|= Option.get
   >>= fun feed ->
   private_to_html [feed]
 
 let tree_to_atom id () =
-  Db_feed_ng.get_tree_feeds id ~starting:0l ~number:Utils.offset ()
+  Db_feed.get_tree_feeds id ~starting:0l ~number:Utils.offset ()
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -91,7 +91,7 @@ let tree_to_atom id () =
   )
 
 let tag_to_atom tag () =
-  Db_feed_ng.get_feeds_with_tag tag ~starting:0l ~number:Utils.offset ()
+  Db_feed.get_feeds_with_tag tag ~starting:0l ~number:Utils.offset ()
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -105,7 +105,7 @@ let tag_to_atom tag () =
 
 (* FIXME? should atom feed return only a limited number of links ? *)
 let to_atom () =
-  Db_feed_ng.get_links_feeds ~starting:0l ~number:Utils.offset ()
+  Db_feed.get_links_feeds ~starting:0l ~number:Utils.offset ()
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -118,7 +118,7 @@ let to_atom () =
   )
 
 let comments_to_atom () =
-  Db_feed_ng.get_comments_feeds ~starting:0l ~number:Utils.offset ()
+  Db_feed.get_comments_feeds ~starting:0l ~number:Utils.offset ()
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -176,9 +176,11 @@ let append_feed (url, (description, tags)) =
     )
 
 let get_root_and_parent id =
-  Db_feed.get_feed_with_id (Int32.of_int id) >>= fun (feed, _, _) ->
-  let parent = feed#!id in
-  let root = match feed#?root with
+  Db_feed.get_feed_with_id (Int32.of_int id)
+  >|= Option.get
+  >>= fun feeds ->
+  let parent = feeds.Feed.id in
+  let root = match feeds.Feed.root with
     | Some root -> root
     | None -> parent
   in
@@ -214,8 +216,10 @@ let edit_feed_aux ~id ~url ~description ~tags f =
        else if Utils.is_invalid_url url then
          Lwt.return Invalid_url
        else
-         Db_feed.get_feed_with_id (Int32.of_int id) >>= (fun (feed, _, _) ->
-           if feed#?url <> Some url then
+         Db_feed.get_feed_with_id (Int32.of_int id)
+         >|= Option.get
+         >>= (fun feeds ->
+           if feeds.Feed.url <> Some url then
              Db_feed.get_feed_url_with_url url >>= function
              | Some _ -> Lwt.return Already_exist
              | None -> f () >>= updating_and_ret

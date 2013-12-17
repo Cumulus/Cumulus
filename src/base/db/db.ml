@@ -43,12 +43,14 @@ let pool = Lwt_pool.create 16 ~validate:Lwt_PGOCaml.alive connect
 
 let use f = Lwt_pool.use pool f
 
-let view x = use (fun db -> Lwt_Query.view db x)
-let view_opt x = use (fun db -> Lwt_Query.view_opt db x)
-let view_one x = use (fun db -> Lwt_Query.view_one db x)
-let query x = use (fun db -> Lwt_Query.query db x)
-let value x = use (fun db -> Lwt_Query.value db x)
-let value_opt x = use (fun db -> Lwt_Query.value_opt db x)
+let log = Some Pervasives.stdout
+
+let view x = use (fun db -> Lwt_Query.view db ?log x)
+let view_opt x = use (fun db -> Lwt_Query.view_opt db ?log x)
+let view_one x = use (fun db -> Lwt_Query.view_one db ?log x)
+let query x = use (fun db -> Lwt_Query.query db ?log x)
+let value x = use (fun db -> Lwt_Query.value db ?log x)
+let value_opt x = use (fun db -> Lwt_Query.value_opt db ?log x)
 let alter x = use (fun db -> Lwt_PGOCaml.alter db x)
 
 let rec in' value = function

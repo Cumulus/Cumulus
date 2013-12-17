@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 91402ff3544285d7353f2531a3719875) *)
+(* DO NOT EDIT (digest: 9e3a617fe17e9d0c3e438f2165c2fe7a) *)
 module OASISGettext = struct
 (* # 22 "src/oasis/OASISGettext.ml" *)
 
@@ -368,7 +368,11 @@ module MyOCamlbuildFindlib = struct
           flag ["ocaml"; "pkg_threads"; "compile"] (S[A "-thread"]);
           flag ["ocaml"; "pkg_threads"; "doc"] (S[A "-I"; A "+threads"]);
           flag ["ocaml"; "pkg_threads"; "link"] (S[A "-thread"]);
-          flag ["ocaml"; "pkg_threads"; "infer_interface"] (S[A "-thread"])
+          flag ["ocaml"; "pkg_threads"; "infer_interface"] (S[A "-thread"]);
+          flag ["ocaml"; "package(threads)"; "compile"] (S[A "-thread"]);
+          flag ["ocaml"; "package(threads)"; "doc"] (S[A "-I"; A "+threads"]);
+          flag ["ocaml"; "package(threads)"; "link"] (S[A "-thread"]);
+          flag ["ocaml"; "package(threads)"; "infer_interface"] (S[A "-thread"]);
 
       | _ ->
           ()
@@ -547,7 +551,7 @@ module MyOCamlbuildBase = struct
 end
 
 
-# 550 "myocamlbuild.ml"
+# 554 "myocamlbuild.ml"
 open Ocamlbuild_plugin;;
 let package_default =
   {
@@ -558,7 +562,57 @@ let package_default =
           ("cumulus", ["src"; "src/server"], [])
        ];
      lib_c = [];
-     flags = [];
+     flags =
+       [
+          (["oasis_library_db_byte"; "ocaml"; "link"; "byte"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_db_native"; "ocaml"; "link"; "native"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_db_byte"; "ocaml"; "ocamldep"; "byte"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_db_native"; "ocaml"; "ocamldep"; "native"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_db_byte"; "ocaml"; "compile"; "byte"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_db_native"; "ocaml"; "compile"; "native"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_base_byte"; "ocaml"; "link"; "byte"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_base_native"; "ocaml"; "link"; "native"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_base_byte"; "ocaml"; "ocamldep"; "byte"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_base_native"; "ocaml"; "ocamldep"; "native"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_base_byte"; "ocaml"; "compile"; "byte"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_base_native"; "ocaml"; "compile"; "native"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_cumulus_byte"; "ocaml"; "link"; "byte"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_cumulus_native"; "ocaml"; "link"; "native"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_cumulus_byte"; "ocaml"; "ocamldep"; "byte"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_cumulus_native"; "ocaml"; "ocamldep"; "native"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_cumulus_byte"; "ocaml"; "compile"; "byte"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_library_cumulus_native"; "ocaml"; "compile"; "native"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_executable_cumulus_byte"; "ocaml"; "link"; "byte"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_executable_cumulus_native"; "ocaml"; "link"; "native"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_executable_cumulus_byte"; "ocaml"; "ocamldep"; "byte"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_executable_cumulus_native"; "ocaml"; "ocamldep"; "native"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_executable_cumulus_byte"; "ocaml"; "compile"; "byte"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])]);
+          (["oasis_executable_cumulus_native"; "ocaml"; "compile"; "native"],
+            [(OASISExpr.EBool true, S [A "-w"; A "A-44-33"])])
+       ];
      includes =
        [
           ("src/server", ["src"; "src/base"]);
@@ -570,7 +624,7 @@ let package_default =
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 574 "myocamlbuild.ml"
+# 628 "myocamlbuild.ml"
 (* OASIS_STOP *)
 
 module M = Ocamlbuild_eliom.Make(struct

@@ -21,7 +21,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 open CalendarLib
 
-type feed = Db_feed_ng.feed =
+type feed = Db_feed.feed =
   { author : int32
   ; id : int32
   ; date : CalendarLib.Calendar.t
@@ -36,9 +36,9 @@ type feed = Db_feed_ng.feed =
   ; count : int
   }
 
-val to_html : Db_feed_ng.feed ->
+val to_html : Db_feed.feed ->
   (([> `A of [> `PCDATA ] | `Br | `Div | `Img | `PCDATA ] Html.elt) list) Lwt.t
-val to_atom : Db_feed_ng.feed -> Atom_feed.entry Lwt.t
+val to_atom : Db_feed.feed -> Atom_feed.entry Lwt.t
 
 val get_edit_infos : int32 ->
   (bool * string * string * string) Lwt.t
@@ -56,13 +56,13 @@ val downvote : int32 -> unit Lwt.t
 val cancel_vote : int32 -> unit Lwt.t
 
 (* TODO: Remove the following functions *)
-val get_root_feeds : Db_feed_ng.feed_generator
+val get_root_feeds : Db_feed.feed_generator
 val count_root_feeds : unit -> int64 Lwt.t
-val get_feeds_with_author : string -> Db_feed_ng.feed_generator
+val get_feeds_with_author : string -> Db_feed.feed_generator
 val count_feeds_with_author : string -> int64 Lwt.t
-val get_feeds_with_tag : string -> Db_feed_ng.feed_generator
+val get_feeds_with_tag : string -> Db_feed.feed_generator
 val count_feeds_with_tag : string -> int64 Lwt.t
-val get_fav_with_username : string -> Db_feed_ng.feed_generator
+val get_fav_with_username : string -> Db_feed.feed_generator
 val count_fav_with_username : string -> int64 Lwt.t
 val exist : feedid:int32 -> unit -> bool Lwt.t
 val is_feed_author : feedid:int32 -> userid:int32 -> unit -> bool Lwt.t

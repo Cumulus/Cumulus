@@ -25,7 +25,7 @@ open Eliom_lib.Lwt_ops
 module Calendar = CalendarLib.Calendar
 module Uri = Eliom_uri
 
-type feed = Db_feed_ng.feed =
+type feed = Db_feed.feed =
   { author : int32
   ; id : int32
   ; date : CalendarLib.Calendar.t
@@ -87,7 +87,7 @@ let to_html self =
   >>= fun is_admin ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
-    | Some userid -> Db_feed_ng.user_voted ~feedid:self.id ~userid ())
+    | Some userid -> Db_feed.user_voted ~feedid:self.id ~userid ())
   >>= fun user_voted ->
   Lwt.return (
     List.flatten [
@@ -166,7 +166,7 @@ let to_atom self =
   Db_feed.get_root self.id () >>= fun root_feed -> (* TODO: On a un sushi ici *)
   Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   let title, root_infos = match root_feed with
-    | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'#!description) ^
+    | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'.description) ^
                             "] " ^ (
                             match self.url with
                             | Some url -> self.description
@@ -174,9 +174,9 @@ let to_atom self =
                           ),
                           [Html.pcdata "ce message est une réponse à : ";
                            Html.a ~service:Services.view_feed
-                             [Html.pcdata root_feed'#!description]
-                             (Int32.to_int root_feed'#!id,
-                              Utils.troncate root_feed'#!description)])
+                             [Html.pcdata root_feed'.description]
+                             (Int32.to_int root_feed'.id,
+                              Utils.troncate root_feed'.description)])
     | None -> (Utils.troncate' 200 self.description, [])
   in
   Lwt.return (
@@ -223,26 +223,26 @@ let to_atom self =
       ]
   )
 
-let get_edit_url feed =
-  match feed#?url with
+let get_edit_url feeds =
+  match feeds.url with
   | Some f -> f
   | None -> "Url"
 
-let get_edit_tags tags =
-  let tags_str = List.map (fun t -> t#!tag) tags in
-  String.concat ", " tags_str
+let get_edit_tags = String.concat ", "
 
 let get_edit_infos id =
-  Db_feed_ng.is_url ~feedid:id () >>= fun is_url ->
-  Db_feed.get_feed_with_id id >>= fun (feed, tags, _) -> (* Encore un problème ici *)
-  let desc = feed#!description in
-  let url = get_edit_url feed in
-  let tags_str = get_edit_tags tags in
+  Db_feed.is_url ~feedid:id () >>= fun is_url ->
+  Db_feed.get_feed_with_id id
+  >|= Option.get
+  >>= fun feeds ->
+  let desc = feeds.description in
+  let url = get_edit_url feeds in
+  let tags_str = get_edit_tags feeds.tags in
   Lwt.return (is_url, desc, url, tags_str)
 
 let delete_feed_check ~feedid ~userid () =
   User.is_admin () >>= fun is_admin ->
-  Db_feed_ng.is_feed_author ~feedid ~userid () >>= fun is_author ->
+  Db_feed.is_feed_author ~feedid ~userid () >>= fun is_author ->
   if is_admin or is_author then
     Db_feed.delete_feed ~feedid ~userid ()
   else
@@ -251,7 +251,7 @@ let delete_feed_check ~feedid ~userid () =
 let exec_if_not_author f feedid =
   User.get_userid () >>= function
   | Some userid ->
-      Db_feed_ng.is_feed_author ~feedid ~userid ()
+      Db_feed.is_feed_author ~feedid ~userid ()
       >>= fun is_author ->
       if not is_author then
         f ~feedid ~userid ()
@@ -272,13 +272,13 @@ let downvote = exec_if_not_author Db_feed.downvote
 let cancel_vote = exec_if_not_author Db_feed.cancelvote
 
 (* TODO: Remove the following functions *)
-let get_root_feeds = Db_feed_ng.get_root_feeds
+let get_root_feeds = Db_feed.get_root_feeds
 let count_root_feeds () = Db_feed.count_root_feeds () >|= fun x -> x#!n
-let get_feeds_with_author = Db_feed_ng.get_feeds_with_author
+let get_feeds_with_author = Db_feed.get_feeds_with_author
 let count_feeds_with_author x = Db_feed.count_feeds_with_author x >|= fun x -> x#!n
-let get_feeds_with_tag = Db_feed_ng.get_feeds_with_tag
+let get_feeds_with_tag = Db_feed.get_feeds_with_tag
 let count_feeds_with_tag x = Db_feed.count_feeds_with_tag x >|= fun x -> x#!n
-let get_fav_with_username = Db_feed_ng.get_fav_with_username
+let get_fav_with_username = Db_feed.get_fav_with_username
 let count_fav_with_username x = Db_feed.count_fav_with_username x >|= fun x -> x#!n
 let exist = Db_feed.exist
-let is_feed_author = Db_feed_ng.is_feed_author
+let is_feed_author = Db_feed.is_feed_author

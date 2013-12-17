@@ -24,7 +24,7 @@ type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 val event : unit Eliom_react.Down.t
 
 val to_html :
-  Db_feed_ng.feeds -> (([> Html5_types.div ] Html.elt) list) Lwt.t
+  Db_feed.feeds -> (([> Html5_types.div ] Html.elt) list) Lwt.t
 val comments_to_html :
   int32 -> [< Html5_types.div_content_fun > `A `Br `Div `Img `P `PCDATA ] Html.elt Lwt.t
 val branch_to_html :
@@ -45,5 +45,5 @@ val to_html' :
   starting:int32 ->
   number:int32 ->
   ?user:int32 ->
-  Db_feed_ng.feed_generator ->
+  Db_feed.feed_generator ->
   [> Html5_types.div ] Html.elt list Lwt.t
