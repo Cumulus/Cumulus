@@ -207,7 +207,7 @@ let get_root_feeds ~starting ~number ~user () =
   >>= reduce ~user
 
 let get_feeds ~starting ~number ~user () =
-  let feeds_filter f = (<:value< true >>) in
+  let feeds_filter _ = (<:value< true >>) in
   let tags_filter _ = (<:value< true >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~tags_filter ~users_filter ~user ()
@@ -432,7 +432,7 @@ let list_of_depend_feed id =
       >>= fun comments ->
       Lwt.return (aux root comments)
 
-let delete_feed ~feedid ~userid () =
+let delete_feed ~feedid () =
   list_of_depend_feed feedid
   >>= fun dfeeds ->
   let feeds_filter f =

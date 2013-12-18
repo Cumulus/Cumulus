@@ -242,7 +242,7 @@ let delete_feed_check ~feedid ~userid () =
   User.is_admin () >>= fun is_admin ->
   Db_feed.is_feed_author ~feedid ~userid () >>= fun is_author ->
   if is_admin or is_author then
-    Db_feed.delete_feed ~feedid ~userid ()
+    Db_feed.delete_feed ~feedid ()
   else
     Lwt.return ()
 

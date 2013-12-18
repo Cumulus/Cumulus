@@ -106,7 +106,6 @@ val add_feed :
 
 val delete_feed :
   feedid:int32 ->
-  userid:int32 ->
   unit ->
   unit Lwt.t
 
