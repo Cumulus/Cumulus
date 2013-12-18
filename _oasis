@@ -24,8 +24,8 @@ Library cumulus
     Main
   BuildDepends:
     cumulus.base
-  ByteOpt: -w A-44-33
-  NativeOpt: -w A-44-33
+#  ByteOpt: -w A
+#  NativeOpt: -w A
   DataFiles:
     ../data/*.ico,
     ../data/*.css,
@@ -50,8 +50,8 @@ Library base
     cumulus.db,
     camomile,
     markdown.html (>= 0.1.1)
-  ByteOpt: -w A-44-33
-  NativeOpt: -w A-44-33
+#  ByteOpt: -w A
+#  NativeOpt: -w A
 
 Library db
   Path: src/base/db
@@ -74,8 +74,8 @@ Library db
     lwt (>= 2.4),
     safepass (>= 1.2),
     markdown.html (>= 0.1.1)
-  ByteOpt: -w A-44-33
-  NativeOpt: -w A-44-33
+#  ByteOpt: -w A
+#  NativeOpt: -w A
 
 Executable cumulus
   Install: false
@@ -84,5 +84,5 @@ Executable cumulus
   BuildDepends:
     eliom.client
   CompiledObject: byte
-  ByteOpt: -w A-44-33
-  NativeOpt: -w A-44-33
+#  ByteOpt: -w A
+#  NativeOpt: -w A
