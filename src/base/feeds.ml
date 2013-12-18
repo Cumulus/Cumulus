@@ -27,23 +27,6 @@ module UTF8 = CamomileLibraryDefault.Camomile.CaseMap.Make(CamomileLibrary.UTF8)
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
-let feed_of_db (feed, tags, votes) =
-  let tags =
-    List.map
-      (fun elm -> elm#!tag)
-      (List.filter (fun elm -> elm#!id_feed = feed#!id) tags)
-  in
-  let votes =
-    List.fold_left
-      (fun acc elm -> acc + Int32.to_int elm#!score)
-      0
-      (List.filter (fun elm -> elm#!id_feed = feed#!id) votes)
-  in
-  Lwt.return (Feed.feed_new feed tags votes)
-
-let feeds_of_db (feeds, tags, votes) =
-  Lwt_list.map_s (fun x -> feed_of_db (x, tags, votes)) feeds
-
 let to_somthing f data =
   Lwt_list.map_p (fun feed -> f feed) data
 
@@ -55,12 +38,13 @@ let private_to_html data =
        )
     ) data
 
+(* Problème entre Db_feed.get_feed_with_id et Db_feed.get_feed_with_id *)
+(* feed option <> feed *)
+
 let comments_to_html id =
-  Db_feed.get_feed_with_id id
-  >>= feed_of_db
-  >>= fun root ->
-  Db_feed.get_comments id
-  >>= feeds_of_db
+  User.get_userid () >>= fun user ->
+  Db_feed.get_feed_with_id ~user id >>= fun root ->
+  Db_feed.get_comments ~user id
   >>= fun comments ->
   let result = Comments.tree_comments [Comments.Sheet root] comments
   in match result with
@@ -68,34 +52,29 @@ let comments_to_html id =
   | None -> Comments.to_html (Comments.Sheet root)
 
 let branch_to_html id =
-  Db_feed.get_feed_with_id id
-  >>= feed_of_db
-  >>= fun sheet ->
+  User.get_userid () >>= fun user ->
+  Db_feed.get_feed_with_id ~user id >>= fun sheet ->
   match sheet.Feed.root with
   | None -> Comments.to_html (Comments.Sheet sheet)
   | Some id ->
-      Db_feed.get_feed_with_id id
-      >>= feed_of_db
-      >>= fun root ->
-      Db_feed.get_comments id
-      >>= feeds_of_db
+      Db_feed.get_feed_with_id ~user id >>= fun root ->
+      Db_feed.get_comments ~user id
       >>= fun comments ->
       let tree =
         Comments.branch_comments (Comments.Sheet sheet) (root :: comments)
       in
       Comments.to_html tree
 
-let to_html feeds = feeds_of_db feeds >>= private_to_html
+let to_html = private_to_html
 
 let feed_id_to_html id =
-  Db_feed.get_feed_with_id id
-  >>= feed_of_db
-  >>= fun feed ->
+  User.get_userid () >>= fun user ->
+  Db_feed.get_feed_with_id ~user id >>= fun feed ->
   private_to_html [feed]
 
 let tree_to_atom id () =
-  Db_feed.get_tree_feeds id ~starting:0l ~number:Utils.offset ()
-  >>= feeds_of_db
+  User.get_userid () >>= fun user ->
+  Db_feed.get_tree_feeds ~user id ~starting:0l ~number:Utils.offset ()
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -108,8 +87,8 @@ let tree_to_atom id () =
   )
 
 let tag_to_atom tag () =
-  Db_feed.get_feeds_with_tag tag ~starting:0l ~number:Utils.offset ()
-  >>= feeds_of_db
+  User.get_userid () >>= fun user ->
+  Db_feed.get_feeds_with_tag ~user tag ~starting:0l ~number:Utils.offset ()
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -123,8 +102,8 @@ let tag_to_atom tag () =
 
 (* FIXME? should atom feed return only a limited number of links ? *)
 let to_atom () =
-  Db_feed.get_links_feeds ~starting:0l ~number:Utils.offset ()
-  >>= feeds_of_db
+  User.get_userid () >>= fun user ->
+  Db_feed.get_links_feeds ~user ~starting:0l ~number:Utils.offset ()
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -137,8 +116,8 @@ let to_atom () =
   )
 
 let comments_to_atom () =
-  Db_feed.get_comments_feeds ~starting:0l ~number:Utils.offset ()
-  >>= feeds_of_db
+  User.get_userid () >>= fun user ->
+  Db_feed.get_comments_feeds ~user ~starting:0l ~number:Utils.offset ()
   >>= to_somthing Feed.to_atom
   >>= (fun tmp ->
     Lwt.return (
@@ -196,9 +175,10 @@ let append_feed (url, (description, tags)) =
     )
 
 let get_root_and_parent id =
-  Db_feed.get_feed_with_id (Int32.of_int id) >>= fun (feed, _, _) ->
-  let parent = feed#!id in
-  let root = match feed#?root with
+  User.get_userid () >>= fun user ->
+  Db_feed.get_feed_with_id ~user (Int32.of_int id) >>= fun feeds ->
+  let parent = feeds.Feed.id in
+  let root = match feeds.Feed.root with
     | Some root -> root
     | None -> parent
   in
@@ -227,6 +207,7 @@ let append_desc_comment (id, description) =
     )
 
 let edit_feed_aux ~id ~url ~description ~tags f =
+  User.get_userid () >>= fun user ->
   append_feed_aux_base ~description
     (fun ~author () ->
        if Utils.string_is_empty tags then
@@ -234,8 +215,8 @@ let edit_feed_aux ~id ~url ~description ~tags f =
        else if Utils.is_invalid_url url then
          Lwt.return Invalid_url
        else
-         Db_feed.get_feed_with_id (Int32.of_int id) >>= (fun (feed, _, _) ->
-           if feed#?url <> Some url then
+         Db_feed.get_feed_with_id ~user (Int32.of_int id) >>= (fun feeds ->
+           if feeds.Feed.url <> Some url then
              Db_feed.get_feed_url_with_url url >>= function
              | Some _ -> Lwt.return Already_exist
              | None -> f () >>= updating_and_ret
@@ -267,4 +248,5 @@ let edit_desc_comment (id, description) =
     )
 
 (* TODO: Remove this ugly thing *)
-let to_html' ~starting ~number feeds = feeds ~starting ~number () >>= to_html
+let to_html' ~starting ~number ~user feeds =
+  feeds ~starting ~number ~user () >>= to_html

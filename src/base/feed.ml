@@ -25,29 +25,21 @@ open Eliom_lib.Lwt_ops
 module Calendar = CalendarLib.Calendar
 module Uri = Eliom_uri
 
-type feed = {
-  id : int32;
-  url : string option;
-  description : string;
-  date : Calendar.t;
-  author : int32;
-  parent : int32 option;
-  root : int32 option;
-  tags: string list;
-  score : int;
-}
-
-let feed_new data tags score = {
-  id = data#!id;
-  url = data#?url;
-  description = data#!description;
-  date = data#!timedate;
-  author = data#!author;
-  parent = data#?parent;
-  root = data#?root;
-  tags;
-  score;
-}
+type feed = Db_feed.feed =
+  { author : int32
+  ; id : int32
+  ; date : CalendarLib.Calendar.t
+  ; description : string
+  ; url : string option
+  ; parent: int32 option
+  ; root : int32 option
+  ; tags : string list
+  ; score : int
+  ; user : < email_digest : string; name : string >
+  ; fav : bool
+  ; vote : int
+  ; count : int
+  }
 
 let links_of_tags tags =
   List.fold_left (fun acc tag ->
@@ -88,53 +80,39 @@ let to_html self =
     | Some _ -> (Html.pcdata "Tags: ") :: links_of_tags self.tags
     | None -> [] in
   User.is_connected () >>= fun state ->
-  Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
-    | Some userid ->
-        Db_feed.is_feed_author ~feed:self.id ~userid ()
-  )
+    | Some userid -> Lwt.return (Int32.equal userid self.author))
   >>= fun is_author ->
   User.is_admin ()
   >>= fun is_admin ->
-  Db_feed.count_comments self.id >>= fun comments ->
-  User.get_userid () >>= (function
-    | None -> Lwt.return false
-    | Some userid -> Db_feed.is_fav ~feedid:self.id ~userid ()
-  )
-  >>= fun is_fav ->
-  User.get_userid () >>= (function
-    | None -> Lwt.return (Int32.of_int 0)
-    | Some userid -> Db_feed.user_vote ~feedid:self.id ~userid ()
-  )
-  >>= fun user_score ->
   Lwt.return (
     List.flatten [
       [Html.img
          ~a: [Html.a_class ["left"]]
-         ~alt: (author#!name)
+         ~alt: (self.user#name)
          ~src: (
            Html.make_uri
-             ~service: (Utils.get_gravatar (author#!email)) (40, "identicon")
+             ~service: (Utils.get_gravatar (self.user#email_digest)) (40, "identicon")
          )
          ();
        (if not state then
           (Html.pcdata "")
         else
-          (if is_fav = true then
+          (if self.fav = true then
              (Html.a ~service:Services.del_fav_feed [Html.pcdata "★"] self.id)
            else (Html.a ~service:Services.add_fav_feed [Html.pcdata "☆"] self.id))
        );
        (if not state or is_author then
           (Html.pcdata "")
-        else if user_score <> (Int32.of_int 1) then
+        else if self.vote <> 1 then
           (Html.a ~service:Services.upvote_feed [Html.pcdata "⬆"] self.id)
         else
           (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
        );
        (if not state or is_author then
           (Html.pcdata "")
-        else if user_score <> (Int32.of_int (-1)) then
+        else if self.vote <> -1 then
           (Html.a ~service:Services.downvote_feed [Html.pcdata "⬇"] self.id)
         else
           (Html.a ~service:Services.cancelvote_feed [Html.pcdata "✕"] self.id)
@@ -145,14 +123,14 @@ let to_html self =
        Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
        Html.a
          ~service:Services.author_feed
-         [Html.pcdata author#!name]
-         (None, author#!name);
+         [Html.pcdata self.user#name]
+         (None, self.user#name);
       ];
       [Html.br ();
        (* TODO : afficher "n commentaire(s)" *)
        Html.a
          ~service:Services.view_feed
-         (let n = Int64.to_int comments#!n
+         (let n = self.count
           in match n with
           | 0
           | 1 -> [Html.pcdata ((string_of_int n) ^ " commentaire")]
@@ -182,10 +160,11 @@ let to_html self =
   )
 
 let to_atom self =
-  Db_feed.get_root self.id () >>= fun root_feed ->
+  User.get_userid () >>= fun user ->
+  Db_feed.get_root ~feedid:self.id ~user () >>= fun root_feed ->
   Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   let title, root_infos = match root_feed with
-    | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'#!description) ^
+    | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'.description) ^
                             "] " ^ (
                             match self.url with
                             | Some url -> self.description
@@ -193,9 +172,9 @@ let to_atom self =
                           ),
                           [Html.pcdata "ce message est une réponse à : ";
                            Html.a ~service:Services.view_feed
-                             [Html.pcdata root_feed'#!description]
-                             (Int32.to_int root_feed'#!id,
-                              Utils.troncate root_feed'#!description)])
+                             [Html.pcdata root_feed'.description]
+                             (Int32.to_int root_feed'.id,
+                              Utils.troncate root_feed'.description)])
     | None -> (Utils.troncate' 200 self.description, [])
   in
   Lwt.return (
@@ -242,35 +221,33 @@ let to_atom self =
       ]
   )
 
-let get_edit_url feed =
-  match feed#?url with
+let get_edit_url feeds =
+  match feeds.url with
   | Some f -> f
   | None -> "Url"
 
-let get_edit_tags tags =
-  let tags_str = List.map (fun t -> t#!tag) tags in
-  String.concat ", " tags_str
+let get_edit_tags = String.concat ", "
 
 let get_edit_infos id =
-  Db_feed.is_url ~feedid:id () >>= fun is_url ->
-  Db_feed.get_feed_with_id id >>= fun (feed, tags, _) ->
-  let desc = feed#!description in
-  let url = get_edit_url feed in
-  let tags_str = get_edit_tags tags in
-  Lwt.return (is_url, desc, url, tags_str)
+  User.get_userid () >>= fun user ->
+  Db_feed.get_feed_with_id ~user id >>= fun feeds ->
+  let desc = feeds.description in
+  let url = get_edit_url feeds in
+  let tags_str = get_edit_tags feeds.tags in
+  Lwt.return (Option.is_some feeds.url, desc, url, tags_str)
 
-let delete_feed_check ~feed ~userid () =
+let delete_feed_check ~feedid ~userid () =
   User.is_admin () >>= fun is_admin ->
-  Db_feed.is_feed_author ~feed ~userid () >>= fun is_author ->
+  Db_feed.is_feed_author ~feedid ~userid () >>= fun is_author ->
   if is_admin or is_author then
-    Db_feed.delete_feed ~feed ~userid ()
+    Db_feed.delete_feed ~feedid ()
   else
     Lwt.return ()
 
 let exec_if_not_author f feedid =
   User.get_userid () >>= function
   | Some userid ->
-      Db_feed.is_feed_author ~feed:feedid ~userid ()
+      Db_feed.is_feed_author ~feedid ~userid ()
       >>= fun is_author ->
       if not is_author then
         f ~feedid ~userid ()

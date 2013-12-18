@@ -31,6 +31,10 @@ val value :
   < nul : Sql.non_nullable; t : 'a #Sql.type_info; .. > Sql.t ->
   'a Lwt.t
 
+val value_opt :
+  < nul : Sql.nullable; t : 'a #Sql.type_info; .. > Sql.t ->
+  'a option Lwt.t
+
 val alter : string -> unit Lwt.t
 
 val in' :

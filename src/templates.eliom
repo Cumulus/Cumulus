@@ -485,7 +485,7 @@ let private_edit_feed id =
     Feed.get_edit_infos id >>= fun (is_url, edit_desc, edit_url, edit_tags) ->
     User.get_userid () >>= (function
       | None -> Lwt.return true
-      | Some uid -> Feed.is_feed_author ~feed:id ~userid:uid ())
+      | Some uid -> Feed.is_feed_author ~feedid:id ~userid:uid ())
     >>= fun is_author ->
     main_style
       ( if (not state) or (not is_author) then
@@ -561,10 +561,11 @@ let private_edit_feed id =
 
 let feed_list ~service page link feeds nb_feeds =
   User.get_offset () >>= fun off ->
+  User.get_userid () >>= fun is_connected ->
   let starting = Int32.mul (Int32.of_int page) off in
   private_main ~page ~link
     ~service
-    (Feeds.to_html' ~starting ~number:off feeds)
+    (Feeds.to_html' ~starting ~number:off ~user:is_connected feeds)
     nb_feeds
 
 (* see TODO [1] *)

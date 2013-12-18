@@ -60,6 +60,7 @@ Library db
     Configfile,
     Db_config,
     Db,
+    Db_table,
     Db_update,
     Db_feed,
     Db_user

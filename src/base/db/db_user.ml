@@ -49,22 +49,11 @@ let user_to_user_with_password =
   in
   Option.map f
 
-let users_id_seq = (<:sequence< serial "users_id_seq" >>)
-
-let users = (<:table< users (
-                     id integer NOT NULL DEFAULT(nextval $users_id_seq$),
-                     name text NOT NULL,
-                     password text NOT NULL,
-                     email text NOT NULL,
-                     is_admin boolean NOT NULL DEFAULT(false),
-                     feeds_per_page integer NOT NULL DEFAULT(10)
-                     ) >>)
-
 let get_user_id_with_name name =
   Db.view_one
     (<:view< {
             u.id
-            } | u in $users$;
+            } | u in $Db_table.users$;
             u.name = $string:name$;
      >>)
 
@@ -73,7 +62,7 @@ let get_user_name_and_email_with_id id =
     (<:view< {
             u.name;
             u.email;
-            } | u in $users$;
+            } | u in $Db_table.users$;
             u.id = $int32:id$;
      >>)
 
@@ -86,41 +75,41 @@ let get_user_with_name name =
             u.email;
             u.is_admin;
             u.feeds_per_page;
-            } | u in $users$;
+            } | u in $Db_table.users$;
             u.name = $string:name$;
      >>)
   >|= user_to_user_with_password
 
 let add_user ~name ~password ~email () =
   Db.query
-    (<:insert< $users$ := {
-              id = users?id;
+    (<:insert< $Db_table.users$ := {
+              id = $Db_table.users$?id;
               name = $string:name$;
               password = $string:Bcrypt.string_of_hash password$;
               email = $string:email$;
-              is_admin = users?is_admin;
-              feeds_per_page = users?feeds_per_page;
+              is_admin = $Db_table.users$?is_admin;
+              feeds_per_page = $Db_table.users$?feeds_per_page;
               } >>)
 
 let update_user_password ~userid ~password () =
   Db.query
-    (<:update< u in $users$ := {
+    (<:update< u in $Db_table.users$ := {
               password = $string:Bcrypt.string_of_hash password$;
               } | u.id = $int32:userid$; >>)
 
 let update_user_email ~userid ~email () =
   Db.query
-    (<:update< u in $users$ := {
+    (<:update< u in $Db_table.users$ := {
               email = $string:email$;
               } | u.id = $int32:userid$; >>)
 
 let update_user_feeds_per_page ~userid ~nb_feeds () =
   Db.query
-    (<:update< u in $users$ := {
+    (<:update< u in $Db_table.users$ := {
               feeds_per_page = $int32:nb_feeds$;
               } | u.id = $int32:userid$; >>)
 
 let get_user_with_email email =
   Db.view_opt
-    (<:view< u | u in $users$; u.email = $string:email$; >>)
+    (<:view< u | u in $Db_table.users$; u.email = $string:email$; >>)
   >|= user_to_user_with_password
