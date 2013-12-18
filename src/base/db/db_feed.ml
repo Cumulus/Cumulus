@@ -389,10 +389,6 @@ let list_of_depend_feed id =
     Db.view_one
       (<:view< {
               f.id;
-              f.url;
-              f.description;
-              f.timedate;
-              f.author;
               f.parent;
               f.root;
               } | f in $Db_table.feeds$;
@@ -403,10 +399,6 @@ let list_of_depend_feed id =
     Db.view
       (<:view< {
               f.id;
-              f.url;
-              f.description;
-              f.timedate;
-              f.author;
               f.parent;
               f.root;
               } | f in $Db_table.feeds$;
