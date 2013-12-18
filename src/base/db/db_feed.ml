@@ -243,7 +243,7 @@ let get_feed_with_id ~user id =
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~tags_filter ~users_filter ~user ()
   >>= reduce ~user
-  >>= (function | [] -> Lwt.return None | x :: _ -> Lwt.return (Some x))
+  >|= (function [x] -> x | _ -> assert false)
 
 let get_comments ~user root =
   let feeds_filter f =

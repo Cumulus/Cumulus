@@ -43,9 +43,7 @@ let private_to_html data =
 
 let comments_to_html id =
   User.get_userid () >>= fun user ->
-  Db_feed.get_feed_with_id ~user id
-  >|= Option.get
-  >>= fun root ->
+  Db_feed.get_feed_with_id ~user id >>= fun root ->
   Db_feed.get_comments ~user id
   >>= fun comments ->
   let result = Comments.tree_comments [Comments.Sheet root] comments
@@ -55,15 +53,11 @@ let comments_to_html id =
 
 let branch_to_html id =
   User.get_userid () >>= fun user ->
-  Db_feed.get_feed_with_id ~user id
-  >|= Option.get
-  >>= fun sheet ->
+  Db_feed.get_feed_with_id ~user id >>= fun sheet ->
   match sheet.Feed.root with
   | None -> Comments.to_html (Comments.Sheet sheet)
   | Some id ->
-      Db_feed.get_feed_with_id ~user id
-      >|= Option.get
-      >>= fun root ->
+      Db_feed.get_feed_with_id ~user id >>= fun root ->
       Db_feed.get_comments ~user id
       >>= fun comments ->
       let tree =
@@ -75,9 +69,7 @@ let to_html = private_to_html
 
 let feed_id_to_html id =
   User.get_userid () >>= fun user ->
-  Db_feed.get_feed_with_id ~user id
-  >|= Option.get
-  >>= fun feed ->
+  Db_feed.get_feed_with_id ~user id >>= fun feed ->
   private_to_html [feed]
 
 let tree_to_atom id () =
@@ -184,9 +176,7 @@ let append_feed (url, (description, tags)) =
 
 let get_root_and_parent id =
   User.get_userid () >>= fun user ->
-  Db_feed.get_feed_with_id ~user (Int32.of_int id)
-  >|= Option.get
-  >>= fun feeds ->
+  Db_feed.get_feed_with_id ~user (Int32.of_int id) >>= fun feeds ->
   let parent = feeds.Feed.id in
   let root = match feeds.Feed.root with
     | Some root -> root
@@ -225,9 +215,7 @@ let edit_feed_aux ~id ~url ~description ~tags f =
        else if Utils.is_invalid_url url then
          Lwt.return Invalid_url
        else
-         Db_feed.get_feed_with_id ~user (Int32.of_int id)
-         >|= Option.get
-         >>= (fun feeds ->
+         Db_feed.get_feed_with_id ~user (Int32.of_int id) >>= (fun feeds ->
            if feeds.Feed.url <> Some url then
              Db_feed.get_feed_url_with_url url >>= function
              | Some _ -> Lwt.return Already_exist

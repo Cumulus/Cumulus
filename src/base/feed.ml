@@ -230,9 +230,7 @@ let get_edit_tags = String.concat ", "
 
 let get_edit_infos id =
   User.get_userid () >>= fun user ->
-  Db_feed.get_feed_with_id ~user id
-  >|= Option.get
-  >>= fun feeds ->
+  Db_feed.get_feed_with_id ~user id >>= fun feeds ->
   let desc = feeds.description in
   let url = get_edit_url feeds in
   let tags_str = get_edit_tags feeds.tags in
