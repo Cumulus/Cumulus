@@ -29,7 +29,7 @@ type feed =
   ; root : int32 option
   ; tags : string list
   ; score : int
-  ; user : < email : string; name : string >
+  ; user : < email_digest : string; name : string >
   ; fav : bool
   ; vote : int
   ; count : int

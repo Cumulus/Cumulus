@@ -33,7 +33,7 @@ type feed =
   ; root : int32 option
   ; tags : string list
   ; score : int
-  ; user : < email : string; name: string >
+  ; user : < email_digest : string; name: string >
   ; fav : bool
   ; vote : int
   ; count : int
@@ -57,7 +57,9 @@ let get_feeds_aux ?range
   begin match range with
   | Some (limit, offset) ->
       Db.view
-        (<:view< group {}
+        (<:view< group {
+          email_digest = md5[u.email];
+        }
         by {
           f.id;
           f.url;
@@ -77,7 +79,9 @@ let get_feeds_aux ?range
         >>)
   | None ->
       Db.view
-        (<:view< group {}
+        (<:view< group {
+          email_digest = md5[u.email];
+        }
         by {
           f.id;
           f.url;
@@ -159,7 +163,7 @@ let reduce ~user (feeds, tags, votes, favs, count) =
     ; root = o#?root
     ; tags = Array.to_list (Option.map_default (fun x -> x#!tags) [||] (find tags))
     ; score = Int32.to_int (Option.map_default (fun x -> x#!score) 0l (find votes))
-    ; user = object method name = o#!name method email = o#!email end
+    ; user = object method name = o#!name method email_digest = o#!email_digest end
     ; fav = List.exists (fun e -> e#!id_feed = o#!id) favs
     ; vote = Option.map_default (fun user -> Int32.to_int (Option.default 0l (List.Exceptionless.find_map (fun e -> if e#!id_feed = o#!id && e#!id_user = user then Some e#!score else None) votes))) 0 user
     ; count =

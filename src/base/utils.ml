@@ -62,8 +62,7 @@ let is_invalid_email =
      not (Str.string_match email_regexp email 0)
   )
 
-let get_gravatar email =
-  let md5_email = Digest.to_hex (Digest.string (String.lowercase email)) in
+let get_gravatar md5_email =
   Eliom_service.external_service
     ~prefix:"http://www.gravatar.com"
     ~path:[ "avatar"; md5_email ]
