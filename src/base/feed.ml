@@ -162,7 +162,6 @@ let to_html self =
 let to_atom self =
   User.get_userid () >>= fun user ->
   Db_feed.get_root ~feedid:self.id ~user () >>= fun root_feed ->
-  Db_user.get_user_name_and_email_with_id self.author >>= fun author ->
   let title, root_infos = match root_feed with
     | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'.description) ^
                             "] " ^ (
@@ -182,7 +181,7 @@ let to_atom self =
       ~updated: self.date
       ~id:(Int32.to_string self.id)
       ~title: (Atom_feed.plain (title))
-      [Atom_feed.authors [Atom_feed.author author#!name];
+      [Atom_feed.authors [Atom_feed.author self.user#name];
        Atom_feed.links [Atom_feed.link (Uri.make_string_uri ~absolute:true
                                           ~service:Services.view_feed
                                           (Int32.to_int self.id, "")

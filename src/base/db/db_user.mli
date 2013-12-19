@@ -33,12 +33,6 @@ type user =
 val to_password : string -> password
 val check_password : string -> password -> bool
 
-val get_user_name_and_email_with_id :
-  int32 ->
-  < email : Sql.string_t Sql.non_nullable_data;
-    name : Sql.string_t Sql.non_nullable_data >
-    Lwt.t
-
 val get_user_with_name : string -> user option Lwt.t
 
 val get_user_id_with_name :

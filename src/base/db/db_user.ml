@@ -57,15 +57,6 @@ let get_user_id_with_name name =
             u.name = $string:name$;
      >>)
 
-let get_user_name_and_email_with_id id =
-  Db.view_one
-    (<:view< {
-            u.name;
-            u.email;
-            } | u in $Db_table.users$;
-            u.id = $int32:id$;
-     >>)
-
 let get_user_with_name name =
   Db.view_opt
     (<:view< {
