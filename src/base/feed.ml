@@ -268,12 +268,12 @@ let cancel_vote = exec_if_not_author Db_feed.cancelvote
 
 (* TODO: Remove the following functions *)
 let get_root_feeds = Db_feed.get_root_feeds
-let count_root_feeds () = Db_feed.count_root_feeds () >|= fun x -> x#!n
+let count_root_feeds () = Db_feed.count_root_feeds () >|= fun x -> Sql.get x#n
 let get_feeds_with_author = Db_feed.get_feeds_with_author
-let count_feeds_with_author x = Db_feed.count_feeds_with_author x >|= fun x -> x#!n
+let count_feeds_with_author x = Db_feed.count_feeds_with_author x >|= fun x -> Sql.get x#n
 let get_feeds_with_tag = Db_feed.get_feeds_with_tag
-let count_feeds_with_tag x = Db_feed.count_feeds_with_tag x >|= fun x -> x#!n
+let count_feeds_with_tag x = Db_feed.count_feeds_with_tag x >|= fun x -> Sql.get x#n
 let get_fav_with_username = Db_feed.get_fav_with_username
-let count_fav_with_username x = Db_feed.count_fav_with_username x >|= fun x -> x#!n
+let count_fav_with_username x = Db_feed.count_fav_with_username x >|= fun x -> Sql.get x#n
 let exist = Db_feed.exist
 let is_feed_author = Db_feed.is_feed_author

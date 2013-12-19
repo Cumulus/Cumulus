@@ -60,9 +60,8 @@
 "src/client/cumulus.byte": package(eliom.client)
 <src/client/*.ml{,i}>: package(eliom.client)
 # OASIS_STOP
-<src/**/*.ml>: syntax(camlp4o)
+<src/base/db/db_*.ml>: syntax(camlp4o)
 <src/**/*.ml{,i}>: thread
-<src/client/*.ml>: -syntax(camlp4o)
 <src/*.ml{,i}>: -use_db
 <src/server/*.ml{,i}>: -use_db
 "src/client/cumulus.js": package(eliom.client)
