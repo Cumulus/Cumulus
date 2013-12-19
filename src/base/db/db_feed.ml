@@ -304,7 +304,7 @@ let get_fav_aux ~starting ~number ~feeds_filter ~user () =
 
 let get_fav_with_username name ~starting ~number ~user () =
   Db_user.get_user_id_with_name name >>= fun author ->
-  let feeds_filter f = (<:value< f.id_user = $author#id$ >>) in
+  let feeds_filter f = (<:value< f.id_user = $author$ >>) in
   get_fav_aux ~starting ~number ~feeds_filter ~user ()
 
 let filter_tags_id f tags =
@@ -340,7 +340,7 @@ let count_root_feeds () =
 
 let count_feeds_with_author author =
   Db_user.get_user_id_with_name author >>= fun author ->
-  let filter f = (<:value< f.author = $int32:author#!id$ >>) in
+  let filter f = (<:value< f.author = $author$ >>) in
   count_feeds_aux ~filter ()
 
 let count_feeds_with_tag tag =
@@ -456,7 +456,7 @@ let count_fav_aux ~filter () =
 
 let count_fav_with_username name =
   Db_user.get_user_id_with_name name >>= fun author ->
-  let filter f = (<:value< f.id_user = $int32:author#!id$ >>) in
+  let filter f = (<:value< f.id_user = $author$ >>) in
   count_fav_aux ~filter ()
 
 let add_fav ~feedid ~userid () =

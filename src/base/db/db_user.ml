@@ -57,6 +57,8 @@ let get_user_id_with_name name =
             } | u in $Db_table.users$;
             u.name = $string:name$;
      >>)
+  >|= fun x ->
+  x#id
 
 let get_user_with_name name =
   Db.view_opt

@@ -36,10 +36,8 @@ type user =
   }
 
 val get_user_with_name : string -> user option Lwt.t
-
-val get_user_id_with_name :
-  string ->
-  < id : Sql.int32_t Sql.non_nullable_data > Lwt.t
+val get_user_id_with_name : string -> Sql.int32_t Sql.non_nullable_data Lwt.t
+val get_user_with_email : string -> user option Lwt.t
 
 val add_user :
   name:string ->
@@ -61,5 +59,3 @@ val update_user_feeds_per_page :
   userid:int32 ->
   nb_feeds:int32 ->
   unit Lwt.t
-
-val get_user_with_email : string -> user option Lwt.t
