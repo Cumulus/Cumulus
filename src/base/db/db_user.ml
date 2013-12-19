@@ -22,19 +22,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 open Batteries
 open Eliom_lib.Lwt_ops
 
-type password = Bcrypt.hash_t
+module Password = struct
+  type t = Bcrypt.hash_t
+
+  let hash x = Bcrypt.hash x
+  let check = Bcrypt.verify
+end
 
 type user =
   { id : int32
   ; name : string
-  ; password : password
+  ; password : Password.t
   ; email : string
   ; is_admin : bool
   ; feeds_per_page : int32
   }
-
-let to_password x = Bcrypt.hash x
-let check_password = Bcrypt.verify
 
 (* TODO: Change the name to « to_user » *)
 let user_to_user_with_password =

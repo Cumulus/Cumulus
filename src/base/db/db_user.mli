@@ -19,19 +19,21 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-type password
+module Password : sig
+  type t
+
+  val hash : string -> t
+  val check : string -> t -> bool
+end
 
 type user =
   { id : int32
   ; name : string
-  ; password : password
+  ; password : Password.t
   ; email : string
   ; is_admin : bool
   ; feeds_per_page : int32
   }
-
-val to_password : string -> password
-val check_password : string -> password -> bool
 
 val get_user_with_name : string -> user option Lwt.t
 
@@ -41,14 +43,14 @@ val get_user_id_with_name :
 
 val add_user :
   name:string ->
-  password:password ->
+  password:Password.t ->
   email:string ->
   unit ->
   unit Lwt.t
 
 val update_user_password :
   userid:int32 ->
-  password:password ->
+  password:Password.t ->
   unit ->
   unit Lwt.t
 

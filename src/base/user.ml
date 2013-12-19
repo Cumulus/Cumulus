@@ -25,7 +25,7 @@ open Eliom_lib.Lwt_ops
 type user = Db_user.user =
   { id : int32
   ; name : string
-  ; password : Db_user.password
+  ; password : Db_user.Password.t
   ; email : string
   ; is_admin : bool
   ; feeds_per_page : int32
@@ -46,7 +46,7 @@ let add = function
       Db_user.get_user_with_name name >>= function
       | Some _ -> Lwt.return false
       | None ->
-          let password = Db_user.to_password password in
+          let password = Db_user.Password.hash password in
           Db_user.add_user ~name ~password ~email () >>= fun () ->
           Lwt.return true
 
@@ -80,7 +80,7 @@ let connect user password =
   Db_user.get_user_with_name user >>= function
   | None -> Lwt.return Not_found
   | Some user ->
-      if Db_user.check_password password user.password then
+      if Db_user.Password.check password user.password then
         is_connected () >>= function
         | true -> Lwt.return Already_connected
         | false ->
@@ -114,7 +114,7 @@ let update_password (password, password_check) =
     get_user () >>= function
     | None -> Lwt.return false
     | Some user ->
-        let password = Db_user.to_password password in
+        let password = Db_user.Password.hash password in
         Db_user.update_user_password ~userid:user.id ~password ()
         >>= fun () ->
         Lwt.return true

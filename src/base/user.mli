@@ -24,7 +24,7 @@ type user_state = Already_connected | Ok | Bad_password | Not_found
 type user = Db_user.user =
   { id : int32
   ; name : string
-  ; password : Db_user.password
+  ; password : Db_user.Password.t
   ; email : string
   ; is_admin : bool
   ; feeds_per_page : int32
