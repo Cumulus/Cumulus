@@ -72,7 +72,12 @@ let get_user_with_name name =
      >>)
   >|= to_user
 
-let add_user ~name ~password ~email () =
+let get_user_with_email email =
+  Db.view_opt
+    (<:view< u | u in $Db_table.users$; u.email = $string:email$; >>)
+  >|= to_user
+
+let add_user ~name ~password ~email =
   Db.query
     (<:insert< $Db_table.users$ := {
               id = $Db_table.users$?id;
@@ -83,25 +88,20 @@ let add_user ~name ~password ~email () =
               feeds_per_page = $Db_table.users$?feeds_per_page;
               } >>)
 
-let update_user_password ~userid ~password () =
+let update_user_password ~userid ~password =
   Db.query
     (<:update< u in $Db_table.users$ := {
               password = $string:Bcrypt.string_of_hash password$;
               } | u.id = $int32:userid$; >>)
 
-let update_user_email ~userid ~email () =
+let update_user_email ~userid ~email =
   Db.query
     (<:update< u in $Db_table.users$ := {
               email = $string:email$;
               } | u.id = $int32:userid$; >>)
 
-let update_user_feeds_per_page ~userid ~nb_feeds () =
+let update_user_feeds_per_page ~userid ~nb_feeds =
   Db.query
     (<:update< u in $Db_table.users$ := {
               feeds_per_page = $int32:nb_feeds$;
               } | u.id = $int32:userid$; >>)
-
-let get_user_with_email email =
-  Db.view_opt
-    (<:view< u | u in $Db_table.users$; u.email = $string:email$; >>)
-  >|= to_user

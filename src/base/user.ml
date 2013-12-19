@@ -47,7 +47,7 @@ let add = function
       | Some _ -> Lwt.return false
       | None ->
           let password = Db_user.Password.hash password in
-          Db_user.add_user ~name ~password ~email () >>= fun () ->
+          Db_user.add_user ~name ~password ~email >>= fun () ->
           Lwt.return true
 
 let (get_user, set_user, unset_user) =
@@ -115,7 +115,7 @@ let update_password (password, password_check) =
     | None -> Lwt.return false
     | Some user ->
         let password = Db_user.Password.hash password in
-        Db_user.update_user_password ~userid:user.id ~password ()
+        Db_user.update_user_password ~userid:user.id ~password
         >>= fun () ->
         Lwt.return true
 
@@ -127,7 +127,7 @@ let update_email email =
     | None -> Lwt.return false
     | Some user ->
         set_user {user with email} >>= fun () ->
-        Db_user.update_user_email ~userid:user.id ~email () >>= fun () ->
+        Db_user.update_user_email ~userid:user.id ~email >>= fun () ->
         Lwt.return true
 
 let update_feeds_per_page feeds_per_page =
@@ -138,7 +138,6 @@ let update_feeds_per_page feeds_per_page =
       Db_user.update_user_feeds_per_page
         ~userid:user.id
         ~nb_feeds:feeds_per_page
-        ()
       >>= fun () ->
       Lwt.return true
 

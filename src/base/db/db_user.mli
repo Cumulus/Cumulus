@@ -45,25 +45,21 @@ val add_user :
   name:string ->
   password:Password.t ->
   email:string ->
-  unit ->
   unit Lwt.t
 
 val update_user_password :
   userid:int32 ->
   password:Password.t ->
-  unit ->
   unit Lwt.t
 
 val update_user_email :
   userid:int32 ->
   email:string ->
-  unit ->
   unit Lwt.t
 
 val update_user_feeds_per_page :
   userid:int32 ->
   nb_feeds:int32 ->
-  unit ->
   unit Lwt.t
 
 val get_user_with_email : string -> user option Lwt.t
