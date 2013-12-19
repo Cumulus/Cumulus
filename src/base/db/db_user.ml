@@ -38,8 +38,7 @@ type user =
   ; feeds_per_page : int32
   }
 
-(* TODO: Change the name to « to_user » *)
-let user_to_user_with_password =
+let to_user =
   let f x =
     { id = x#!id
     ; name = x#!name
@@ -71,7 +70,7 @@ let get_user_with_name name =
             } | u in $Db_table.users$;
             u.name = $string:name$;
      >>)
-  >|= user_to_user_with_password
+  >|= to_user
 
 let add_user ~name ~password ~email () =
   Db.query
@@ -105,4 +104,4 @@ let update_user_feeds_per_page ~userid ~nb_feeds () =
 let get_user_with_email email =
   Db.view_opt
     (<:view< u | u in $Db_table.users$; u.email = $string:email$; >>)
-  >|= user_to_user_with_password
+  >|= to_user
