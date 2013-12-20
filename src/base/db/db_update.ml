@@ -99,12 +99,12 @@ let () =
 
          Db.alter "ALTER TABLE feeds_tags DROP COLUMN id" >>= fun () ->
          (* Because we didn't remove all the orphan tags *)
-         Db.alter "DELETE FROM feeds_tags AS t WHERE NOT EXISTS (SELECT * FROM feeds AS f WHERE t.id_feed = f.id)" >>= fun () ->
+         Db.alter "DELETE FROM feeds_tags AS t WHERE t.id_feed NOT IN (SELECT id FROM feeds)" >>= fun () ->
          Db.alter "ALTER TABLE feeds_tags ADD FOREIGN KEY (id_feed) REFERENCES feeds (id) ON DELETE CASCADE" >>= fun () ->
 
          Db.alter "ALTER TABLE favs ADD FOREIGN KEY (id_user) REFERENCES users (id)" >>= fun () ->
          (* Because we didn't remove all the orphan favs *)
-         Db.alter "DELETE FROM favs AS t WHERE NOT EXISTS (SELECT * FROM feeds AS f WHERE t.id_feed = f.id)" >>= fun () ->
+         Db.alter "DELETE FROM favs AS f WHERE f.id_feed NOT IN (SELECT id FROM feeds)" >>= fun () ->
          Db.alter "ALTER TABLE favs ADD FOREIGN KEY (id_feed) REFERENCES feeds (id) ON DELETE CASCADE" >>= fun () ->
 
          Db.alter "ALTER TABLE votes ADD FOREIGN KEY (id_user) REFERENCES users (id)" >>= fun () ->
