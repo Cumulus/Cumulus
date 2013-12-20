@@ -6,6 +6,15 @@ CREATE TABLE options (
   value text NOT NULL
 );
 
+CREATE TABLE users (
+  id integer PRIMARY KEY,
+  name text NOT NULL,
+  password text NOT NULL,
+  email text NOT NULL,
+  is_admin boolean NOT NULL,
+  feeds_per_page integer NOT NULL CHECK (feeds_per_page > 0)
+);
+
 CREATE TABLE feeds (
     id integer PRIMARY KEY,
     url text,
@@ -18,26 +27,17 @@ CREATE TABLE feeds (
 
 CREATE TABLE feeds_tags (
     tag text NOT NULL,
-    id_feed integer NOT NULL REFERENCES feeds (id) ON DELETE CASCADE
-);
-
-CREATE TABLE users (
-  id integer PRIMARY KEY,
-  name text NOT NULL,
-  password text NOT NULL,
-  email text NOT NULL,
-  is_admin boolean NOT NULL,
-  feeds_per_page integer NOT NULL CHECK (feeds_per_page > 0)
+    id_feed integer NOT NULL REFERENCES feeds (id) ON DELETE CASCADE
 );
 
 CREATE TABLE favs (
   id_user integer NOT NULL REFERENCES users (id),
-  id_feed integer NOT NULL REFERENCES feeds (id) ON DELETE CASCADE
+  id_feed integer NOT NULL REFERENCES feeds (id) ON DELETE CASCADE
 );
 
 CREATE TABLE votes (
   id_user integer NOT NULL REFERENCES users (id),
-  id_feed integer NOT NULL REFERENCES feeds (id) ON DELETE CASCADE,
+  id_feed integer NOT NULL REFERENCES feeds (id) ON DELETE CASCADE,
   score integer NOT NULL
 );
 
