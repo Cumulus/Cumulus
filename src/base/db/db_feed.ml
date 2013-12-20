@@ -108,7 +108,7 @@ let get_feeds_aux ?range
       }
       by { v.id_feed; v.id_user }
       | v in $Db_table.votes$;
-      $Db.in'$ v.id_feed $List.map (fun x -> x#id) feeds$
+      in' v.id_feed $List.map (fun x -> x#id) feeds$
     >>)
   >>= fun votes ->
   Db.view
@@ -118,7 +118,7 @@ let get_feeds_aux ?range
       }
       by { t.id_feed }
       | t in $Db_table.feeds_tags$;
-      $Db.in'$ t.id_feed $List.map (fun x -> x#id) feeds$
+      in' t.id_feed $List.map (fun x -> x#id) feeds$
     >>)
   >>= fun tags ->
   Db.view
@@ -129,7 +129,7 @@ let get_feeds_aux ?range
       is_not_null f.parent;
       (match f.root with
        | null -> false
-       | root -> $Db.in'$ root $List.map (fun x -> x#id) feeds$
+       | root -> in' root $List.map (fun x -> x#id) feeds$
       )
     >>)
   >>= fun count ->
@@ -139,7 +139,7 @@ let get_feeds_aux ?range
         (<:view< {
           f.id_feed;
         } | f in $Db_table.favs$;
-        f.id_user = $int32:user_id$ && $Db.in'$ f.id_feed $List.map (fun x -> x#id) feeds$
+        f.id_user = $int32:user_id$ && in' f.id_feed $List.map (fun x -> x#id) feeds$
         >>)
       >>= fun favs -> Lwt.return (feeds, tags, votes, favs, count)
     | None -> Lwt.return (feeds, tags, votes, [], count)
@@ -296,7 +296,7 @@ let get_fav_aux ~starting ~number ~feeds_filter ~user () =
      >>)
   >>= fun favs ->
   let feeds_filter f =
-    (<:value< $Db.in'$ f.id $List.map (fun x -> x#id_feed) favs$ >>) in
+    (<:value< in' f.id $List.map (fun x -> x#id_feed) favs$ >>) in
   let tags_filter _ = (<:value< true >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~tags_filter ~users_filter ~user ()
@@ -308,7 +308,7 @@ let get_fav_with_username name ~starting ~number ~user () =
   get_fav_aux ~starting ~number ~feeds_filter ~user ()
 
 let filter_tags_id f tags =
-  (<:value< $Db.in'$ f.id $List.map (fun x -> x#id_feed) tags$ >>)
+  (<:value< in' f.id $List.map (fun x -> x#id_feed) tags$ >>)
 
 let get_id_feed_from_tag tag =
   Db.view
@@ -432,17 +432,15 @@ let delete_feed ~feedid () =
   list_of_depend_feed feedid
   >>= fun dfeeds ->
   let feeds_filter f =
-    (<:value< $Db.in'$ f.id $List.map (fun x -> x#id) dfeeds$ >>) in
+    (<:value< in' f.id $List.map (fun x -> x#id) dfeeds$ >>) in
   Db.query
     (<:delete< f in $Db_table.feeds$ | $feeds_filter$ f; >>)
   >>= fun () ->
   let feeds_filter f =
-    (<:value< $Db.in'$ f.id_feed $List.map (fun x -> x#id) dfeeds$ >>) in
+    (<:value< in' f.id_feed $List.map (fun x -> x#id) dfeeds$ >>) in
   Db.query
     (<:delete< f in $Db_table.feeds_tags$ | $feeds_filter$ f >>)
   >>= fun () ->
-  let feeds_filter f =
-    (<:value< $Db.in'$ f.id_feed $List.map (fun x -> x#id) dfeeds$ >>) in
   Db.query
     (<:delete< f in $Db_table.votes$ | $feeds_filter$ f >>)
 

@@ -36,8 +36,3 @@ val value_opt :
   'a option Lwt.t
 
 val alter : string -> unit Lwt.t
-
-val in' :
-  < nul : 'a; t : 'b; .. > Sql.t ->
-  < nul : 'a; t : 'b; .. > Sql.t list ->
-  < nul : 'a; t : Sql.bool_t > Sql.t

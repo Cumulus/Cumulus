@@ -54,7 +54,3 @@ let query x = use (fun db -> Lwt_Query.query db ?log x)
 let value x = use (fun db -> Lwt_Query.value db ?log x)
 let value_opt x = use (fun db -> Lwt_Query.value_opt db ?log x)
 let alter x = use (fun db -> Lwt_PGOCaml.alter db x)
-
-let rec in' value = function
-  | [] -> Sql.Value.bool false
-  | x::xs -> Sql.Op.(||) (Sql.Op.(=) x value) (in' value xs)
