@@ -112,4 +112,12 @@ let () =
 
          Db.alter "DROP SEQUENCE feeds_tags_id_seq"
       )
+    >>= fun () ->
+    update 7
+      (fun () ->
+         (* Because we didn't remove all the orphan feeds *)
+         Db.alter "DELETE FROM feeds AS f WHERE f.parent NOT IN (SELECT id FROM feeds)" >>= fun () ->
+         Db.alter "ALTER TABLE feeds ADD FOREIGN KEY (parent) REFERENCES feeds (id) ON DELETE CASCADE" >>= fun () ->
+         Db.alter "ALTER TABLE feeds ADD FOREIGN KEY (root) REFERENCES feeds (id) ON DELETE CASCADE"
+      )
   end
