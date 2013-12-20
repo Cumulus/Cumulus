@@ -33,10 +33,9 @@ val feeds : (
 ) Sql.view
 
 val feeds_tags : (
-  < id : Sql.int32_t Sql.non_nullable_data;
-    id_feed : Sql.int32_t Sql.non_nullable_data;
+  < id_feed : Sql.int32_t Sql.non_nullable_data;
     tag : Sql.string_t Sql.non_nullable_data >,
-  < id : < nul : Sql.non_nullable; t : Sql.int32_t > Sql.t >
+  < >
   Sql.writable
 ) Sql.view
 

@@ -379,7 +379,6 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
       (fun tag ->
          Db.query
            (<:insert< $Db_table.feeds_tags$ := {
-                     id = $Db_table.feeds_tags$?id;
                      tag = $string:tag$;
                      id_feed = $int32:id_feed$;
                      } >>)
@@ -559,7 +558,6 @@ let update ~feedid ~url ~description ~tags () =
          (fun tag ->
             Db.query
               (<:insert< $Db_table.feeds_tags$ := {
-                        id = $Db_table.feeds_tags$?id;
                         tag = $string:tag$;
                         id_feed = $int32:feedid$;
                         } >>)

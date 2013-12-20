@@ -33,10 +33,7 @@ let feeds = (<:table< feeds (
                      root integer
                      ) >>)
 
-let feeds_tags_id_seq = (<:sequence< serial "feeds_tags_id_seq" >>)
-
 let feeds_tags = (<:table< feeds_tags (
-                          id integer NOT NULL DEFAULT(nextval $feeds_tags_id_seq$),
                           tag text NOT NULL,
                           id_feed integer NOT NULL
                           ) >>)

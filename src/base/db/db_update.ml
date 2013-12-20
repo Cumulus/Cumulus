@@ -84,4 +84,28 @@ let () =
                    id_feed integer NOT NULL, \
                    score integer NOT NULL);"
       )
+    >>= fun () ->
+    update 6
+      (fun () ->
+         Db.alter "ALTER TABLE options ADD PRIMARY KEY (name)" >>= fun () ->
+
+         Db.alter "ALTER TABLE feeds ADD PRIMARY KEY (id)" >>= fun () ->
+         Db.alter "ALTER TABLE feeds ADD FOREIGN KEY (author) REFERENCES users (id)" >>= fun () ->
+
+         Db.alter "ALTER TABLE feeds_tags DROP COLUMN id" >>= fun () ->
+         Db.alter "ALTER TABLE feeds_tags ADD FOREIGN KEY (id_feed) REFERENCES feeds (id) ON DELETE CASCADE" >>= fun () ->
+
+         Db.alter "ALTER TABLE users ADD PRIMARY KEY (id)" >>= fun () ->
+         Db.alter "ALTER TABLE users ALTER is_admin DROP DEFAULT" >>= fun () ->
+         Db.alter "ALTER TABLE users ALTER feeds_per_page DROP DEFAULT" >>= fun () ->
+         Db.alter "ALTER TABLE users ADD CHECK (feeds_per_page > 0)" >>= fun () ->
+
+         Db.alter "ALTER TABLE favs ADD FOREIGN KEY (id_user) REFERENCES users (id)" >>= fun () ->
+         Db.alter "ALTER TABLE favs ADD FOREIGN KEY (id_feed) REFERENCES feeds (id) ON DELETE CASCADE" >>= fun () ->
+
+         Db.alter "ALTER TABLE votes ADD FOREIGN KEY (id_user) REFERENCES users (id)" >>= fun () ->
+         Db.alter "ALTER TABLE votes ADD FOREIGN KEY (id_feed) REFERENCES feeds (id) ON DELETE CASCADE" >>= fun () ->
+
+         Db.alter "DROP SEQUENCE feeds_tags_id_seq"
+      )
   end
