@@ -361,9 +361,8 @@ let count_comments root =
 let add_feed ?root ?parent ?url ~description ~tags ~userid () =
   Db.value (<:value< $Db_table.feeds$?id >>)
   >>= fun id_feed ->
-  let feed =
-    Db.query
-      (<:insert< $Db_table.feeds$ := {
+  Db.query
+    (<:insert< $Db_table.feeds$ := {
                 id = $int32:id_feed$;
                 url = of_option $Option.map Sql.Value.string url$;
                 description = $string:description$;
@@ -372,18 +371,16 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
                 parent = of_option $Option.map Sql.Value.int32 parent$;
                 root = of_option $Option.map Sql.Value.int32 root$;
                 } >>)
-  and tag =
-    Lwt_list.iter_p
-      (fun tag ->
-         Db.query
-           (<:insert< $Db_table.feeds_tags$ := {
-                     tag = $string:tag$;
-                     id_feed = $int32:id_feed$;
-                     } >>)
-      )
-      tags
-  in
-  Lwt.join [feed; tag]
+  >>= fun () ->
+  Lwt_list.iter_p
+    (fun tag ->
+       Db.query
+         (<:insert< $Db_table.feeds_tags$ := {
+                   tag = $string:tag$;
+                   id_feed = $int32:id_feed$;
+                   } >>)
+    )
+    tags
 
 let delete_feed ~feedid () =
   Db.query
