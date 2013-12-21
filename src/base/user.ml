@@ -134,11 +134,11 @@ let update_feeds_per_page feeds_per_page =
   get_user () >>= function
   | None -> Lwt.return false
   | Some user ->
-      set_user {user with feeds_per_page} >>= fun () ->
       Db_user.update_user_feeds_per_page
         ~userid:user.id
         ~nb_feeds:feeds_per_page
       >>= fun () ->
+      set_user {user with feeds_per_page} >>= fun () ->
       Lwt.return true
 
 let get_offset () =
