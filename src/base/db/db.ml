@@ -44,8 +44,8 @@ let pool = Lwt_pool.create 16 ~validate:Lwt_PGOCaml.alive connect
 let use f = Lwt_pool.use pool f
 
 (** Debugging *)
-(*let log = Some Pervasives.stdout*)
-let log = None
+let log = Some Pervasives.stdout
+(*let log = None*)
 
 let view x = use (fun db -> Lwt_Query.view db ?log x)
 let view_opt x = use (fun db -> Lwt_Query.view_opt db ?log x)
