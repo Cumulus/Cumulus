@@ -104,8 +104,8 @@ button, input, select {
 .userbox {
     border-bottom-right-radius: 15px;
     margin-right: 0.25%;
-    background:#333;
     opacity: 0.9;
+    background:#444;
     height: 150px;
     width: 200px;
 }
@@ -275,11 +275,10 @@ button, input, select {
   height: 65px;
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: center center;
   -webkit-border-radius: 99em;
   -moz-border-radius: 99em;
   border-radius: 99em;
-  margin: 25% 0 25% 0;
+  margin: calc(100% - 65px) 0;
 }
 
 .avatarbox {
@@ -354,7 +353,7 @@ a.postitle{
 
 .col.post_int {
   padding-top: 25px;
-  width: 80px;
+  width: 220px;
   padding-bottom: 15px;
   margin-top: 5px;
 }
@@ -418,6 +417,9 @@ a.postitle{
 }
 
 .upvote_wrap {
+  vertical-align: center;
+}
+.upvote_wrap_inner {
   width: 30px;
   margin-left: 10px;
   text-align: center;
@@ -426,6 +428,6 @@ a.postitle{
   float: left;
 }
 
-.upvote_wrap.gray {
+.upvote_wrap_inner.gray {
   color: #ddd;
 }
