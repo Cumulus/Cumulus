@@ -145,7 +145,7 @@ let to_html self =
                     (Int32.to_int self.id);
                 ]
                 @
-          (if is_author or is_admin then
+          (if is_author || is_admin then
             [
                 Html.a ~service:Services.delete_feed [Html.pcdata "- Supprimer "] self.id ;
                 Html.a ~service:Services.edit_feed [Html.pcdata "- Editer"]
@@ -176,16 +176,12 @@ let to_html self =
                   if is_fav = false then
                     Html.a
                       ~service:Services.add_fav_feed
-                      [let n = Int64.to_int comments#!n in
-                       get_image ["circled";"gray";] "fav.png";
-                      ]
+                      [get_image ["circled";"gray";] "fav.png"]
                       (self.id)
                   else
                     Html.a
                       ~service:Services.del_fav_feed
-                      [let n = Int64.to_int comments#!n in
-                       get_image ["circled";"highlighted";"deletable"] "fav.png";
-                      ]
+                      [get_image ["circled";"highlighted";"deletable"] "fav.png"]
                       (self.id);
                 ];
                 let cl = if self.score <= 0 then ["upvote_wrap_inner";"gray"] else
@@ -293,7 +289,7 @@ let get_edit_infos id =
 let delete_feed_check ~feed ~userid () =
   User.is_admin () >>= fun is_admin ->
   Db_feed.is_feed_author ~feed ~userid () >>= fun is_author ->
-  if is_admin or is_author then
+  if is_admin || is_author then
     Db_feed.delete_feed ~feed ~userid ()
   else
     Lwt.return ()

@@ -502,7 +502,7 @@ let private_edit_feed id =
       | Some uid -> Feed.is_feed_author ~feed:id ~userid:uid ())
     >>= fun is_author ->
     main_style
-      ( if (not state) or (not is_author) then
+      ( if (not state) || (not is_author) then
           [Html.div
              ~a:[Html.a_class ["box"]]
              [Html.pcdata "Vous n'avez pas le droit d'editer ce lien."]
