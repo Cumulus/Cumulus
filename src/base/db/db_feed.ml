@@ -61,11 +61,11 @@ let get_feeds_aux ?range
      union
        (group {
           email_digest = md5[u.email];
-          score = null;
-          tags = null;
-          id_feed_of_votes = null;
-          id_user_of_votes = null;
-          id_feed_of_tags = null;
+          score = cast null as integer;
+          tags = cast null as string_array;
+          id_feed_of_votes = cast null as integer;
+          id_user_of_votes = cast null as integer;
+          id_feed_of_tags = cast null as integer;
         }
         by {
           f.id;
@@ -85,8 +85,8 @@ let get_feeds_aux ?range
        (group {
           email_digest = md5[u.email];
           score = sum[v.score];
-          tags = null;
-          id_feed_of_tags = null;
+          tags = cast null as string_array;
+          id_feed_of_tags = cast null as integer;
         }
         by {
           f.id;
@@ -110,9 +110,9 @@ let get_feeds_aux ?range
        (group {
           email_digest = md5[u.email];
           tags = array_agg[t.tag];
-          score = null;
-          id_feed_of_votes = null;
-          id_user_of_votes = null;
+          score = cast null as integer;
+          id_feed_of_votes = cast null as integer;
+          id_user_of_votes = cast null as integer;
         }
         by {
           f.id;
@@ -139,11 +139,11 @@ let get_feeds_aux ?range
      union
        (group {
           email_digest = md5[u.email];
-          score = null;
-          tags = null;
-          id_feed_of_votes = null;
-          id_user_of_votes = null;
-          id_feed_of_tags = null;
+          score = cast null as integer;
+          tags = cast null as string_array;
+          id_feed_of_votes = cast null as integer;
+          id_user_of_votes = cast null as integer;
+          id_feed_of_tags = cast null as integer;
         }
         by {
           f.id;
@@ -163,8 +163,8 @@ let get_feeds_aux ?range
        (group {
           email_digest = md5[u.email];
           score = sum[v.score];
-          tags = null;
-          id_feed_of_tags = null;
+          tags = cast null as string_array;
+          id_feed_of_tags = cast null as integer;
         }
         by {
           f.id;
@@ -188,9 +188,9 @@ let get_feeds_aux ?range
        (group {
           email_digest = md5[u.email];
           tags = array_agg[t.tag];
-          score = null;
-          id_feed_of_votes = null;
-          id_user_of_votes = null;
+          score = cast null as integer;
+          id_feed_of_votes = cast null as integer;
+          id_user_of_votes = cast null as integer;
         }
         by {
           f.id;
