@@ -260,7 +260,7 @@ let reduce ~user (feeds, count, favs) =
     ; score = Option.map_default Int32.to_int 0 o#?score
     ; user = object method name = o#!name method email_digest = o#!email_digest end
     ; fav = List.exists (fun e -> e#!id_feed = o#!id) favs
-    ; vote = 0(*Option.map_default (fun user -> Int32.to_int (Option.default 0l (List.Exceptionless.find_map (fun e -> if e#!id_feed = o#!id && e#!id_user = user then Some e#!score else None) votes))) 0 user*)
+    ; vote = Option.map_default (fun user -> Int32.to_int (Option.default 0l (List.Exceptionless.find_map (fun e -> if e#?id_feed_of_votes = Some o#!id && e#?id_user_of_votes = Some user then e#?score else None) feeds))) 0 user
     ; count =
       try Int64.to_int (List.find (fun e -> match e#?root with Some x -> Int32.equal x o#!id | None -> false) count)#!c
       with _ -> 0
