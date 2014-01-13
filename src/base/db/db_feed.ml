@@ -73,9 +73,8 @@ let get_feeds_aux ?range
         } order by f.id desc limit $int32:limit$ offset $int32:offset$
         | f in $Db_table.feeds$; $feeds_filter$ f;
           u in $Db_table.users$; $users_filter$ f u;
-          t in $Db_table.feeds_tags$; $tags_filter$ t;
+          t in $Db_table.feeds_tags$; $tags_filter$ f t;
           f.author = u.id;
-          f.id = t.id_feed;
         >>)
   | None ->
       Db.view
@@ -95,9 +94,8 @@ let get_feeds_aux ?range
         } order by f.id desc
         | f in $Db_table.feeds$; $feeds_filter$ f;
           u in $Db_table.users$; $users_filter$ f u;
-          t in $Db_table.feeds_tags$; $tags_filter$ t;
+          t in $Db_table.feeds_tags$; $tags_filter$ f t;
           f.author = u.id;
-          f.id = t.id_feed;
         >>)
   end
   >>= fun feeds ->
@@ -144,8 +142,8 @@ let get_feeds_aux ?range
       >>= fun favs -> Lwt.return (feeds, tags, votes, favs, count)
     | None -> Lwt.return (feeds, tags, votes, [], count)
 
-let filter_feed_tag tag t =
-  (<:value< t.tag = $string:tag$ >>)
+let filter_feed_tag tag f t =
+  (<:value< f.id = t.id_feed && t.tag = $string:tag$ >>)
 let filter_feed_author author u =
   (<:value< u.name = $string:author$ >>)
 
@@ -179,7 +177,7 @@ let reduce ~user (feeds, tags, votes, favs, count) =
 
 let rec get_tree_feeds feed_id ~starting ~number ~user () =
   let feeds_filter f = (<:value< f.parent = $int32:feed_id$ >>) in
-  let tags_filter _ = (<:value< true >>) in
+  let tags_filter _ _ = (<:value< true >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~tags_filter ~users_filter ~user ()
   >>= reduce ~user >>= (fun feeds ->
@@ -191,28 +189,28 @@ let rec get_tree_feeds feed_id ~starting ~number ~user () =
 
 let get_links_feeds ~starting ~number ~user () =
   let feeds_filter f = (<:value< is_not_null f.url >>) in
-  let tags_filter _ = (<:value< true >>) in
+  let tags_filter _ _ = (<:value< true >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~tags_filter ~users_filter ~user ()
   >>= reduce ~user
 
 let get_comments_feeds ~starting ~number ~user () =
   let feeds_filter f = (<:value< is_null f.url >>) in
-  let tags_filter _ = (<:value< true >>) in
+  let tags_filter _ _ = (<:value< true >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~tags_filter ~users_filter ~user ()
   >>= reduce ~user
 
 let get_root_feeds ~starting ~number ~user () =
   let feeds_filter f = (<:value< is_null f.root || is_null f.parent >>) in
-  let tags_filter _ = (<:value< true >>) in
+  let tags_filter _ _ = (<:value< true >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~tags_filter ~users_filter ~user ()
   >>= reduce ~user
 
 let get_feeds ~starting ~number ~user () =
   let feeds_filter _ = (<:value< true >>) in
-  let tags_filter _ = (<:value< true >>) in
+  let tags_filter _ _ = (<:value< true >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~tags_filter ~users_filter ~user ()
   >>= reduce ~user
@@ -221,21 +219,21 @@ let get_feeds ~starting ~number ~user () =
 
 let get_feeds_with_author author ~starting ~number ~user () =
   let feeds_filter _ = (<:value< true >>) in
-  let tags_filter _ = (<:value< true >>) in
+  let tags_filter _ _ = (<:value< true >>) in
   let users_filter _ u = filter_feed_author author u in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~tags_filter ~users_filter ~user ()
   >>= reduce ~user
 
 let get_feeds_with_tag tag ~starting ~number ~user () =
   let feeds_filter _ = (<:value< true >>) in
-  let tags_filter t = filter_feed_tag tag t in
+  let tags_filter f t = filter_feed_tag tag f t in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~tags_filter ~users_filter ~user ()
   >>= reduce ~user
 
 let get_feed_with_url ~user url =
   let feeds_filter f = (<:value< f.url = $string:url$ >>) in
-  let tags_filter _ = (<:value< true >>) in
+  let tags_filter _ _ = (<:value< true >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~tags_filter ~users_filter ~user ()
   >>= reduce ~user
@@ -243,7 +241,7 @@ let get_feed_with_url ~user url =
 
 let get_feed_with_id ~user id =
   let feeds_filter f = (<:value< f.id = $int32:id$ >>) in
-  let tags_filter _ = (<:value< true >>) in
+  let tags_filter _ _ = (<:value< true >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~tags_filter ~users_filter ~user ()
   >>= reduce ~user
@@ -252,14 +250,14 @@ let get_feed_with_id ~user id =
 let get_comments ~user root =
   let feeds_filter f =
     (<:value< f.root = $int32:root$ || f.parent = $int32:root$ >>) in
-  let tags_filter _ = (<:value< true >>) in
+  let tags_filter _ _ = (<:value< true >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~tags_filter ~users_filter ~user ()
   >>= reduce ~user
 
 let get_root ~feedid ~user () =
   let feeds_filter f = (<:value< f.id = $int32:feedid$ >>) in
-  let tags_filter _ = (<:value< true >>) in
+  let tags_filter _ _ = (<:value< true >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~tags_filter ~users_filter ~user ()
   >>= reduce ~user
@@ -297,7 +295,7 @@ let get_fav_aux ~starting ~number ~feeds_filter ~user () =
   >>= fun favs ->
   let feeds_filter f =
     (<:value< in' f.id $List.map (fun x -> x#id_feed) favs$ >>) in
-  let tags_filter _ = (<:value< true >>) in
+  let tags_filter _ _ = (<:value< true >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~tags_filter ~users_filter ~user ()
   >>= reduce ~user
