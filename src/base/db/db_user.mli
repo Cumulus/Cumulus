@@ -31,6 +31,7 @@ type user =
   ; name : string
   ; password : Password.t
   ; email : string
+  ; email_digest : string
   ; is_admin : bool
   ; feeds_per_page : int32
   }

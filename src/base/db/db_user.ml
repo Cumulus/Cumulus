@@ -34,6 +34,7 @@ type user =
   ; name : string
   ; password : Password.t
   ; email : string
+  ; email_digest : string
   ; is_admin : bool
   ; feeds_per_page : int32
   }
@@ -44,6 +45,7 @@ let to_user =
     ; name = x#!name
     ; password = Bcrypt.hash_of_string x#!password
     ; email = x#!email
+    ; email_digest = x#!email_digest
     ; is_admin = x#!is_admin
     ; feeds_per_page = x#!feeds_per_page
     }
@@ -62,7 +64,11 @@ let get_user_id_with_name name =
 
 let get_user_with_name name =
   Db.view_opt
-    (<:view< {
+    (<:view<
+      group {
+        email_digest = md5[u.email];
+      }
+      by {
             u.id;
             u.name;
             u.password;
@@ -76,7 +82,17 @@ let get_user_with_name name =
 
 let get_user_with_email email =
   Db.view_opt
-    (<:view< u | u in $Db_table.users$; u.email = $string:email$; >>)
+    (<:view< group {
+        email_digest = md5[u.email];
+      }
+      by {
+        u.id;
+        u.name;
+        u.password;
+        u.email;
+        u.is_admin;
+        u.feeds_per_page;
+      } | u in $Db_table.users$; u.email = $string:email$; >>)
   >|= to_user
 
 let add_user ~name ~password ~email =

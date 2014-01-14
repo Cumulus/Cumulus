@@ -27,6 +27,7 @@ type user = Db_user.user =
   ; name : string
   ; password : Db_user.Password.t
   ; email : string
+  ; email_digest : string
   ; is_admin : bool
   ; feeds_per_page : int32
   }
@@ -90,13 +91,13 @@ let connect user password =
         Lwt.return Bad_password
 
 (* TODO: Remove this after the merge of the new ui *)
-let get_user_and_email () =
+let get_user_and_email_digest () =
   get_user () >>= function
   | None -> Lwt.return None
   | Some user ->
       let user = object
         method name = user.name
-        method email = user.email
+        method email_digest = user.email_digest
       end in
       Lwt.return (Some user)
 

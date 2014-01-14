@@ -120,7 +120,7 @@ let user_information user =
                        ~alt:user#name
                        ~src:(
                          Html.make_uri
-                           ~service: (Utils.get_gravatar user#email)
+                           ~service: (Utils.get_gravatar user#email_digest)
                            (30, "identicon")
                        )
                        ();
@@ -132,7 +132,7 @@ let user_information user =
     ]
 
 let user_info () =
-  User.get_user_and_email () >>= (function
+  User.get_user_and_email_digest () >>= (function
     | Some user -> user_information user
     | None -> user_form ()
   )
