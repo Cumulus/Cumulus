@@ -56,7 +56,7 @@ let (get_user, set_user, unset_user) =
   let eref =
     Eliom_reference.eref
       ~scope:session_scope
-      ~persistent:"cumulus_user_v1"
+      ~persistent:"cumulus_user_v2"
       None
   in
   ((fun () -> Eliom_reference.get eref),
