@@ -149,6 +149,9 @@ FROM
 
         ORDER BY
           f.id DESC
+
+        LIMIT $limit
+        OFFSET $offset
       ) AS f
       LEFT OUTER JOIN
       feeds_tags AS t
@@ -210,9 +213,6 @@ GROUP BY
 
 ORDER BY
   f.id DESC
-
-LIMIT $limit
-OFFSET $offset
 ")
   | None ->
   Lwt.return (PGSQL(dbh) "user=cumulus" "password=h"
