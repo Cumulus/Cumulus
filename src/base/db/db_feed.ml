@@ -48,276 +48,353 @@ type feed_generator =
   unit ->
   feeds Lwt.t
 
+let connect =
+  let open Db_config in
+  PGOCaml.connect
+    ?database
+    ?host
+    ?port
+    ?password
+    ?user
+    ?unix_domain_socket_dir
+
 let get_feeds_aux ?range
   ~feeds_filter
   ~users_filter
   ~user
   () =
+  let dbh = connect () in
   begin match range with
   | Some (limit, offset) ->
-      Db.view
-        (<:view<
-     union
-       (group {
-          email_digest = md5[u.email];
-          score = cast null as integer;
-          tags = cast null as string_array;
-          id_feed_of_votes = cast null as integer;
-          id_user_of_votes = cast null as integer;
-          id_feed_of_tags = cast null as integer;
-        }
-        by {
-          f.id;
-          f.url;
-          f.description;
-          f.timedate;
-          f.author;
-          f.parent;
-          f.root;
-          u.name;
-          u.email;
-        } order by f.id desc limit $int32:limit$ offset $int32:offset$
-        | f in $Db_table.feeds$; $feeds_filter$ f;
-          u in $Db_table.users$; $users_filter$ f u;
-          f.author = u.id;
-       )
-       (group {
-          email_digest = md5[u.email];
-          score = sum[v.score];
-          tags = cast null as string_array;
-          id_feed_of_tags = cast null as integer;
-        }
-        by {
-          f.id;
-          f.url;
-          f.description;
-          f.timedate;
-          f.author;
-          f.parent;
-          f.root;
-          u.name;
-          u.email;
-          id_feed_of_votes = nullable v.id_feed;
-          id_user_of_votes = nullable v.id_user;
-        } order by f.id desc limit $int32:limit$ offset $int32:offset$
-        | f in $Db_table.feeds$; $feeds_filter$ f;
-          u in $Db_table.users$; $users_filter$ f u;
-          v in $Db_table.votes$;
-          f.author = u.id;
-          f.id = v.id_feed;
-       )
-       (group {
-          email_digest = md5[u.email];
-          tags = array_agg[t.tag];
-          score = cast null as integer;
-          id_feed_of_votes = cast null as integer;
-          id_user_of_votes = cast null as integer;
-        }
-        by {
-          f.id;
-          f.url;
-          f.description;
-          f.timedate;
-          f.author;
-          f.parent;
-          f.root;
-          u.name;
-          u.email;
-          id_feed_of_tags = nullable t.id_feed;
-        } order by f.id desc limit $int32:limit$ offset $int32:offset$
-        | f in $Db_table.feeds$; $feeds_filter$ f;
-          u in $Db_table.users$; $users_filter$ f u;
-          t in $Db_table.feeds_tags$;
-          f.author = u.id;
-          f.id = t.id_feed;
-       )
-         >>)
+      let limit = Int64.of_int32 limit in
+      let offset = Int64.of_int32 offset in
+  Lwt.return (PGSQL(dbh) "user=cumulus" "password=h"
+    "
+SELECT
+  f.id AS id,
+  f.url AS url,
+  f.date AS date,
+  f.description AS description,
+  f.author AS author,
+  f.parent AS parent,
+  f.root AS root,
+  f.name AS name,
+  f.email_digest AS email_digest,
+  f.tags AS tags,
+  f.score AS score,
+
+  COUNT(g.root) AS c
+
+FROM
+ (SELECT
+    sum(v.score) AS score,
+
+    f.id AS id,
+    f.url AS url,
+    f.date AS date,
+    f.description AS description,
+    f.author AS author,
+    f.parent AS parent,
+    f.root AS root,
+    f.name AS name,
+    f.email_digest AS email_digest,
+    f.tags AS tags
+
+  FROM
+    (SELECT
+       array_agg(t.tag) AS tags,
+
+       f.id AS id,
+       f.url AS url,
+       f.date AS date,
+       f.description AS description,
+       f.author AS author,
+       f.parent AS parent,
+       f.root AS root,
+       f.name AS name,
+       f.email_digest AS email_digest
+
+     FROM
+       (SELECT
+          f.id AS id,
+          f.url AS url,
+          f.timedate AS date,
+          f.description AS description,
+          f.author AS author,
+          f.parent AS parent,
+          f.root AS root,
+
+          u.name AS name,
+          md5(u.email) AS email_digest
+
+        FROM
+          feeds AS f,
+          users AS u
+
+        WHERE
+          f.author = u.id
+          AND
+          (f.parent IS NULL OR f.root IS NULL)
+
+        GROUP BY
+          f.id,
+          f.url,
+          f.timedate,
+          f.description,
+          f.author,
+          f.parent,
+          f.root,
+          u.name,
+          u.email
+
+        ORDER BY
+          f.id DESC
+      ) AS f
+      LEFT OUTER JOIN
+      feeds_tags AS t
+      ON
+        f.id = t.id_feed
+
+    GROUP BY
+      f.id,
+      f.url,
+      f.date,
+      f.description,
+      f.author,
+      f.parent,
+      f.root,
+      f.name,
+      f.email_digest
+
+    ORDER BY
+      f.id DESC
+    ) AS f
+    LEFT OUTER JOIN
+    votes AS v
+    ON
+      f.id = v.id_feed
+
+  GROUP BY
+    f.id,
+    f.url,
+    f.date,
+    f.description,
+    f.author,
+    f.parent,
+    f.root,
+    f.name,
+    f.email_digest,
+    f.tags
+
+  ORDER BY
+    f.id DESC
+  ) AS f
+  LEFT OUTER JOIN
+  feeds AS g
+  ON
+    f.id = g.root
+
+
+GROUP BY
+  f.id,
+  f.url,
+  f.date,
+  f.description,
+  f.author,
+  f.parent,
+  f.root,
+  f.name,
+  f.email_digest,
+  f.tags,
+  f.score
+
+ORDER BY
+  f.id DESC
+
+LIMIT $limit
+OFFSET $offset
+")
   | None ->
-      Db.view
-        (<:view<
-     union
-       (group {
-          email_digest = md5[u.email];
-          score = cast null as integer;
-          tags = cast null as string_array;
-          id_feed_of_votes = cast null as integer;
-          id_user_of_votes = cast null as integer;
-          id_feed_of_tags = cast null as integer;
-        }
-        by {
-          f.id;
-          f.url;
-          f.description;
-          f.timedate;
-          f.author;
-          f.parent;
-          f.root;
-          u.name;
-          u.email;
-        } order by f.id desc
-        | f in $Db_table.feeds$; $feeds_filter$ f;
-          u in $Db_table.users$; $users_filter$ f u;
-          f.author = u.id;
-       )
-       (group {
-          email_digest = md5[u.email];
-          score = sum[v.score];
-          tags = cast null as string_array;
-          id_feed_of_tags = cast null as integer;
-        }
-        by {
-          f.id;
-          f.url;
-          f.description;
-          f.timedate;
-          f.author;
-          f.parent;
-          f.root;
-          u.name;
-          u.email;
-          id_feed_of_votes = nullable v.id_feed;
-          id_user_of_votes = nullable v.id_user;
-        } order by f.id desc
-        | f in $Db_table.feeds$; $feeds_filter$ f;
-          u in $Db_table.users$; $users_filter$ f u;
-          v in $Db_table.votes$;
-          f.author = u.id;
-          f.id = v.id_feed;
-       )
-       (group {
-          email_digest = md5[u.email];
-          tags = array_agg[t.tag];
-          score = cast null as integer;
-          id_feed_of_votes = cast null as integer;
-          id_user_of_votes = cast null as integer;
-        }
-        by {
-          f.id;
-          f.url;
-          f.description;
-          f.timedate;
-          f.author;
-          f.parent;
-          f.root;
-          u.name;
-          u.email;
-          id_feed_of_tags = nullable t.id_feed;
-        } order by f.id desc
-        | f in $Db_table.feeds$; $feeds_filter$ f;
-          u in $Db_table.users$; $users_filter$ f u;
-          t in $Db_table.feeds_tags$;
-          f.author = u.id;
-          f.id = t.id_feed;
-       )
-         >>)
-  end
+  Lwt.return (PGSQL(dbh) "user=cumulus" "password=h"
+    "
+SELECT
+  f.id AS id,
+  f.url AS url,
+  f.date AS date,
+  f.description AS description,
+  f.author AS author,
+  f.parent AS parent,
+  f.root AS root,
+  f.name AS name,
+  f.email_digest AS email_digest,
+  f.tags AS tags,
+  f.score AS score,
+
+  COUNT(g.root) AS c
+
+FROM
+ (SELECT
+    sum(v.score) AS score,
+
+    f.id AS id,
+    f.url AS url,
+    f.date AS date,
+    f.description AS description,
+    f.author AS author,
+    f.parent AS parent,
+    f.root AS root,
+    f.name AS name,
+    f.email_digest AS email_digest,
+    f.tags AS tags
+
+  FROM
+    (SELECT
+       array_agg(t.tag) AS tags,
+
+       f.id AS id,
+       f.url AS url,
+       f.date AS date,
+       f.description AS description,
+       f.author AS author,
+       f.parent AS parent,
+       f.root AS root,
+       f.name AS name,
+       f.email_digest AS email_digest
+
+     FROM
+       (SELECT
+          f.id AS id,
+          f.url AS url,
+          f.timedate AS date,
+          f.description AS description,
+          f.author AS author,
+          f.parent AS parent,
+          f.root AS root,
+
+          u.name AS name,
+          md5(u.email) AS email_digest
+
+        FROM
+          feeds AS f,
+          users AS u
+
+        WHERE
+          f.author = u.id
+          AND
+          (f.parent IS NULL OR f.root IS NULL)
+
+        GROUP BY
+          f.id,
+          f.url,
+          f.timedate,
+          f.description,
+          f.author,
+          f.parent,
+          f.root,
+          u.name,
+          u.email
+
+        ORDER BY
+          f.id DESC
+      ) AS f
+      LEFT OUTER JOIN
+      feeds_tags AS t
+      ON
+        f.id = t.id_feed
+
+    GROUP BY
+      f.id,
+      f.url,
+      f.date,
+      f.description,
+      f.author,
+      f.parent,
+      f.root,
+      f.name,
+      f.email_digest
+
+    ORDER BY
+      f.id DESC
+    ) AS f
+    LEFT OUTER JOIN
+    votes AS v
+    ON
+      f.id = v.id_feed
+
+  GROUP BY
+    f.id,
+    f.url,
+    f.date,
+    f.description,
+    f.author,
+    f.parent,
+    f.root,
+    f.name,
+    f.email_digest,
+    f.tags
+
+  ORDER BY
+    f.id DESC
+  ) AS f
+  LEFT OUTER JOIN
+  feeds AS g
+  ON
+    f.id = g.root
+
+
+GROUP BY
+  f.id,
+  f.url,
+  f.date,
+  f.description,
+  f.author,
+  f.parent,
+  f.root,
+  f.name,
+  f.email_digest,
+  f.tags,
+  f.score
+
+ORDER BY
+  f.id DESC
+")
+end
   >>= fun feeds ->
-  Db.view
-    (<:view<
-      group { c = count[f.root] } by { f.root }
-      | f in $Db_table.feeds$;
-      is_not_null f.root;
-      is_not_null f.parent;
-      (match f.root with
-       | null -> false
-       | root -> in' root $List.map (fun x -> x#id) feeds$
-      )
-    >>)
-  >>= fun count ->
-  match user with
-    | Some user_id ->
+  begin match user with
+  | Some user_id ->
       Db.view
         (<:view< {
           f.id_feed;
         } | f in $Db_table.favs$;
-        f.id_user = $int32:user_id$ && in' f.id_feed $List.map (fun x -> x#id) feeds$
+        f.id_user = $int32:user_id$ && in' f.id_feed $List.map (fun (id, _, _, _, _, _, _, _, _, _, _, _) -> Sql.Value.int32 id) feeds$
         >>)
-      >|= fun favs ->
-      (feeds, count, favs)
-    | None ->
-      Lwt.return (feeds, count, [])
-
-let reduce ~user (feeds, count, favs) =
-  let module Map = Map.Make(Int32) in
-  let new_object o =
-    let find l =
-      List.Exceptionless.find (fun x -> Int32.equal x#!id_feed o#!id) l
-    in
-    { author = o#!author
-    ; id = o#!id
-    ; date = o#!timedate
-    ; description = o#!description
-    ; url = o#?url
-    ; parent = o#?parent
-    ; root = o#?root
-    ; tags = Option.map_default Array.to_list [] o#?tags
-    ; score = Option.map_default Int32.to_int 0 o#?score
-    ; user = object method name = o#!name method email_digest = o#!email_digest end
-    ; fav = List.exists (fun e -> e#!id_feed = o#!id) favs
-    ; vote = Option.map_default (fun user -> Int32.to_int (Option.default 0l (List.Exceptionless.find_map (fun e -> if e#?id_feed_of_votes = Some o#!id && e#?id_user_of_votes = Some user then e#?score else None) feeds))) 0 user
-    ; count =
-      try Int64.to_int (List.find (fun e -> match e#?root with Some x -> Int32.equal x o#!id | None -> false) count)#!c
-      with _ -> 0
+  | None ->
+      Lwt.return []
+  end
+  >>= fun favs ->
+  let new_object (id, url, date, description, author, parent, root, name', email_digest', tags, score, count) =
+    { author
+    ; id
+    ; date
+    ; description
+    ; url
+    ; parent
+    ; root
+    ; tags = Option.map_default Array.to_list [] tags
+    ; score = Option.map_default Int64.to_int 0 score
+    ; user = object method name = name' method email_digest = Option.get email_digest' end
+    ; fav = List.exists (fun e -> e#!id_feed = id) favs
+    ; vote = 0(*Option.map_default (fun user -> Int32.to_int (Option.default 0l (List.Exceptionless.find_map (fun e -> if e#?id_feed_of_votes = Some id && e#?id_user_of_votes = Some user then e#?score else None) feeds))) 0 user*)
+    ; count = Option.map_default Int64.to_int 0 count
     }
   in
-  let merge map x =
-    let update_tags ~tags ~id_feed x = object
-      method author = x#author
-      method description = x#description
-      method email = x#email
-      method email_digest = x#email_digest
-      method id = x#id
-      method id_feed_of_tags = id_feed
-      method id_feed_of_votes = x#id_feed_of_votes
-      method id_user_of_votes = x#id_user_of_votes
-      method name = x#name
-      method parent = x#parent
-      method root = x#root
-      method score = x#score
-      method tags = tags
-      method timedate = x#timedate
-      method url = x#url
-    end in
-    let update_votes ~score ~id_feed ~id_user x = object
-      method author = x#author
-      method description = x#description
-      method email = x#email
-      method email_digest = x#email_digest
-      method id = x#id
-      method id_feed_of_tags = x#id_feed_of_tags
-      method id_feed_of_votes = id_feed
-      method id_user_of_votes = id_user
-      method name = x#name
-      method parent = x#parent
-      method root = x#root
-      method score = score
-      method tags = x#tags
-      method timedate = x#timedate
-      method url = x#url
-    end in
-    match Map.Exceptionless.find x#!id map with
-    | None -> Map.add x#!id x map
-    | Some old ->
-        let old = match old#?id_feed_of_tags, x#?id_feed_of_tags, old#?tags, x#?tags with
-          | None, Some _,
-            None, Some _ -> update_tags ~tags:x#tags ~id_feed:x#id_feed_of_tags old
-          | _ -> old
-        in
-        let old = match old#?id_feed_of_votes, x#?id_feed_of_votes, old#?id_user_of_votes, x#?id_user_of_votes, old#?score, x#?score with
-          | None, Some _,
-            None, Some _,
-            None, Some _ -> update_votes ~score:x#score ~id_feed:x#id_feed_of_votes ~id_user:x#id_user_of_votes old
-          | _ -> old
-        in
-        Map.add x#!id old map
-  in
-  Lwt.return (Map.fold (fun _ -> List.cons) (Map.map new_object (List.fold_left merge Map.empty feeds)) [])
+  Lwt.return (List.map new_object feeds)
 
 let rec get_tree_feeds feed_id ~starting ~number ~user () =
   let feeds_filter f = (<:value< f.parent = $int32:feed_id$ >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~users_filter ~user ()
-  >>= reduce ~user >>= (fun feeds ->
+  >>= (fun feeds ->
     Lwt_list.fold_left_s
       (fun acc feed -> get_tree_feeds feed.id ~starting ~number ~user () >>=
       (fun child -> Lwt.return (acc @ child))
@@ -328,25 +405,21 @@ let get_links_feeds ~starting ~number ~user () =
   let feeds_filter f = (<:value< is_not_null f.url >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~users_filter ~user ()
-  >>= reduce ~user
 
 let get_comments_feeds ~starting ~number ~user () =
   let feeds_filter f = (<:value< is_null f.url >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~users_filter ~user ()
-  >>= reduce ~user
 
 let get_root_feeds ~starting ~number ~user () =
   let feeds_filter f = (<:value< is_null f.root || is_null f.parent >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~users_filter ~user ()
-  >>= reduce ~user
 
 let get_feeds ~starting ~number ~user () =
   let feeds_filter _ = (<:value< true >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~users_filter ~user ()
-  >>= reduce ~user
 
 (* HIT *)
 
@@ -354,7 +427,6 @@ let get_feeds_with_author author ~starting ~number ~user () =
   let feeds_filter _ = (<:value< true >>) in
   let users_filter _ u = (<:value< u.name = $string:author$ >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~users_filter ~user ()
-  >>= reduce ~user
 
 let get_feeds_with_tag tag ~starting ~number ~user () =
   Db.view
@@ -363,20 +435,17 @@ let get_feeds_with_tag tag ~starting ~number ~user () =
   let feeds_filter f = (<:value< in' f.id $List.map (fun x -> x#id_feed) ids$ >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~users_filter ~user ()
-  >>= reduce ~user
 
 let get_feed_with_url ~user url =
   let feeds_filter f = (<:value< f.url = $string:url$ >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~users_filter ~user ()
-  >>= reduce ~user
   >>= (function | [] -> Lwt.return None | x :: _ -> Lwt.return (Some x))
 
 let get_feed_with_id ~user id =
   let feeds_filter f = (<:value< f.id = $int32:id$ >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~users_filter ~user ()
-  >>= reduce ~user
   >|= (function [x] -> x | _ -> assert false)
 
 let get_comments ~user root =
@@ -384,13 +453,11 @@ let get_comments ~user root =
     (<:value< f.root = $int32:root$ || f.parent = $int32:root$ >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~users_filter ~user ()
-  >>= reduce ~user
 
 let get_root ~feedid ~user () =
   let feeds_filter f = (<:value< f.id = $int32:feedid$ >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~users_filter ~user ()
-  >>= reduce ~user
   >>= (function | [] -> Lwt.return None | x :: _ -> Lwt.return (Some x))
 
 
@@ -427,7 +494,6 @@ let get_fav_aux ~starting ~number ~feeds_filter ~user () =
     (<:value< in' f.id $List.map (fun x -> x#id_feed) favs$ >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~users_filter ~user ()
-  >>= reduce ~user
 
 let get_fav_with_username name ~starting ~number ~user () =
   Db_user.get_user_id_with_name name >>= fun author ->

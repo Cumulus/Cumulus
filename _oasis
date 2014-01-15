@@ -68,6 +68,7 @@ Library db
     eliom.server (>= 3.0.3),
     batteries (>= 2.0),
     macaque.syntax (>= 0.6),
+    pgocaml.syntax,
     batteries (>= 2.0),
     camomile,
     pgocaml (>= 1.7),
