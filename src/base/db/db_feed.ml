@@ -48,6 +48,12 @@ type feed_generator =
   unit ->
   feeds Lwt.t
 
+module Lwt_thread = struct
+  include Lwt
+  include Lwt_chan
+end
+module PGOCaml = PGOCaml_generic.Make(Lwt_thread)
+
 let connect =
   let open Db_config in
   PGOCaml.connect
@@ -63,12 +69,10 @@ let get_feeds_aux ?range
   ~users_filter
   ~user
   () =
-  let dbh = connect () in
-  begin match range with
-  | Some (limit, offset) ->
-      let limit = Int64.of_int32 limit in
-      let offset = Int64.of_int32 offset in
-  Lwt.return (PGSQL(dbh) "user=cumulus" "password=h"
+  connect () >>= fun dbh ->
+  let limit, offset = Option.map_default (fun (x, y) -> Int64.of_int32 x, Int64.of_int32 y) (999999L, 0L) range in
+  let user = Option.default (-1l) user in
+  PGSQL(dbh) "nullable-results" "user=cumulus" "password=h"
     "
 SELECT
   f.id AS id,
@@ -82,121 +86,200 @@ SELECT
   f.email_digest AS email_digest,
   f.tags AS tags,
   f.score AS score,
+  f.c as c,
+  f.fav as fav,
 
-  COUNT(g.root) AS c
+  v.score AS vote
 
 FROM
- (SELECT
-    sum(v.score) AS score,
+  (SELECT
+     f.id AS id,
+     f.url AS url,
+     f.date AS date,
+     f.description AS description,
+     f.author AS author,
+     f.parent AS parent,
+     f.root AS root,
+     f.name AS name,
+     f.email_digest AS email_digest,
+     f.tags AS tags,
+     f.score AS score,
+     f.c as c,
 
-    f.id AS id,
-    f.url AS url,
-    f.date AS date,
-    f.description AS description,
-    f.author AS author,
-    f.parent AS parent,
-    f.root AS root,
-    f.name AS name,
-    f.email_digest AS email_digest,
-    f.tags AS tags
-
-  FROM
-    (SELECT
-       array_agg(t.tag) AS tags,
-
-       f.id AS id,
-       f.url AS url,
-       f.date AS date,
-       f.description AS description,
-       f.author AS author,
-       f.parent AS parent,
-       f.root AS root,
-       f.name AS name,
-       f.email_digest AS email_digest
+     (CASE g.id_user WHEN 20 THEN TRUE ELSE FALSE END) AS fav
 
      FROM
        (SELECT
           f.id AS id,
           f.url AS url,
-          f.timedate AS date,
+          f.date AS date,
           f.description AS description,
           f.author AS author,
           f.parent AS parent,
           f.root AS root,
+          f.name AS name,
+          f.email_digest AS email_digest,
+          f.tags AS tags,
+          f.score AS score,
 
-          u.name AS name,
-          md5(u.email) AS email_digest
+          COUNT(g.root) AS c
 
-        FROM
-          feeds AS f,
-          users AS u
+          FROM
+            (SELECT
+               sum(v.score) AS score,
 
-        WHERE
-          f.author = u.id
-          AND
-          (f.parent IS NULL OR f.root IS NULL)
+               f.id AS id,
+               f.url AS url,
+               f.date AS date,
+               f.description AS description,
+               f.author AS author,
+               f.parent AS parent,
+               f.root AS root,
+               f.name AS name,
+               f.email_digest AS email_digest,
+               f.tags AS tags
 
-        GROUP BY
-          f.id,
-          f.url,
-          f.timedate,
-          f.description,
-          f.author,
-          f.parent,
-          f.root,
-          u.name,
-          u.email
+               FROM
+                 (SELECT
+                    array_agg(t.tag) AS tags,
 
-        ORDER BY
-          f.id DESC
+                    f.id AS id,
+                    f.url AS url,
+                    f.date AS date,
+                    f.description AS description,
+                    f.author AS author,
+                    f.parent AS parent,
+                    f.root AS root,
+                    f.name AS name,
+                    f.email_digest AS email_digest
 
-        LIMIT $limit
-        OFFSET $offset
-      ) AS f
-      LEFT OUTER JOIN
-      feeds_tags AS t
-      ON
-        f.id = t.id_feed
+                    FROM
+                      (SELECT
+                         f.id AS id,
+                         f.url AS url,
+                         f.timedate AS date,
+                         f.description AS description,
+                         f.author AS author,
+                         f.parent AS parent,
+                         f.root AS root,
 
-    GROUP BY
-      f.id,
-      f.url,
-      f.date,
-      f.description,
-      f.author,
-      f.parent,
-      f.root,
-      f.name,
-      f.email_digest
+                         u.name AS name,
+                         md5(u.email) AS email_digest
 
-    ORDER BY
-      f.id DESC
-    ) AS f
-    LEFT OUTER JOIN
-    votes AS v
-    ON
-      f.id = v.id_feed
+                         FROM
+                           feeds AS f,
+                           users AS u
 
-  GROUP BY
-    f.id,
-    f.url,
-    f.date,
-    f.description,
-    f.author,
-    f.parent,
-    f.root,
-    f.name,
-    f.email_digest,
-    f.tags
+                         WHERE
+                           f.author = u.id
+                           AND
+                           f.root IS NULL
 
-  ORDER BY
-    f.id DESC
+                         GROUP BY
+                           f.id,
+                           f.url,
+                           f.timedate,
+                           f.description,
+                           f.author,
+                           f.parent,
+                           f.root,
+                           u.name,
+                           u.email
+
+                         ORDER BY
+                           f.id DESC
+                      ) AS f
+                      LEFT OUTER JOIN
+                      feeds_tags AS t
+                      ON
+                        f.id = t.id_feed
+
+                    GROUP BY
+                      f.id,
+                      f.url,
+                      f.date,
+                      f.description,
+                      f.author,
+                      f.parent,
+                      f.root,
+                      f.name,
+                      f.email_digest
+
+                    ORDER BY
+                      f.id DESC
+                 ) AS f
+                 LEFT OUTER JOIN
+                 votes AS v
+                 ON
+                   f.id = v.id_feed
+
+               GROUP BY
+                 f.id,
+                 f.url,
+                 f.date,
+                 f.description,
+                 f.author,
+                 f.parent,
+                 f.root,
+                 f.name,
+                 f.email_digest,
+                 f.tags
+
+               ORDER BY
+                 f.id DESC
+            ) AS f
+            LEFT OUTER JOIN
+            feeds AS g
+            ON
+              f.id = g.root
+
+          GROUP BY
+            f.id,
+            f.url,
+            f.date,
+            f.description,
+            f.author,
+            f.parent,
+            f.root,
+            f.name,
+            f.email_digest,
+            f.tags,
+            f.score
+
+          ORDER BY
+            f.id DESC
+       ) AS f
+       LEFT OUTER JOIN
+       favs AS g
+       ON
+         f.id = g.id_feed
+         AND
+         g.id_user = $user
+
+     GROUP BY
+       f.id,
+       f.url,
+       f.date,
+       f.description,
+       f.author,
+       f.parent,
+       f.root,
+       f.name,
+       f.email_digest,
+       f.tags,
+       f.score,
+       f.c,
+       g.id_user
+
+     ORDER BY
+       f.id DESC
   ) AS f
   LEFT OUTER JOIN
-  feeds AS g
+  votes AS v
   ON
-    f.id = g.root
-
+    f.id = v.id_feed
+    AND
+    v.id_user = $user
 
 GROUP BY
   f.id,
@@ -209,170 +292,25 @@ GROUP BY
   f.name,
   f.email_digest,
   f.tags,
-  f.score
+  f.score,
+  f.c,
+  f.fav,
+  v.score
 
 ORDER BY
   f.id DESC
-")
-  | None ->
-  Lwt.return (PGSQL(dbh) "user=cumulus" "password=h"
-    "
-SELECT
-  f.id AS id,
-  f.url AS url,
-  f.date AS date,
-  f.description AS description,
-  f.author AS author,
-  f.parent AS parent,
-  f.root AS root,
-  f.name AS name,
-  f.email_digest AS email_digest,
-  f.tags AS tags,
-  f.score AS score,
 
-  COUNT(g.root) AS c
-
-FROM
- (SELECT
-    sum(v.score) AS score,
-
-    f.id AS id,
-    f.url AS url,
-    f.date AS date,
-    f.description AS description,
-    f.author AS author,
-    f.parent AS parent,
-    f.root AS root,
-    f.name AS name,
-    f.email_digest AS email_digest,
-    f.tags AS tags
-
-  FROM
-    (SELECT
-       array_agg(t.tag) AS tags,
-
-       f.id AS id,
-       f.url AS url,
-       f.date AS date,
-       f.description AS description,
-       f.author AS author,
-       f.parent AS parent,
-       f.root AS root,
-       f.name AS name,
-       f.email_digest AS email_digest
-
-     FROM
-       (SELECT
-          f.id AS id,
-          f.url AS url,
-          f.timedate AS date,
-          f.description AS description,
-          f.author AS author,
-          f.parent AS parent,
-          f.root AS root,
-
-          u.name AS name,
-          md5(u.email) AS email_digest
-
-        FROM
-          feeds AS f,
-          users AS u
-
-        WHERE
-          f.author = u.id
-          AND
-          (f.parent IS NULL OR f.root IS NULL)
-
-        GROUP BY
-          f.id,
-          f.url,
-          f.timedate,
-          f.description,
-          f.author,
-          f.parent,
-          f.root,
-          u.name,
-          u.email
-
-        ORDER BY
-          f.id DESC
-      ) AS f
-      LEFT OUTER JOIN
-      feeds_tags AS t
-      ON
-        f.id = t.id_feed
-
-    GROUP BY
-      f.id,
-      f.url,
-      f.date,
-      f.description,
-      f.author,
-      f.parent,
-      f.root,
-      f.name,
-      f.email_digest
-
-    ORDER BY
-      f.id DESC
-    ) AS f
-    LEFT OUTER JOIN
-    votes AS v
-    ON
-      f.id = v.id_feed
-
-  GROUP BY
-    f.id,
-    f.url,
-    f.date,
-    f.description,
-    f.author,
-    f.parent,
-    f.root,
-    f.name,
-    f.email_digest,
-    f.tags
-
-  ORDER BY
-    f.id DESC
-  ) AS f
-  LEFT OUTER JOIN
-  feeds AS g
-  ON
-    f.id = g.root
-
-
-GROUP BY
-  f.id,
-  f.url,
-  f.date,
-  f.description,
-  f.author,
-  f.parent,
-  f.root,
-  f.name,
-  f.email_digest,
-  f.tags,
-  f.score
-
-ORDER BY
-  f.id DESC
-")
-end
+LIMIT $limit
+OFFSET $offset
+"
   >>= fun feeds ->
-  begin match user with
-  | Some user_id ->
-      Db.view
-        (<:view< {
-          f.id_feed;
-        } | f in $Db_table.favs$;
-        f.id_user = $int32:user_id$ && in' f.id_feed $List.map (fun (id, _, _, _, _, _, _, _, _, _, _, _) -> Sql.Value.int32 id) feeds$
-        >>)
-  | None ->
-      Lwt.return []
-  end
-  >>= fun favs ->
-  let new_object (id, url, date, description, author, parent, root, name', email_digest', tags, score, count) =
+  let new_object (id, url, date, description, author, parent, root, name', email_digest', tags, score, count, fav, vote) =
+    let id = Option.get id in
+    let date = Option.get date in
+    let description = Option.get description in
+    let author = Option.get author in
+    let name' = Option.get name' in
+    let email_digest' = Option.get email_digest' in
     { author
     ; id
     ; date
@@ -382,9 +320,9 @@ end
     ; root
     ; tags = Option.map_default Array.to_list [] tags
     ; score = Option.map_default Int64.to_int 0 score
-    ; user = object method name = name' method email_digest = Option.get email_digest' end
-    ; fav = List.exists (fun e -> e#!id_feed = id) favs
-    ; vote = 0(*Option.map_default (fun user -> Int32.to_int (Option.default 0l (List.Exceptionless.find_map (fun e -> if e#?id_feed_of_votes = Some id && e#?id_user_of_votes = Some user then e#?score else None) feeds))) 0 user*)
+    ; user = object method name = name' method email_digest = email_digest' end
+    ; fav = Option.default false fav
+    ; vote = Option.map_default Int32.to_int 0 vote
     ; count = Option.map_default Int64.to_int 0 count
     }
   in
