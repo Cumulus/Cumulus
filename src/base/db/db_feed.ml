@@ -162,16 +162,10 @@ let get_feeds_aux ?range
   in
   Lwt.return (List.map new_object feeds)
 
-let rec get_tree_feeds feed_id ~starting ~number ~user () =
-  let feeds_filter f = (<:value< f.parent = $int32:feed_id$ >>) in
+let get_tree_feeds feed_id ~starting ~number ~user () =
+  let feeds_filter f = (<:value< f.root = $int32:feed_id$ >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~range:(number, starting) ~feeds_filter ~users_filter ~user ()
-  >>= (fun feeds ->
-    Lwt_list.fold_left_s
-      (fun acc feed -> get_tree_feeds feed.id ~starting ~number ~user () >>=
-      (fun child -> Lwt.return (acc @ child))
-      ) feeds feeds (* rajoute les feeds enfants après les feeds parent *)
-  )
 
 let get_links_feeds ~starting ~number ~user () =
   let feeds_filter f = (<:value< is_not_null f.url >>) in
