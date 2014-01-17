@@ -42,6 +42,11 @@ STATIC_DIR = data
 $(STATIC_DIR):
 	mkdir -p $(STATIC_DIR)
 
-run: $(STATIC_DIR)
+run.common: $(STATIC_DIR)
 	cp _build/src/client/cumulus.js $(STATIC_DIR)
+
+run: run.common
 	ocsigenserver -c ocsigenserver.conf -v
+
+run.opt: run.common
+	ocsigenserver.opt -c ocsigenserver.opt.conf -v
