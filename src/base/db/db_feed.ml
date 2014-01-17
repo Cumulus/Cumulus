@@ -56,15 +56,8 @@ let get_feeds_aux ?range
   begin match range with
   | Some (limit, offset) ->
       Db.view
-        (<:view<
-     union
-       (group {
+        (<:view< group {
           email_digest = md5[u.email];
-          score = cast null as integer;
-          tags = cast null as string_array;
-          id_feed_of_votes = cast null as integer;
-          id_user_of_votes = cast null as integer;
-          id_feed_of_tags = cast null as integer;
         }
         by {
           f.id;
@@ -80,69 +73,11 @@ let get_feeds_aux ?range
         | f in $Db_table.feeds$; $feeds_filter$ f;
           u in $Db_table.users$; $users_filter$ f u;
           f.author = u.id;
-       )
-       (group {
-          email_digest = md5[u.email];
-          score = sum[v.score];
-          tags = cast null as string_array;
-          id_feed_of_tags = cast null as integer;
-        }
-        by {
-          f.id;
-          f.url;
-          f.description;
-          f.timedate;
-          f.author;
-          f.parent;
-          f.root;
-          u.name;
-          u.email;
-          id_feed_of_votes = nullable v.id_feed;
-          id_user_of_votes = nullable v.id_user;
-        } order by f.id desc limit $int32:limit$ offset $int32:offset$
-        | f in $Db_table.feeds$; $feeds_filter$ f;
-          u in $Db_table.users$; $users_filter$ f u;
-          v in $Db_table.votes$;
-          f.author = u.id;
-          f.id = v.id_feed;
-       )
-       (group {
-          email_digest = md5[u.email];
-          tags = array_agg[t.tag];
-          score = cast null as integer;
-          id_feed_of_votes = cast null as integer;
-          id_user_of_votes = cast null as integer;
-        }
-        by {
-          f.id;
-          f.url;
-          f.description;
-          f.timedate;
-          f.author;
-          f.parent;
-          f.root;
-          u.name;
-          u.email;
-          id_feed_of_tags = nullable t.id_feed;
-        } order by f.id desc limit $int32:limit$ offset $int32:offset$
-        | f in $Db_table.feeds$; $feeds_filter$ f;
-          u in $Db_table.users$; $users_filter$ f u;
-          t in $Db_table.feeds_tags$;
-          f.author = u.id;
-          f.id = t.id_feed;
-       )
-         >>)
+        >>)
   | None ->
       Db.view
-        (<:view<
-     union
-       (group {
+        (<:view< group {
           email_digest = md5[u.email];
-          score = cast null as integer;
-          tags = cast null as string_array;
-          id_feed_of_votes = cast null as integer;
-          id_user_of_votes = cast null as integer;
-          id_feed_of_tags = cast null as integer;
         }
         by {
           f.id;
@@ -158,155 +93,74 @@ let get_feeds_aux ?range
         | f in $Db_table.feeds$; $feeds_filter$ f;
           u in $Db_table.users$; $users_filter$ f u;
           f.author = u.id;
-       )
-       (group {
-          email_digest = md5[u.email];
-          score = sum[v.score];
-          tags = cast null as string_array;
-          id_feed_of_tags = cast null as integer;
-        }
-        by {
-          f.id;
-          f.url;
-          f.description;
-          f.timedate;
-          f.author;
-          f.parent;
-          f.root;
-          u.name;
-          u.email;
-          id_feed_of_votes = nullable v.id_feed;
-          id_user_of_votes = nullable v.id_user;
-        } order by f.id desc
-        | f in $Db_table.feeds$; $feeds_filter$ f;
-          u in $Db_table.users$; $users_filter$ f u;
-          v in $Db_table.votes$;
-          f.author = u.id;
-          f.id = v.id_feed;
-       )
-       (group {
-          email_digest = md5[u.email];
-          tags = array_agg[t.tag];
-          score = cast null as integer;
-          id_feed_of_votes = cast null as integer;
-          id_user_of_votes = cast null as integer;
-        }
-        by {
-          f.id;
-          f.url;
-          f.description;
-          f.timedate;
-          f.author;
-          f.parent;
-          f.root;
-          u.name;
-          u.email;
-          id_feed_of_tags = nullable t.id_feed;
-        } order by f.id desc
-        | f in $Db_table.feeds$; $feeds_filter$ f;
-          u in $Db_table.users$; $users_filter$ f u;
-          t in $Db_table.feeds_tags$;
-          f.author = u.id;
-          f.id = t.id_feed;
-       )
-         >>)
+        >>)
   end
   >>= fun feeds ->
+  let ids = List.map (fun x -> x#id) feeds in
+  Db.view
+    (<:view<
+      group {
+        tags = match array_agg[t.tag] with null -> $string_array:[||]$ | x -> x;
+      }
+      by { t.id_feed }
+      | t in $Db_table.feeds_tags$;
+      in' t.id_feed $ids$
+    >>)
+  >>= fun tags ->
   Db.view
     (<:view<
       group { c = count[f.root] } by { f.root }
       | f in $Db_table.feeds$;
-      is_not_null f.root;
-      is_not_null f.parent;
       (match f.root with
        | null -> false
-       | root -> in' root $List.map (fun x -> x#id) feeds$
+       | root -> in' root $ids$
       )
     >>)
   >>= fun count ->
+  Db.view
+    (<:view< {
+            f.id_feed;
+            f.id_user;
+            f.score;
+            } | f in $Db_table.votes$;
+            in' f.id_feed $ids$
+     >>)
+  >>= fun votes ->
   begin match user with
     | Some user_id ->
-      Db.view
-        (<:view< {
-          f.id_feed;
-        } | f in $Db_table.favs$;
-        f.id_user = $int32:user_id$ && in' f.id_feed $List.map (fun x -> x#id) feeds$
-        >>)
+        Db.view
+          (<:view< {
+                  f.id_feed;
+                  } | f in $Db_table.favs$;
+                  f.id_user = $int32:user_id$; in' f.id_feed $ids$
+           >>)
+        >|= fun favs ->
+        (favs, List.filter (fun x -> Int32.equal x#!id_user user_id) votes)
     | None ->
-      Lwt.return []
+      Lwt.return ([], [])
   end
-  >>= fun favs ->
-  let module Map = Map.Make(Int32) in
+  >>= fun (favs, user_votes) ->
+  let favs = List.map (fun x -> x#!id_feed) favs in
   let new_object o =
+    let id = o#!id in
     { author = o#!author
-    ; id = o#!id
+    ; id
     ; date = o#!timedate
     ; description = o#!description
     ; url = o#?url
     ; parent = o#?parent
     ; root = o#?root
-    ; tags = Option.map_default Array.to_list [] o#?tags
-    ; score = Option.map_default Int32.to_int 0 o#?score
+    ; tags = Option.map_default (fun x -> Array.to_list x#!tags) [] (List.Exceptionless.find (fun x -> Int32.equal x#!id_feed id) tags)
+    ; score = List.fold_left (fun acc x -> if Int32.equal x#!id_feed id then acc + Int32.to_int x#!score else acc) 0 votes
     ; user = object method name = o#!name method email_digest = o#!email_digest end
-    ; fav = List.exists (fun e -> e#!id_feed = o#!id) favs
-    ; vote = Option.map_default (fun user -> Int32.to_int (Option.default 0l (List.Exceptionless.find_map (fun e -> if e#?id_feed_of_votes = Some o#!id && e#?id_user_of_votes = Some user then e#?score else None) feeds))) 0 user
+    ; fav = List.exists (Int32.equal id) favs
+    ; vote = Option.map_default (fun x -> Int32.to_int x#!score) 0 (List.Exceptionless.find (fun x -> Int32.equal x#!id_feed id) user_votes)
     ; count =
       try Int64.to_int (List.find (fun e -> match e#?root with Some x -> Int32.equal x o#!id | None -> false) count)#!c
       with _ -> 0
     }
   in
-  let merge map x =
-    let update_tags ~tags ~id_feed x = object
-      method author = x#author
-      method description = x#description
-      method email = x#email
-      method email_digest = x#email_digest
-      method id = x#id
-      method id_feed_of_tags = id_feed
-      method id_feed_of_votes = x#id_feed_of_votes
-      method id_user_of_votes = x#id_user_of_votes
-      method name = x#name
-      method parent = x#parent
-      method root = x#root
-      method score = x#score
-      method tags = tags
-      method timedate = x#timedate
-      method url = x#url
-    end in
-    let update_votes ~score ~id_feed ~id_user x = object
-      method author = x#author
-      method description = x#description
-      method email = x#email
-      method email_digest = x#email_digest
-      method id = x#id
-      method id_feed_of_tags = x#id_feed_of_tags
-      method id_feed_of_votes = id_feed
-      method id_user_of_votes = id_user
-      method name = x#name
-      method parent = x#parent
-      method root = x#root
-      method score = score
-      method tags = x#tags
-      method timedate = x#timedate
-      method url = x#url
-    end in
-    match Map.Exceptionless.find x#!id map with
-    | None -> Map.add x#!id x map
-    | Some old ->
-        let old = match old#?id_feed_of_tags, x#?id_feed_of_tags, old#?tags, x#?tags with
-          | None, Some _,
-            None, Some _ -> update_tags ~tags:x#tags ~id_feed:x#id_feed_of_tags old
-          | _ -> old
-        in
-        let old = match old#?id_feed_of_votes, x#?id_feed_of_votes, old#?id_user_of_votes, x#?id_user_of_votes, old#?score, x#?score with
-          | None, Some _,
-            None, Some _,
-            None, Some _ -> update_votes ~score:x#score ~id_feed:x#id_feed_of_votes ~id_user:x#id_user_of_votes old
-          | _ -> old
-        in
-        Map.add x#!id old map
-  in
-  Lwt.return (Map.fold (fun _ -> List.cons) (Map.map new_object (List.fold_left merge Map.empty feeds)) [])
+  Lwt.return (List.map new_object feeds)
 
 let rec get_tree_feeds feed_id ~starting ~number ~user () =
   let feeds_filter f = (<:value< f.parent = $int32:feed_id$ >>) in
