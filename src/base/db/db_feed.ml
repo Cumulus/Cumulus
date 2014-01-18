@@ -317,19 +317,6 @@ let delete_feed ~feedid () =
   Db.query
     (<:delete< f in $Db_table.feeds$ | f.id = $int32:feedid$ >>)
 
-let count_fav_aux ~filter () =
-  Db.view_one
-    (<:view< group {
-            n = count[f];
-            } | f in $Db_table.favs$;
-            $filter$ f;
-     >>)
-
-let count_fav_with_username name =
-  Db_user.get_user_id_with_name name >>= fun author ->
-  let filter f = (<:value< f.id_user = $author$ >>) in
-  count_fav_aux ~filter ()
-
 let add_fav ~feedid ~userid () =
   Db.view_opt
     (<:view< {
