@@ -129,7 +129,7 @@ let user_logged user =
                   ~alt:user#name
                   ~src:(
                     Html.make_uri
-                      ~service: (Utils.get_gravatar user#email)
+                      ~service: (Utils.get_gravatar user#email_digest)
                       (50, "identicon")
                   )
                   ();
@@ -140,7 +140,7 @@ let user_logged user =
     )
 
 let userbox () =
-  User.get_user_and_email () >>= (function
+  User.get_user_and_email_digest () >>= (function
     | Some user -> user_logged user
     | None -> user_form ()
   )
@@ -281,9 +281,8 @@ let link_footer ~link min max = function
       [ link "Précédent" (Some (page - 1)); link "Suivant" (Some (page + 1)) ]
   | _ -> []
 
-let private_main ~page ~link ~service feeds count =
-  feeds >>= fun feeds ->
-  count >>= fun count ->
+let private_main ~page ~link ~service feeds =
+  feeds >>= fun (feeds, count) ->
   User.get_offset () >>= fun off ->
   main_style
     feeds
@@ -499,7 +498,7 @@ let private_edit_feed id =
     Feed.get_edit_infos id >>= fun (is_url, edit_desc, edit_url, edit_tags) ->
     User.get_userid () >>= (function
       | None -> Lwt.return true
-      | Some uid -> Feed.is_feed_author ~feed:id ~userid:uid ())
+      | Some uid -> Feed.is_feed_author ~feedid:id ~userid:uid ())
     >>= fun is_author ->
     main_style
       ( if (not state) || (not is_author) then
@@ -573,13 +572,13 @@ let private_edit_feed id =
       )
       []
 
-let feed_list ~service page link feeds nb_feeds =
+let feed_list ~service page link feeds =
   User.get_offset () >>= fun off ->
+  User.get_userid () >>= fun is_connected ->
   let starting = Int32.mul (Int32.of_int page) off in
   private_main ~page ~link
     ~service
-    (Feeds.to_html' ~starting ~number:off feeds)
-    nb_feeds
+    (Feeds.to_html' ~starting ~number:off ~user:is_connected feeds)
 
 (* see TODO [1] *)
 let main ?(page=0) ~service () =
@@ -590,7 +589,6 @@ let main ?(page=0) ~service () =
        ] param
     )
     (Feed.get_root_feeds)
-    (Feed.count_root_feeds ())
 
 let user ?(page=0) ~service username =
   feed_list ~service page
@@ -600,7 +598,6 @@ let user ?(page=0) ~service username =
        ] (param, username)
     )
     (Feed.get_feeds_with_author username)
-    (Feed.count_feeds_with_author username)
 
 let tag ?(page=0) ~service tag =
   feed_list ~service page
@@ -610,7 +607,6 @@ let tag ?(page=0) ~service tag =
        ] (param, tag)
     )
     (Feed.get_feeds_with_tag tag)
-    (Feed.count_feeds_with_tag tag)
 
 let fav_feed ?(page=0) ~service username =
   feed_list ~service page
@@ -620,7 +616,6 @@ let fav_feed ?(page=0) ~service username =
        ] (username, param)
     )
     (Feed.get_fav_with_username username)
-    (Feed.count_fav_with_username username)
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =

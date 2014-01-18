@@ -19,54 +19,44 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-type password
+module Password : sig
+  type t
+
+  val hash : string -> t
+  val check : string -> t -> bool
+end
 
 type user =
-  < email : Sql.string_t Sql.non_nullable_data;
-    id : Sql.int32_t Sql.non_nullable_data;
-    name : Sql.string_t Sql.non_nullable_data;
-    password : password;
-    is_admin : Sql.bool_t Sql.non_nullable_data;
-    feeds_per_page : Sql.int32_t Sql.non_nullable_data >
-
-val to_password : string -> password
-val check_password : string -> password -> bool
-
-val get_user_name_and_email_with_id :
-  int32 ->
-  < email : Sql.string_t Sql.non_nullable_data;
-    name : Sql.string_t Sql.non_nullable_data >
-    Lwt.t
+  { id : int32
+  ; name : string
+  ; password : Password.t
+  ; email : string
+  ; email_digest : string
+  ; is_admin : bool
+  ; feeds_per_page : int32
+  }
 
 val get_user_with_name : string -> user option Lwt.t
-
-val get_user_id_with_name :
-  string ->
-  < id : Sql.int32_t Sql.non_nullable_data > Lwt.t
+val get_user_id_with_name : string -> Sql.int32_t Sql.non_nullable_data Lwt.t
+val get_user_with_email : string -> user option Lwt.t
 
 val add_user :
   name:string ->
-  password:password ->
+  password:Password.t ->
   email:string ->
-  unit ->
   unit Lwt.t
 
 val update_user_password :
   userid:int32 ->
-  password:password ->
-  unit ->
+  password:Password.t ->
   unit Lwt.t
 
 val update_user_email :
   userid:int32 ->
   email:string ->
-  unit ->
   unit Lwt.t
 
 val update_user_feeds_per_page :
   userid:int32 ->
   nb_feeds:int32 ->
-  unit ->
   unit Lwt.t
-
-val get_user_with_email : string -> user option Lwt.t

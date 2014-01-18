@@ -19,39 +19,30 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-class type feed = object
-  method author : Sql.int32_t Sql.non_nullable_data
-  method id : Sql.int32_t Sql.non_nullable_data
-  method timedate : Sql.timestamp_t Sql.non_nullable_data
-  method description : Sql.string_t Sql.non_nullable_data
-  method url : Sql.string_t Sql.nullable_data
-  method parent : Sql.int32_t Sql.nullable_data
-  method root : Sql.int32_t Sql.nullable_data
-end
+type feed =
+  { author : int32
+  ; id : int32
+  ; date : CalendarLib.Calendar.t
+  ; description : string
+  ; url : string option
+  ; parent: int32 option
+  ; root : int32 option
+  ; tags : string list
+  ; score : int
+  ; user : < email_digest : string; name : string >
+  ; fav : bool
+  ; vote : int
+  ; count : int
+  }
 
-class type tag = object
-  method tag : Sql.string_t Sql.non_nullable_data
-  method id_feed : Sql.int32_t Sql.non_nullable_data
-end
+type feeds = feed list
 
-class type fav = object
-  (* method id : Sql.int32_t Sql.non_nullable_data *)
-  method id_user : Sql.int32_t Sql.non_nullable_data
-  method id_feed : Sql.int32_t Sql.non_nullable_data
-end
-
-class type vote = object
-  method score : Sql.int32_t Sql.non_nullable_data
-  method id_user : Sql.int32_t Sql.non_nullable_data
-  method id_feed : Sql.int32_t Sql.non_nullable_data
-end
-
-type feeds_and_tags = feed list * tag list * vote list
 type feed_generator =
   starting:int32 ->
   number:int32 ->
+  user:int32 option ->
   unit ->
-  feeds_and_tags Lwt.t
+  (feeds * int64) Lwt.t
 
 val get_tree_feeds : int32 -> feed_generator
 val get_links_feeds : feed_generator
@@ -60,36 +51,30 @@ val get_root_feeds : feed_generator
 val get_feeds : feed_generator
 val get_feeds_with_author : string -> feed_generator
 val get_feeds_with_tag : string -> feed_generator
+val get_feed_with_id : user:int32 option -> int32 -> feed Lwt.t
+val get_feed_with_url : user:int32 option -> string -> feed option Lwt.t
 val get_fav_with_username : string -> feed_generator
+
+val get_comments :
+  user:int32 option ->
+  int32 ->
+  feeds Lwt.t
+
+val get_root :
+  feedid:int32 ->
+  user:int32 option ->
+  unit ->
+  feed option Lwt.t
+
+val is_feed_author :
+  feedid:int32 ->
+  userid:int32 ->
+  unit ->
+  bool Lwt.t
+
 val get_feed_url_with_url :
   string ->
   < url : Sql.string_t Sql.nullable_data > option Lwt.t
-val get_feed_with_url :
-  string -> feed option Lwt.t
-val get_feed_with_id :
-  int32 ->
-  (feed * tag list * vote list) Lwt.t
-val count_feeds :
-  unit ->
-  < n : Sql.int64_t Sql.non_nullable_data > Lwt.t
-val count_root_feeds :
-  unit ->
-  < n : Sql.int64_t Sql.non_nullable_data > Lwt.t
-val count_feeds_with_author :
-  string ->
-  < n : Sql.int64_t Sql.non_nullable_data > Lwt.t
-val count_fav_with_username :
-  string ->
-  < n : Sql.int64_t Sql.non_nullable_data > Lwt.t
-val count_feeds_with_tag :
-  string ->
-  < n : Sql.int64_t Sql.non_nullable_data > Lwt.t
-val count_comments :
-  int32 ->
-  < n : Sql.int64_t Sql.non_nullable_data > Lwt.t
-val get_comments :
-  int32 ->
-  feeds_and_tags Lwt.t
 
 val add_feed :
   ?root:int32 ->
@@ -101,15 +86,8 @@ val add_feed :
   unit ->
   unit Lwt.t
 
-val is_feed_author :
-  feed:int32 ->
-  userid:int32 ->
-  unit ->
-  bool Lwt.t
-
 val delete_feed :
-  feed:int32 ->
-  userid:int32 ->
+  feedid:int32 ->
   unit ->
   unit Lwt.t
 
@@ -142,33 +120,6 @@ val cancelvote :
   userid:int32 ->
   unit ->
   unit Lwt.t
-
-val user_vote :
-  feedid:int32 ->
-  userid:int32 ->
-  unit ->
-  int32 Lwt.t
-
-val is_fav :
-  feedid:int32 ->
-  userid:int32 ->
-  unit ->
-  bool Lwt.t
-
-val is_url :
-  feedid:int32 ->
-  unit ->
-  bool Lwt.t
-
-val is_root :
-  feedid:int32 ->
-  unit ->
-  bool Lwt.t
-
-val get_root :
-  feedid:int32 ->
-  unit->
-  feed option Lwt.t
 
 val update :
   feedid:int32 ->

@@ -13,5 +13,6 @@ Coding style:
  - No end-line spaces is telerated (to check them, please use: grep -P " +$" *)
  - No tabs. Use spaces instead.
  - 80 columns rule !
- - no "open" (exept on certain cases, localy)
- - Please refere to the tuareg-mode indent style.
+ - no "open" (exept on certain cases (for modules that are explicitly done for
+             this or for modules that contains only operators) and localy)
+ - Use ocp-indent.

@@ -20,3 +20,5 @@ Run Requirements
 See the INSTALL file to know how to get them.
 
 A running demo is available at: http://cumulus.mirai.fr/
+
+[![Build Status](https://travis-ci.org/Cumulus/Cumulus.png?branch=master)](https://travis-ci.org/Cumulus/Cumulus)

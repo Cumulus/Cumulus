@@ -21,28 +21,30 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 open CalendarLib
 
-type feed = {
-  id : int32;
-  url : string option;
-  description : string;
-  date : CalendarLib.Calendar.t;
-  author : int32;
-  parent : int32 option;
-  root : int32 option;
-  tags: string list;
-  score : int;
-}
+type feed = Db_feed.feed =
+  { author : int32
+  ; id : int32
+  ; date : CalendarLib.Calendar.t
+  ; description : string
+  ; url : string option
+  ; parent: int32 option
+  ; root : int32 option
+  ; tags : string list
+  ; score : int
+  ; user : < email_digest : string; name : string >
+  ; fav : bool
+  ; vote : int
+  ; count : int
+  }
 
-val feed_new : Db_feed.feed -> string list -> int -> feed
-val to_html : feed ->
-  (([> `Aside | `Div ] Html.elt) list) Lwt.t
-val to_atom : feed -> Atom_feed.entry Lwt.t
+val to_html : Db_feed.feed -> [> `Aside | `Div ] Html.elt list Lwt.t
+val to_atom : Db_feed.feed -> Atom_feed.entry Lwt.t
 
 val get_edit_infos : int32 ->
   (bool * string * string * string) Lwt.t
 
 val delete_feed_check :
-  feed:int32 ->
+  feedid:int32 ->
   userid:int32 ->
   unit ->
   unit Lwt.t
@@ -55,12 +57,8 @@ val cancel_vote : int32 -> unit Lwt.t
 
 (* TODO: Remove the following functions *)
 val get_root_feeds : Db_feed.feed_generator
-val count_root_feeds : unit -> int64 Lwt.t
 val get_feeds_with_author : string -> Db_feed.feed_generator
-val count_feeds_with_author : string -> int64 Lwt.t
 val get_feeds_with_tag : string -> Db_feed.feed_generator
-val count_feeds_with_tag : string -> int64 Lwt.t
 val get_fav_with_username : string -> Db_feed.feed_generator
-val count_fav_with_username : string -> int64 Lwt.t
 val exist : feedid:int32 -> unit -> bool Lwt.t
-val is_feed_author : feed:int32 -> userid:int32 -> unit -> bool Lwt.t
+val is_feed_author : feedid:int32 -> userid:int32 -> unit -> bool Lwt.t

@@ -1,16 +1,20 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: d3a280108519ee0f4ece91aab3c29657) *)
+(* DO NOT EDIT (digest: cbc0ff31efbf6d5923e4b12883a420c1) *)
 module OASISGettext = struct
-(* # 21 "src/oasis/OASISGettext.ml" *)
+(* # 22 "src/oasis/OASISGettext.ml" *)
+
 
   let ns_ str =
     str
 
+
   let s_ str =
     str
 
-  let f_ (str : ('a, 'b, 'c, 'd) format4) =
+
+  let f_ (str: ('a, 'b, 'c, 'd) format4) =
     str
+
 
   let fn_ fmt1 fmt2 n =
     if n = 1 then
@@ -18,21 +22,28 @@ module OASISGettext = struct
     else
       fmt2^^""
 
+
   let init =
     []
+
 
 end
 
 module OASISExpr = struct
-(* # 21 "src/oasis/OASISExpr.ml" *)
+(* # 22 "src/oasis/OASISExpr.ml" *)
+
+
 
 
 
   open OASISGettext
 
+
   type test = string
 
+
   type flag = string
+
 
   type t =
     | EBool of bool
@@ -43,7 +54,9 @@ module OASISExpr = struct
     | ETest of test * string
 
 
+
   type 'a choices = (t * 'a) list
+
 
   let eval var_get t =
     let rec eval' =
@@ -74,6 +87,7 @@ module OASISExpr = struct
               (v = vl)
     in
       eval' t
+
 
   let choose ?printer ?name var_get lst =
     let rec choose_aux =
@@ -111,21 +125,26 @@ module OASISExpr = struct
     in
       choose_aux (List.rev lst)
 
+
 end
 
 
-# 117 "myocamlbuild.ml"
+# 132 "myocamlbuild.ml"
 module BaseEnvLight = struct
-(* # 21 "src/base/BaseEnvLight.ml" *)
+(* # 22 "src/base/BaseEnvLight.ml" *)
+
 
   module MapString = Map.Make(String)
 
+
   type t = string MapString.t
+
 
   let default_filename =
     Filename.concat
       (Sys.getcwd ())
       "setup.data"
+
 
   let load ?(allow_empty=false) ?(filename=default_filename) () =
     if Sys.file_exists filename then
@@ -184,6 +203,7 @@ module BaseEnvLight = struct
              filename)
       end
 
+
   let var_get name env =
     let rec var_expand str =
       let buff =
@@ -205,6 +225,7 @@ module BaseEnvLight = struct
     in
       var_expand (MapString.find name env)
 
+
   let var_choose lst env =
     OASISExpr.choose
       (fun nm -> var_get nm env)
@@ -212,9 +233,10 @@ module BaseEnvLight = struct
 end
 
 
-# 215 "myocamlbuild.ml"
+# 236 "myocamlbuild.ml"
 module MyOCamlbuildFindlib = struct
-(* # 21 "src/plugins/ocamlbuild/MyOCamlbuildFindlib.ml" *)
+(* # 22 "src/plugins/ocamlbuild/MyOCamlbuildFindlib.ml" *)
+
 
   (** OCamlbuild extension, copied from
     * http://brion.inria.fr/gallium/index.php/Using_ocamlfind_with_ocamlbuild
@@ -226,12 +248,15 @@ module MyOCamlbuildFindlib = struct
     *)
   open Ocamlbuild_plugin
 
+
   (* these functions are not really officially exported *)
   let run_and_read =
     Ocamlbuild_pack.My_unix.run_and_read
 
+
   let blank_sep_strings =
     Ocamlbuild_pack.Lexers.blank_sep_strings
+
 
   let split s ch =
     let buf = Buffer.create 13 in
@@ -250,22 +275,36 @@ module MyOCamlbuildFindlib = struct
       flush ();
       List.rev !x
 
+
   let split_nl s = split s '\n'
+
 
   let before_space s =
     try
       String.before s (String.index s ' ')
     with Not_found -> s
 
+  (* ocamlfind command *)
+  let ocamlfind x =
+    let ocamlfind_prog =
+      let env_filename = Pathname.basename BaseEnvLight.default_filename in
+      let env = BaseEnvLight.load ~filename:env_filename ~allow_empty:true () in
+      try
+        BaseEnvLight.var_get "ocamlfind" env
+      with Not_found ->
+        Printf.eprintf "W: Cannot get variable ocamlfind";
+        "ocamlfind"
+    in
+      S[Sh ocamlfind_prog; x]
+
   (* This lists all supported packages. *)
   let find_packages () =
     List.map before_space (split_nl & run_and_read "ocamlfind list")
 
+
   (* Mock to list available syntaxes. *)
   let find_syntaxes () = ["camlp4o"; "camlp4r"]
 
-  (* ocamlfind command *)
-  let ocamlfind x = S[A"ocamlfind"; x]
 
   let dispatch =
     function
@@ -277,7 +316,8 @@ module MyOCamlbuildFindlib = struct
           Options.ocamlopt   := ocamlfind & A"ocamlopt";
           Options.ocamldep   := ocamlfind & A"ocamldep";
           Options.ocamldoc   := ocamlfind & A"ocamldoc";
-          Options.ocamlmktop := ocamlfind & A"ocamlmktop"
+          Options.ocamlmktop := ocamlfind & A"ocamlmktop";
+          Options.ocamlmklib := ocamlfind & A"ocamlmklib"
 
       | After_rules ->
 
@@ -328,14 +368,19 @@ module MyOCamlbuildFindlib = struct
           flag ["ocaml"; "pkg_threads"; "compile"] (S[A "-thread"]);
           flag ["ocaml"; "pkg_threads"; "doc"] (S[A "-I"; A "+threads"]);
           flag ["ocaml"; "pkg_threads"; "link"] (S[A "-thread"]);
-          flag ["ocaml"; "pkg_threads"; "infer_interface"] (S[A "-thread"])
+          flag ["ocaml"; "pkg_threads"; "infer_interface"] (S[A "-thread"]);
+          flag ["ocaml"; "package(threads)"; "compile"] (S[A "-thread"]);
+          flag ["ocaml"; "package(threads)"; "doc"] (S[A "-I"; A "+threads"]);
+          flag ["ocaml"; "package(threads)"; "link"] (S[A "-thread"]);
+          flag ["ocaml"; "package(threads)"; "infer_interface"] (S[A "-thread"]);
 
       | _ ->
           ()
 end
 
 module MyOCamlbuildBase = struct
-(* # 21 "src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
+(* # 22 "src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
+
 
   (** Base functions for writing myocamlbuild.ml
       @author Sylvain Le Gall
@@ -343,15 +388,20 @@ module MyOCamlbuildBase = struct
 
 
 
+
+
   open Ocamlbuild_plugin
   module OC = Ocamlbuild_pack.Ocaml_compiler
+
 
   type dir = string
   type file = string
   type name = string
   type tag = string
 
-(* # 56 "src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
+
+(* # 62 "src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
+
 
   type t =
       {
@@ -364,9 +414,11 @@ module MyOCamlbuildBase = struct
         includes:  (dir * dir list) list;
       }
 
+
   let env_filename =
     Pathname.basename
       BaseEnvLight.default_filename
+
 
   let dispatch_combine lst =
     fun e ->
@@ -374,11 +426,14 @@ module MyOCamlbuildBase = struct
         (fun dispatch -> dispatch e)
         lst
 
+
   let tag_libstubs nm =
     "use_lib"^nm^"_stubs"
 
+
   let nm_libstubs nm =
     nm^"_stubs"
+
 
   let dispatch t e =
     let env =
@@ -484,6 +539,7 @@ module MyOCamlbuildBase = struct
         | _ ->
             ()
 
+
   let dispatch_default t =
     dispatch_combine
       [
@@ -491,10 +547,11 @@ module MyOCamlbuildBase = struct
         MyOCamlbuildFindlib.dispatch;
       ]
 
+
 end
 
 
-# 497 "myocamlbuild.ml"
+# 554 "myocamlbuild.ml"
 open Ocamlbuild_plugin;;
 let package_default =
   {
@@ -511,14 +568,22 @@ let package_default =
           ("src/server", ["src"; "src/base"]);
           ("src/base", ["src/base/db"]);
           ("src", ["src/base"; "src/server"])
-       ];
-     }
+       ]
+  }
   ;;
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 521 "myocamlbuild.ml"
+# 578 "myocamlbuild.ml"
 (* OASIS_STOP *)
+
+(* Copy pasted from ocamlbuild.
+ * It fixes a bug on cmxs (see the offensive comment below)
+ *)
+let ext_lib = !Options.ext_lib
+let ext_dll = !Options.ext_dll
+let x_a = "%"-.-ext_lib
+let x_dll = "%"-.-ext_dll
 
 module M = Ocamlbuild_eliom.Make(struct
   let client_dir = "client"
@@ -538,5 +603,12 @@ let () =
                | x -> x
              in
              Options.targets := List.map f !Options.targets
+         | After_rules ->
+             (* SON OF A BIATCH !!!!!!!!!!!!!!!!! *)
+             rule "ocaml: cmxa & a -> cmxs & so SON OF A BIATCH"
+               ~insert:`top
+               ~prods:["%.cmxs"; x_dll]
+               ~deps:["%.cmxa"; x_a]
+               (Ocamlbuild_pack.Ocaml_compiler.native_shared_library_link ~tags:["linkall"] "%.cmxa" "%.cmxs")
          | _ -> ()
     )

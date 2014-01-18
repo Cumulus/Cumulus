@@ -215,10 +215,10 @@ let () =
     (fun (id, _) () -> Templates.edit_feed id);
   Eliom_registration.Action.register
     ~service:Services.delete_feed
-    (fun feed () ->
+    (fun feedid () ->
        User.get_userid () >>= function
        | None -> Lwt.return ()
-       | Some userid -> Feed.delete_feed_check ~feed ~userid ()
+       | Some userid -> Feed.delete_feed_check ~feedid ~userid ()
     );
   Eliom_registration.Action.register
     ~service:Services.add_fav_feed

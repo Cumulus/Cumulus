@@ -1,4 +1,4 @@
-OASISFormat: 0.3
+OASISFormat: 0.4
 Name: cumulus
 Version: 1.0
 Synopsis: Buzz erl^WOCaml, le retour
@@ -11,6 +11,7 @@ Authors:
   xarch,
   Alexis Cassaigne
 License: MIT
+AlphaFeatures: ocamlbuild_more_args
 Plugins: DevFiles (0.3), META (0.3)
 BuildTools: ocamlbuild
 XOCamlbuildPluginTags: package(eliom.ocamlbuild)
@@ -59,6 +60,7 @@ Library db
     Configfile,
     Db_config,
     Db,
+    Db_table,
     Db_update,
     Db_feed,
     Db_user

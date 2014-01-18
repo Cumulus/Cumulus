@@ -22,24 +22,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 open Batteries
 open Eliom_lib.Lwt_ops
 
-type user = {
-  id : int32;
-  name : string;
-  password : Db_user.password;
-  email : string;
-  is_admin : bool;
-  feeds_per_page : int32;
-}
+type user = Db_user.user =
+  { id : int32
+  ; name : string
+  ; password : Db_user.Password.t
+  ; email : string
+  ; email_digest : string
+  ; is_admin : bool
+  ; feeds_per_page : int32
+  }
 type user_state = Already_connected | Ok | Bad_password | Not_found
-
-let user_new data = {
-  id = data#!id;
-  name = data#!name;
-  password = data#password;
-  email = data#!email;
-  is_admin = data#!is_admin;
-  feeds_per_page = data#!feeds_per_page;
-}
 
 let add = function
   | ("", ((_ as email), ((_ as password), (_ as password_check))))
@@ -55,8 +47,8 @@ let add = function
       Db_user.get_user_with_name name >>= function
       | Some _ -> Lwt.return false
       | None ->
-          let password = Db_user.to_password password in
-          Db_user.add_user ~name ~password ~email () >>= fun () ->
+          let password = Db_user.Password.hash password in
+          Db_user.add_user ~name ~password ~email >>= fun () ->
           Lwt.return true
 
 let (get_user, set_user, unset_user) =
@@ -64,7 +56,7 @@ let (get_user, set_user, unset_user) =
   let eref =
     Eliom_reference.eref
       ~scope:session_scope
-      ~persistent:"cumulus_user_v1"
+      ~persistent:"cumulus_user_v2"
       None
   in
   ((fun () -> Eliom_reference.get eref),
@@ -89,8 +81,7 @@ let connect user password =
   Db_user.get_user_with_name user >>= function
   | None -> Lwt.return Not_found
   | Some user ->
-      let user = user_new user in
-      if Db_user.check_password password user.password then
+      if Db_user.Password.check password user.password then
         is_connected () >>= function
         | true -> Lwt.return Already_connected
         | false ->
@@ -100,13 +91,13 @@ let connect user password =
         Lwt.return Bad_password
 
 (* TODO: Remove this after the merge of the new ui *)
-let get_user_and_email () =
+let get_user_and_email_digest () =
   get_user () >>= function
   | None -> Lwt.return None
   | Some user ->
       let user = object
         method name = user.name
-        method email = user.email
+        method email_digest = user.email_digest
       end in
       Lwt.return (Some user)
 
@@ -124,8 +115,8 @@ let update_password (password, password_check) =
     get_user () >>= function
     | None -> Lwt.return false
     | Some user ->
-        let password = Db_user.to_password password in
-        Db_user.update_user_password ~userid:user.id ~password ()
+        let password = Db_user.Password.hash password in
+        Db_user.update_user_password ~userid:user.id ~password
         >>= fun () ->
         Lwt.return true
 
@@ -137,19 +128,18 @@ let update_email email =
     | None -> Lwt.return false
     | Some user ->
         set_user {user with email} >>= fun () ->
-        Db_user.update_user_email ~userid:user.id ~email () >>= fun () ->
+        Db_user.update_user_email ~userid:user.id ~email >>= fun () ->
         Lwt.return true
 
 let update_feeds_per_page feeds_per_page =
   get_user () >>= function
   | None -> Lwt.return false
   | Some user ->
-      set_user {user with feeds_per_page} >>= fun () ->
       Db_user.update_user_feeds_per_page
         ~userid:user.id
         ~nb_feeds:feeds_per_page
-        ()
       >>= fun () ->
+      set_user {user with feeds_per_page} >>= fun () ->
       Lwt.return true
 
 let get_offset () =
@@ -169,4 +159,4 @@ let send_reset_email ~service email =
   in
   Db_user.get_user_with_email email >|= Option.may f
 
-let force_connect user = set_user (user_new user)
+let force_connect = set_user
