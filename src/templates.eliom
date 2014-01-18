@@ -495,7 +495,7 @@ let private_edit_feed id =
   else
     User.is_connected () >>= fun state ->
     Feeds.branch_to_html id >>= fun branch ->
-    Feed.get_edit_infos id >>= fun (is_url, edit_desc, edit_url, edit_tags) ->
+    Feed.get_edit_infos id >>= fun (edit_desc, edit_url, edit_tags) ->
     User.get_userid () >>= (function
       | None -> Lwt.return true
       | Some uid -> Feed.is_feed_author ~feedid:id ~userid:uid ())
@@ -508,7 +508,8 @@ let private_edit_feed id =
           ]
         else
           [ branch;
-            if is_url then
+            match edit_url with
+            | Some edit_url ->
               (Html.post_form
                  ~a:[Html.a_class ["box"]]
                  ~service:Services.edit_link_comment
@@ -544,8 +545,8 @@ let private_edit_feed id =
                         submit_input ~value:"Envoyer !" ()
                       ]
                     ])
-                 (Int32.to_int id, "");)
-            else
+                 (Int32.to_int id, ""))
+            | None ->
               (Html.post_form
                  ~a:[Html.a_class ["box"]]
                  ~service:Services.edit_desc_comment

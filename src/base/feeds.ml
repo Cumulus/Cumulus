@@ -38,9 +38,6 @@ let private_to_html data =
        )
     ) data
 
-(* Problème entre Db_feed.get_feed_with_id et Db_feed.get_feed_with_id *)
-(* feed option <> feed *)
-
 let comments_to_html id =
   User.get_userid () >>= fun user ->
   Db_feed.get_feed_with_id ~user id >>= fun root ->
@@ -162,9 +159,9 @@ let append_feed_aux ~url ~description ~tags f =
        else if Utils.is_invalid_url url then
          Lwt.return Invalid_url
        else
-         Db_feed.get_feed_url_with_url url >>= function
-         | Some _ -> Lwt.return Already_exist
-         | None -> f ~author () >>= updating_and_ret
+         Db_feed.exists_with_url ~url >>= function
+         | true -> Lwt.return Already_exist
+         | false -> f ~author () >>= updating_and_ret
     )
 
 let append_feed (url, (description, tags)) =
@@ -221,9 +218,9 @@ let edit_feed_aux ~id ~url ~description ~tags f =
        else
          Db_feed.get_feed_with_id ~user (Int32.of_int id) >>= (fun feeds ->
            if feeds.Feed.url <> Some url then
-             Db_feed.get_feed_url_with_url url >>= function
-             | Some _ -> Lwt.return Already_exist
-             | None -> f () >>= updating_and_ret
+             Db_feed.exists_with_url ~url >>= function
+             | true -> Lwt.return Already_exist
+             | false -> f () >>= updating_and_ret
            else
              f () >>= updating_and_ret)
     )

@@ -41,7 +41,7 @@ val to_html : Db_feed.feed -> [> `Aside | `Div ] Html.elt list Lwt.t
 val to_atom : Db_feed.feed -> Atom_feed.entry Lwt.t
 
 val get_edit_infos : int32 ->
-  (bool * string * string * string) Lwt.t
+  (string * string option * string) Lwt.t
 
 val delete_feed_check :
   feedid:int32 ->
