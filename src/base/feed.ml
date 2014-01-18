@@ -220,20 +220,13 @@ let to_atom self =
       ]
   )
 
-let get_edit_url feeds =
-  match feeds.url with
-  | Some f -> f
-  | None -> "Url"
-
 let get_edit_tags = String.concat ", "
 
 let get_edit_infos id =
   User.get_userid () >>= fun user ->
-  Db_feed.get_feed_with_id ~user id >>= fun feeds ->
-  let desc = feeds.description in
-  let url = get_edit_url feeds in
-  let tags_str = get_edit_tags feeds.tags in
-  Lwt.return (Option.is_some feeds.url, desc, url, tags_str)
+  Db_feed.get_feed_with_id ~user id >>= fun feed ->
+  let tags_str = get_edit_tags feed.tags in
+  Lwt.return (feed.description, feed.url, tags_str)
 
 let delete_feed_check ~feedid ~userid () =
   User.is_admin () >>= fun is_admin ->
@@ -246,12 +239,10 @@ let delete_feed_check ~feedid ~userid () =
 let exec_if_not_author f feedid =
   User.get_userid () >>= function
   | Some userid ->
-      Db_feed.is_feed_author ~feedid ~userid ()
-      >>= fun is_author ->
-      if not is_author then
-        f ~feedid ~userid ()
-      else
-        Lwt.return ()
+      begin Db_feed.is_feed_author ~feedid ~userid () >>= function
+      | true -> Lwt.return ()
+      | false -> f ~feedid ~userid ()
+      end
   | None -> Lwt.return ()
 
 let get_userid f =
@@ -271,5 +262,5 @@ let get_root_feeds = Db_feed.get_root_feeds
 let get_feeds_with_author = Db_feed.get_feeds_with_author
 let get_feeds_with_tag = Db_feed.get_feeds_with_tag
 let get_fav_with_username = Db_feed.get_fav_with_username
-let exist = Db_feed.exist
+let exist = Db_feed.exists
 let is_feed_author = Db_feed.is_feed_author

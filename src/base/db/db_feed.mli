@@ -72,10 +72,6 @@ val is_feed_author :
   unit ->
   bool Lwt.t
 
-val get_feed_url_with_url :
-  string ->
-  < url : Sql.string_t Sql.nullable_data > option Lwt.t
-
 val add_feed :
   ?root:int32 ->
   ?parent:int32 ->
@@ -129,7 +125,5 @@ val update :
   unit ->
   unit Lwt.t
 
-val exist :
-  feedid:int32 ->
-  unit ->
-  bool Lwt.t
+val exists : feedid:int32 -> unit -> bool Lwt.t
+val exists_with_url : url:string -> bool Lwt.t

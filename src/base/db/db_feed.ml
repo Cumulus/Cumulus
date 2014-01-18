@@ -167,10 +167,8 @@ let get_feeds_aux ?range
     ; score = List.fold_left (fun acc x -> if Int32.equal x#!id_feed id then acc + Int32.to_int x#!score else acc) 0 votes
     ; user = object method name = o#!name method email_digest = o#!email_digest end
     ; fav = List.exists (Int32.equal id) favs
-    ; vote = Option.map_default (fun x -> Int32.to_int x#!score) 0 (List.Exceptionless.find (fun x -> Int32.equal x#!id_feed id) user_votes)
-    ; count =
-      try Int64.to_int (List.find (fun e -> match e#?root with Some x -> Int32.equal x o#!id | None -> false) count)#!c
-      with _ -> 0
+    ; vote = map (fun x -> Int32.to_int x#!score) 0 user_votes
+    ; count = find_and_map (fun e -> match e#?root with Some x -> Int32.equal x id | None -> assert false) (fun x -> Int64.to_int x#!c) 0 count
     }
   in
   Lwt.return (List.map new_object feeds, total_count#!n)
@@ -239,31 +237,17 @@ let get_root ~feedid ~user () =
   get_feeds_aux ~feeds_filter ~users_filter ~user ()
   >|= fst >|= (function [] -> None | x :: _ -> Some x)
 
-
 let is_feed_author ~feedid ~userid () =
-  Lwt.catch
-    (fun () ->
-       Db.view_one
-         (<:view< f | f in $Db_table.feeds$;
+  Db.view_opt
+    (<:view< {} | f in $Db_table.feeds$;
                  f.id = $int32:feedid$;
                  f.author = $int32:userid$;
-          >>)
-       >>= fun _ ->
-       Lwt.return true
-    )
-    (fun exn ->
-       Ocsigen_messages.debug (fun () -> Printexc.to_string exn);
-       Lwt.return false
-    )
+     >>)
+  >|= Option.is_some
 
 let get_fav_aux ~starting ~number ~feeds_filter ~user () =
   Db.view
-    (<:view< {
-            f.id_feed;
-            } order by f.id_feed desc
-            | f in $Db_table.favs$;
-            $feeds_filter$ f;
-     >>)
+    (<:view< {f.id_feed} | f in $Db_table.favs$; $feeds_filter$ f; >>)
   >>= fun favs ->
   let feeds_filter f =
     (<:value< in' f.id $List.map (fun x -> x#id_feed) favs$ >>) in
@@ -274,26 +258,6 @@ let get_fav_with_username name ~starting ~number ~user () =
   Db_user.get_user_id_with_name name >>= fun author ->
   let feeds_filter f = (<:value< f.id_user = $author$ >>) in
   get_fav_aux ~starting ~number ~feeds_filter ~user ()
-
-let get_id_feed_from_tag tag =
-  Db.view
-    (<:view< {
-            t.id_feed;
-            } | t in $Db_table.feeds_tags$;
-            t.tag = $string:tag$;
-     >>)
-
-(*
- * TODO: optimization (depend of Feeds.tree_to_atom)
- *)
-
-let get_feed_url_with_url url =
-  Db.view_opt
-    (<:view< {
-            f.url
-            } | f in $Db_table.feeds$;
-            f.url = $string:url$;
-     >>)
 
 let add_feed ?root ?parent ?url ~description ~tags ~userid () =
   Db.value (<:value< $Db_table.feeds$?id >>)
@@ -325,48 +289,37 @@ let delete_feed ~feedid () =
 
 let add_fav ~feedid ~userid () =
   Db.view_opt
-    (<:view< {
-            f.id_user;
-            f.id_feed;
-            } | f in $Db_table.favs$;
+    (<:view< {} | f in $Db_table.favs$;
             f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
      >>) >>= function
   | Some _ -> Lwt.return ()
   | None ->
       Db.query
         (<:insert< $Db_table.favs$ := {
-                  (* id; *)
                   id_user = $int32:userid$;
                   id_feed = $int32:feedid$;
                   } >>)
 
 let del_fav ~feedid ~userid () =
+  Db.query
+    (<:delete< f in $Db_table.favs$ | f.id_feed = $int32:feedid$; f.id_user = $int32:userid$; >>)
+
+let vote_exists ~feedid ~userid =
   Db.view_opt
-    (<:view< {
-            f.id_user;
-            f.id_feed;
-            } | f in $Db_table.favs$;
-            f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
-     >>) >>= function
-  | None -> Lwt.return ()
-  | Some _ ->
-      Db.query
-        (<:delete< f in $Db_table.favs$ | f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
+    (<:view< {}
+            | f in $Db_table.votes$;
+            f.id_user = $int32:userid$; f.id_feed = $int32:feedid$;
+     >>)
+  >|= Option.is_some
 
 let upvote ~feedid ~userid () =
-  Db.view_opt
-    (<:view< {
-            f.id_user;
-            f.id_feed;
-            } | f in $Db_table.votes$;
-            f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
-     >>) >>= function
-  | Some _ ->
+  vote_exists ~feedid ~userid >>= function
+  | true ->
       Db.query
         (<:update< f in $Db_table.votes$ := {
                   score = $int32:Int32.of_int(1)$
-                  } | f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$; >>)
-  | None ->
+                  } | f.id_user = $int32:userid$; f.id_feed = $int32:feedid$; >>)
+  | false ->
       Db.query
         (<:insert< $Db_table.votes$ := {
                   id_user = $int32:userid$;
@@ -375,19 +328,13 @@ let upvote ~feedid ~userid () =
                   } >>)
 
 let downvote ~feedid ~userid () =
-  Db.view_opt
-    (<:view< {
-            f.id_user;
-            f.id_feed;
-            } | f in $Db_table.votes$;
-            f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
-     >>) >>= function
-  | Some _ ->
+  vote_exists ~feedid ~userid >>= function
+  | true ->
       Db.query
         (<:update< f in $Db_table.votes$ := {
                   score = $int32:Int32.of_int(-1)$
                   } | f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$; >>)
-  | None ->
+  | false ->
       Db.query
         (<:insert< $Db_table.votes$ := {
                   id_user = $int32:userid$;
@@ -396,17 +343,8 @@ let downvote ~feedid ~userid () =
                   } >>)
 
 let cancelvote ~feedid ~userid () =
-  Db.view_opt
-    (<:view< {
-            f.id_user;
-            f.id_feed;
-            } | f in $Db_table.votes$;
-            f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
-     >>) >>= function
-  | None -> Lwt.return ()
-  | Some _ ->
-      Db.query
-        (<:delete< f in $Db_table.votes$ | f.id_feed = $int32:feedid$ && f.id_user = $int32:userid$; >>)
+  Db.query
+    (<:delete< f in $Db_table.votes$ | f.id_feed = $int32:feedid$; f.id_user = $int32:userid$; >>)
 
 (* Il faut delete tous les tags du lien et ajouter les nouveaux *)
 let update ~feedid ~url ~description ~tags () =
@@ -417,10 +355,10 @@ let update ~feedid ~url ~description ~tags () =
                    description = $string:description$;
                    url = $string:u$;
                    } | f.id = $int32:feedid$; >>)
-       >>= fun _ ->
+       >>= fun () ->
        Db.query
          (<:delete< t in $Db_table.feeds_tags$ | t.id_feed = $int32:feedid$ >>)
-       >>= fun _ ->
+       >>= fun () ->
        Lwt_list.iter_p
          (fun tag ->
             Db.query
@@ -437,12 +375,12 @@ let update ~feedid ~url ~description ~tags () =
                   description = $string:description$;
                   } | f.id = $int32:feedid$; >>)
 
-let exist ~feedid () =
+let exists ~feedid () =
   Db.view_opt
-    (<:view< {
-            f.id;
-            } | f in $Db_table.feeds$;
-            f.id = $int32:feedid$;
-     >>) >>= function
-  | None -> Lwt.return false
-  | Some _ -> Lwt.return true
+    (<:view< {} | f in $Db_table.feeds$; f.id = $int32:feedid$; >>)
+  >|= Option.is_some
+
+let exists_with_url ~url =
+  Db.view_opt
+    (<:view< {} | f in $Db_table.feeds$; f.url = $string:url$; >>)
+  >|= Option.is_some

@@ -19,7 +19,8 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-module Option = Eliom_lib.Option
+open Batteries
+open Eliom_lib.Lwt_ops
 
 let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
 
