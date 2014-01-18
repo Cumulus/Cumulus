@@ -46,7 +46,7 @@ type feed_generator =
   number:int32 ->
   user:int32 option ->
   unit ->
-  feeds Lwt.t
+  (feeds * int64) Lwt.t
 
 let get_feeds_aux ?range
   ~feeds_filter
@@ -140,6 +140,13 @@ let get_feeds_aux ?range
       Lwt.return ([], [])
   end
   >>= fun (favs, user_votes) ->
+  Db.view_one
+    (<:view< group {
+            n = count[f];
+            } | f in $Db_table.feeds$;
+            $feeds_filter$ f;
+     >>)
+  >>= fun total_count ->
   let favs = List.map (fun x -> x#!id_feed) favs in
   let new_object o =
     let id = o#!id in
@@ -160,7 +167,7 @@ let get_feeds_aux ?range
       with _ -> 0
     }
   in
-  Lwt.return (List.map new_object feeds)
+  Lwt.return (List.map new_object feeds, total_count#!n)
 
 let get_tree_feeds feed_id ~starting ~number ~user () =
   let feeds_filter f = (<:value< f.root = $int32:feed_id$ >>) in
@@ -206,25 +213,25 @@ let get_feed_with_url ~user url =
   let feeds_filter f = (<:value< f.url = $string:url$ >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~users_filter ~user ()
-  >>= (function | [] -> Lwt.return None | x :: _ -> Lwt.return (Some x))
+  >|= fst >|= (function [] -> None | x :: _ -> Some x)
 
 let get_feed_with_id ~user id =
   let feeds_filter f = (<:value< f.id = $int32:id$ >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~users_filter ~user ()
-  >|= (function [x] -> x | _ -> assert false)
+  >|= fst >|= (function [x] -> x | _ -> assert false)
 
 let get_comments ~user root =
   let feeds_filter f =
     (<:value< f.root = $int32:root$ || f.parent = $int32:root$ >>) in
   let users_filter _ _ = (<:value< true >>) in
-  get_feeds_aux ~feeds_filter ~users_filter ~user ()
+  get_feeds_aux ~feeds_filter ~users_filter ~user () >|= fst
 
 let get_root ~feedid ~user () =
   let feeds_filter f = (<:value< f.id = $int32:feedid$ >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~users_filter ~user ()
-  >>= (function | [] -> Lwt.return None | x :: _ -> Lwt.return (Some x))
+  >|= fst >|= (function [] -> None | x :: _ -> Some x)
 
 
 let is_feed_author ~feedid ~userid () =
@@ -246,13 +253,9 @@ let is_feed_author ~feedid ~userid () =
 let get_fav_aux ~starting ~number ~feeds_filter ~user () =
   Db.view
     (<:view< {
-            (* f.id; *)
-            f.id_user;
             f.id_feed;
             } order by f.id_feed desc
-            limit $int32:number$
-            offset $int32:starting$ |
-            f in $Db_table.favs$;
+            | f in $Db_table.favs$;
             $feeds_filter$ f;
      >>)
   >>= fun favs ->
@@ -266,9 +269,6 @@ let get_fav_with_username name ~starting ~number ~user () =
   let feeds_filter f = (<:value< f.id_user = $author$ >>) in
   get_fav_aux ~starting ~number ~feeds_filter ~user ()
 
-let filter_tags_id f tags =
-  (<:value< in' f.id $List.map (fun x -> x#id_feed) tags$ >>)
-
 let get_id_feed_from_tag tag =
   Db.view
     (<:view< {
@@ -281,32 +281,6 @@ let get_id_feed_from_tag tag =
  * TODO: optimization (depend of Feeds.tree_to_atom)
  *)
 
-let count_feeds_aux ~filter () =
-  Db.view_one
-    (<:view< group {
-            n = count[f];
-            } | f in $Db_table.feeds$;
-            $filter$ f;
-     >>)
-
-let count_feeds () =
-  let filter _ = (<:value< true >>) in
-  count_feeds_aux ~filter ()
-
-let count_root_feeds () =
-  let filter f = (<:value< is_null f.root || is_null f.parent >>) in
-  count_feeds_aux ~filter ()
-
-let count_feeds_with_author author =
-  Db_user.get_user_id_with_name author >>= fun author ->
-  let filter f = (<:value< f.author = $author$ >>) in
-  count_feeds_aux ~filter ()
-
-let count_feeds_with_tag tag =
-  get_id_feed_from_tag tag >>= fun tags ->
-  let filter f = filter_tags_id f tags in
-  count_feeds_aux ~filter ()
-
 let get_feed_url_with_url url =
   Db.view_opt
     (<:view< {
@@ -314,10 +288,6 @@ let get_feed_url_with_url url =
             } | f in $Db_table.feeds$;
             f.url = $string:url$;
      >>)
-
-let count_comments root =
-  let filter f = (<:value< f.root = $int32:root$ || f.parent = $int32:root$ >>) in
-  count_feeds_aux ~filter ()
 
 let add_feed ?root ?parent ?url ~description ~tags ~userid () =
   Db.value (<:value< $Db_table.feeds$?id >>)

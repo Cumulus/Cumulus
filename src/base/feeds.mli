@@ -46,4 +46,4 @@ val to_html' :
   number:int32 ->
   user:int32 option ->
   Db_feed.feed_generator ->
-  [> Html5_types.div ] Html.elt list Lwt.t
+  ([> Html5_types.div ] Html.elt list * int64) Lwt.t

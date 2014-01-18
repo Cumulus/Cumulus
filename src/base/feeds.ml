@@ -75,7 +75,8 @@ let feed_id_to_html id =
 let tree_to_atom id () =
   User.get_userid () >>= fun user ->
   Db_feed.get_tree_feeds ~user id ~starting:0l ~number:Utils.offset ()
-  >>= to_somthing Feed.to_atom
+  >>= fun (feeds, _) ->
+  to_somthing Feed.to_atom feeds
   >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
@@ -89,7 +90,8 @@ let tree_to_atom id () =
 let tag_to_atom tag () =
   User.get_userid () >>= fun user ->
   Db_feed.get_feeds_with_tag ~user tag ~starting:0l ~number:Utils.offset ()
-  >>= to_somthing Feed.to_atom
+  >>= fun (feeds, _) ->
+  to_somthing Feed.to_atom feeds
   >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
@@ -104,7 +106,8 @@ let tag_to_atom tag () =
 let to_atom () =
   User.get_userid () >>= fun user ->
   Db_feed.get_links_feeds ~user ~starting:0l ~number:Utils.offset ()
-  >>= to_somthing Feed.to_atom
+  >>= fun (feeds, _) ->
+  to_somthing Feed.to_atom feeds
   >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
@@ -118,7 +121,8 @@ let to_atom () =
 let comments_to_atom () =
   User.get_userid () >>= fun user ->
   Db_feed.get_comments_feeds ~user ~starting:0l ~number:Utils.offset ()
-  >>= to_somthing Feed.to_atom
+  >>= fun (feeds, _) ->
+  to_somthing Feed.to_atom feeds
   >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
@@ -249,4 +253,6 @@ let edit_desc_comment (id, description) =
 
 (* TODO: Remove this ugly thing *)
 let to_html' ~starting ~number ~user feeds =
-  feeds ~starting ~number ~user () >>= to_html
+  feeds ~starting ~number ~user () >>= fun (feeds, n) ->
+  to_html feeds >|= fun feeds ->
+  (feeds, n)

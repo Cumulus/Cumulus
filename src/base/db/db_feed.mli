@@ -42,7 +42,7 @@ type feed_generator =
   number:int32 ->
   user:int32 option ->
   unit ->
-  feeds Lwt.t
+  (feeds * int64) Lwt.t
 
 val get_tree_feeds : int32 -> feed_generator
 val get_links_feeds : feed_generator
@@ -75,24 +75,6 @@ val is_feed_author :
 val get_feed_url_with_url :
   string ->
   < url : Sql.string_t Sql.nullable_data > option Lwt.t
-val count_feeds :
-  unit ->
-  < n : Sql.int64_t Sql.non_nullable_data > Lwt.t
-val count_root_feeds :
-  unit ->
-  < n : Sql.int64_t Sql.non_nullable_data > Lwt.t
-val count_feeds_with_author :
-  string ->
-  < n : Sql.int64_t Sql.non_nullable_data > Lwt.t
-val count_fav_with_username :
-  string ->
-  < n : Sql.int64_t Sql.non_nullable_data > Lwt.t
-val count_feeds_with_tag :
-  string ->
-  < n : Sql.int64_t Sql.non_nullable_data > Lwt.t
-val count_comments :
-  int32 ->
-  < n : Sql.int64_t Sql.non_nullable_data > Lwt.t
 
 val add_feed :
   ?root:int32 ->
