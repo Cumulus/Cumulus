@@ -148,8 +148,14 @@ let get_feeds_aux ?range
      >>)
   >>= fun total_count ->
   let favs = List.map (fun x -> x#!id_feed) favs in
+  let find_and_map find map default x =
+    Option.map_default map default (List.Exceptionless.find find x)
+  in
   let new_object o =
     let id = o#!id in
+    let map map default x =
+      find_and_map (fun x -> Int32.equal x#!id_feed id) map default x
+    in
     { author = o#!author
     ; id
     ; date = o#!timedate
@@ -157,7 +163,7 @@ let get_feeds_aux ?range
     ; url = o#?url
     ; parent = o#?parent
     ; root = o#?root
-    ; tags = Option.map_default (fun x -> Array.to_list x#!tags) [] (List.Exceptionless.find (fun x -> Int32.equal x#!id_feed id) tags)
+    ; tags = map (fun x -> List.filter_map identity (Array.to_list x#!tags)) [] tags
     ; score = List.fold_left (fun acc x -> if Int32.equal x#!id_feed id then acc + Int32.to_int x#!score else acc) 0 votes
     ; user = object method name = o#!name method email_digest = o#!email_digest end
     ; fav = List.exists (Int32.equal id) favs
