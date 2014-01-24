@@ -53,10 +53,8 @@ let links_of_tags tags =
     acc @ [Html.pcdata " "; link]
   ) [] tags
 
-module H = Xhtml_f.Make(Eliom_content.Xml)
-module M = MarkdownHTML.Make_xhtml(H)
-
-let conv : 'a H.elt list -> 'a Html.elt list = fun x -> Html.totl (H.toeltl x)
+module H = Eliom_content.Html5.F.Raw
+module M = MarkdownHTML.Make_html5(struct include H module Svg = Eliom_content.Svg.F.Raw end)
 
 let to_html self =
   let content = match self.url with
@@ -74,7 +72,7 @@ let to_html self =
         let render_img {Markdown.img_src; img_alt} =
           H.img ~src:(H.uri_of_string img_src) ~alt:img_alt ()
         in
-        Html.div ~a:[Html.a_class ["lamalama"]] (conv (M.to_html ~render_pre ~render_link ~render_img markdown))
+        Html.div ~a:[Html.a_class ["lamalama"]] (M.to_html ~render_pre ~render_link ~render_img markdown)
   in
   let tags = match self.url with
     | Some _ -> (Html.pcdata "Tags: ") :: links_of_tags self.tags
@@ -204,8 +202,8 @@ let to_atom self =
               let render_img {Markdown.img_src; img_alt} =
                 H.img ~src:(H.uri_of_string img_src) ~alt:img_alt ()
               in
-              Html.div ~a:[Html.a_class ["lamalama"]] (conv (M.to_html ~render_pre
-                                                               ~render_link ~render_img markdown))
+              Html.div ~a:[Html.a_class ["lamalama"]] (M.to_html ~render_pre
+                                                         ~render_link ~render_img markdown)
          )
          :: (Html.br ())
          :: (Html.a ~service:Services.atom_feed [Html.pcdata "Flux atom du lien"]
