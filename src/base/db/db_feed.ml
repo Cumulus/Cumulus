@@ -100,7 +100,7 @@ let get_feeds_aux ?range
   Db.view
     (<:view<
       group {
-        tags = match array_agg[t.tag] with null -> $string_array:[||]$ | x -> x;
+        tags = match array_agg[t.tag] with null -> $string_array:[]$ | x -> x;
       }
       by { t.id_feed }
       | t in $Db_table.feeds_tags$;
@@ -163,7 +163,7 @@ let get_feeds_aux ?range
     ; url = o#?url
     ; parent = o#?parent
     ; root = o#?root
-    ; tags = map (fun x -> List.filter_map identity (Array.to_list x#!tags)) [] tags
+    ; tags = map (fun x -> List.filter_map identity x#!tags) [] tags
     ; score = List.fold_left (fun acc x -> if Int32.equal x#!id_feed id then acc + Int32.to_int x#!score else acc) 0 votes
     ; user = object method name = o#!name method email_digest = o#!email_digest end
     ; fav = List.exists (Int32.equal id) favs
