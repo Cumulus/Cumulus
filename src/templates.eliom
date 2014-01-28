@@ -73,8 +73,6 @@ end
 module Feed = struct
   include Feed
 
-module Uri = Eliom_uri
-
 let links_of_tags tags =
   List.fold_left (fun acc tag ->
     let link =
@@ -218,67 +216,6 @@ let to_html self =
         ]
       ]
   )
-
-let to_atom self =
-  User.get_userid () >>= fun user ->
-  Feed.get_root ~feedid:self.id ~user () >>= fun root_feed ->
-  let title, root_infos = match root_feed with
-    | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'.description) ^
-                            "] " ^ (
-                            match self.url with
-                            | Some url -> self.description
-                            | None -> Utils.troncate self.description
-                          ),
-                          [Html.pcdata "ce message est une réponse à : ";
-                           Html.a ~service:Services.view_feed
-                             [Html.pcdata root_feed'.description]
-                             (Int32.to_int root_feed'.id,
-                              Utils.troncate root_feed'.description)])
-    | None -> (Utils.troncate' 200 self.description, [])
-  in
-  Lwt.return (
-    Atom_feed.entry
-      ~updated: self.date
-      ~id:(Int32.to_string self.id)
-      ~title: (Atom_feed.plain (title))
-      [Atom_feed.authors [Atom_feed.author self.user#name];
-       Atom_feed.links [Atom_feed.link (Uri.make_string_uri ~absolute:true
-                                          ~service:Services.view_feed
-                                          (Int32.to_int self.id, "")
-                                       )];
-       Atom_feed.summary (Atom_feed.html5 (
-         (match self.url with
-          | Some url -> Html.Raw.a ~a:
-                          [Html.a_href
-                             (Html.uri_of_string
-                                (fun () -> url)
-                             )
-                          ]
-                          [Html.pcdata self.description]
-          | None ->
-              let markdown = Markdown.parse_text self.description in
-              let render_pre ~kind s = H.pre [H.pcdata s] in
-              let render_link {Markdown.href_target; href_desc} =
-                H.a ~a:[H.a_href (H.uri_of_string href_target)] [H.pcdata href_desc]
-              in
-              let render_img {Markdown.img_src; img_alt} =
-                H.img ~src:(H.uri_of_string img_src) ~alt:img_alt ()
-              in
-              Html.div ~a:[Html.a_class ["lamalama"]] (M.to_html ~render_pre
-                                                         ~render_link ~render_img markdown)
-         )
-         :: (Html.br ())
-         :: (Html.a ~service:Services.atom_feed [Html.pcdata "Flux atom du lien"]
-               (Int32.to_int self.id))
-         :: (Html.br ())
-         :: (Html.pcdata "Tags : ")
-         :: (links_of_tags self.tags)
-         @ [(Html.br ())]
-         @ root_infos
-       )
-       )
-      ]
-  )
 end
 
 module Comments = struct
@@ -296,9 +233,6 @@ let rec to_html tree =
 end
 
 module Feeds = struct
-
-module Calendar = CalendarLib.Calendar
-
 let to_somthing f data =
   Lwt_list.map_p (fun feed -> f feed) data
 
@@ -340,67 +274,6 @@ let feed_id_to_html id =
   User.get_userid () >>= fun user ->
   Feed.get_feed_with_id ~user id >>= fun feed ->
   private_to_html [feed]
-
-let tree_to_atom id () =
-  User.get_userid () >>= fun user ->
-  Feed.get_tree_feeds ~user id ~starting:0l ~number:Utils.offset ()
-  >>= fun (feeds, _) ->
-  to_somthing Feed.to_atom feeds
-  >>= (fun tmp ->
-    Lwt.return (
-      Atom_feed.feed
-        ~updated: (Calendar.make 2012 6 9 17 40 30)
-        ~id:"http://cumulus.org"
-        ~title: (Atom_feed.plain ("Cumulus (id: " ^ Int32.to_string id ^ ")"))
-        tmp
-    )
-  )
-
-let tag_to_atom tag () =
-  User.get_userid () >>= fun user ->
-  Feed.get_feeds_with_tag ~user tag ~starting:0l ~number:Utils.offset ()
-  >>= fun (feeds, _) ->
-  to_somthing Feed.to_atom feeds
-  >>= (fun tmp ->
-    Lwt.return (
-      Atom_feed.feed
-        ~updated: (Calendar.make 2012 6 9 17 40 30)
-        ~id:"http://cumulus.org"
-        ~title: (Atom_feed.plain ("Cumulus (tag: " ^ tag ^ ")"))
-        tmp
-    )
-  )
-
-(* FIXME? should atom feed return only a limited number of links ? *)
-let to_atom () =
-  User.get_userid () >>= fun user ->
-  Feed.get_links_feeds ~user ~starting:0l ~number:Utils.offset ()
-  >>= fun (feeds, _) ->
-  to_somthing Feed.to_atom feeds
-  >>= (fun tmp ->
-    Lwt.return (
-      Atom_feed.feed
-        ~updated: (Calendar.make 2012 6 9 17 40 30)
-        ~id:"http://cumulus.org"
-        ~title: (Atom_feed.plain "Cumulus")
-        tmp
-    )
-  )
-
-let comments_to_atom () =
-  User.get_userid () >>= fun user ->
-  Feed.get_comments_feeds ~user ~starting:0l ~number:Utils.offset ()
-  >>= fun (feeds, _) ->
-  to_somthing Feed.to_atom feeds
-  >>= (fun tmp ->
-    Lwt.return (
-      Atom_feed.feed
-        ~updated: (Calendar.make 2012 6 9 17 40 30)
-        ~id:"http://cumulus.org"
-        ~title: (Atom_feed.plain "Cumulus")
-        tmp
-    )
-  )
 
 (* TODO: Remove this ugly thing *)
 let to_html' ~starting ~number ~user feeds =
@@ -1016,8 +889,3 @@ let reset_password () =
       ()
   in
   main_style [form] []
-
-let to_atom = Feeds.to_atom
-let comments_to_atom = Feeds.comments_to_atom
-let tree_to_atom = Feeds.tree_to_atom
-let tag_to_atom = Feeds.tag_to_atom

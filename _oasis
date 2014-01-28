@@ -21,6 +21,7 @@ Library cumulus
   Path: src
   Modules:
     server/Templates,
+    Templates_atom,
     Main
   BuildDepends:
     cumulus.base
