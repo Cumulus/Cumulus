@@ -343,13 +343,9 @@ let user_logged user =
     )
 
 let userbox () =
-  User.get_user_and_email_digest () >>= (function
-    | Some user -> user_logged user
-    | None -> user_form ()
-  )
-  >>= fun userb ->
-  Lwt.return
-    userb
+  User.get_user_and_email_digest () >>= function
+  | Some user -> user_logged user
+  | None -> user_form ()
 
 let header () =
   Lwt.return
