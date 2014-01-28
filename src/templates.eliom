@@ -240,7 +240,7 @@ let main_style content footer =
                @ [Html.aside ~a: [Html.a_class["col";"w80"]] content]
                @ [ userbox;
                    Html.div ~a: [Html.a_class ["navigation"]]footer;
-                   Html.footer
+                   (*Html.footer
                      ( [ Html.br ();
                          Html.br ();
                          Html.pcdata "(not so) Proudly propulsed by the inglorious ";
@@ -267,7 +267,7 @@ let main_style content footer =
                          Html.pcdata ") Si t'as oublié ton mot-de-passe, clique ";
                          Html.a ~service:Services.reset_password_form [Html.pcdata "ici"] ();
                        ]
-                     )
+                     )*)
                  ]
               )
           ]
