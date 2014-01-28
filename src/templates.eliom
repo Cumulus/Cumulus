@@ -60,35 +60,21 @@ open Batteries
 
 module Html = Eliom_content.Html5.F
 
-module Utils = struct
-  include Utils
-
-let msg str = [
-  Html.p [
-    Html.pcdata str
-  ]
-]
-end
-
-module Feed = struct
-  include Feed
-
-let links_of_tags tags =
-  List.fold_left (fun acc tag ->
-    let link =
-      Html.a
-        ~a:[Html.a_class ["tags"]]
-        ~service:Services.tag_feed
-        [Html.pcdata tag]
-        (None, tag)
-    in
-    acc @ [Html.pcdata " "; link]
-  ) [] tags
-
-module H = Eliom_content.Html5.F.Raw
-module M = MarkdownHTML.Make_html5(struct include H module Svg = Eliom_content.Svg.F.Raw end)
-
-let to_html self =
+let feed_to_html self =
+  let module H = Eliom_content.Html5.F.Raw in
+  let module M = MarkdownHTML.Make_html5(struct include H module Svg = Eliom_content.Svg.F.Raw end) in
+  let links_of_tags tags =
+    List.fold_left (fun acc tag ->
+      let link =
+        Html.a
+          ~a:[Html.a_class ["tags"]]
+          ~service:Services.tag_feed
+          [Html.pcdata tag]
+          (None, tag)
+      in
+      acc @ [Html.pcdata " "; link]
+    ) [] tags
+  in
   let get_image cls imgname =
    Html.img ~a: [Html.a_class cls]
                   ~alt: imgname
@@ -96,15 +82,15 @@ let to_html self =
                     ~service: (Eliom_service.static_dir ())
                   [imgname]
                     )() in
-  let content = match self.url with
+  let content = match self.Feed.url with
     | Some url -> Html.div ~a:[Html.a_class["line_title"]][
                     Html.Raw.a
                     ~a:[Html.a_class ["postitle"];
                         Html.a_href (Html.uri_of_string (fun () -> url));
                        ]
-                    [Html.pcdata self.description]]
+                    [Html.pcdata self.Feed.description]]
     | None ->
-        let markdown = Markdown.parse_text self.description in
+        let markdown = Markdown.parse_text self.Feed.description in
         let render_pre ~kind s = H.pre [H.pcdata s] in
         let render_link {Markdown.href_target; href_desc} =
           H.a ~a:[H.a_href (H.uri_of_string href_target)] [H.pcdata href_desc]
@@ -114,13 +100,13 @@ let to_html self =
         in
         Html.div ~a:[Html.a_class ["lamalama"]] (M.to_html ~render_pre ~render_link ~render_img markdown)
   in
-  let tags = match self.url with
-    | Some _ -> Html.div ~a:[Html.a_class["tag_line"]] (links_of_tags self.tags)
+  let tags = match self.Feed.url with
+    | Some _ -> Html.div ~a:[Html.a_class["tag_line"]] (links_of_tags self.Feed.tags)
     | None -> Html.div ~a:[Html.a_class["error"]][] in
   User.is_connected () >>= fun state ->
   User.get_userid () >>= (function
     | None -> Lwt.return false
-    | Some userid -> Lwt.return (Int32.equal userid self.author)
+    | Some userid -> Lwt.return (Int32.equal userid self.Feed.author)
   )
   >>= fun is_author ->
   User.is_admin ()
@@ -134,31 +120,31 @@ let to_html self =
                 [Html.div ~a: [Html.a_class["post_avatar"]]
                    [Html.img
                       ~a: [Html.a_class ["postimg"]]
-                      ~alt: (self.user#name)
+                      ~alt: (self.Feed.user#name)
                       ~src: (
                         Html.make_uri
-                          ~service: (Utils.get_gravatar (self.user#email_digest)) (65, "identicon")
+                          ~service: (Utils.get_gravatar (self.Feed.user#email_digest)) (65, "identicon")
                       )
                       ()]];
               Html.aside ~a: [Html.a_class["col";"post_info"]][
                 Html.div ~a: [Html.a_class["line_author"]]([
 
-                  Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
+                  Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.Feed.date) ^ " par ");
                   Html.a
                     ~service:Services.author_feed
-                    [Html.pcdata self.user#name]
-                    (None, self.user#name);
+                    [Html.pcdata self.Feed.user#name]
+                    (None, self.Feed.user#name);
                   Html.a
                     ~service:Services.atom_feed
                     [Html.pcdata "  Flux Atom du lien "]
-                    (Int32.to_int self.id);
+                    (Int32.to_int self.Feed.id);
                 ]
                 @
           (if is_author || is_admin then
             [
-                Html.a ~service:Services.delete_feed [Html.pcdata "- Supprimer "] self.id ;
+                Html.a ~service:Services.delete_feed [Html.pcdata "- Supprimer "] self.Feed.id ;
                 Html.a ~service:Services.edit_feed [Html.pcdata "- Editer"]
-                  (Int32.to_int self.id, Utils.troncate self.description);
+                  (Int32.to_int self.Feed.id, Utils.troncate self.Feed.description);
             ]
            else []
                 ));
@@ -173,92 +159,86 @@ let to_html self =
                   Html.div ~a: [Html.a_class["com_wrap"]][
                     Html.a
                       ~service:Services.view_feed
-                      [if self.count <= 0 then
+                      [if self.Feed.count <= 0 then
                          get_image ["circled";"gray";"comment_icon"] "comments.png"
                        else
                          get_image ["circled";"highlighted";"comment_icon"] "comments.png";
                       ]
-                      (Int32.to_int self.id, Utils.troncate self.description)];
-                  Html.pcdata (string_of_int self.count)
+                      (Int32.to_int self.Feed.id, Utils.troncate self.Feed.description)];
+                  Html.pcdata (string_of_int self.Feed.count)
                 ];
                 Html.div ~a: [Html.a_class ["fav_wrap"]][
-                  if self.fav = false then
+                  if self.Feed.fav = false then
                     Html.a
                       ~service:Services.add_fav_feed
                       [get_image ["circled";"gray";] "fav.png"]
-                      (self.id)
+                      (self.Feed.id)
                   else
                     Html.a
                       ~service:Services.del_fav_feed
                       [get_image ["circled";"highlighted";"deletable"] "fav.png"]
-                      (self.id);
+                      (self.Feed.id);
                 ];
-                let cl = if self.score <= 0 then ["upvote_wrap_inner";"gray"] else
+                let cl = if self.Feed.score <= 0 then ["upvote_wrap_inner";"gray"] else
                     ["upvote_wrap_inner"] in
                 Html.div ~a: [Html.a_class["upvote_wrap"]][
                   Html.div ~a: [Html.a_class cl][
-                    if self.score <> 1 then
+                    if self.Feed.score <> 1 then
                       (Html.a ~service:Services.upvote_feed [
-                         get_image [] "up.png"] self.id)
+                         get_image [] "up.png"] self.Feed.id)
                     else
                       (Html.a ~service:Services.cancelvote_feed [
-                         get_image [] "upon.png"] self.id);
-                    Html.pcdata (string_of_int self.score);
-                    if self.score <> -1 then
+                         get_image [] "upon.png"] self.Feed.id);
+                    Html.pcdata (string_of_int self.Feed.score);
+                    if self.Feed.score <> -1 then
                       (Html.a ~service:Services.downvote_feed [
-                         get_image [] "down.png"] self.id)
+                         get_image [] "down.png"] self.Feed.id)
                     else
                       (Html.a ~service:Services.cancelvote_feed [
-                         get_image [] "downon.png"] self.id)
+                         get_image [] "downon.png"] self.Feed.id)
                   ]];
               ]
           ]
         ]
       ]
   )
-end
 
-module Comments = struct
-  include Comments
-
-let rec to_html tree =
+let rec comments_to_html' tree =
   match tree with
   | Comments.Sheet feed ->
-      Feed.to_html feed >>= fun elm ->
+      feed_to_html feed >>= fun elm ->
       Lwt.return (Html.div ~a: [Html.a_class ["line"]] elm)
   | Comments.Node (feed, childs) ->
-      Feed.to_html feed >>= fun elm ->
-      Lwt_util.map to_html childs >>= fun childs ->
+      feed_to_html feed >>= fun elm ->
+      Lwt_util.map comments_to_html' childs >>= fun childs ->
       Lwt.return (Html.div ~a: [Html.a_class ["line"]] (elm @ childs))
-end
 
-module Feeds = struct
 let to_somthing f data =
   Lwt_list.map_p (fun feed -> f feed) data
 
 let private_to_html data =
   to_somthing
     (fun feed ->
-       Feed.to_html feed >>= (fun elm ->
+       feed_to_html feed >>= (fun elm ->
          Lwt.return (Html.section ~a: [Html.a_class["line"]] elm)
        )
     ) data
 
-let comments_to_html id =
+let feeds_comments_to_html id =
   User.get_userid () >>= fun user ->
   Feed.get_feed_with_id ~user id >>= fun root ->
   Feed.get_comments ~user id
   >>= fun comments ->
   let result = Comments.tree_comments [Comments.Sheet root] comments
   in match result with
-  | Some tree -> Comments.to_html tree
-  | None -> Comments.to_html (Comments.Sheet root)
+  | Some tree -> comments_to_html' tree
+  | None -> comments_to_html' (Comments.Sheet root)
 
-let branch_to_html id =
+let feeds_branch_to_html id =
   User.get_userid () >>= fun user ->
   Feed.get_feed_with_id ~user id >>= fun sheet ->
   match sheet.Feed.root with
-  | None -> Comments.to_html (Comments.Sheet sheet)
+  | None -> comments_to_html' (Comments.Sheet sheet)
   | Some id ->
       Feed.get_feed_with_id ~user id >>= fun root ->
       Feed.get_comments ~user id
@@ -266,7 +246,7 @@ let branch_to_html id =
       let tree =
         Comments.branch_comments (Comments.Sheet sheet) (root :: comments)
       in
-      Comments.to_html tree
+      comments_to_html' tree
 
 let to_html = private_to_html
 
@@ -276,11 +256,10 @@ let feed_id_to_html id =
   private_to_html [feed]
 
 (* TODO: Remove this ugly thing *)
-let to_html' ~starting ~number ~user feeds =
+let feeds_to_html' ~starting ~number ~user feeds =
   feeds ~starting ~number ~user () >>= fun (feeds, n) ->
   to_html feeds >|= fun feeds ->
   (feeds, n)
-end
 
 let string_input_box ?(a=[]) =
   Html.string_input ~a:(Html.a_class ["input-box"] :: a)
@@ -289,7 +268,6 @@ let submit_input ?(a=[]) =
   Html.string_input
     ~a:(Html.a_class ["btn-box"] :: a)
     ~input_type:`Submit
-
 
 let user_form () =
   Lwt.return
@@ -645,7 +623,7 @@ let private_comment id =
                ] []
   else
     User.is_connected () >>= fun state ->
-    Feeds.branch_to_html id >>= fun branch ->
+    feeds_branch_to_html id >>= fun branch ->
     main_style
       ( if not state then
           [Html.div
@@ -719,7 +697,7 @@ let private_edit_feed id =
                ] []
   else
     User.is_connected () >>= fun state ->
-    Feeds.branch_to_html id >>= fun branch ->
+    feeds_branch_to_html id >>= fun branch ->
     Feed.get_edit_infos id >>= fun (edit_desc, edit_url, edit_tags) ->
     User.get_userid () >>= (function
       | None -> Lwt.return true
@@ -804,7 +782,7 @@ let feed_list ~service page link feeds =
   let starting = Int32.mul (Int32.of_int page) off in
   private_main ~page ~link
     ~service
-    (Feeds.to_html' ~starting ~number:off ~user:is_connected feeds)
+    (feeds_to_html' ~starting ~number:off ~user:is_connected feeds)
 
 (* see TODO [1] *)
 let main ?(page=0) ~service () =
@@ -847,7 +825,7 @@ let fav_feed ?(page=0) ~service username =
 let view_feed id =
   Feed.exist ~feedid:(Int32.of_int id) () >>= fun exist ->
   if exist then
-    Feeds.comments_to_html (Int32.of_int id) >>= (fun feed ->
+    feeds_comments_to_html (Int32.of_int id) >>= (fun feed ->
       main_style [feed] [])
   else
     main_style
