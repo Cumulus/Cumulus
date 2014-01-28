@@ -20,9 +20,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
 {shared{
-    let (>>=) = Lwt.(>>=)
-    and (=<<) = Lwt.(=<<)
-  }}
+  open Eliom_lib.Lwt_ops
+}}
 
 {client{
   let display_error error_frame =
@@ -56,6 +55,359 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
            stream
       )
 }}
+
+open Batteries
+
+module Html = Eliom_content.Html5.F
+
+module Utils = struct
+  include Utils
+
+let msg str = [
+  Html.p [
+    Html.pcdata str
+  ]
+]
+end
+
+module Feed = struct
+  include Feed
+
+module Uri = Eliom_uri
+
+let links_of_tags tags =
+  List.fold_left (fun acc tag ->
+    let link =
+      Html.a
+        ~a:[Html.a_class ["tags"]]
+        ~service:Services.tag_feed
+        [Html.pcdata tag]
+        (None, tag)
+    in
+    acc @ [Html.pcdata " "; link]
+  ) [] tags
+
+module H = Eliom_content.Html5.F.Raw
+module M = MarkdownHTML.Make_html5(struct include H module Svg = Eliom_content.Svg.F.Raw end)
+
+let to_html self =
+  let get_image cls imgname =
+   Html.img ~a: [Html.a_class cls]
+                  ~alt: imgname
+                  ~src:(Html.make_uri
+                    ~service: (Eliom_service.static_dir ())
+                  [imgname]
+                    )() in
+  let content = match self.url with
+    | Some url -> Html.div ~a:[Html.a_class["line_title"]][
+                    Html.Raw.a
+                    ~a:[Html.a_class ["postitle"];
+                        Html.a_href (Html.uri_of_string (fun () -> url));
+                       ]
+                    [Html.pcdata self.description]]
+    | None ->
+        let markdown = Markdown.parse_text self.description in
+        let render_pre ~kind s = H.pre [H.pcdata s] in
+        let render_link {Markdown.href_target; href_desc} =
+          H.a ~a:[H.a_href (H.uri_of_string href_target)] [H.pcdata href_desc]
+        in
+        let render_img {Markdown.img_src; img_alt} =
+          H.img ~src:(H.uri_of_string img_src) ~alt:img_alt ()
+        in
+        Html.div ~a:[Html.a_class ["lamalama"]] (M.to_html ~render_pre ~render_link ~render_img markdown)
+  in
+  let tags = match self.url with
+    | Some _ -> Html.div ~a:[Html.a_class["tag_line"]] (links_of_tags self.tags)
+    | None -> Html.div ~a:[Html.a_class["error"]][] in
+  User.is_connected () >>= fun state ->
+  User.get_userid () >>= (function
+    | None -> Lwt.return false
+    | Some userid -> Lwt.return (Int32.equal userid self.author)
+  )
+  >>= fun is_author ->
+  User.is_admin ()
+  >>= fun is_admin ->
+  Lwt.return (
+    List.flatten
+      [
+        [
+          Html.aside ~a: [Html.a_class ["row";"post";"mod"]; Html.a_id "post"] [
+              Html.aside ~a: [Html.a_class["col";"avatarbox"]]
+                [Html.div ~a: [Html.a_class["post_avatar"]]
+                   [Html.img
+                      ~a: [Html.a_class ["postimg"]]
+                      ~alt: (self.user#name)
+                      ~src: (
+                        Html.make_uri
+                          ~service: (Utils.get_gravatar (self.user#email_digest)) (65, "identicon")
+                      )
+                      ()]];
+              Html.aside ~a: [Html.a_class["col";"post_info"]][
+                Html.div ~a: [Html.a_class["line_author"]]([
+
+                  Html.pcdata ("Publié le " ^ (Utils.string_of_calendar self.date) ^ " par ");
+                  Html.a
+                    ~service:Services.author_feed
+                    [Html.pcdata self.user#name]
+                    (None, self.user#name);
+                  Html.a
+                    ~service:Services.atom_feed
+                    [Html.pcdata "  Flux Atom du lien "]
+                    (Int32.to_int self.id);
+                ]
+                @
+          (if is_author || is_admin then
+            [
+                Html.a ~service:Services.delete_feed [Html.pcdata "- Supprimer "] self.id ;
+                Html.a ~service:Services.edit_feed [Html.pcdata "- Editer"]
+                  (Int32.to_int self.id, Utils.troncate self.description);
+            ]
+           else []
+                ));
+                content;
+                tags;
+              ];
+              Html.div ~a: [Html.a_class["col";"post_int"]][
+
+
+                Html.aside
+                  ~a: [Html.a_class["comment_block"]][
+                  Html.div ~a: [Html.a_class["com_wrap"]][
+                    Html.a
+                      ~service:Services.view_feed
+                      [if self.count <= 0 then
+                         get_image ["circled";"gray";"comment_icon"] "comments.png"
+                       else
+                         get_image ["circled";"highlighted";"comment_icon"] "comments.png";
+                      ]
+                      (Int32.to_int self.id, Utils.troncate self.description)];
+                  Html.pcdata (string_of_int self.count)
+                ];
+                Html.div ~a: [Html.a_class ["fav_wrap"]][
+                  if self.fav = false then
+                    Html.a
+                      ~service:Services.add_fav_feed
+                      [get_image ["circled";"gray";] "fav.png"]
+                      (self.id)
+                  else
+                    Html.a
+                      ~service:Services.del_fav_feed
+                      [get_image ["circled";"highlighted";"deletable"] "fav.png"]
+                      (self.id);
+                ];
+                let cl = if self.score <= 0 then ["upvote_wrap_inner";"gray"] else
+                    ["upvote_wrap_inner"] in
+                Html.div ~a: [Html.a_class["upvote_wrap"]][
+                  Html.div ~a: [Html.a_class cl][
+                    if self.score <> 1 then
+                      (Html.a ~service:Services.upvote_feed [
+                         get_image [] "up.png"] self.id)
+                    else
+                      (Html.a ~service:Services.cancelvote_feed [
+                         get_image [] "upon.png"] self.id);
+                    Html.pcdata (string_of_int self.score);
+                    if self.score <> -1 then
+                      (Html.a ~service:Services.downvote_feed [
+                         get_image [] "down.png"] self.id)
+                    else
+                      (Html.a ~service:Services.cancelvote_feed [
+                         get_image [] "downon.png"] self.id)
+                  ]];
+              ]
+          ]
+        ]
+      ]
+  )
+
+let to_atom self =
+  User.get_userid () >>= fun user ->
+  Feed.get_root ~feedid:self.id ~user () >>= fun root_feed ->
+  let title, root_infos = match root_feed with
+    | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'.description) ^
+                            "] " ^ (
+                            match self.url with
+                            | Some url -> self.description
+                            | None -> Utils.troncate self.description
+                          ),
+                          [Html.pcdata "ce message est une réponse à : ";
+                           Html.a ~service:Services.view_feed
+                             [Html.pcdata root_feed'.description]
+                             (Int32.to_int root_feed'.id,
+                              Utils.troncate root_feed'.description)])
+    | None -> (Utils.troncate' 200 self.description, [])
+  in
+  Lwt.return (
+    Atom_feed.entry
+      ~updated: self.date
+      ~id:(Int32.to_string self.id)
+      ~title: (Atom_feed.plain (title))
+      [Atom_feed.authors [Atom_feed.author self.user#name];
+       Atom_feed.links [Atom_feed.link (Uri.make_string_uri ~absolute:true
+                                          ~service:Services.view_feed
+                                          (Int32.to_int self.id, "")
+                                       )];
+       Atom_feed.summary (Atom_feed.html5 (
+         (match self.url with
+          | Some url -> Html.Raw.a ~a:
+                          [Html.a_href
+                             (Html.uri_of_string
+                                (fun () -> url)
+                             )
+                          ]
+                          [Html.pcdata self.description]
+          | None ->
+              let markdown = Markdown.parse_text self.description in
+              let render_pre ~kind s = H.pre [H.pcdata s] in
+              let render_link {Markdown.href_target; href_desc} =
+                H.a ~a:[H.a_href (H.uri_of_string href_target)] [H.pcdata href_desc]
+              in
+              let render_img {Markdown.img_src; img_alt} =
+                H.img ~src:(H.uri_of_string img_src) ~alt:img_alt ()
+              in
+              Html.div ~a:[Html.a_class ["lamalama"]] (M.to_html ~render_pre
+                                                         ~render_link ~render_img markdown)
+         )
+         :: (Html.br ())
+         :: (Html.a ~service:Services.atom_feed [Html.pcdata "Flux atom du lien"]
+               (Int32.to_int self.id))
+         :: (Html.br ())
+         :: (Html.pcdata "Tags : ")
+         :: (links_of_tags self.tags)
+         @ [(Html.br ())]
+         @ root_infos
+       )
+       )
+      ]
+  )
+end
+
+module Comments = struct
+  include Comments
+
+let rec to_html tree =
+  match tree with
+  | Comments.Sheet feed ->
+      Feed.to_html feed >>= fun elm ->
+      Lwt.return (Html.div ~a: [Html.a_class ["line"]] elm)
+  | Comments.Node (feed, childs) ->
+      Feed.to_html feed >>= fun elm ->
+      Lwt_util.map to_html childs >>= fun childs ->
+      Lwt.return (Html.div ~a: [Html.a_class ["line"]] (elm @ childs))
+end
+
+module Feeds = struct
+
+module Calendar = CalendarLib.Calendar
+
+let to_somthing f data =
+  Lwt_list.map_p (fun feed -> f feed) data
+
+let private_to_html data =
+  to_somthing
+    (fun feed ->
+       Feed.to_html feed >>= (fun elm ->
+         Lwt.return (Html.section ~a: [Html.a_class["line"]] elm)
+       )
+    ) data
+
+let comments_to_html id =
+  User.get_userid () >>= fun user ->
+  Feed.get_feed_with_id ~user id >>= fun root ->
+  Feed.get_comments ~user id
+  >>= fun comments ->
+  let result = Comments.tree_comments [Comments.Sheet root] comments
+  in match result with
+  | Some tree -> Comments.to_html tree
+  | None -> Comments.to_html (Comments.Sheet root)
+
+let branch_to_html id =
+  User.get_userid () >>= fun user ->
+  Feed.get_feed_with_id ~user id >>= fun sheet ->
+  match sheet.Feed.root with
+  | None -> Comments.to_html (Comments.Sheet sheet)
+  | Some id ->
+      Feed.get_feed_with_id ~user id >>= fun root ->
+      Feed.get_comments ~user id
+      >>= fun comments ->
+      let tree =
+        Comments.branch_comments (Comments.Sheet sheet) (root :: comments)
+      in
+      Comments.to_html tree
+
+let to_html = private_to_html
+
+let feed_id_to_html id =
+  User.get_userid () >>= fun user ->
+  Feed.get_feed_with_id ~user id >>= fun feed ->
+  private_to_html [feed]
+
+let tree_to_atom id () =
+  User.get_userid () >>= fun user ->
+  Feed.get_tree_feeds ~user id ~starting:0l ~number:Utils.offset ()
+  >>= fun (feeds, _) ->
+  to_somthing Feed.to_atom feeds
+  >>= (fun tmp ->
+    Lwt.return (
+      Atom_feed.feed
+        ~updated: (Calendar.make 2012 6 9 17 40 30)
+        ~id:"http://cumulus.org"
+        ~title: (Atom_feed.plain ("Cumulus (id: " ^ Int32.to_string id ^ ")"))
+        tmp
+    )
+  )
+
+let tag_to_atom tag () =
+  User.get_userid () >>= fun user ->
+  Feed.get_feeds_with_tag ~user tag ~starting:0l ~number:Utils.offset ()
+  >>= fun (feeds, _) ->
+  to_somthing Feed.to_atom feeds
+  >>= (fun tmp ->
+    Lwt.return (
+      Atom_feed.feed
+        ~updated: (Calendar.make 2012 6 9 17 40 30)
+        ~id:"http://cumulus.org"
+        ~title: (Atom_feed.plain ("Cumulus (tag: " ^ tag ^ ")"))
+        tmp
+    )
+  )
+
+(* FIXME? should atom feed return only a limited number of links ? *)
+let to_atom () =
+  User.get_userid () >>= fun user ->
+  Feed.get_links_feeds ~user ~starting:0l ~number:Utils.offset ()
+  >>= fun (feeds, _) ->
+  to_somthing Feed.to_atom feeds
+  >>= (fun tmp ->
+    Lwt.return (
+      Atom_feed.feed
+        ~updated: (Calendar.make 2012 6 9 17 40 30)
+        ~id:"http://cumulus.org"
+        ~title: (Atom_feed.plain "Cumulus")
+        tmp
+    )
+  )
+
+let comments_to_atom () =
+  User.get_userid () >>= fun user ->
+  Feed.get_comments_feeds ~user ~starting:0l ~number:Utils.offset ()
+  >>= fun (feeds, _) ->
+  to_somthing Feed.to_atom feeds
+  >>= (fun tmp ->
+    Lwt.return (
+      Atom_feed.feed
+        ~updated: (Calendar.make 2012 6 9 17 40 30)
+        ~id:"http://cumulus.org"
+        ~title: (Atom_feed.plain "Cumulus")
+        tmp
+    )
+  )
+
+(* TODO: Remove this ugly thing *)
+let to_html' ~starting ~number ~user feeds =
+  feeds ~starting ~number ~user () >>= fun (feeds, n) ->
+  to_html feeds >|= fun feeds ->
+  (feeds, n)
+end
 
 let string_input_box ?(a=[]) =
   Html.string_input ~a:(Html.a_class ["input-box"] :: a)
@@ -664,3 +1016,8 @@ let reset_password () =
       ()
   in
   main_style [form] []
+
+let to_atom = Feeds.to_atom
+let comments_to_atom = Feeds.comments_to_atom
+let tree_to_atom = Feeds.tree_to_atom
+let tag_to_atom = Feeds.tag_to_atom

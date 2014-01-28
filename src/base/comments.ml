@@ -92,13 +92,3 @@ let rec branch_comments root = function
       if Int32.equal x.Feed.id (get root)
       then branch_comments (Node (x, [root])) r
       else branch_comments root (r @ [x])
-
-let rec to_html tree =
-  match tree with
-  | Sheet feed ->
-      Feed.to_html feed >>= fun elm ->
-      Lwt.return (Html.div ~a: [Html.a_class ["line"]] elm)
-  | Node (feed, childs) ->
-      Feed.to_html feed >>= fun elm ->
-      Lwt_util.map to_html childs >>= fun childs ->
-      Lwt.return (Html.div ~a: [Html.a_class ["line"]] (elm @ childs))

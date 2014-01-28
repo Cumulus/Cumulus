@@ -37,8 +37,12 @@ type feed = Db_feed.feed =
   ; count : int
   }
 
-val to_html : Db_feed.feed -> [> `Aside | `Div ] Html.elt list Lwt.t
-val to_atom : Db_feed.feed -> Atom_feed.entry Lwt.t
+type feed_generator =
+  starting:int32 ->
+  number:int32 ->
+  user:int32 option ->
+  unit ->
+  (feed list * int64) Lwt.t
 
 val get_edit_infos : int32 ->
   (string * string option * string) Lwt.t
@@ -56,9 +60,22 @@ val downvote : int32 -> unit Lwt.t
 val cancel_vote : int32 -> unit Lwt.t
 
 (* TODO: Remove the following functions *)
-val get_root_feeds : Db_feed.feed_generator
-val get_feeds_with_author : string -> Db_feed.feed_generator
-val get_feeds_with_tag : string -> Db_feed.feed_generator
-val get_fav_with_username : string -> Db_feed.feed_generator
+val get_root_feeds : feed_generator
+val get_feeds_with_author : string -> feed_generator
+val get_feeds_with_tag : string -> feed_generator
+val get_fav_with_username : string -> feed_generator
 val exist : feedid:int32 -> unit -> bool Lwt.t
 val is_feed_author : feedid:int32 -> userid:int32 -> unit -> bool Lwt.t
+val get_root :
+  feedid:int32 ->
+  user:int32 option ->
+  unit ->
+  feed option Lwt.t
+val get_feed_with_id : user:int32 option -> int32 -> feed Lwt.t
+val get_comments :
+  user:int32 option ->
+  int32 ->
+  feed list Lwt.t
+val get_tree_feeds : int32 -> feed_generator
+val get_links_feeds : feed_generator
+val get_comments_feeds : feed_generator

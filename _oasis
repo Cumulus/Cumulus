@@ -39,7 +39,6 @@ Library base
   Modules:
     General_config,
     Services,
-    Html,
     Utils,
     Errors,
     User,

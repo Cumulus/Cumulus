@@ -29,16 +29,16 @@ end)
 let () =
   Eliom_atom.Reg.register
     ~service: Services.atom
-    (fun () () -> Feeds.to_atom ());
+    (fun () () -> Templates.to_atom ());
   Eliom_atom.Reg.register
     ~service: Services.comments_atom
-    (fun () () -> Feeds.comments_to_atom ());
+    (fun () () -> Templates.comments_to_atom ());
   Eliom_atom.Reg.register
     ~service: Services.atom_feed
-    (fun (feed_id) () -> Feeds.tree_to_atom (Int32.of_int feed_id) ());
+    (fun (feed_id) () -> Templates.tree_to_atom (Int32.of_int feed_id) ());
   Eliom_atom.Reg.register
     ~service: Services.atom_tag
-    (fun (tag) () -> Feeds.tag_to_atom tag ());
+    (fun (tag) () -> Templates.tag_to_atom tag ());
   Cumulus_appl.register
     ~service: Services.main
     (fun page () ->

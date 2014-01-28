@@ -34,12 +34,6 @@ let string_of_calendar cal = Calendar.Printer.sprint "%d/%m/%Y à %T" cal
 let string_is_empty =
   String.fold_left (fun res x -> Char.is_whitespace x && res) true
 
-let msg str = [
-  Html.p [
-    Html.pcdata str
-  ]
-]
-
 let is_invalid_url =
   let regexp_match_url =
     let legit_chars = "[]0-9A-Za-z_~().,+=&%-|]" in

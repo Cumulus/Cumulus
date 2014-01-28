@@ -22,113 +22,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 open Batteries
 open Eliom_lib.Lwt_ops
 
-module Calendar = CalendarLib.Calendar
 module UTF8 = CamomileLibraryDefault.Camomile.CaseMap.Make(CamomileLibrary.UTF8)
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
-
-let to_somthing f data =
-  Lwt_list.map_p (fun feed -> f feed) data
-
-let private_to_html data =
-  to_somthing
-    (fun feed ->
-       Feed.to_html feed >>= (fun elm ->
-         Lwt.return (Html.section ~a: [Html.a_class["line"]] elm)
-       )
-    ) data
-
-let comments_to_html id =
-  User.get_userid () >>= fun user ->
-  Db_feed.get_feed_with_id ~user id >>= fun root ->
-  Db_feed.get_comments ~user id
-  >>= fun comments ->
-  let result = Comments.tree_comments [Comments.Sheet root] comments
-  in match result with
-  | Some tree -> Comments.to_html tree
-  | None -> Comments.to_html (Comments.Sheet root)
-
-let branch_to_html id =
-  User.get_userid () >>= fun user ->
-  Db_feed.get_feed_with_id ~user id >>= fun sheet ->
-  match sheet.Feed.root with
-  | None -> Comments.to_html (Comments.Sheet sheet)
-  | Some id ->
-      Db_feed.get_feed_with_id ~user id >>= fun root ->
-      Db_feed.get_comments ~user id
-      >>= fun comments ->
-      let tree =
-        Comments.branch_comments (Comments.Sheet sheet) (root :: comments)
-      in
-      Comments.to_html tree
-
-let to_html = private_to_html
-
-let feed_id_to_html id =
-  User.get_userid () >>= fun user ->
-  Db_feed.get_feed_with_id ~user id >>= fun feed ->
-  private_to_html [feed]
-
-let tree_to_atom id () =
-  User.get_userid () >>= fun user ->
-  Db_feed.get_tree_feeds ~user id ~starting:0l ~number:Utils.offset ()
-  >>= fun (feeds, _) ->
-  to_somthing Feed.to_atom feeds
-  >>= (fun tmp ->
-    Lwt.return (
-      Atom_feed.feed
-        ~updated: (Calendar.make 2012 6 9 17 40 30)
-        ~id:"http://cumulus.org"
-        ~title: (Atom_feed.plain ("Cumulus (id: " ^ Int32.to_string id ^ ")"))
-        tmp
-    )
-  )
-
-let tag_to_atom tag () =
-  User.get_userid () >>= fun user ->
-  Db_feed.get_feeds_with_tag ~user tag ~starting:0l ~number:Utils.offset ()
-  >>= fun (feeds, _) ->
-  to_somthing Feed.to_atom feeds
-  >>= (fun tmp ->
-    Lwt.return (
-      Atom_feed.feed
-        ~updated: (Calendar.make 2012 6 9 17 40 30)
-        ~id:"http://cumulus.org"
-        ~title: (Atom_feed.plain ("Cumulus (tag: " ^ tag ^ ")"))
-        tmp
-    )
-  )
-
-(* FIXME? should atom feed return only a limited number of links ? *)
-let to_atom () =
-  User.get_userid () >>= fun user ->
-  Db_feed.get_links_feeds ~user ~starting:0l ~number:Utils.offset ()
-  >>= fun (feeds, _) ->
-  to_somthing Feed.to_atom feeds
-  >>= (fun tmp ->
-    Lwt.return (
-      Atom_feed.feed
-        ~updated: (Calendar.make 2012 6 9 17 40 30)
-        ~id:"http://cumulus.org"
-        ~title: (Atom_feed.plain "Cumulus")
-        tmp
-    )
-  )
-
-let comments_to_atom () =
-  User.get_userid () >>= fun user ->
-  Db_feed.get_comments_feeds ~user ~starting:0l ~number:Utils.offset ()
-  >>= fun (feeds, _) ->
-  to_somthing Feed.to_atom feeds
-  >>= (fun tmp ->
-    Lwt.return (
-      Atom_feed.feed
-        ~updated: (Calendar.make 2012 6 9 17 40 30)
-        ~id:"http://cumulus.org"
-        ~title: (Atom_feed.plain "Cumulus")
-        tmp
-    )
-  )
 
 let (event, call_event) =
   let (private_event, call_event) = React.E.create () in
@@ -247,9 +143,3 @@ let edit_desc_comment (id, description) =
          ()
        >>= updating_and_ret
     )
-
-(* TODO: Remove this ugly thing *)
-let to_html' ~starting ~number ~user feeds =
-  feeds ~starting ~number ~user () >>= fun (feeds, n) ->
-  to_html feeds >|= fun feeds ->
-  (feeds, n)

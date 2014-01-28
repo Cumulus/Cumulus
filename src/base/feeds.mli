@@ -23,27 +23,8 @@ type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
 val event : unit Eliom_react.Down.t
 
-val to_html :
-  Db_feed.feeds -> (([> Html5_types.section ] Html.elt) list) Lwt.t
-val comments_to_html :
-  int32 ->  [< Html5_types.div_content_fun > `Aside `Div ] Html.elt  Lwt.t
-val branch_to_html :
-  int32 -> [< Html5_types.div_content_fun > `Aside `Div ] Html.elt Lwt.t
-val tree_to_atom : int32 -> unit -> Atom_feed.feed Lwt.t
-val tag_to_atom: string -> unit -> Atom_feed.feed Lwt.t
-val to_atom : unit -> Atom_feed.feed Lwt.t
-val comments_to_atom : unit -> Atom_feed.feed Lwt.t
 val append_feed : (string * (string * string)) -> append_state Lwt.t
 val append_link_comment : (int * (string * (string * string))) -> append_state Lwt.t
 val append_desc_comment : (int * string) -> append_state Lwt.t
-val feed_id_to_html : int32 -> (([> Html5_types.section ]  Html.elt) list) Lwt.t
 val edit_link_comment : (int * (string * (string * string))) -> append_state Lwt.t
 val edit_desc_comment : (int * string) -> append_state Lwt.t
-
-(* TODO: Remove this ugly thing *)
-val to_html' :
-  starting:int32 ->
-  number:int32 ->
-  user:int32 option ->
-  Db_feed.feed_generator ->
-  ([> Html5_types.section ] Html.elt list * int64) Lwt.t

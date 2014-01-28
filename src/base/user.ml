@@ -147,7 +147,7 @@ let get_offset () =
 
 let send_reset_email ~service email =
   let f x =
-    let service = Html.make_string_uri ~service:(service x) ~absolute:true () in
+    let service = Eliom_content.Html5.F.make_string_uri ~service:(service x) ~absolute:true () in
     Netsendmail.sendmail
       (Netsendmail.compose
          ~from_addr:("Cumulus no-reply", General_config.email)
