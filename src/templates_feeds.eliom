@@ -212,14 +212,6 @@ let private_to_html ~user data =
 
 let to_html = private_to_html
 
-let string_input_box ?(a=[]) =
-  string_input ~a:(a_class ["input-box"] :: a)
-
-let submit_input ?(a=[]) =
-  string_input
-    ~a:(a_class ["btn-box"] :: a)
-    ~input_type:`Submit
-
 let user_form () =
   aside
     ~a: [a_class ["col";"w20";"userbox"; "right"; "bottom-box"]][
@@ -430,31 +422,31 @@ let private_register () =
        (fun (username_name, (email_name, (password_name, password_check))) -> [
             h1 [pcdata "Inscription"];
             p [
-              string_input_box
+              Templates_common.string_input_box
                 ~a:[a_placeholder "Pseudo"]
                 ~input_type:`Text
                 ~name:username_name
                 ();
               br ();
-              string_input_box
+              Templates_common.string_input_box
                 ~a:[a_placeholder "Mot de passe"]
                 ~input_type:`Password
                 ~name:password_name
                 ();
               br ();
-              string_input_box
+              Templates_common.string_input_box
                 ~a:[a_placeholder "Confirmation"]
                 ~input_type:`Password
                 ~name:password_check
                 ();
               br ();
-              string_input_box
+              Templates_common.string_input_box
                 ~a:[a_placeholder "Email"]
                 ~input_type:`Text
                 ~name:email_name
                 ();
               br ();
-              submit_input ~value:"Valider" ()
+              Templates_common.submit_input ~value:"Valider" ()
             ]
           ])
        ()
@@ -478,19 +470,19 @@ let private_preferences ~user ~error =
              (fun (password_name, password_check) -> [
                   h1 [pcdata "Modifier le mot de passe"] ;
                   p [
-                    string_input_box
+                    Templates_common.string_input_box
                       ~a:[a_placeholder "Nouveau mot de passe"]
                       ~input_type:`Password
                       ~name:password_name
                       ();
                     br ();
-                    string_input_box
+                    Templates_common.string_input_box
                       ~a:[a_placeholder "Confirmer le nouveau mot de passe"]
                       ~input_type:`Password
                       ~name:password_check
                       ();
                     br ();
-                    submit_input ~value:"Valider" ()
+                    Templates_common.submit_input ~value:"Valider" ()
                   ]
                 ])
              ();
@@ -500,7 +492,7 @@ let private_preferences ~user ~error =
              (fun email_name -> [
                   h1 [pcdata "Changer d'adresse mail"];
                   p [
-                    string_input_box
+                    Templates_common.string_input_box
                       ~a:[a_placeholder User.(usr.email);
                           a_id "new_email"
                          ]
@@ -508,7 +500,7 @@ let private_preferences ~user ~error =
                       ~name:email_name
                       ();
                     br ();
-                    submit_input ~value:"Valider" ()
+                    Templates_common.submit_input ~value:"Valider" ()
                   ]
                 ])
              ();
@@ -527,7 +519,7 @@ let private_preferences ~user ~error =
                       ~name:nb_feeds_name
                       ();
                     br ();
-                    submit_input ~value:"Valider" ()
+                    Templates_common.submit_input ~value:"Valider" ()
                   ]
                 ])
              ()
@@ -550,19 +542,19 @@ let private_comment ~user id =
             (fun (parent, (url, (desc, tags))) -> [
                  h1 [pcdata "Lien"] ;
                  p [
-                   string_input_box
+                   Templates_common.string_input_box
                      ~a:[a_placeholder "URL"]
                      ~input_type:`Text
                      ~name:url
                      ();
                    br ();
-                   string_input_box
+                   Templates_common.string_input_box
                      ~a:[a_placeholder "Titre"]
                      ~input_type:`Text
                      ~name:desc
                      ();
                    br ();
-                   string_input_box
+                   Templates_common.string_input_box
                      ~a:[a_placeholder "Tags"]
                      ~input_type:`Text
                      ~name:tags
@@ -573,7 +565,7 @@ let private_comment ~user id =
                      ~name:parent
                      ~value:(Int32.to_int id)
                      ();
-                   submit_input ~value:"Envoyer !" ()
+                   Templates_common.submit_input ~value:"Envoyer !" ()
                  ]
                ])
             (Int32.to_int id, "");
@@ -595,7 +587,7 @@ let private_comment ~user id =
                      ~value:(Int32.to_int id)
                      ();
                    br ();
-                   submit_input ~value:"Envoyer !" ()
+                   Templates_common.submit_input ~value:"Envoyer !" ()
                  ]
                ])
             (Int32.to_int id, "")
@@ -622,21 +614,21 @@ let private_edit_feed ~user ~error ~feed (edit_desc, edit_url, edit_tags) =
                  (fun (parent, (url, (desc, tags))) -> [
                       h1 [pcdata "Lien"] ;
                       p [
-                        string_input_box
+                        Templates_common.string_input_box
                           ~a:[ a_placeholder "URL"]
                           ~input_type:`Text
                           ~name:url
                           ~value:edit_url
                           ();
                         br ();
-                        string_input_box
+                        Templates_common.string_input_box
                           ~a:[ a_placeholder "Titre" ]
                           ~input_type:`Text
                           ~name:desc
                           ~value:edit_desc
                           ();
                         br ();
-                        string_input_box
+                        Templates_common.string_input_box
                           ~a:[ a_placeholder "Tags" ]
                           ~input_type:`Text
                           ~name:tags
@@ -648,7 +640,7 @@ let private_edit_feed ~user ~error ~feed (edit_desc, edit_url, edit_tags) =
                           ~name:parent
                           ~value:id
                           ();
-                        submit_input ~value:"Envoyer !" ()
+                        Templates_common.submit_input ~value:"Envoyer !" ()
                       ]
                     ])
                  (id, ""))
@@ -671,7 +663,7 @@ let private_edit_feed ~user ~error ~feed (edit_desc, edit_url, edit_tags) =
                           ~value:id
                           ();
                         br ();
-                        submit_input ~value:"Envoyer !" ()
+                        Templates_common.submit_input ~value:"Envoyer !" ()
                       ]
                     ])
                  (id, ""))

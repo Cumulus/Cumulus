@@ -172,16 +172,6 @@ let edit_feed id =
   else
     Templates_feeds.private_edit_feed ~user ~error ~feed infos
 
-(* TODO: Put into Templates_common *)
-let string_input_box ?(a=[]) =
-  Html.string_input ~a:(Html.a_class ["input-box"] :: a)
-
-(* TODO: Put into Templates_common *)
-let submit_input ?(a=[]) =
-  Html.string_input
-    ~a:(Html.a_class ["btn-box"] :: a)
-    ~input_type:`Submit
-
 let reset_password () =
   User.get_user () >>= fun user ->
   Errors.get_error () >|= fun error ->
@@ -192,13 +182,13 @@ let reset_password () =
       (fun email_name -> [
            Html.h1 [Html.pcdata "Adresse mail associée au compte"];
            Html.p [
-             string_input_box
+             Templates_common.string_input_box
                ~a:[Html.a_id "new_email"]
                ~input_type:`Text
                ~name:email_name
                ();
              Html.br ();
-             submit_input ~value:"Valider" ()
+             Templates_common.submit_input ~value:"Valider" ()
            ]
          ])
       ()
