@@ -1,6 +1,7 @@
 # OASIS_START
-# DO NOT EDIT (digest: 5edfc6117dcb10e01b735e5d796f96c2)
-server/Templates
+# DO NOT EDIT (digest: 09ab3aac7fc11ccbd64c49a0c5ed01b8)
+Templates
+server/Templates_feeds
 Templates_atom
 Main
 # OASIS_STOP

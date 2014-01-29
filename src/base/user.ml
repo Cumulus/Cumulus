@@ -77,6 +77,9 @@ let get_userid () = get_user () >|= Option.map (fun x -> x.id)
 let is_connected () = get_user () >|= Option.is_some
 let is_admin () = get_user () >|= Option.map_default (fun x -> x.is_admin) false
 
+let get_feeds_per_page =
+  Option.map_default (fun x -> x.feeds_per_page) Utils.offset
+
 let connect user password =
   Db_user.get_user_with_name user >>= function
   | None -> Lwt.return Not_found

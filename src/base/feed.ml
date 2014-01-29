@@ -75,6 +75,10 @@ let exec_if_not_author f feedid =
 let get_userid f =
   User.get_userid () >>= BatOption.map_default f Lwt.return_unit
 
+let is_author ~feed user =
+  Option.map_default (fun x -> Int32.equal x.User.id feed.author) false user
+  || Option.map_default (fun x -> x.User.is_admin) false user
+
 let add_fav feedid =
   get_userid (fun userid -> Db_feed.add_fav ~feedid ~userid ())
 let del_fav feedid =

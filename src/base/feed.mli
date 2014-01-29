@@ -59,6 +59,8 @@ val upvote : int32 -> unit Lwt.t
 val downvote : int32 -> unit Lwt.t
 val cancel_vote : int32 -> unit Lwt.t
 
+val is_author : feed:feed -> User.user option -> bool
+
 (* TODO: Remove the following functions *)
 val get_root_feeds : feed_generator
 val get_feeds_with_author : string -> feed_generator
