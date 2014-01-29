@@ -30,3 +30,20 @@ let submit_input ?(a=[]) =
   string_input
     ~a:(a_class ["btn-box"] :: a)
     ~input_type:`Submit
+
+let links_of_tags tags =
+  List.fold_left (fun acc tag ->
+    let link =
+      a
+        ~a:[a_class ["tags"]]
+        ~service:Services.tag_feed
+        [pcdata tag]
+        (None, tag)
+    in
+    acc @ [pcdata " "; link]
+  ) [] tags
+
+module Markdown = MarkdownHTML.Make_html5(struct
+  include Raw
+  module Svg = Eliom_content.Svg.F.Raw
+end)

@@ -48,9 +48,19 @@ val string_input_box :
   ?value:string ->
   unit ->
   [> Html5_types.input ] Eliom_content_core.Html5.elt
+
 val submit_input :
   ?a:Html5_types.input_attrib Eliom_content.Html5.F.attrib list ->
   ?name:[< string Eliom_parameter.setoneradio ] Eliom_parameter.param_name ->
   ?value:string ->
   unit ->
   [> Html5_types.input ] Eliom_content_core.Html5.elt
+
+val links_of_tags :
+  string list ->
+  [> `A of [> `PCDATA ] | `PCDATA ] Eliom_content.Html5.F.elt list
+
+module Markdown : module type of MarkdownHTML.Make_html5(struct
+  include Eliom_content_core.Html5.F.Raw
+  module Svg = Eliom_content.Svg.F.Raw
+end)

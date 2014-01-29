@@ -58,20 +58,6 @@ open Batteries
 open Eliom_content.Html5.F
 
 let feed_to_html ~user self =
-  let module H = Eliom_content.Html5.F.Raw in
-  let module M = MarkdownHTML.Make_html5(struct include H module Svg = Eliom_content.Svg.F.Raw end) in
-  let links_of_tags tags =
-    List.fold_left (fun acc tag ->
-      let link =
-        a
-          ~a:[a_class ["tags"]]
-          ~service:Services.tag_feed
-          [pcdata tag]
-          (None, tag)
-      in
-      acc @ [pcdata " "; link]
-    ) [] tags
-  in
   let get_image cls imgname =
    img ~a: [a_class cls]
                   ~alt: imgname
@@ -88,17 +74,17 @@ let feed_to_html ~user self =
                     [pcdata self.Feed.description]]
     | None ->
         let markdown = Markdown.parse_text self.Feed.description in
-        let render_pre ~kind s = H.pre [H.pcdata s] in
+        let render_pre ~kind s = Raw.pre [Raw.pcdata s] in
         let render_link {Markdown.href_target; href_desc} =
-          H.a ~a:[H.a_href (H.uri_of_string href_target)] [H.pcdata href_desc]
+          Raw.a ~a:[Raw.a_href (Raw.uri_of_string href_target)] [Raw.pcdata href_desc]
         in
         let render_img {Markdown.img_src; img_alt} =
-          H.img ~src:(H.uri_of_string img_src) ~alt:img_alt ()
+          Raw.img ~src:(Raw.uri_of_string img_src) ~alt:img_alt ()
         in
-        div ~a:[a_class ["lamalama"]] (M.to_html ~render_pre ~render_link ~render_img markdown)
+        div ~a:[a_class ["lamalama"]] (Templates_common.Markdown.to_html ~render_pre ~render_link ~render_img markdown)
   in
   let tags = match self.Feed.url with
-    | Some _ -> div ~a:[a_class["tag_line"]] (links_of_tags self.Feed.tags)
+    | Some _ -> div ~a:[a_class["tag_line"]] (Templates_common.links_of_tags self.Feed.tags)
     | None -> div ~a:[a_class["error"]][]
   in
   let is_author = Feed.is_author ~feed:self user in
