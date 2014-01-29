@@ -93,17 +93,6 @@ let connect user password =
       else
         Lwt.return Bad_password
 
-(* TODO: Remove this after the merge of the new ui *)
-let get_user_and_email_digest () =
-  get_user () >>= function
-  | None -> Lwt.return None
-  | Some user ->
-      let user = object
-        method name = user.name
-        method email_digest = user.email_digest
-      end in
-      Lwt.return (Some user)
-
 let disconnect () =
   is_connected () >>= function
   | true ->
