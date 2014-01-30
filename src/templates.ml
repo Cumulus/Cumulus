@@ -22,15 +22,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 open Batteries
 open Eliom_lib.Lwt_ops
 
-module Html = Eliom_content.Html5.F
-
 let main_style_aux content =
   User.get_user () >>= fun user ->
   Errors.get_error () >>= fun error ->
   content user >|= fun (content, footer) ->
   Templates_feeds.main_style ~user ~error content footer
 
-let feed_list ~service page link feeds =
+let feed_list ~service page ~service_link link_param feeds =
   let content user =
     let offset = User.get_feeds_per_page user in
     let starting = Int32.(Int32.of_int page * offset) in
@@ -41,7 +39,8 @@ let feed_list ~service page link feeds =
     let offset = Int32.to_int offset in
     let footer =
       Templates_feeds.link_footer
-        ~link
+        ~service:service_link
+        ~param:link_param
         0
         ((n / offset) - (if (n mod offset) = 0 then 1 else 0))
         page
@@ -64,38 +63,26 @@ let main_style_pure content =
 (* see TODO [1] *)
 let main ?(page=0) ~service () =
   feed_list ~service page
-    (fun name param ->
-       Html.a ~service:Services.main [
-         Html.pcdata name
-       ] param
-    )
-    (Feed.get_root_feeds)
+    ~service_link:Services.main
+    identity
+    Feed.get_root_feeds
 
 let user ?(page=0) ~service username =
   feed_list ~service page
-    (fun name param ->
-       Html.a ~service:Services.author_feed [
-         Html.pcdata name
-       ] (param, username)
-    )
+    ~service_link:Services.author_feed
+    (fun x -> (x, username))
     (Feed.get_feeds_with_author username)
 
 let tag ?(page=0) ~service tag =
   feed_list ~service page
-    (fun name param ->
-       Html.a ~service:Services.tag_feed [
-         Html.pcdata name
-       ] (param, tag)
-    )
+    ~service_link:Services.tag_feed
+    (fun x -> (x, tag))
     (Feed.get_feeds_with_tag tag)
 
 let fav_feed ?(page=0) ~service username =
   feed_list ~service page
-    (fun name param ->
-       Html.a ~service:Services.fav_feed [
-         Html.pcdata name
-       ] (username, param)
-    )
+    ~service_link:Services.fav_feed
+    (fun x -> (username, x))
     (Feed.get_fav_with_username username)
 
 let feeds_comments_to_html ~user id =
@@ -131,10 +118,7 @@ let view_feed id =
       [feed]
     else
       Lwt.return
-        [Html.div
-           ~a:[Html.a_class ["box"]]
-           [Html.pcdata "Ce lien n'existe pas."]
-        ]
+        (Templates_feeds.error_content "Ce lien n'existe pas.")
   in
   main_style content
 
@@ -150,10 +134,7 @@ let comment id =
   let content user =
     Feed.exist ~feedid:id () >|= fun exist ->
     if not exist then
-      [Html.div
-         ~a:[Html.a_class ["box"]]
-         [Html.pcdata "Ce commentaire n'existe pas."]
-      ]
+      Templates_feeds.error_content "Ce commentaire n'existe pas."
     else
       Templates_feeds.private_comment ~user id
   in
@@ -166,33 +147,12 @@ let edit_feed id =
     Feed.get_edit_infos feed.Feed.id >>= fun infos ->
     Feed.exist ~feedid:feed.Feed.id () >|= fun exist ->
     if not exist then
-      [Html.div
-         ~a:[Html.a_class ["box"]]
-         [Html.pcdata "Ce commentaire n'existe pas."]
-      ]
+      Templates_feeds.error_content "Ce commentaire n'existe pas."
     else
       Templates_feeds.private_edit_feed ~user ~feed infos
   in
   main_style content
 
 let reset_password () =
-  let form _ =
-    [Html.post_form
-       ~a:[Html.a_class ["box"]]
-       ~service:Services.reset_password
-       (fun email_name -> [
-            Html.h1 [Html.pcdata "Adresse mail associée au compte"];
-            Html.p [
-              Templates_common.string_input_box
-                ~a:[Html.a_id "new_email"]
-                ~input_type:`Text
-                ~name:email_name
-                ();
-              Html.br ();
-              Templates_common.submit_input ~value:"Valider" ()
-            ]
-          ])
-       ()
-    ]
-  in
+  let form _ = Templates_feeds.reset_password () in
   main_style_pure form

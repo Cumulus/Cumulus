@@ -393,7 +393,9 @@ let main_style ~user ~error content footer =
        ]
     )
 
-let link_footer ~link min max = function
+let link_footer ~service ~param min max =
+  let link name x = a ~service [pcdata name] (param x) in
+  function
   | page when page = min && page < max -> [ link "Suivant" (Some (page + 1)) ]
   | page when page = max && page > min -> [ link "Précédent" (Some (page - 1)) ]
   | page when page > min && page < max ->
@@ -641,3 +643,24 @@ let private_edit_feed ~user ~feed (edit_desc, edit_url, edit_tags) =
                 ])
              (feed.Feed.id, ""))
     ]
+
+let error_content msg = [div ~a:[a_class ["box"]] [pcdata msg]]
+
+let reset_password () =
+  [post_form
+     ~a:[a_class ["box"]]
+     ~service:Services.reset_password
+     (fun email_name -> [
+          h1 [pcdata "Adresse mail associée au compte"];
+          p [
+            Templates_common.string_input_box
+              ~a:[a_id "new_email"]
+              ~input_type:`Text
+              ~name:email_name
+              ();
+            br ();
+            Templates_common.submit_input ~value:"Valider" ()
+          ]
+        ])
+     ()
+  ]

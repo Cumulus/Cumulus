@@ -30,11 +30,15 @@ val main_style :
   [< Html5_types.div_content_fun ] Eliom_content.Html5.F.elt list ->
   [> `Html ] Eliom_content.Html5.F.elt
 val link_footer :
-  link:(string -> int option -> 'a) ->
+  service:('a, unit, [< Eliom_service.get_service_kind ],
+           [< Eliom_service.suff ], _, unit, [< Eliom_service.registrable ],
+           [< Eliom_service.non_ocaml_service ])
+            Eliom_service.service ->
+  param:(int option -> 'a) ->
   int ->
   int ->
   int ->
-  'a list
+  [> [> `PCDATA ] Html5_types.a ] Eliom_content.Html5.F.elt list
 val comments_to_html' :
   user:User.user option ->
   Comments.tree ->
@@ -54,3 +58,9 @@ val private_edit_feed :
   feed:Feed.feed ->
   string * string option * string ->
   [> `Div | `Form ] Eliom_content.Html5.F.elt list
+val error_content :
+  string ->
+  [> `Div ] Eliom_content.Html5.F.elt list
+val reset_password :
+  unit ->
+  [> `Form ] Eliom_content.Html5.F.elt list
