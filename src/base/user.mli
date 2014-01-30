@@ -36,6 +36,7 @@ val get_user : unit -> user option Lwt.t
 val get_userid : unit -> int32 option Lwt.t
 val is_connected : unit -> bool Lwt.t
 val is_admin : unit -> bool Lwt.t
+val get_id : user option -> Int32.t option
 val get_feeds_per_page : user option -> Int32.t
 val connect : string -> string -> user_state Lwt.t
 val disconnect : unit -> bool Lwt.t

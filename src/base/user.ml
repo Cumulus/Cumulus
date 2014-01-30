@@ -77,6 +77,8 @@ let get_userid () = get_user () >|= Option.map (fun x -> x.id)
 let is_connected () = get_user () >|= Option.is_some
 let is_admin () = get_user () >|= Option.map_default (fun x -> x.is_admin) false
 
+let get_id = Option.map (fun x -> x.id)
+
 let get_feeds_per_page =
   Option.map_default (fun x -> x.feeds_per_page) Utils.offset
 

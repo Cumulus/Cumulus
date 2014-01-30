@@ -30,7 +30,7 @@ let feed_list ~service page link feeds =
   Errors.get_error () >>= fun error ->
   let offset = User.get_feeds_per_page user in
   let starting = Int32.(Int32.of_int page * offset) in
-  let userid = Option.map (fun x -> x.User.id) user in
+  let userid = User.get_id user in
   feeds ~starting ~number:offset ~user:userid () >|= fun (feeds, n) ->
   let feeds = Templates_feeds.to_html ~user feeds in
   let n = Int64.to_int n in
@@ -84,8 +84,7 @@ let fav_feed ?(page=0) ~service username =
     (Feed.get_fav_with_username username)
 
 let feeds_comments_to_html ~user id =
-  (* TODO: Avoid duplicate *)
-  let userid = Option.map (fun x -> x.User.id) user in
+  let userid = User.get_id user in
   Feed.get_feed_with_id ~user:userid id >>= fun root ->
   Feed.get_comments ~user:userid id >|= fun comments ->
   let result = Comments.tree_comments [Comments.Sheet root] comments
@@ -95,7 +94,7 @@ let feeds_comments_to_html ~user id =
 
 (* TODO: Fix it (doesn't seems to work) *)
 let feeds_branch_to_html ~user id =
-  let userid = Option.map (fun x -> x.User.id) user in
+  let userid = User.get_id user in
   Feed.get_feed_with_id ~user:userid id >>= fun sheet ->
   match sheet.Feed.root with
   | None ->
@@ -155,7 +154,7 @@ let comment id =
 
 let edit_feed id =
   User.get_user () >>= fun user ->
-  let userid = Option.map (fun x -> x.User.id) user in
+  let userid = User.get_id user in
   Feed.get_feed_with_id ~user:userid id >>= fun feed ->
   Errors.get_error () >>= fun error ->
   Feed.get_edit_infos feed.Feed.id >>= fun infos ->
