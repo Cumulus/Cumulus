@@ -35,7 +35,7 @@ let () =
     (fun () () -> Templates_atom.comments_to_atom ());
   Eliom_atom.Reg.register
     ~service: Services.atom_feed
-    (fun (feed_id) () -> Templates_atom.tree_to_atom (Int32.of_int feed_id) ());
+    (fun (feed_id) () -> Templates_atom.tree_to_atom feed_id ());
   Eliom_atom.Reg.register
     ~service: Services.atom_tag
     (fun (tag) () -> Templates_atom.tag_to_atom tag ());
@@ -176,7 +176,7 @@ let () =
   Eliom_registration.Action.register
     ~service:Services.update_user_feeds_per_page
     (fun () data ->
-       User.update_feeds_per_page (Int32.of_int data) >>= (function
+       User.update_feeds_per_page data >>= (function
          | true -> Lwt.return "Nombre de liens par page modifié"
          | false -> Lwt.return "Nombre invalide"
        )

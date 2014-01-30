@@ -40,8 +40,8 @@ val tag :
   string ->
   [> `Html ] Eliom_content.Html5.F.elt Lwt.t
 val register : unit -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t
-val view_feed : int -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t
+val view_feed : int32 -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t
 val preferences : unit -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t
-val comment : int -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t
-val edit_feed : int -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t
+val comment : int32 -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t
+val edit_feed : int32 -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t
 val reset_password : unit -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t

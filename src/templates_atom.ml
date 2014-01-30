@@ -39,7 +39,7 @@ let feed_to_atom self =
                           [Html.pcdata "ce message est une réponse à : ";
                            Html.a ~service:Services.view_feed
                              [Html.pcdata root_feed'.Feed.description]
-                             (Int32.to_int root_feed'.Feed.id,
+                             (root_feed'.Feed.id,
                               Utils.troncate root_feed'.Feed.description)])
     | None -> (Utils.troncate' 200 self.Feed.description, [])
   in
@@ -51,7 +51,7 @@ let feed_to_atom self =
       [Atom_feed.authors [Atom_feed.author self.Feed.user#name];
        Atom_feed.links [Atom_feed.link (Uri.make_string_uri ~absolute:true
                                           ~service:Services.view_feed
-                                          (Int32.to_int self.Feed.id, "")
+                                          (self.Feed.id, "")
                                        )];
        Atom_feed.summary (Atom_feed.html5 (
          (match self.Feed.url with
@@ -76,7 +76,7 @@ let feed_to_atom self =
          )
          :: (Html.br ())
          :: (Html.a ~service:Services.atom_feed [Html.pcdata "Flux atom du lien"]
-               (Int32.to_int self.Feed.id))
+               self.Feed.id)
          :: (Html.br ())
          :: (Html.pcdata "Tags : ")
          :: (Templates_common.links_of_tags self.Feed.tags)

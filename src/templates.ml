@@ -112,9 +112,9 @@ let feeds_branch_to_html ~user id =
 let view_feed id =
   User.get_user () >>= fun user ->
   Errors.get_error () >>= fun error ->
-  Feed.exist ~feedid:(Int32.of_int id) () >>= fun exist ->
+  Feed.exist ~feedid:id () >>= fun exist ->
   if exist then
-    feeds_comments_to_html ~user (Int32.of_int id) >|= fun feed ->
+    feeds_comments_to_html ~user id >|= fun feed ->
     Templates_feeds.main_style ~user ~error [feed] []
   else
     Lwt.return
@@ -139,7 +139,6 @@ let preferences () =
   Templates_feeds.private_preferences ~user ~error
 
 let comment id =
-  let id = Int32.of_int id in
   User.get_user () >>= fun user ->
   Errors.get_error () >>= fun error ->
   Feed.exist ~feedid:id () >|= fun exist ->
@@ -157,7 +156,7 @@ let comment id =
 let edit_feed id =
   User.get_user () >>= fun user ->
   let userid = Option.map (fun x -> x.User.id) user in
-  Feed.get_feed_with_id ~user:userid (Int32.of_int id) >>= fun feed ->
+  Feed.get_feed_with_id ~user:userid id >>= fun feed ->
   Errors.get_error () >>= fun error ->
   Feed.get_edit_infos feed.Feed.id >>= fun infos ->
   Feed.exist ~feedid:feed.Feed.id () >|= fun exist ->

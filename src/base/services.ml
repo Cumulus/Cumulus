@@ -37,7 +37,7 @@ let comments_atom =
 let atom_feed =
   Eliom_service.Http.service
     ~path: ["atom"; "feed"]
-    ~get_params: Eliom_parameter.(suffix (int "feed_id"))
+    ~get_params: Eliom_parameter.(suffix (int32 "feed_id"))
     ()
 
 let atom_tag =
@@ -49,19 +49,19 @@ let atom_tag =
 let main =
   Eliom_service.App.service
     ~path: [""]
-    ~get_params: (Eliom_parameter.opt (Eliom_parameter.int "page"))
+    ~get_params: Eliom_parameter.(opt (int "page"))
     ()
 
 let view_feed' =
   Eliom_service.App.service
     ~path:["view"]
-    ~get_params: Eliom_parameter.(suffix_prod (int "id" ** string "name") (opt any))
+    ~get_params: Eliom_parameter.(suffix_prod (int32 "id" ** string "name") (opt any))
     ()
 
 let view_feed =
   Eliom_service.App.service
     ~path:["view"]
-    ~get_params: Eliom_parameter.(suffix (int "id" ** string "name"))
+    ~get_params: Eliom_parameter.(suffix (int32 "id" ** string "name"))
     ()
 
 let append_feed =
@@ -131,7 +131,7 @@ let add_user =
 let append_link_comment =
   Eliom_service.Http.post_coservice
     ~fallback:view_feed
-    ~post_params: Eliom_parameter.((int "id") **
+    ~post_params: Eliom_parameter.((int32 "id") **
                                      (string "url") **
                                      (string "desc") **
                                      (string "tags"))
@@ -140,7 +140,7 @@ let append_link_comment =
 let append_desc_comment =
   Eliom_service.Http.post_coservice
     ~fallback:view_feed
-    ~post_params: Eliom_parameter.((int "id") **
+    ~post_params: Eliom_parameter.((int32 "id") **
                                      (string "desc"))
     ()
 
@@ -157,7 +157,7 @@ let update_user_password =
 
 let update_user_feeds_per_page =
   Eliom_service.Http.post_coservice'
-    ~post_params: Eliom_parameter.((int "feeds_per_page"))
+    ~post_params: Eliom_parameter.((int32 "feeds_per_page"))
     ()
 
 let registration =
@@ -180,7 +180,7 @@ let preferences =
 let comment =
   Eliom_service.App.service
     ~path: ["comment"]
-    ~get_params: Eliom_parameter.(suffix ((int "id") ** string "name"))
+    ~get_params: Eliom_parameter.(suffix ((int32 "id") ** string "name"))
     ()
 
 let delete_feed =
@@ -191,13 +191,13 @@ let delete_feed =
 let edit_feed =
   Eliom_service.App.service
     ~path: ["edit"]
-    ~get_params: Eliom_parameter.(suffix ((int "id") ** string "name"))
+    ~get_params: Eliom_parameter.(suffix ((int32 "id") ** string "name"))
     ()
 
 let edit_link_comment =
   Eliom_service.Http.post_coservice
     ~fallback:view_feed
-    ~post_params: Eliom_parameter.((int "id") **
+    ~post_params: Eliom_parameter.((int32 "id") **
                                      (string "url") **
                                      (string "desc") **
                                      (string "tags"))
@@ -206,7 +206,7 @@ let edit_link_comment =
 let edit_desc_comment =
   Eliom_service.Http.post_coservice
     ~fallback:view_feed
-    ~post_params: Eliom_parameter.((int "id") **
+    ~post_params: Eliom_parameter.((int32 "id") **
                                      (string "desc"))
     ()
 

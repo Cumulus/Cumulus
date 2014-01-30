@@ -113,14 +113,14 @@ let feed_to_html ~user self =
               a
                 ~service:Services.atom_feed
                 [pcdata "  Flux Atom du lien "]
-                (Int32.to_int self.Feed.id);
+                self.Feed.id;
             ]
               @
               (if is_author then
                  [
                    a ~service:Services.delete_feed [pcdata "- Supprimer "] self.Feed.id ;
                    a ~service:Services.edit_feed [pcdata "- Editer"]
-                     (Int32.to_int self.Feed.id, Utils.troncate self.Feed.description);
+                     (self.Feed.id, Utils.troncate self.Feed.description);
                  ]
                else []
               ));
@@ -140,7 +140,7 @@ let feed_to_html ~user self =
                    else
                      get_image ["circled";"highlighted";"comment_icon"] "comments.png";
                   ]
-                  (Int32.to_int self.Feed.id, Utils.troncate self.Feed.description)];
+                  (self.Feed.id, Utils.troncate self.Feed.description)];
               pcdata (string_of_int self.Feed.count)
             ];
             div ~a: [a_class ["fav_wrap"]][
@@ -496,7 +496,7 @@ let private_preferences ~user ~error =
              (fun nb_feeds_name -> [
                   h1 [pcdata "Changer le nombre de liens par page"];
                   p [
-                    int_input
+                    int32_input
                       ~a:[a_class ["input-box"];
                           a_placeholder (Int32.to_string
                                                 User.(usr.feeds_per_page))
@@ -546,15 +546,15 @@ let private_comment ~user id =
                      ~name:tags
                      ();
                    br ();
-                   int_input
+                   int32_input
                      ~input_type:`Hidden
                      ~name:parent
-                     ~value:(Int32.to_int id)
+                     ~value:id
                      ();
                    Templates_common.submit_input ~value:"Envoyer !" ()
                  ]
                ])
-            (Int32.to_int id, "");
+            (id, "");
           post_form
             ~a:[a_class ["box"]]
             ~service:Services.append_desc_comment
@@ -567,21 +567,20 @@ let private_comment ~user id =
                         ]
                      ~name:desc
                      ();
-                   int_input
+                   int32_input
                      ~input_type:`Hidden
                      ~name:parent
-                     ~value:(Int32.to_int id)
+                     ~value:id
                      ();
                    br ();
                    Templates_common.submit_input ~value:"Envoyer !" ()
                  ]
                ])
-            (Int32.to_int id, "")
+            (id, "")
         ]) []
 
 let private_edit_feed ~user ~error ~feed (edit_desc, edit_url, edit_tags) =
   let is_author = Feed.is_author ~feed user in
-  let id = Int32.to_int feed.Feed.id in
   main_style
     ~user
     ~error
@@ -621,15 +620,15 @@ let private_edit_feed ~user ~error ~feed (edit_desc, edit_url, edit_tags) =
                           ~value:edit_tags
                           ();
                         br ();
-                        int_input
+                        int32_input
                           ~input_type:`Hidden
                           ~name:parent
-                          ~value:id
+                          ~value:feed.Feed.id
                           ();
                         Templates_common.submit_input ~value:"Envoyer !" ()
                       ]
                     ])
-                 (id, ""))
+                 (feed.Feed.id, ""))
           | None ->
               (post_form
                  ~a:[a_class ["box"]]
@@ -643,16 +642,16 @@ let private_edit_feed ~user ~error ~feed (edit_desc, edit_url, edit_tags) =
                           ~name:desc
                           ~value:edit_desc
                           () ;
-                        int_input
+                        int32_input
                           ~input_type:`Hidden
                           ~name:parent
-                          ~value:id
+                          ~value:feed.Feed.id
                           ();
                         br ();
                         Templates_common.submit_input ~value:"Envoyer !" ()
                       ]
                     ])
-                 (id, ""))
+                 (feed.Feed.id, ""))
         ]
     )
     []

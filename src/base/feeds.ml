@@ -73,7 +73,7 @@ let append_feed (url, (description, tags)) =
 
 let get_root_and_parent id =
   User.get_userid () >>= fun user ->
-  Db_feed.get_feed_with_id ~user (Int32.of_int id) >>= fun feeds ->
+  Db_feed.get_feed_with_id ~user id >>= fun feeds ->
   let parent = feeds.Feed.id in
   let root = match feeds.Feed.root with
     | Some root -> root
@@ -112,7 +112,7 @@ let edit_feed_aux ~id ~url ~description ~tags f =
        else if Utils.is_invalid_url url then
          Lwt.return Invalid_url
        else
-         Db_feed.get_feed_with_id ~user (Int32.of_int id) >>= (fun feeds ->
+         Db_feed.get_feed_with_id ~user id >>= (fun feeds ->
            if feeds.Feed.url <> Some url then
              Db_feed.exists_with_url ~url >>= function
              | true -> Lwt.return Already_exist
@@ -125,7 +125,7 @@ let edit_link_comment (id, (url, (description, tags))) =
   edit_feed_aux ~id ~url ~description ~tags
     (fun () ->
        Db_feed.update
-         ~feedid:(Int32.of_int id)
+         ~feedid:id
          ~url:(Some url)
          ~description
          ~tags:(List.map strip_and_lowercase (Utils.split tags))
@@ -136,7 +136,7 @@ let edit_desc_comment (id, description) =
   append_feed_aux_base ~description
     (fun ~author () ->
        Db_feed.update
-         ~feedid:(Int32.of_int id)
+         ~feedid:id
          ~description
          ~tags:[]
          ~url:None
