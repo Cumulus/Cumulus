@@ -24,27 +24,42 @@ open Eliom_lib.Lwt_ops
 
 module Html = Eliom_content.Html5.F
 
-(* TODO: improve genericity *)
-let feed_list ~service page link feeds =
+let main_style_aux content =
   User.get_user () >>= fun user ->
   Errors.get_error () >>= fun error ->
-  let offset = User.get_feeds_per_page user in
-  let starting = Int32.(Int32.of_int page * offset) in
-  let userid = User.get_id user in
-  feeds ~starting ~number:offset ~user:userid () >|= fun (feeds, n) ->
-  let feeds = Templates_feeds.to_html ~user feeds in
-  let n = Int64.to_int n in
-  let offset = Int32.to_int offset in
-  Templates_feeds.main_style
-    ~user
-    ~error
-    feeds
-    (Templates_feeds.link_footer
-       ~link
-       0
-       ((n / offset) - (if (n mod offset) = 0 then 1 else 0))
-       page
-    )
+  content user >|= fun (content, footer) ->
+  Templates_feeds.main_style ~user ~error content footer
+
+let feed_list ~service page link feeds =
+  let content user =
+    let offset = User.get_feeds_per_page user in
+    let starting = Int32.(Int32.of_int page * offset) in
+    let userid = User.get_id user in
+    feeds ~starting ~number:offset ~user:userid () >|= fun (feeds, n) ->
+    let feeds = Templates_feeds.to_html ~user feeds in
+    let n = Int64.to_int n in
+    let offset = Int32.to_int offset in
+    let footer =
+      Templates_feeds.link_footer
+        ~link
+        0
+        ((n / offset) - (if (n mod offset) = 0 then 1 else 0))
+        page
+    in
+    (feeds, footer)
+  in
+  main_style_aux content
+
+let main_style content =
+  let content user =
+    content user >|= fun content ->
+    (content, [])
+  in
+  main_style_aux content
+
+let main_style_pure content =
+  let content user = Lwt.return (content user) in
+  main_style content
 
 (* see TODO [1] *)
 let main ?(page=0) ~service () =
@@ -109,86 +124,75 @@ let feeds_branch_to_html ~user id =
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =
-  User.get_user () >>= fun user ->
-  Errors.get_error () >>= fun error ->
-  Feed.exist ~feedid:id () >>= fun exist ->
-  if exist then
-    feeds_comments_to_html ~user id >|= fun feed ->
-    Templates_feeds.main_style ~user ~error [feed] []
-  else
-    Lwt.return
-      (Templates_feeds.main_style
-         ~user
-         ~error
-         [Html.div
-            ~a:[Html.a_class ["box"]]
-            [Html.pcdata "Ce lien n'existe pas."]
-         ]
-         []
-      )
+  let content user =
+    Feed.exist ~feedid:id () >>= fun exist ->
+    if exist then
+      feeds_comments_to_html ~user id >|= fun feed ->
+      [feed]
+    else
+      Lwt.return
+        [Html.div
+           ~a:[Html.a_class ["box"]]
+           [Html.pcdata "Ce lien n'existe pas."]
+        ]
+  in
+  main_style content
 
 let register () =
-  User.get_user () >>= fun user ->
-  Errors.get_error () >|= fun error ->
-  Templates_feeds.private_register ~user ~error ()
+  let content _ = Templates_feeds.private_register () in
+  main_style_pure content
 
 let preferences () =
-  User.get_user () >>= fun user ->
-  Errors.get_error () >|= fun error ->
-  Templates_feeds.private_preferences ~user ~error
+  let content user = Templates_feeds.private_preferences ~user in
+  main_style_pure content
 
 let comment id =
-  User.get_user () >>= fun user ->
-  Errors.get_error () >>= fun error ->
-  Feed.exist ~feedid:id () >|= fun exist ->
-  if not exist then
-    Templates_feeds.main_style
-      ~user
-      ~error
+  let content user =
+    Feed.exist ~feedid:id () >|= fun exist ->
+    if not exist then
       [Html.div
          ~a:[Html.a_class ["box"]]
          [Html.pcdata "Ce commentaire n'existe pas."]
-      ] []
-  else
-    Templates_feeds.private_comment ~user ~error id
+      ]
+    else
+      Templates_feeds.private_comment ~user id
+  in
+  main_style content
 
 let edit_feed id =
-  User.get_user () >>= fun user ->
-  let userid = User.get_id user in
-  Feed.get_feed_with_id ~user:userid id >>= fun feed ->
-  Errors.get_error () >>= fun error ->
-  Feed.get_edit_infos feed.Feed.id >>= fun infos ->
-  Feed.exist ~feedid:feed.Feed.id () >|= fun exist ->
-  if not exist then
-    Templates_feeds.main_style
-      ~user
-      ~error
+  let content user =
+    let userid = User.get_id user in
+    Feed.get_feed_with_id ~user:userid id >>= fun feed ->
+    Feed.get_edit_infos feed.Feed.id >>= fun infos ->
+    Feed.exist ~feedid:feed.Feed.id () >|= fun exist ->
+    if not exist then
       [Html.div
          ~a:[Html.a_class ["box"]]
          [Html.pcdata "Ce commentaire n'existe pas."]
-      ] []
-  else
-    Templates_feeds.private_edit_feed ~user ~error ~feed infos
+      ]
+    else
+      Templates_feeds.private_edit_feed ~user ~feed infos
+  in
+  main_style content
 
 let reset_password () =
-  User.get_user () >>= fun user ->
-  Errors.get_error () >|= fun error ->
-  let form =
-    Html.post_form
-      ~a:[Html.a_class ["box"]]
-      ~service:Services.reset_password
-      (fun email_name -> [
-           Html.h1 [Html.pcdata "Adresse mail associée au compte"];
-           Html.p [
-             Templates_common.string_input_box
-               ~a:[Html.a_id "new_email"]
-               ~input_type:`Text
-               ~name:email_name
-               ();
-             Html.br ();
-             Templates_common.submit_input ~value:"Valider" ()
-           ]
-         ])
-      ()
+  let form _ =
+    [Html.post_form
+       ~a:[Html.a_class ["box"]]
+       ~service:Services.reset_password
+       (fun email_name -> [
+            Html.h1 [Html.pcdata "Adresse mail associée au compte"];
+            Html.p [
+              Templates_common.string_input_box
+                ~a:[Html.a_id "new_email"]
+                ~input_type:`Text
+                ~name:email_name
+                ();
+              Html.br ();
+              Templates_common.submit_input ~value:"Valider" ()
+            ]
+          ])
+       ()
+    ]
   in
-  Templates_feeds.main_style ~user ~error [form] []
+  main_style_pure form

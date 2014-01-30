@@ -41,21 +41,16 @@ val comments_to_html' :
   [< Html5_types.div_content_fun > `Aside `Div ] Eliom_content.Html5.F.elt
 val private_register :
   unit ->
-  user:User.user option ->
-  error:string option ->
-  [> `Html ] Eliom_content.Html5.F.elt
+  [> Html5_types.form ] Eliom_content.Html5.F.elt list
 val private_preferences :
   user:User.user option ->
-  error:string option ->
-  [> `Html ] Eliom_content.Html5.F.elt
+  [> `Div | `Form ] Eliom_content.Html5.F.elt list
 val private_comment :
   user:User.user option ->
   int32 ->
-  error:string option ->
-  [> `Html ] Eliom_content.Html5.F.elt
+  [> `Div | `Form ] Eliom_content.Html5.F.elt list
 val private_edit_feed :
   user:User.user option ->
-  error:string option ->
   feed:Feed.feed ->
   string * string option * string ->
-  [> `Html ] Eliom_content.Html5.F.elt
+  [> `Div | `Form ] Eliom_content.Html5.F.elt list
