@@ -26,6 +26,12 @@ module Calendar = CalendarLib.Calendar
 module Html = Eliom_content.Html5.F
 module Uri = Eliom_uri
 
+let string_uri_of_tag tag =
+  Uri.make_string_uri
+    ~absolute:true
+    ~service:Services.tag_feed
+    (None, tag)
+
 let feed_to_atom self =
   User.get_userid () >>= fun user ->
   Feed.get_root ~feedid:self.Feed.id ~user () >>= fun root_feed ->
@@ -53,6 +59,14 @@ let feed_to_atom self =
                                           ~service:Services.view_feed
                                           (self.Feed.id, "")
                                        )];
+       Atom_feed.categories (
+         List.map (fun tag ->
+           Atom_feed.category
+             ~scheme:(string_uri_of_tag tag)
+             ~label:tag
+             tag
+             [])
+           self.Feed.tags);
        Atom_feed.summary (Atom_feed.html5 (
          (match self.Feed.url with
           | Some url -> Html.Raw.a ~a:
