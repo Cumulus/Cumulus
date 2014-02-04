@@ -172,15 +172,13 @@ let rec comments_to_html' ~user tree =
       let childs = List.map (comments_to_html' ~user) childs in
       div ~a: [a_class ["line"]] (elm @ childs)
 
-let private_to_html ~user data =
+let to_html ~user data =
   List.map
     (fun feed ->
        let elm = feed_to_html ~user feed in
        section ~a: [a_class["line"]] elm
     )
     data
-
-let to_html = private_to_html
 
 let user_form () =
   aside
