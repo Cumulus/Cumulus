@@ -26,6 +26,9 @@ val to_html :
 val main_style :
   user:User.user option ->
   error:string option ->
+  server_function:(box:[> Html5_types.aside ] Eliom_content.Html5.D.elt ->
+                   footer:[> Html5_types.div ] Eliom_content.Html5.D.elt ->
+                   unit) ->
   [< Html5_types.aside_content_fun ] Eliom_content.Html5.F.elt list ->
   [< Html5_types.div_content_fun ] Eliom_content.Html5.F.elt list ->
   [> `Html ] Eliom_content.Html5.F.elt

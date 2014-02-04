@@ -19,17 +19,40 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
+{shared{
+  open Eliom_lib.Lwt_ops
+}}
+
+{client{
+  let waiting_for_reload server_function ~box ~footer =
+    let service = Eliom_service.void_coservice' in
+    let event = %Feeds.event in
+    let stream = Lwt_react.E.to_stream event in
+    Lwt.async
+      (fun () ->
+         Lwt_stream.iter_s
+           (fun id ->
+              (* TODO: Except for ourself *)
+              (* TODO: reload on delete *)
+              server_function () >>= fun (feeds, footer_content) ->
+              Eliom_content.Html5.Manip.replaceAllChild box feeds;
+              Eliom_content.Html5.Manip.replaceAllChild footer footer_content;
+              Lwt.return_unit
+           )
+           stream
+      )
+}}
+
 open Batteries
-open Eliom_lib.Lwt_ops
 
 let main_style_aux content =
   User.get_user () >>= fun user ->
   Errors.get_error () >>= fun error ->
-  content user >|= fun (content, footer) ->
-  Templates_feeds.main_style ~user ~error content footer
+  content user >|= fun (content, footer, server_function) ->
+  Templates_feeds.main_style ~user ~error ~server_function content footer
 
 let feed_list ~service page ~service_link link_param feeds =
-  let content user =
+  let rec content user =
     let offset = User.get_feeds_per_page user in
     let starting = Int32.(Int32.of_int page * offset) in
     let userid = User.get_id user in
@@ -45,14 +68,28 @@ let feed_list ~service page ~service_link link_param feeds =
         ((n / offset) - (if (n mod offset) = 0 then 1 else 0))
         page
     in
-    (feeds, footer)
+    let server_function ~box ~footer =
+      let server_function =
+        let f () =
+          content user >|= fun (a, b, _) ->
+          (a, b)
+        in
+        server_function Json.t<unit> f
+      in
+      ignore {unit{
+        let box = %box in
+        let footer = %footer in
+        waiting_for_reload %server_function ~box ~footer
+      }};
+    in
+    (feeds, footer, server_function)
   in
   main_style_aux content
 
 let main_style content =
   let content user =
     content user >|= fun content ->
-    (content, [])
+    (content, [], fun ~box:_ ~footer:_ -> ())
   in
   main_style_aux content
 

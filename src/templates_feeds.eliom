@@ -20,8 +20,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
 {client{
-  open Eliom_lib.Lwt_ops
-
   let display_error error_frame =
     let id_timeout = ref None in
     id_timeout :=
@@ -38,20 +36,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             5_000.
            )
         )
-
-  (* Reloading feeds*)
-  let () =
-    let service = Eliom_service.void_coservice' in
-    let event = %Feeds.event in
-    let stream = Lwt_react.E.to_stream event in
-    Lwt.async
-      (fun () ->
-         Lwt_stream.iter_s
-           (fun () ->
-              Eliom_client.change_page ~service () ()
-           )
-           stream
-      )
 }}
 
 open Batteries
@@ -317,7 +301,7 @@ let header () =
       ];
   ]
 
-let main_style ~user ~error content footer =
+let main_style ~user ~error ~server_function content footer =
   let userbox = userbox user in
   let header = header () in
   let base_error_frame =
@@ -336,6 +320,13 @@ let main_style ~user ~error content footer =
         error_frame
     | None -> base_error_frame []
   in
+  let content =
+    Eliom_content.Html5.D.aside ~a:[a_class ["col"; "w80"]] content
+  in
+  let footer =
+    Eliom_content.Html5.D.div ~a:[a_class ["navigation"]] footer
+  in
+  server_function ~box:content ~footer;
   html
     (head
        (title
@@ -357,9 +348,9 @@ let main_style ~user ~error content footer =
        [ div
            ~a: [a_class ["line"]]
            (header
-            @ [aside ~a: [a_class["col";"w80"]] content]
-            @ [ userbox;
-                div ~a: [a_class ["navigation"]]footer;
+            @ [ content;
+                userbox;
+                footer;
                    (*footer
                      ( [ br ();
                          br ();

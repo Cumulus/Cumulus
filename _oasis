@@ -20,7 +20,7 @@ OCamlVersion: >= 4.01
 Library cumulus
   Path: src
   Modules:
-    Templates,
+    server/Templates,
     Templates_common,
     server/Templates_feeds,
     Templates_atom,
