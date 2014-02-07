@@ -28,7 +28,7 @@ let feeds = (<:table< feeds (
                      id integer NOT NULL DEFAULT(nextval $feeds_id_seq$),
                      url text,
                      description text NOT NULL,
-                     timedate timestamp NOT NULL DEFAULT(current_timestamp),
+                     timedate timestamp NOT NULL DEFAULT(localtimestamp ()),
                      author integer NOT NULL,
                      parent integer,
                      root integer
