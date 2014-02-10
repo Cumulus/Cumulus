@@ -286,6 +286,19 @@ button, input, select {
   text-align: center
 }
 
+.little.avatarbox {
+  width: 115px;
+  height: 68px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  text-align: center;
+}
+
+.little.avatarbox .post_avatar {
+  width: 68px;
+  height: 68px;
+}
+
 .post_avatar {
   height: 100%;
   border-radius: 5px 0 0 5px;
@@ -355,6 +368,26 @@ a.postitle{
   width: 220px;
   padding-bottom: 15px;
   margin-top: 5px;
+}
+
+.col.little.post_int {
+  width: 145px;
+}
+
+.col.little.post_int .comment_icon {
+  padding: 10px;
+  width: 32px;
+  height: 32px;
+}
+
+.col.little.post_int .fav_icon {
+  padding: 10px;
+  width: 32px;
+  height: 32px;
+}
+
+.col.little.post_int .upvote_wrap_inner {
+  width: 15px;
 }
 
 .tags {

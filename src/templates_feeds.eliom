@@ -41,7 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 open Batteries
 open Eliom_content.Html5.F
 
-let feed_to_html ?(padding=0) ~user self =
+let feed_to_html ?(padding=0) ?(is_child=false) ~user self =
   let get_image cls imgname =
    img ~a: [a_class cls]
                   ~alt: imgname
@@ -76,7 +76,7 @@ let feed_to_html ?(padding=0) ~user self =
     [
       [
         aside ~a: [a_class ["row";"post";"mod"]; a_id "post"; a_style ("margin-left: " ^ (string_of_int padding) ^ "px;")] [
-          aside ~a: [a_class["col";"avatarbox"]]
+          aside ~a: [a_class["col"; if is_child then "little" else ""; "avatarbox"]]
             [div ~a: [a_class["post_avatar"]]
                [img
                   ~a: [a_class ["postimg"]]
@@ -111,7 +111,7 @@ let feed_to_html ?(padding=0) ~user self =
             content;
             tags;
           ];
-          div ~a: [a_class["col";"post_int"]][
+          div ~a: [a_class["col"; if is_child then "little" else ""; "post_int"]][
 
 
             aside
@@ -131,7 +131,7 @@ let feed_to_html ?(padding=0) ~user self =
               if self.Feed.fav = false then
                 a
                   ~service:Services.add_fav_feed
-                  [get_image ["circled";"gray";] "fav.png"]
+                  [get_image ["circled";"gray";"fav_icon"] "fav.png"]
                   (self.Feed.id)
               else
                 a
@@ -162,14 +162,14 @@ let feed_to_html ?(padding=0) ~user self =
       ]
     ]
 
-let rec comments_to_html' ?(padding=0) ~user tree =
+let rec comments_to_html' ?(padding=0) ?(is_child=false) ~user tree =
   match tree with
   | Comments.Sheet feed ->
-      let elm = feed_to_html ~padding ~user feed in
+      let elm = feed_to_html ~padding ~is_child ~user feed in
       div ~a: [a_class ["line"]] elm
   | Comments.Node (feed, childs) ->
-      let elm = feed_to_html ~padding ~user feed in
-      let childs = List.map (comments_to_html' ~padding:(padding + 75) ~user) childs in
+      let elm = feed_to_html ~padding ~is_child ~user feed in
+      let childs = List.map (comments_to_html' ~padding:(padding + 75) ~is_child:true ~user) childs in
       div ~a: [a_class ["line"]] (elm @ childs)
 
 let to_html ~user data =
