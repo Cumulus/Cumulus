@@ -52,13 +52,13 @@ let feed_to_atom self =
   Lwt.return (
     Atom_feed.entry
       ~updated: self.Feed.date
-      ~id:(Int32.to_string self.Feed.id)
+      ~id:(Uri.make_string_uri
+             ~absolute:true
+             ~service:Services.view_feed
+             (self.Feed.id, "")
+          )
       ~title: (Atom_feed.plain (title))
       [Atom_feed.authors [Atom_feed.author self.Feed.user#name];
-       Atom_feed.links [Atom_feed.link (Uri.make_string_uri ~absolute:true
-                                          ~service:Services.view_feed
-                                          (self.Feed.id, "")
-                                       )];
        Atom_feed.categories (
          List.map (fun tag ->
            Atom_feed.category
