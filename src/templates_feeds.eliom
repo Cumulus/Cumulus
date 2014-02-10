@@ -41,7 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 open Batteries
 open Eliom_content.Html5.F
 
-let feed_to_html ~user self =
+let feed_to_html ?(padding=0) ~user self =
   let get_image cls imgname =
    img ~a: [a_class cls]
                   ~alt: imgname
@@ -75,7 +75,7 @@ let feed_to_html ~user self =
   List.flatten
     [
       [
-        aside ~a: [a_class ["row";"post";"mod"]; a_id "post"] [
+        aside ~a: [a_class ["row";"post";"mod"]; a_id "post"; a_style ("padding-left: " ^ (string_of_int padding) ^ "px;")] [
           aside ~a: [a_class["col";"avatarbox"]]
             [div ~a: [a_class["post_avatar"]]
                [img
@@ -162,14 +162,14 @@ let feed_to_html ~user self =
       ]
     ]
 
-let rec comments_to_html' ~user tree =
+let rec comments_to_html' ?(padding=0) ~user tree =
   match tree with
   | Comments.Sheet feed ->
-      let elm = feed_to_html ~user feed in
+      let elm = feed_to_html ~padding ~user feed in
       div ~a: [a_class ["line"]] elm
   | Comments.Node (feed, childs) ->
-      let elm = feed_to_html ~user feed in
-      let childs = List.map (comments_to_html' ~user) childs in
+      let elm = feed_to_html ~padding ~user feed in
+      let childs = List.map (comments_to_html' ~padding:(padding + 25) ~user) childs in
       div ~a: [a_class ["line"]] (elm @ childs)
 
 let to_html ~user data =

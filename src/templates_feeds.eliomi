@@ -43,6 +43,7 @@ val link_footer :
   int ->
   [> [> `PCDATA ] Html5_types.a ] Eliom_content.Html5.F.elt list
 val comments_to_html' :
+	?padding:int ->
   user:User.user option ->
   Comments.tree ->
   [< Html5_types.div_content_fun > `Aside `Div ] Eliom_content.Html5.F.elt

@@ -260,7 +260,7 @@ button, input, select {
 
 .post {
   margin-top: 5px;
-  margin-bottom: 5px;
+  margin-bottom: 0px;
   margin-left: 5px;
   width: 80%;
   height: 100px;
