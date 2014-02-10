@@ -75,7 +75,7 @@ let feed_to_html ?(padding=0) ~user self =
   List.flatten
     [
       [
-        aside ~a: [a_class ["row";"post";"mod"]; a_id "post"; a_style ("padding-left: " ^ (string_of_int padding) ^ "px;")] [
+        aside ~a: [a_class ["row";"post";"mod"]; a_id "post"; a_style ("margin-left: " ^ (string_of_int padding) ^ "px;")] [
           aside ~a: [a_class["col";"avatarbox"]]
             [div ~a: [a_class["post_avatar"]]
                [img
@@ -169,7 +169,7 @@ let rec comments_to_html' ?(padding=0) ~user tree =
       div ~a: [a_class ["line"]] elm
   | Comments.Node (feed, childs) ->
       let elm = feed_to_html ~padding ~user feed in
-      let childs = List.map (comments_to_html' ~padding:(padding + 25) ~user) childs in
+      let childs = List.map (comments_to_html' ~padding:(padding + 75) ~user) childs in
       div ~a: [a_class ["line"]] (elm @ childs)
 
 let to_html ~user data =
