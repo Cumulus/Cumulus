@@ -430,3 +430,21 @@ a.postitle{
 .upvote_wrap_inner.gray {
   color: #ddd;
 }
+
+.box {
+    color: #414141;
+    text-align: center;
+    padding-left: 72%;
+}
+
+.box input {
+    height: 37px;
+    width: 100%;
+    font-size: 1em;
+    margin: 5px 0px;
+    padding: 10px;
+    background-color: #777;
+    color: #FFF;
+    border-radius: 4px;
+    border: medium none;
+}
