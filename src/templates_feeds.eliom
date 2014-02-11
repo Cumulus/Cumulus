@@ -510,62 +510,67 @@ let private_comment ~user id branch =
     ]
   else
     [div
-       ~a:[a_class ["simple-page"]]
-        [ branch; post_form
-           ~a:[a_class ["box"]]
-           ~service:Services.append_link_comment
-           (fun (parent, (url, (desc, tags))) -> [
-                h1 [pcdata "Lien"] ;
-                p [
-                  Templates_common.string_input_box
-                    ~a:[a_placeholder "URL"]
-                    ~input_type:`Text
-                    ~name:url
-                    ();
-                  br ();
-                  Templates_common.string_input_box
-                    ~a:[a_placeholder "Titre"]
-                    ~input_type:`Text
-                    ~name:desc
-                    ();
-                  br ();
-                  Templates_common.string_input_box
-                    ~a:[a_placeholder "Tags"]
-                    ~input_type:`Text
-                    ~name:tags
-                    ();
-                  br ();
-                  int32_input
-                    ~input_type:`Hidden
-                    ~name:parent
-                    ~value:id
-                    ();
-                  Templates_common.submit_input ~value:"Envoyer !" ()
-                ]
-              ])
-           (id, "");
-         post_form
-           ~a:[a_class ["box"]]
-           ~service:Services.append_desc_comment
-           (fun (parent, desc) -> [
-                h1 [pcdata "Commentaire"];
-                p [
-                  textarea
-                    ~a:[a_class ["input-box"];
-                        a_placeholder "Texte"
-                       ]
-                    ~name:desc
-                    ();
-                  int32_input
-                    ~input_type:`Hidden
-                    ~name:parent
-                    ~value:id
-                    ();
-                  br ();
-                  Templates_common.submit_input ~value:"Envoyer !" ()
-                ]
-              ])
-           (id, "")
+       ~a:[a_class [""]]
+        [ branch;
+          div
+            ~a:[a_class ["form-comment"]]
+            [ post_form
+             ~a:[a_class ["box"]]
+             ~service:Services.append_link_comment
+             (fun (parent, (url, (desc, tags))) -> [
+                  h1 [pcdata "Lien"] ;
+                  p [
+                    Templates_common.string_input_box
+                      ~a:[a_placeholder "URL"]
+                      ~input_type:`Text
+                      ~name:url
+                      ();
+                    br ();
+                    Templates_common.string_input_box
+                      ~a:[a_placeholder "Titre"]
+                      ~input_type:`Text
+                      ~name:desc
+                      ();
+                    br ();
+                    Templates_common.string_input_box
+                      ~a:[a_placeholder "Tags"]
+                      ~input_type:`Text
+                      ~name:tags
+                      ();
+                    br ();
+                    int32_input
+                      ~input_type:`Hidden
+                      ~name:parent
+                      ~value:id
+                      ();
+                    Templates_common.submit_input ~value:"Envoyer !" ()
+                  ]
+                ])
+             (id, "") ];
+          div
+            ~a:[a_class ["form-comment"]]
+            [ post_form
+              ~a:[a_class ["box"]]
+              ~service:Services.append_desc_comment
+             (fun (parent, desc) -> [
+                  h1 [pcdata "Commentaire"];
+                  p [
+                    textarea
+                      ~a:[a_class ["input-box"];
+                          a_placeholder "Texte"
+                         ]
+                      ~name:desc
+                      ();
+                    int32_input
+                      ~input_type:`Hidden
+                      ~name:parent
+                      ~value:id
+                      ();
+                    br ();
+                    Templates_common.submit_input ~value:"Envoyer !" ()
+                  ]
+                ])
+             (id, "")];
        ]
     ]
 

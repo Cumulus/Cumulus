@@ -490,6 +490,10 @@ a.postitle{
     border: medium none;
 }
 
+textaera.input-box {
+  font-size: 50px;
+}
+
 .msghandler {
     text-align: center;
     background-color: #777;
@@ -497,4 +501,19 @@ a.postitle{
     margin-left: 30%;
     margin-right: 40%;
     border-radius: 4px;
+}
+
+.form-comment {
+  width: 25%;
+  margin: auto;
+  background-color: #FFFFFF;
+  border-radius: 5px 5px 5px 5px;
+}
+
+.form-comment .box {
+  padding-right: 0%;
+}
+
+.form-comment .input-box {
+  width: 90%;
 }
