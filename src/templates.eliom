@@ -24,8 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 }}
 
 {client{
-  let waiting_for_reload server_function ~box ~footer =
-    let service = Eliom_service.void_coservice' in
+  let waiting_for_reload server_function ~box =
     let event = %Feeds.event in
     let stream = Lwt_react.E.to_stream event in
     Lwt.async
@@ -34,9 +33,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
            (fun id ->
               (* TODO: Except for ourself *)
               (* TODO: reload on delete *)
-              server_function 0 >|= fun (feeds, footer_content) ->
+              server_function 0 >|= fun feeds ->
               Eliom_content.Html5.Manip.replaceAllChild box feeds;
-              Eliom_content.Html5.Manip.replaceAllChild footer footer_content;
            )
            stream
       )
@@ -47,42 +45,28 @@ open Batteries
 let main_style_aux content =
   User.get_user () >>= fun user ->
   Errors.get_error () >>= fun error ->
-  content user 0 >|= fun (content, footer, server_function) ->
-  Templates_feeds.main_style ~user ~error ~server_function content footer
+  content user 0 >|= fun (content, server_function) ->
+  Templates_feeds.main_style ~user ~error ~server_function content
 
-let feed_list ~service ~service_link link_param feeds =
+let feed_list feeds =
   let rec content user page =
     let offset = User.get_feeds_per_page user in
     let starting = Int32.(Int32.of_int page * offset) in
     let userid = User.get_id user in
-    feeds ~starting ~number:offset ~user:userid () >|= fun (feeds, n) ->
+    feeds ~starting ~number:offset ~user:userid () >|= fun feeds ->
     let feeds = Templates_feeds.to_html ~user feeds in
-    let n = Int64.to_int n in
-    let offset = Int32.to_int offset in
-    let footer =
-      Templates_feeds.link_footer
-        ~service:service_link
-        ~param:link_param
-        0
-        ((n / offset) - (if (n mod offset) = 0 then 1 else 0))
-        page
-    in
-    let server_function ~box ~footer =
+    let server_function ~box =
       let server_function =
-        let f page =
-          content user page >|= fun (a, b, _) ->
-          (a, b)
-        in
+        let f page = content user page >|= fst in
         server_function Json.t<int> f
       in
       ignore {unit{
         let box = %box in
-        let footer = %footer in
         let get_next_page =
           let last_page = ref 0 in
           begin fun () ->
             let page = succ !last_page in
-            %server_function page >|= fun (feeds, _) ->
+            %server_function page >|= fun feeds ->
             Eliom_content.Html5.Manip.appendChilds box feeds;
             last_page := page;
           end
@@ -105,17 +89,17 @@ let feed_list ~service ~service_link link_param feeds =
                  in
                  ev ()
           );
-        waiting_for_reload %server_function ~box ~footer;
+        waiting_for_reload %server_function ~box;
       }};
     in
-    (feeds, footer, server_function)
+    (feeds, server_function)
   in
   main_style_aux content
 
 let main_style content =
   let content user page =
     content user page >|= fun content ->
-    (content, [], fun ~box:_ ~footer:_ -> ())
+    (content, fun ~box:_ -> ())
   in
   main_style_aux content
 
@@ -124,29 +108,13 @@ let main_style_pure content =
   main_style content
 
 (* see TODO [1] *)
-let main ?(page=0) ~service () =
-  feed_list ~service
-    ~service_link:Services.main
-    identity
-    Feed.get_root_feeds
+let main () = feed_list Feed.get_root_feeds
 
-let user ?(page=0) ~service username =
-  feed_list ~service
-    ~service_link:Services.author_feed
-    (fun x -> (x, username))
-    (Feed.get_feeds_with_author username)
+let user username = feed_list (Feed.get_feeds_with_author username)
 
-let tag ?(page=0) ~service tag =
-  feed_list ~service
-    ~service_link:Services.tag_feed
-    (fun x -> (x, tag))
-    (Feed.get_feeds_with_tag tag)
+let tag tag = feed_list (Feed.get_feeds_with_tag tag)
 
-let fav_feed ?(page=0) ~service username =
-  feed_list ~service
-    ~service_link:Services.fav_feed
-    (fun x -> (username, x))
-    (Feed.get_fav_with_username username)
+let fav_feed username = feed_list (Feed.get_fav_with_username username)
 
 let feeds_comments_to_html ~user id =
   let userid = User.get_id user in

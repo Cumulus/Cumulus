@@ -45,7 +45,7 @@ type feed_generator =
   number:int32 ->
   user:int32 option ->
   unit ->
-  (feed list * int64) Lwt.t
+  feed list Lwt.t
 
 let get_edit_tags = String.concat ", "
 

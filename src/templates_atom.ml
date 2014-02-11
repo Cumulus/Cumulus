@@ -30,7 +30,7 @@ let string_uri_of_tag tag =
   Uri.make_string_uri
     ~absolute:true
     ~service:Services.tag_feed
-    (None, tag)
+    tag
 
 let feed_to_atom self =
   User.get_userid () >>= fun user ->
@@ -108,8 +108,7 @@ let to_somthing f data =
 let tree_to_atom id () =
   User.get_userid () >>= fun user ->
   Feed.get_tree_feeds ~user id ~starting:0l ~number:Utils.offset ()
-  >>= fun (feeds, _) ->
-  to_somthing feed_to_atom feeds
+  >>= to_somthing feed_to_atom
   >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
@@ -123,8 +122,7 @@ let tree_to_atom id () =
 let tag_to_atom tag () =
   User.get_userid () >>= fun user ->
   Feed.get_feeds_with_tag ~user tag ~starting:0l ~number:Utils.offset ()
-  >>= fun (feeds, _) ->
-  to_somthing feed_to_atom feeds
+  >>= to_somthing feed_to_atom
   >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
@@ -139,8 +137,7 @@ let tag_to_atom tag () =
 let to_atom () =
   User.get_userid () >>= fun user ->
   Feed.get_links_feeds ~user ~starting:0l ~number:Utils.offset ()
-  >>= fun (feeds, _) ->
-  to_somthing feed_to_atom feeds
+  >>= to_somthing feed_to_atom
   >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
@@ -154,8 +151,7 @@ let to_atom () =
 let comments_to_atom () =
   User.get_userid () >>= fun user ->
   Feed.get_comments_feeds ~user ~starting:0l ~number:Utils.offset ()
-  >>= fun (feeds, _) ->
-  to_somthing feed_to_atom feeds
+  >>= to_somthing feed_to_atom
   >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed

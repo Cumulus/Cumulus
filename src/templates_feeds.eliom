@@ -93,7 +93,7 @@ let feed_to_html ?(padding=0) ?(is_child=false) ~user self =
               a
                 ~service:Services.author_feed
                 [pcdata self.Feed.user#name]
-                (None, self.Feed.user#name);
+                self.Feed.user#name;
               a
                 ~service:Services.atom_feed
                 [pcdata "  Flux Atom du lien "]
@@ -227,7 +227,7 @@ let user_logged user =
                  ~a:[a_class ["loggedentry"]]
                  ~service:Services.fav_feed
                  [pcdata "Favoris"]
-                 (user.User.name, Some 0)];
+                 user.User.name];
 
              div ~a: [a_class ["loggedlink"]] [
                a
@@ -270,7 +270,7 @@ let header () =
                   )
                   ();
               ]
-              None;
+              ();
           ];
         aside
           ~a:[a_class ["w75 dash"]]
@@ -303,7 +303,7 @@ let header () =
       ];
   ]
 
-let main_style ~user ~error ~server_function content footer =
+let main_style ~user ~error ~server_function content =
   let userbox = userbox user in
   let header = header () in
   let base_error_frame =
@@ -324,10 +324,7 @@ let main_style ~user ~error ~server_function content footer =
   let content =
     Eliom_content.Html5.D.aside ~a:[a_class ["col"; "w80"]] content
   in
-  let footer =
-    Eliom_content.Html5.D.div ~a:[a_class ["navigation"]] footer
-  in
-  server_function ~box:content ~footer;
+  server_function ~box:content;
   html
     (head
        (title
@@ -352,7 +349,6 @@ let main_style ~user ~error ~server_function content footer =
             @ [ error_frame;
                 content;
                 userbox;
-                footer;
                    (*footer
                      ( [ br ();
                          br ();
@@ -385,15 +381,6 @@ let main_style ~user ~error ~server_function content footer =
            )
        ]
     )
-
-let link_footer ~service ~param min max =
-  let link name x = a ~service [pcdata name] (param x) in
-  function
-  | page when page = min && page < max -> [ link "Suivant" (Some (page + 1)) ]
-  | page when page = max && page > min -> [ link "Précédent" (Some (page - 1)) ]
-  | page when page > min && page < max ->
-      [ link "Précédent" (Some (page - 1)); link "Suivant" (Some (page + 1)) ]
-  | _ -> []
 
 let private_register () =
   [div

@@ -41,28 +41,13 @@ let () =
     (fun (tag) () -> Templates_atom.tag_to_atom tag ());
   Cumulus_appl.register
     ~service: Services.main
-    (fun page () ->
-       let service =
-         Eliom_service.preapply ~service:Services.main page
-       in
-       Templates.main ?page ~service ()
-    );
+    (fun () -> Templates.main);
   Cumulus_appl.register
     ~service: Services.author_feed
-    (fun (page, username) () ->
-       let service =
-         Eliom_service.preapply ~service:Services.author_feed (page, username)
-       in
-       Templates.user ?page ~service username
-    );
+    (fun username () -> Templates.user username);
   Cumulus_appl.register
     ~service: Services.fav_feed
-    (fun (username, page) () ->
-       let service =
-         Eliom_service.preapply ~service:Services.fav_feed (username, page)
-       in
-       Templates.fav_feed ?page ~service username
-    );
+    (fun username () -> Templates.fav_feed username);
   Eliom_registration.Action.register
     ~service:Services.append_feed
     (fun () data ->
@@ -198,12 +183,7 @@ let () =
     (fun () () -> Templates.register ());
   Cumulus_appl.register
     ~service: Services.tag_feed
-    (fun (page, tag) () ->
-       let service =
-         Eliom_service.preapply ~service:Services.tag_feed (page, tag)
-       in
-       Templates.tag ?page ~service tag
-    );
+    (fun tag () -> Templates.tag tag);
   Cumulus_appl.register
     ~service: Services.preferences
     (fun () () -> Templates.preferences ());

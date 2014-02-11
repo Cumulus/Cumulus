@@ -42,7 +42,7 @@ type feed_generator =
   number:int32 ->
   user:int32 option ->
   unit ->
-  (feeds * int64) Lwt.t
+  feeds Lwt.t
 
 val get_tree_feeds : int32 -> feed_generator
 val get_links_feeds : feed_generator

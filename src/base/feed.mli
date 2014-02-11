@@ -42,7 +42,7 @@ type feed_generator =
   number:int32 ->
   user:int32 option ->
   unit ->
-  (feed list * int64) Lwt.t
+  feed list Lwt.t
 
 val get_edit_infos : int32 ->
   (string * string option * string) Lwt.t

@@ -20,23 +20,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
 val main :
-  ?page:int ->
-  service:'a ->
   unit ->
   [> `Html ] Eliom_content.Html5.F.elt Lwt.t
 val user :
-  ?page:int ->
-  service:'a ->
   string ->
   [> `Html ] Eliom_content.Html5.F.elt Lwt.t
 val fav_feed :
-  ?page:int->
-  service:'a ->
   string ->
   [> `Html ] Eliom_content.Html5.F.elt Lwt.t
 val tag :
-  ?page:int ->
-  service:'a ->
   string ->
   [> `Html ] Eliom_content.Html5.F.elt Lwt.t
 val register : unit -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t

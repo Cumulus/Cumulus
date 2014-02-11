@@ -38,7 +38,7 @@ let links_of_tags tags =
         ~a:[a_class ["tags"]]
         ~service:Services.tag_feed
         [pcdata tag]
-        (None, tag)
+        tag
     in
     acc @ [pcdata " "; link]
   ) [] tags

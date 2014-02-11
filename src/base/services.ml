@@ -49,7 +49,7 @@ let atom_tag =
 let main =
   Eliom_service.App.service
     ~path: [""]
-    ~get_params: Eliom_parameter.(opt (int "page"))
+    ~get_params: Eliom_parameter.unit
     ()
 
 let view_feed' =
@@ -74,14 +74,13 @@ let append_feed =
 let author_feed =
   Eliom_service.App.service
     ~path: [""]
-    ~get_params: Eliom_parameter.(opt (int "page") ** string "username")
+    ~get_params: Eliom_parameter.(string "username")
     ()
 
 let fav_feed =
   Eliom_service.App.service
     ~path:["fav"]
-    (* ~get_params: Eliom_parameter.(suffix (string "username") ** int "page") *)
-    ~get_params: Eliom_parameter.(suffix_prod (string "name") (opt (int "page")))
+    ~get_params: Eliom_parameter.(suffix (string "name"))
     ()
 
 let add_fav_feed =
@@ -112,7 +111,7 @@ let cancelvote_feed =
 let tag_feed =
   Eliom_service.App.service
     ~path: [""]
-    ~get_params: Eliom_parameter.(opt (int "page") ** string "tag")
+    ~get_params: Eliom_parameter.(string "tag")
     ()
 
 let auth =
