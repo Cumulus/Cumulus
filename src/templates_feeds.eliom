@@ -303,8 +303,7 @@ let main_style ~user ~error ~server_function content footer =
   let userbox = userbox user in
   let header = header () in
   let base_error_frame =
-    Eliom_content.Html5.D.div
-      ~a:[a_class ["msghandler"]]
+    Eliom_content.Html5.D.div ~a:[a_class ["msghandler"]]
   in
   let error_frame =
     match error with
@@ -346,7 +345,8 @@ let main_style ~user ~error ~server_function content footer =
        [ div
            ~a: [a_class ["line"]]
            (header
-            @ [ content;
+            @ [ error_frame;
+                content;
                 userbox;
                 footer;
                    (*footer
