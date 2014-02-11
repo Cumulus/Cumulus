@@ -490,8 +490,13 @@ a.postitle{
     border: medium none;
 }
 
-textaera.input-box {
-  font-size: 50px;
+.box textarea {
+  background-color: #777;
+  border-radius: 4px 4px 4px 4px;
+  border: medium none;
+  color: #FFF;
+  font-size: 1em;
+  padding: 10px;
 }
 
 .msghandler {
