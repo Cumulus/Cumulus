@@ -481,6 +481,7 @@ a.postitle{
 .box input {
     height: 37px;
     width: 25%;
+    min-width: 100px; /* while resizing, the block cuts the text (does not work on very small size < 100px) */
     font-size: 1em;
     margin: 5px 0px;
     padding: 10px;
