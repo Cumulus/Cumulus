@@ -328,10 +328,18 @@ let main_style ~user ~error ~server_function content =
         error_frame
     | None -> base_error_frame []
   in
-  let content =
-    Eliom_content.Html5.D.aside ~a:[a_class ["col"; "w80"]] content
+  let link_next =
+    Eliom_content.Html5.D.aside ~a:[a_class ["row"; "post"; "mod"]] []
   in
-  server_function ~box:content;
+  let before =
+    Eliom_content.Html5.D.section ~a:[a_class["line"]] [link_next]
+  in
+  let content =
+    Eliom_content.Html5.D.aside
+      ~a:[a_class ["col"; "w80"]]
+      (content @ [before])
+  in
+  server_function ~box:content ~link_next ~before;
   html
     (head
        (title

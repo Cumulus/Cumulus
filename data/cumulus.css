@@ -523,3 +523,12 @@ a.postitle{
 .form-comment .input-box {
   width: 90%;
 }
+
+.link_next {
+    cursor: pointer;
+    text-align: center;
+    width: 100%;
+    vertical-align: middle;
+    font-size: 1.2em;
+    color: #414141;
+}
