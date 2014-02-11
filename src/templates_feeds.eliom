@@ -392,40 +392,43 @@ let link_footer ~service ~param min max =
   | _ -> []
 
 let private_register () =
-  [post_form
-     ~a:[a_class ["box"]]
-     ~service:Services.add_user
-     (fun (username_name, (email_name, (password_name, password_check))) -> [
-          h1 [pcdata "Inscription"];
-          p [
-            Templates_common.string_input_box
-              ~a:[a_placeholder "Pseudo"]
-              ~input_type:`Text
-              ~name:username_name
-              ();
-            br ();
-            Templates_common.string_input_box
-              ~a:[a_placeholder "Mot de passe"]
-              ~input_type:`Password
-              ~name:password_name
-              ();
-            br ();
-            Templates_common.string_input_box
-              ~a:[a_placeholder "Confirmation"]
-              ~input_type:`Password
-              ~name:password_check
-              ();
-            br ();
-            Templates_common.string_input_box
-              ~a:[a_placeholder "Email"]
-              ~input_type:`Text
-              ~name:email_name
-              ();
-            br ();
-            Templates_common.submit_input ~value:"Valider" ()
-          ]
-        ])
-     ()
+  [div
+     ~a:[a_class ["simple-page"]]
+     [post_form
+        ~a:[a_class ["box"]]
+        ~service:Services.add_user
+        (fun (username_name, (email_name, (password_name, password_check))) -> [
+             h1 [pcdata "Inscription"];
+             p [
+               Templates_common.string_input_box
+                 ~a:[a_placeholder "Pseudo"]
+                 ~input_type:`Text
+                 ~name:username_name
+                 ();
+               br ();
+               Templates_common.string_input_box
+                 ~a:[a_placeholder "Mot de passe"]
+                 ~input_type:`Password
+                 ~name:password_name
+                 ();
+               br ();
+               Templates_common.string_input_box
+                 ~a:[a_placeholder "Confirmation"]
+                 ~input_type:`Password
+                 ~name:password_check
+                 ();
+               br ();
+               Templates_common.string_input_box
+                 ~a:[a_placeholder "Email"]
+                 ~input_type:`Text
+                 ~name:email_name
+                 ();
+               br ();
+               Templates_common.submit_input ~value:"Valider" ()
+             ]
+           ])
+        ()
+     ]
   ]
 
 let private_preferences ~user =
@@ -436,65 +439,68 @@ let private_preferences ~user =
           [pcdata "Veuillez vous connecter pour accéder aux préférences."]
        ]
    | Some user ->
-       [ post_form
-           ~a:[a_class ["box"]]
-           ~service:Services.update_user_password
-           (fun (password_name, password_check) -> [
-                h1 [pcdata "Modifier le mot de passe"] ;
-                p [
-                  Templates_common.string_input_box
-                    ~a:[a_placeholder "Nouveau mot de passe"]
-                    ~input_type:`Password
-                    ~name:password_name
-                    ();
-                  br ();
-                  Templates_common.string_input_box
-                    ~a:[a_placeholder "Confirmer le nouveau mot de passe"]
-                    ~input_type:`Password
-                    ~name:password_check
-                    ();
-                  br ();
-                  Templates_common.submit_input ~value:"Valider" ()
-                ]
-              ])
-           ();
-         post_form
-           ~a:[a_class ["box"]]
-           ~service:Services.update_user_mail
-           (fun email_name -> [
-                h1 [pcdata "Changer d'adresse mail"];
-                p [
-                  Templates_common.string_input_box
-                    ~a:[a_placeholder user.User.email;
-                        a_id "new_email"
-                       ]
-                    ~input_type:`Text
-                    ~name:email_name
-                    ();
-                  br ();
-                  Templates_common.submit_input ~value:"Valider" ()
-                ]
-              ])
-           ();
-         post_form
-           ~a:[a_class ["box"]]
-           ~service:Services.update_user_feeds_per_page
-           (fun nb_feeds_name -> [
-                h1 [pcdata "Changer le nombre de liens par page"];
-                p [
-                  int32_input
-                    ~a:[a_class ["input-box"];
-                        a_placeholder (Int32.to_string
-                                         user.User.feeds_per_page)
-                       ]
-                    ~input_type:`Text
-                    ~name:nb_feeds_name
-                    ();
-                  br ();
-                  Templates_common.submit_input ~value:"Valider" ()
-                ]
-              ])
-           ()
+       [div
+          ~a:[a_class ["simple-page"]]
+          [ post_form
+              ~a:[a_class ["box"]]
+              ~service:Services.update_user_password
+              (fun (password_name, password_check) -> [
+                   h1 [pcdata "Modifier le mot de passe"] ;
+                   p [
+                     Templates_common.string_input_box
+                       ~a:[a_placeholder "Nouveau mot de passe"]
+                       ~input_type:`Password
+                       ~name:password_name
+                       ();
+                     br ();
+                     Templates_common.string_input_box
+                       ~a:[a_placeholder "Confirmer le nouveau mot de passe"]
+                       ~input_type:`Password
+                       ~name:password_check
+                       ();
+                     br ();
+                     Templates_common.submit_input ~value:"Valider" ()
+                   ]
+                 ])
+              ();
+            post_form
+              ~a:[a_class ["box"]]
+              ~service:Services.update_user_mail
+              (fun email_name -> [
+                   h1 [pcdata "Changer d'adresse mail"];
+                   p [
+                     Templates_common.string_input_box
+                       ~a:[a_placeholder user.User.email;
+                           a_id "new_email"
+                          ]
+                       ~input_type:`Text
+                       ~name:email_name
+                       ();
+                     br ();
+                     Templates_common.submit_input ~value:"Valider" ()
+                   ]
+                 ])
+              ();
+            post_form
+              ~a:[a_class ["box"]]
+              ~service:Services.update_user_feeds_per_page
+              (fun nb_feeds_name -> [
+                   h1 [pcdata "Changer le nombre de liens par page"];
+                   p [
+                     int32_input
+                       ~a:[a_class ["input-box"];
+                           a_placeholder (Int32.to_string
+                                            user.User.feeds_per_page)
+                          ]
+                       ~input_type:`Text
+                       ~name:nb_feeds_name
+                       ();
+                     br ();
+                     Templates_common.submit_input ~value:"Valider" ()
+                   ]
+                 ])
+              ()
+          ]
        ]
 
 let private_comment ~user id =
@@ -504,61 +510,64 @@ let private_comment ~user id =
        [pcdata "Veuillez vous connecter pour poster un commentaire."]
     ]
   else
-    [ post_form
-        ~a:[a_class ["box"]]
-        ~service:Services.append_link_comment
-        (fun (parent, (url, (desc, tags))) -> [
-             h1 [pcdata "Lien"] ;
-             p [
-               Templates_common.string_input_box
-                 ~a:[a_placeholder "URL"]
-                 ~input_type:`Text
-                 ~name:url
-                 ();
-               br ();
-               Templates_common.string_input_box
-                 ~a:[a_placeholder "Titre"]
-                 ~input_type:`Text
-                 ~name:desc
-                 ();
-               br ();
-               Templates_common.string_input_box
-                 ~a:[a_placeholder "Tags"]
-                 ~input_type:`Text
-                 ~name:tags
-                 ();
-               br ();
-               int32_input
-                 ~input_type:`Hidden
-                 ~name:parent
-                 ~value:id
-                 ();
-               Templates_common.submit_input ~value:"Envoyer !" ()
-             ]
-           ])
-        (id, "");
-      post_form
-        ~a:[a_class ["box"]]
-        ~service:Services.append_desc_comment
-        (fun (parent, desc) -> [
-             h1 [pcdata "Commentaire"];
-             p [
-               textarea
-                 ~a:[a_class ["input-box"];
-                     a_placeholder "Texte"
-                    ]
-                 ~name:desc
-                 ();
-               int32_input
-                 ~input_type:`Hidden
-                 ~name:parent
-                 ~value:id
-                 ();
-               br ();
-               Templates_common.submit_input ~value:"Envoyer !" ()
-             ]
-           ])
-        (id, "")
+    [div
+       ~a:[a_class ["simple-page"]]
+       [ post_form
+           ~a:[a_class ["box"]]
+           ~service:Services.append_link_comment
+           (fun (parent, (url, (desc, tags))) -> [
+                h1 [pcdata "Lien"] ;
+                p [
+                  Templates_common.string_input_box
+                    ~a:[a_placeholder "URL"]
+                    ~input_type:`Text
+                    ~name:url
+                    ();
+                  br ();
+                  Templates_common.string_input_box
+                    ~a:[a_placeholder "Titre"]
+                    ~input_type:`Text
+                    ~name:desc
+                    ();
+                  br ();
+                  Templates_common.string_input_box
+                    ~a:[a_placeholder "Tags"]
+                    ~input_type:`Text
+                    ~name:tags
+                    ();
+                  br ();
+                  int32_input
+                    ~input_type:`Hidden
+                    ~name:parent
+                    ~value:id
+                    ();
+                  Templates_common.submit_input ~value:"Envoyer !" ()
+                ]
+              ])
+           (id, "");
+         post_form
+           ~a:[a_class ["box"]]
+           ~service:Services.append_desc_comment
+           (fun (parent, desc) -> [
+                h1 [pcdata "Commentaire"];
+                p [
+                  textarea
+                    ~a:[a_class ["input-box"];
+                        a_placeholder "Texte"
+                       ]
+                    ~name:desc
+                    ();
+                  int32_input
+                    ~input_type:`Hidden
+                    ~name:parent
+                    ~value:id
+                    ();
+                  br ();
+                  Templates_common.submit_input ~value:"Envoyer !" ()
+                ]
+              ])
+           (id, "")
+       ]
     ]
 
 let private_edit_feed ~user ~feed (edit_desc, edit_url, edit_tags) =
@@ -569,87 +578,92 @@ let private_edit_feed ~user ~feed (edit_desc, edit_url, edit_tags) =
        [pcdata "Vous n'avez pas le droit d'editer ce lien."]
     ]
   else
-    [
-      match edit_url with
-      | Some edit_url ->
-          (post_form
-             ~a:[a_class ["box"]]
-             ~service:Services.edit_link_comment
-             (fun (parent, (url, (desc, tags))) -> [
-                  h1 [pcdata "Lien"] ;
-                  p [
-                    Templates_common.string_input_box
-                      ~a:[ a_placeholder "URL"]
-                      ~input_type:`Text
-                      ~name:url
-                      ~value:edit_url
-                      ();
-                    br ();
-                    Templates_common.string_input_box
-                      ~a:[ a_placeholder "Titre" ]
-                      ~input_type:`Text
-                      ~name:desc
-                      ~value:edit_desc
-                      ();
-                    br ();
-                    Templates_common.string_input_box
-                      ~a:[ a_placeholder "Tags" ]
-                      ~input_type:`Text
-                      ~name:tags
-                      ~value:edit_tags
-                      ();
-                    br ();
-                    int32_input
-                      ~input_type:`Hidden
-                      ~name:parent
-                      ~value:feed.Feed.id
-                      ();
-                    Templates_common.submit_input ~value:"Envoyer !" ()
-                  ]
-                ])
-             (feed.Feed.id, ""))
-      | None ->
-          (post_form
-             ~a:[a_class ["box"]]
-             ~service:Services.edit_desc_comment
-             (fun (parent, desc) -> [
-                  h1 [pcdata "Commentaire"];
-                  p [
-                    textarea
-                      ~a:[a_class ["input-box"];
-                          a_placeholder "Comment" ]
-                      ~name:desc
-                      ~value:edit_desc
-                      () ;
-                    int32_input
-                      ~input_type:`Hidden
-                      ~name:parent
-                      ~value:feed.Feed.id
-                      ();
-                    br ();
-                    Templates_common.submit_input ~value:"Envoyer !" ()
-                  ]
-                ])
-             (feed.Feed.id, ""))
+    [div
+       ~a:[a_class ["simple-page"]]
+       [match edit_url with
+        | Some edit_url ->
+            post_form
+              ~a:[a_class ["box"]]
+              ~service:Services.edit_link_comment
+              (fun (parent, (url, (desc, tags))) -> [
+                   h1 [pcdata "Lien"] ;
+                   p [
+                     Templates_common.string_input_box
+                       ~a:[ a_placeholder "URL"]
+                       ~input_type:`Text
+                       ~name:url
+                       ~value:edit_url
+                       ();
+                     br ();
+                     Templates_common.string_input_box
+                       ~a:[ a_placeholder "Titre" ]
+                       ~input_type:`Text
+                       ~name:desc
+                       ~value:edit_desc
+                       ();
+                     br ();
+                     Templates_common.string_input_box
+                       ~a:[ a_placeholder "Tags" ]
+                       ~input_type:`Text
+                       ~name:tags
+                       ~value:edit_tags
+                       ();
+                     br ();
+                     int32_input
+                       ~input_type:`Hidden
+                       ~name:parent
+                       ~value:feed.Feed.id
+                       ();
+                     Templates_common.submit_input ~value:"Envoyer !" ()
+                   ]
+                 ])
+              (feed.Feed.id, "")
+        | None ->
+            post_form
+              ~a:[a_class ["box"]]
+              ~service:Services.edit_desc_comment
+              (fun (parent, desc) -> [
+                   h1 [pcdata "Commentaire"];
+                   p [
+                     textarea
+                       ~a:[a_class ["input-box"];
+                           a_placeholder "Comment" ]
+                       ~name:desc
+                       ~value:edit_desc
+                       () ;
+                     int32_input
+                       ~input_type:`Hidden
+                       ~name:parent
+                       ~value:feed.Feed.id
+                       ();
+                     br ();
+                     Templates_common.submit_input ~value:"Envoyer !" ()
+                   ]
+                 ])
+              (feed.Feed.id, "")
+       ]
     ]
 
 let error_content msg = [div ~a:[a_class ["box"]] [pcdata msg]]
 
 let reset_password () =
-  [post_form
-     ~a:[a_class ["box"]]
-     ~service:Services.reset_password
-     (fun email_name -> [
-          h1 [pcdata "Adresse mail associée au compte"];
-          p [
-            Templates_common.string_input_box
-              ~a:[a_id "new_email"]
-              ~input_type:`Text
-              ~name:email_name
-              ();
-            br ();
-            Templates_common.submit_input ~value:"Valider" ()
-          ]
-        ])
-     ()
+  [div
+     ~a:[a_class ["simple-page"]]
+     [post_form
+        ~a:[a_class ["box"]]
+        ~service:Services.reset_password
+        (fun email_name -> [
+             h1 [pcdata "Adresse mail associée au compte"];
+             p [
+               Templates_common.string_input_box
+                 ~a:[a_id "new_email"]
+                 ~input_type:`Text
+                 ~name:email_name
+                 ();
+               br ();
+               Templates_common.submit_input ~value:"Valider" ()
+             ]
+           ])
+        ()
+     ]
   ]

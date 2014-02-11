@@ -50,7 +50,7 @@ val comments_to_html' :
   [< Html5_types.div_content_fun > `Aside `Div ] Eliom_content.Html5.F.elt
 val private_register :
   unit ->
-  [> Html5_types.form ] Eliom_content.Html5.F.elt list
+  [> `Div | `Form ] Eliom_content.Html5.F.elt list
 val private_preferences :
   user:User.user option ->
   [> `Div | `Form ] Eliom_content.Html5.F.elt list
@@ -68,4 +68,4 @@ val error_content :
   [> `Div ] Eliom_content.Html5.F.elt list
 val reset_password :
   unit ->
-  [> `Form ] Eliom_content.Html5.F.elt list
+  [> `Div | `Form ] Eliom_content.Html5.F.elt list
