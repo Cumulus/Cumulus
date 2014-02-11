@@ -73,13 +73,13 @@ let feed_list feeds =
         in
         Lwt.async
           (fun () ->
-             let doc = Dom_html.document##documentElement in
-             let innerHeight = Dom_html.window##innerHeight in
-             match Js.Optdef.to_option innerHeight with
-             | None -> Lwt.return_unit
-             | Some innerHeight ->
-                 let rec ev () =
-                   Lwt_js_events.scroll Dom_html.document >>= fun _ ->
+             let rec ev () =
+               Lwt_js_events.scroll Dom_html.document >>= fun _ ->
+               let doc = Dom_html.document##documentElement in
+               let innerHeight = Dom_html.window##innerHeight in
+               match Js.Optdef.to_option innerHeight with
+               | None -> Lwt.return_unit
+               | Some innerHeight ->
                    (if doc##scrollTop >= doc##scrollHeight - innerHeight then
                       get_next_page ()
                     else
