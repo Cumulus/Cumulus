@@ -44,6 +44,7 @@ val private_preferences :
 val private_comment :
   user:User.user option ->
   int32 ->
+  Comments.tree ->
   [> `Div | `Form ] Eliom_content.Html5.F.elt list
 val private_edit_feed :
   user:User.user option ->

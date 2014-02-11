@@ -41,6 +41,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 open Batteries
 open Eliom_content.Html5.F
 
+let action_to_html ~user self = match user with
+  | None -> []
+  | Some user ->
+    [
+      a ~service:Services.comment [pcdata "- Commenter "] (self.Feed.id, self.Feed.description);
+    ]
+
 let feed_to_html ?(padding=0) ?(is_child=false) ~user self =
   let get_image cls imgname =
    img ~a: [a_class cls]
@@ -103,11 +110,11 @@ let feed_to_html ?(padding=0) ?(is_child=false) ~user self =
               (if is_author then
                  [
                    a ~service:Services.delete_feed [pcdata "- Supprimer "] self.Feed.id ;
-                   a ~service:Services.edit_feed [pcdata "- Editer"]
+                   a ~service:Services.edit_feed [pcdata "- Editer "]
                      (self.Feed.id, Utils.troncate self.Feed.description);
                  ]
                else []
-              ));
+              ) @ (action_to_html ~user self));
             content;
             tags;
           ];
@@ -494,7 +501,8 @@ let private_preferences ~user =
           ]
        ]
 
-let private_comment ~user id =
+let private_comment ~user id branch =
+  let branch = comments_to_html' ~user branch in
   if Option.is_none user then
     [div
        ~a:[a_class ["box"]]
@@ -503,7 +511,7 @@ let private_comment ~user id =
   else
     [div
        ~a:[a_class ["simple-page"]]
-       [ post_form
+        [ branch; post_form
            ~a:[a_class ["box"]]
            ~service:Services.append_link_comment
            (fun (parent, (url, (desc, tags))) -> [

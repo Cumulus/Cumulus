@@ -85,10 +85,10 @@ let rec tree_comments stack comments =
   end
   | x :: r -> tree_comments (scan (Sheet x) stack []) r
 
-let rec branch_comments root = function
-  | [] -> root
-  | l when is_root root -> root
+let rec branch_comments target = function
+  | [] -> target
+  | _ when is_root target -> target
   | x :: r ->
-      if Int32.equal x.Feed.id (get root)
-      then branch_comments (Node (x, [root])) r
-      else branch_comments root (r @ [x])
+      if Int32.equal x.Feed.id (get target)
+      then branch_comments (Node (x, [target])) r
+      else branch_comments target (r @ [x])

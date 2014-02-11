@@ -128,25 +128,21 @@ let feeds_comments_to_html ~user id =
 (* TODO: Fix it (doesn't seems to work) *)
 let feeds_branch_to_html ~user id =
   let userid = User.get_id user in
-  Feed.get_feed_with_id ~user:userid id >>= fun sheet ->
-  match sheet.Feed.root with
-  | None ->
-      Lwt.return (Templates_feeds.comments_to_html' ~user (Comments.Sheet sheet))
-  | Some id ->
-      Feed.get_feed_with_id ~user:userid id >>= fun root ->
-      Feed.get_comments ~user:userid id >|= fun comments ->
-      let tree =
-        Comments.branch_comments (Comments.Sheet sheet) (root :: comments)
-      in
-      Templates_feeds.comments_to_html' ~user tree
+  Feed.get_feed_with_id ~user:userid id >>= fun target ->
+  (match target.Feed.root with
+    | None -> Lwt.return (Comments.Sheet target)
+    | Some root ->
+      Feed.get_feed_with_id ~user:userid root >>= fun root ->
+      Feed.get_comments ~user:userid root.Feed.id >|= fun comments ->
+      (Comments.branch_comments (Comments.Sheet target) (root :: comments)))
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =
   let content user _ =
     Feed.exist ~feedid:id () >>= fun exist ->
     if exist then
-      feeds_comments_to_html ~user id >|= fun feed ->
-      [feed]
+      feeds_comments_to_html ~user id >|= fun feeds ->
+      [feeds]
     else
       Lwt.return
         (Templates_feeds.error_content "Ce lien n'existe pas.")
@@ -163,11 +159,12 @@ let preferences () =
 
 let comment id =
   let content user _ =
-    Feed.exist ~feedid:id () >|= fun exist ->
+    Feed.exist ~feedid:id () >>= fun exist ->
     if not exist then
-      Templates_feeds.error_content "Ce commentaire n'existe pas."
+      Lwt.return (Templates_feeds.error_content "Ce commentaire n'existe pas.")
     else
-      Templates_feeds.private_comment ~user id
+      feeds_branch_to_html ~user id >|= fun branch ->
+      Templates_feeds.private_comment ~user id branch
   in
   main_style content
 
