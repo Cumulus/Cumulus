@@ -55,15 +55,21 @@ let feed_list feeds =
     let userid = User.get_id user in
     feeds ~starting ~number:offset ~user:userid () >|= fun feeds ->
     let feeds = Templates_feeds.to_html ~user feeds in
-    let server_function ~box ~link_next ~before =
+    let server_function ~box =
       let server_function =
         let f page = content user page >|= fst in
         server_function Json.t<int> f
       in
       ignore {unit{
         let box = %box in
-        let link_next = %link_next in
-        let before = %before in
+        let link_next =
+          let open Eliom_content.Html5.F in
+          Eliom_content.Html5.D.aside ~a:[a_class ["row"; "post"; "mod"]] []
+        in
+        let before =
+          let open Eliom_content.Html5.F in
+          Eliom_content.Html5.D.section ~a:[a_class["line"]] [link_next]
+        in
         let get_next_page =
           let last_page = ref 0 in
           begin fun () ->
@@ -99,6 +105,7 @@ let feed_list feeds =
                  in
                  ev ()
           );
+        Eliom_content.Html5.Manip.appendChild box before;
         Eliom_content.Html5.Manip.replaceAllChild
           link_next
           [default_link_next_content];
@@ -112,7 +119,7 @@ let feed_list feeds =
 let main_style content =
   let content user page =
     content user page >|= fun content ->
-    (content, fun ~box:_ ~link_next:_ ~before:_ -> ())
+    (content, fun ~box:_ -> ())
   in
   main_style_aux content
 

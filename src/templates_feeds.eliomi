@@ -26,12 +26,7 @@ val to_html :
 val main_style :
   user:User.user option ->
   error:string option ->
-  server_function:
-    (box:[> Html5_types.aside ] Eliom_content.Html5.D.elt ->
-     link_next:[> Html5_types.aside ] Eliom_content.Html5.D.elt ->
-     before:[> Html5_types.section ] Eliom_content.Html5.D.elt ->
-     unit
-    ) ->
+  server_function:(box:[> Html5_types.aside ] Eliom_content.Html5.D.elt ->unit) ->
   [< Html5_types.aside_content_fun > `Section ] Eliom_content.Html5.F.elt list ->
   [> `Html ] Eliom_content.Html5.F.elt
 val comments_to_html' :
