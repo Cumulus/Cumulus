@@ -259,14 +259,18 @@ let header () =
       [
         aside
           ~a:[a_class [""]]
-          [ img
-              ~alt:("Cumulus Project")
-              ~src:(
-                make_uri
-                  ~service: (Eliom_service.static_dir ())
-                  ["logo.png"]
-              )
-              ();
+          [ a
+              ~service:Services.main
+              [ img
+                  ~alt:("Cumulus Project")
+                  ~src:(
+                    make_uri
+                      ~service: (Eliom_service.static_dir ())
+                      ["logo.png"]
+                  )
+                  ();
+              ]
+              None;
           ];
         aside
           ~a:[a_class ["w75 dash"]]
