@@ -34,10 +34,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
            (fun id ->
               (* TODO: Except for ourself *)
               (* TODO: reload on delete *)
-              server_function () >>= fun (feeds, footer_content) ->
+              server_function 0 >|= fun (feeds, footer_content) ->
               Eliom_content.Html5.Manip.replaceAllChild box feeds;
               Eliom_content.Html5.Manip.replaceAllChild footer footer_content;
-              Lwt.return_unit
            )
            stream
       )
@@ -48,11 +47,11 @@ open Batteries
 let main_style_aux content =
   User.get_user () >>= fun user ->
   Errors.get_error () >>= fun error ->
-  content user >|= fun (content, footer, server_function) ->
+  content user 0 >|= fun (content, footer, server_function) ->
   Templates_feeds.main_style ~user ~error ~server_function content footer
 
-let feed_list ~service page ~service_link link_param feeds =
-  let rec content user =
+let feed_list ~service ~service_link link_param feeds =
+  let rec content user page =
     let offset = User.get_feeds_per_page user in
     let starting = Int32.(Int32.of_int page * offset) in
     let userid = User.get_id user in
@@ -70,16 +69,43 @@ let feed_list ~service page ~service_link link_param feeds =
     in
     let server_function ~box ~footer =
       let server_function =
-        let f () =
-          content user >|= fun (a, b, _) ->
+        let f page =
+          content user page >|= fun (a, b, _) ->
           (a, b)
         in
-        server_function Json.t<unit> f
+        server_function Json.t<int> f
       in
       ignore {unit{
         let box = %box in
         let footer = %footer in
-        waiting_for_reload %server_function ~box ~footer
+        let get_next_page =
+          let last_page = ref 0 in
+          begin fun () ->
+            let page = succ !last_page in
+            %server_function page >|= fun (feeds, _) ->
+            Eliom_content.Html5.Manip.appendChilds box feeds;
+            last_page := page;
+          end
+        in
+        Lwt.async
+          (fun () ->
+             let doc = Dom_html.document##documentElement in
+             let innerHeight = Dom_html.window##innerHeight in
+             match Js.Optdef.to_option innerHeight with
+             | None -> Lwt.return_unit
+             | Some innerHeight ->
+                 let rec ev () =
+                   Lwt_js_events.scroll Dom_html.document >>= fun _ ->
+                   (if doc##scrollTop >= doc##scrollHeight - innerHeight then
+                      get_next_page ()
+                    else
+                      Lwt.return_unit
+                   )
+                   >>= ev
+                 in
+                 ev ()
+          );
+        waiting_for_reload %server_function ~box ~footer;
       }};
     in
     (feeds, footer, server_function)
@@ -87,37 +113,37 @@ let feed_list ~service page ~service_link link_param feeds =
   main_style_aux content
 
 let main_style content =
-  let content user =
-    content user >|= fun content ->
+  let content user page =
+    content user page >|= fun content ->
     (content, [], fun ~box:_ ~footer:_ -> ())
   in
   main_style_aux content
 
 let main_style_pure content =
-  let content user = Lwt.return (content user) in
+  let content user _ = Lwt.return (content user) in
   main_style content
 
 (* see TODO [1] *)
 let main ?(page=0) ~service () =
-  feed_list ~service page
+  feed_list ~service
     ~service_link:Services.main
     identity
     Feed.get_root_feeds
 
 let user ?(page=0) ~service username =
-  feed_list ~service page
+  feed_list ~service
     ~service_link:Services.author_feed
     (fun x -> (x, username))
     (Feed.get_feeds_with_author username)
 
 let tag ?(page=0) ~service tag =
-  feed_list ~service page
+  feed_list ~service
     ~service_link:Services.tag_feed
     (fun x -> (x, tag))
     (Feed.get_feeds_with_tag tag)
 
 let fav_feed ?(page=0) ~service username =
-  feed_list ~service page
+  feed_list ~service
     ~service_link:Services.fav_feed
     (fun x -> (username, x))
     (Feed.get_fav_with_username username)
@@ -148,7 +174,7 @@ let feeds_branch_to_html ~user id =
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =
-  let content user =
+  let content user _ =
     Feed.exist ~feedid:id () >>= fun exist ->
     if exist then
       feeds_comments_to_html ~user id >|= fun feed ->
@@ -168,7 +194,7 @@ let preferences () =
   main_style_pure content
 
 let comment id =
-  let content user =
+  let content user _ =
     Feed.exist ~feedid:id () >|= fun exist ->
     if not exist then
       Templates_feeds.error_content "Ce commentaire n'existe pas."
@@ -178,7 +204,7 @@ let comment id =
   main_style content
 
 let edit_feed id =
-  let content user =
+  let content user _ =
     let userid = User.get_id user in
     Feed.get_feed_with_id ~user:userid id >>= fun feed ->
     Feed.get_edit_infos feed.Feed.id >>= fun infos ->
