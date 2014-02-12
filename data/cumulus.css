@@ -288,15 +288,9 @@ button, input, select {
 
 .little.avatarbox {
   width: 115px;
-  height: 68px;
+  height: 100%;
   padding-top: 15px;
   padding-bottom: 15px;
-  text-align: center;
-}
-
-.little.avatarbox .post_avatar {
-  width: 68px;
-  height: 68px;
 }
 
 .post_avatar {
@@ -368,6 +362,16 @@ a.postitle{
   width: 220px;
   padding-bottom: 15px;
   margin-top: 5px;
+}
+
+.col.little .post_avatar {
+  width: 75px;
+}
+
+.col.little .postimg {
+  width: 50px;
+  height: 50px;
+  margin: calc(100% - 50px) 0;
 }
 
 .col.little.post_int {
