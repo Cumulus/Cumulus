@@ -150,19 +150,19 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
                 ["upvote_wrap_inner"] in
             div ~a: [a_class["upvote_wrap"]][
               div ~a: [a_class cl][
-                if self.Feed.score <> 1 then
-                  (a ~service:Services.upvote_feed [
-                     get_image [] "up.png"] self.Feed.id)
-                else
+                if self.Feed.vote = 1 then
                   (a ~service:Services.cancelvote_feed [
-                     get_image [] "upon.png"] self.Feed.id);
-                pcdata (string_of_int self.Feed.score);
-                if self.Feed.score <> -1 then
-                  (a ~service:Services.downvote_feed [
-                     get_image [] "down.png"] self.Feed.id)
+                     get_image [] "upon.png"] self.Feed.id)
                 else
+                  (a ~service:Services.upvote_feed [
+                     get_image [] "up.png"] self.Feed.id);
+                pcdata (string_of_int self.Feed.score);
+                if self.Feed.vote = -1 then
                   (a ~service:Services.cancelvote_feed [
                      get_image [] "downon.png"] self.Feed.id)
+                else
+                  (a ~service:Services.downvote_feed [
+                     get_image [] "down.png"] self.Feed.id)
               ]];
           ]
         ]
