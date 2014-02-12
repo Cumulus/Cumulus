@@ -109,11 +109,11 @@ let get_feeds_aux ?range
   >>= fun tags ->
   Db.view
     (<:view<
-      group { c = count[f.root] } by { f.root }
+      group { c = count[f.parent] } by { f.parent }
       | f in $Db_table.feeds$;
-      (match f.root with
+      (match f.parent with
        | null -> false
-       | root -> in' root $ids$
+       | parent -> in' parent $ids$
       )
     >>)
   >>= fun count ->
@@ -161,7 +161,16 @@ let get_feeds_aux ?range
     ; user = object method name = o#!name method email_digest = o#!email_digest end
     ; fav = List.exists (Int32.equal id) favs
     ; vote = map (fun x -> Int32.to_int x#!score) 0 user_votes
-    ; count = find_and_map (fun e -> match e#?root with Some x -> Int32.equal x id | None -> assert false) (fun x -> Int64.to_int x#!c) 0 count
+    ; count = find_and_map (fun e -> match e#?parent with Some x -> Int32.equal x id | None -> assert false) (fun x -> Int64.to_int x#!c) 0 count
+      (*
+       * On ne comptais (avec l'ancienne version) que le nombre de commentaires
+       * pour les roots.
+       *
+       * Maintenant, nous comptons le nombre de commentaires pour tout les feeds
+       * mais nous prennons en compte que les commentaires de premier niveau.
+       *
+       * TODO: compter la totalité des commentaires
+       *)
     }
   in
   Lwt.return (List.map new_object feeds)
