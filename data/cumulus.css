@@ -536,3 +536,9 @@ a.postitle{
     font-size: 1.2em;
     color: #414141;
 }
+
+.loader {
+    margin-left: 50%;
+    margin-right: 50%;
+    margin-top: 2.5%;
+}

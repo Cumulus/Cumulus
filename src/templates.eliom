@@ -87,23 +87,41 @@ let feed_list feeds =
                ]
             [pcdata "Get the next links"]
         in
+        let loading =
+          let open Eliom_content.Html5.F in
+          img
+            ~a:[a_class ["loader"]]
+            ~alt:"loader.gif"
+            ~src:(make_uri
+                    ~service:(Eliom_service.static_dir ())
+                    ["loader.gif"]
+                 )
+            ()
+        in
         Lwt.async
           (fun () ->
              let rec ev () =
                Lwt_js_events.scroll Dom_html.document >>= fun _ ->
                let doc = Dom_html.document##documentElement in
                let innerHeight = Dom_html.window##innerHeight in
-               match Js.Optdef.to_option innerHeight with
+               begin match Js.Optdef.to_option innerHeight with
                | None -> Lwt.return_unit
                | Some innerHeight ->
-                   (if doc##scrollTop >= doc##scrollHeight - innerHeight then
-                      get_next_page ()
-                    else
-                      Lwt.return_unit
-                   )
-                   >>= ev
-                 in
-                 ev ()
+                   if doc##scrollTop >= doc##scrollHeight - innerHeight then begin
+                     Eliom_content.Html5.Manip.replaceAllChild
+                       link_next
+                       [loading];
+                     get_next_page () >|= fun () ->
+                     Eliom_content.Html5.Manip.replaceAllChild
+                       link_next
+                       [default_link_next_content];
+                   end
+                   else
+                     Lwt.return_unit
+               end
+               >>= ev
+             in
+             ev ()
           );
         Eliom_content.Html5.Manip.appendChild box before;
         Eliom_content.Html5.Manip.replaceAllChild
