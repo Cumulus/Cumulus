@@ -62,14 +62,30 @@ let feed_list feeds =
       in
       ignore {unit{
         let box = %box in
+        let link_next =
+          let open Eliom_content.Html5.F in
+          Eliom_content.Html5.D.aside ~a:[a_class ["row"; "post"; "mod"]] []
+        in
+        let before =
+          let open Eliom_content.Html5.F in
+          Eliom_content.Html5.D.section ~a:[a_class["line"]] [link_next]
+        in
         let get_next_page =
           let last_page = ref 0 in
           begin fun () ->
             let page = succ !last_page in
             %server_function page >|= fun feeds ->
-            Eliom_content.Html5.Manip.appendChilds box feeds;
+            Eliom_content.Html5.Manip.appendChilds ~before box feeds;
             last_page := page;
           end
+        in
+        let default_link_next_content =
+          let open Eliom_content.Html5.F in
+          Raw.a
+            ~a:[ a_onclick (fun _ -> Lwt.async get_next_page)
+               ; a_class ["link_next"]
+               ]
+            [pcdata "Get the next links"]
         in
         Lwt.async
           (fun () ->
@@ -89,6 +105,10 @@ let feed_list feeds =
                  in
                  ev ()
           );
+        Eliom_content.Html5.Manip.appendChild box before;
+        Eliom_content.Html5.Manip.replaceAllChild
+          link_next
+          [default_link_next_content];
         waiting_for_reload %server_function ~box;
       }};
     in
