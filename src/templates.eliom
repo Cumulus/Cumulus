@@ -70,20 +70,15 @@ let feed_list feeds =
           let open Eliom_content.Html5.F in
           Eliom_content.Html5.D.section ~a:[a_class["line"]] [link_next]
         in
-        let get_next_page =
-          let last_page = ref 0 in
-          begin fun () ->
-            let page = succ !last_page in
-            %server_function page >|= fun feeds ->
-            Eliom_content.Html5.Manip.appendChilds ~before box feeds;
-            last_page := page;
-          end
+        let no_more_links =
+          let open Eliom_content.Html5.F in
+          Raw.a ~a:[a_class ["link_next"]] [pcdata "No more links"]
         in
-        let default_link_next_content =
+        let default_link_next_content f =
           let open Eliom_content.Html5.F in
           Raw.a
-            ~a:[ a_onclick (fun _ -> Lwt.async get_next_page)
-               ; a_class ["link_next"]
+            ~a:[ a_onclick (fun _ -> Lwt.async f)
+               ; a_class ["link_next"; "link"]
                ]
             [pcdata "Get the next links"]
         in
@@ -98,6 +93,27 @@ let feed_list feeds =
                  )
             ()
         in
+        let get_next_page =
+          let last_page = ref 0 in
+          let rec aux () =
+            let page = succ !last_page in
+            Eliom_content.Html5.Manip.replaceAllChild
+              link_next
+              [loading];
+            %server_function page >|= fun feeds ->
+            begin match feeds with
+            | [] ->
+                Eliom_content.Html5.Manip.replaceAllChild link_next [no_more_links];
+            | feeds ->
+                Eliom_content.Html5.Manip.appendChilds ~before box feeds;
+                Eliom_content.Html5.Manip.replaceAllChild
+                  link_next
+                  [default_link_next_content aux];
+            end;
+            last_page := page;
+          in
+          aux
+        in
         Lwt.async
           (fun () ->
              let rec ev () =
@@ -107,15 +123,8 @@ let feed_list feeds =
                begin match Js.Optdef.to_option innerHeight with
                | None -> Lwt.return_unit
                | Some innerHeight ->
-                   if doc##scrollTop >= doc##scrollHeight - innerHeight then begin
-                     Eliom_content.Html5.Manip.replaceAllChild
-                       link_next
-                       [loading];
-                     get_next_page () >|= fun () ->
-                     Eliom_content.Html5.Manip.replaceAllChild
-                       link_next
-                       [default_link_next_content];
-                   end
+                   if doc##scrollTop >= doc##scrollHeight - innerHeight then
+                     get_next_page ()
                    else
                      Lwt.return_unit
                end
@@ -126,7 +135,7 @@ let feed_list feeds =
         Eliom_content.Html5.Manip.appendChild box before;
         Eliom_content.Html5.Manip.replaceAllChild
           link_next
-          [default_link_next_content];
+          [default_link_next_content get_next_page];
         waiting_for_reload %server_function ~box;
       }};
     in

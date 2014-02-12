@@ -528,8 +528,11 @@ a.postitle{
   width: 90%;
 }
 
-.link_next {
+.link {
     cursor: pointer;
+}
+
+.link_next {
     text-align: center;
     width: 100%;
     vertical-align: middle;
