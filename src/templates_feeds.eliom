@@ -48,7 +48,7 @@ let action_to_html ~user self = match user with
       a ~service:Services.comment [pcdata "- Commenter "] (self.Feed.id, self.Feed.description);
     ]
 
-let feed_to_html ?(padding=0) ?(is_child=false) ~user self =
+let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
   let get_image cls imgname =
    img ~a: [a_class cls]
                   ~alt: imgname
@@ -169,7 +169,7 @@ let feed_to_html ?(padding=0) ?(is_child=false) ~user self =
       ]
     ]
 
-let rec comments_to_html' ?(padding=0) ?(is_child=false) ~user tree =
+let rec comments_to_html' ?(padding=5) ?(is_child=false) ~user tree =
   match tree with
   | Comments.Sheet feed ->
       let elm = feed_to_html ~padding ~is_child ~user feed in
