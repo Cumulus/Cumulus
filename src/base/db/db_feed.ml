@@ -234,7 +234,7 @@ let get_comments ~user root =
   get_feeds_aux ~feeds_filter ~users_filter ~user ()
 
 let get_root ~feedid ~user () =
-  let feeds_filter f = (<:value< f.id = $int32:feedid$ >>) in
+  let feeds_filter f = (<:value< f.root = $int32:feedid$ >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~users_filter ~user ()
   >|= (function [] -> None | x :: _ -> Some x)
