@@ -20,6 +20,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
 {client{
+  open Eliom_lib.Lwt_ops
+
   let display_error error_frame =
     let id_timeout = ref None in
     id_timeout :=
@@ -79,6 +81,57 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
     | None -> div ~a:[a_class["error"]][]
   in
   let is_author = Feed.is_author ~feed:self user in
+  let fav_div =
+    let add =
+      Eliom_content.Html5.D.Raw.a
+        ~a:[a_class ["link"]]
+        [get_image ["circled";"gray";"fav_icon"] "fav.png"]
+    in
+    let del =
+      Eliom_content.Html5.D.Raw.a
+        ~a:[a_class ["link"]]
+        [get_image ["circled";"highlighted";"deletable"] "fav.png"]
+    in
+    let is_fav = self.Feed.fav in
+    let res =
+      Eliom_content.Html5.D.div
+        ~a:[a_class ["fav_wrap"]]
+        [if self.Feed.fav then del else add]
+    in
+    let feed_id = self.Feed.id in
+    ignore {unit{
+      let is_fav = %is_fav in
+      let res = %res in
+      let r = ref is_fav in
+      Lwt.async
+        (fun () ->
+           let rec aux () =
+             Lwt_js_events.click
+               (Eliom_content.Html5.To_dom.of_element (if !r then %del else %add))
+             >>= fun _ ->
+             let call service =
+               Eliom_client.call_ocaml_service ~service %feed_id ()
+             in
+             (if !r then
+                call %Services.del_fav_feed >|= function
+                | `Ok ->
+                    Eliom_content.Html5.Manip.replaceAllChild res [%add]
+                | `NotConnected -> () (* TODO: Display an error *)
+              else
+                call %Services.add_fav_feed >|= function
+                | `Ok ->
+                    Eliom_content.Html5.Manip.replaceAllChild res [%del]
+                | `NotConnected -> () (* TODO: Display an error *)
+             )
+             >>= fun () ->
+             r := not !r;
+             aux ()
+           in
+           aux ()
+        )
+    }};
+    res
+  in
   List.flatten
     [
       [
@@ -134,18 +187,7 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
                   (self.Feed.id, Utils.troncate self.Feed.description)];
               pcdata (string_of_int self.Feed.count)
             ];
-            div ~a: [a_class ["fav_wrap"]][
-              if self.Feed.fav = false then
-                a
-                  ~service:Services.add_fav_feed
-                  [get_image ["circled";"gray";"fav_icon"] "fav.png"]
-                  (self.Feed.id)
-              else
-                a
-                  ~service:Services.del_fav_feed
-                  [get_image ["circled";"highlighted";"deletable"] "fav.png"]
-                  (self.Feed.id);
-            ];
+            fav_div;
             let cl = if self.Feed.score <= 0 then ["upvote_wrap_inner";"gray"] else
                 ["upvote_wrap_inner"] in
             div ~a: [a_class["upvote_wrap"]][

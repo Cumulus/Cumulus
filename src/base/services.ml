@@ -84,12 +84,14 @@ let fav_feed =
     ()
 
 let add_fav_feed =
-  Eliom_service.Http.coservice'
+  Eliom_service.Ocaml.coservice'
+    ~rt:(Eliom_service.rt : [`Ok | `NotConnected] Eliom_service.rt)
     ~get_params: (Eliom_parameter.int32 "feed_id")
     ()
 
 let del_fav_feed =
-  Eliom_service.Http.coservice'
+  Eliom_service.Ocaml.coservice'
+    ~rt:(Eliom_service.rt : [`Ok | `NotConnected] Eliom_service.rt)
     ~get_params: (Eliom_parameter.int32 "feed_id")
     ()
 

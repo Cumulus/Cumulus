@@ -73,7 +73,9 @@ let exec_if_not_author f feedid =
   | None -> Lwt.return ()
 
 let get_userid f =
-  User.get_userid () >>= BatOption.map_default f Lwt.return_unit
+  User.get_userid () >>= function
+  | Some userid -> f userid >|= fun () -> `Ok
+  | None -> Lwt.return `NotConnected
 
 let is_author ~feed user =
   Option.map_default (fun x -> Int32.equal x.User.id feed.author) false user

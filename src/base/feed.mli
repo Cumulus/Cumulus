@@ -53,8 +53,8 @@ val delete_feed_check :
   unit ->
   unit Lwt.t
 
-val add_fav : int32 -> unit Lwt.t
-val del_fav : int32 -> unit Lwt.t
+val add_fav : int32 -> [`Ok | `NotConnected] Lwt.t
+val del_fav : int32 -> [`Ok | `NotConnected] Lwt.t
 val upvote : int32 -> unit Lwt.t
 val downvote : int32 -> unit Lwt.t
 val cancel_vote : int32 -> unit Lwt.t

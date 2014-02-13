@@ -200,10 +200,10 @@ let () =
        | None -> Lwt.return ()
        | Some userid -> Feed.delete_feed_check ~feedid ~userid ()
     );
-  Eliom_registration.Action.register
+  Eliom_registration.Ocaml.register
     ~service:Services.add_fav_feed
     (fun feedid () -> Feed.add_fav feedid);
-  Eliom_registration.Action.register
+  Eliom_registration.Ocaml.register
     ~service:Services.del_fav_feed
     (fun feedid () -> Feed.del_fav feedid);
   Eliom_registration.Action.register
