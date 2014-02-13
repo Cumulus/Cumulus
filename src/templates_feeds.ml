@@ -19,27 +19,6 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-{client{
-  open Eliom_lib.Lwt_ops
-
-  let display_error error_frame =
-    let id_timeout = ref None in
-    id_timeout :=
-      Some
-        (Dom_html.window##setTimeout
-           (Js.wrap_callback
-              (fun () ->
-                 Eliom_content.Html5.Manip.removeAllChild error_frame;
-                 match !id_timeout with
-                 | None -> () (* It cannot happen *)
-                 | Some id ->
-                     Dom_html.window##clearTimeout (id)
-              ),
-            5_000.
-           )
-        )
-}}
-
 open Batteries
 open Eliom_content.Html5.F
 
@@ -99,37 +78,7 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
         [if self.Feed.fav then del else add]
     in
     let feed_id = self.Feed.id in
-    ignore {unit{
-      let is_fav = %is_fav in
-      let res = %res in
-      let r = ref is_fav in
-      Lwt.async
-        (fun () ->
-           let rec aux () =
-             Lwt_js_events.click
-               (Eliom_content.Html5.To_dom.of_element (if !r then %del else %add))
-             >>= fun _ ->
-             let call service =
-               Eliom_client.call_ocaml_service ~service %feed_id ()
-             in
-             (if !r then
-                call %Services.del_fav_feed >|= function
-                | `Ok ->
-                    Eliom_content.Html5.Manip.replaceAllChild res [%add]
-                | `NotConnected -> () (* TODO: Display an error *)
-              else
-                call %Services.add_fav_feed >|= function
-                | `Ok ->
-                    Eliom_content.Html5.Manip.replaceAllChild res [%del]
-                | `NotConnected -> () (* TODO: Display an error *)
-             )
-             >>= fun () ->
-             r := not !r;
-             aux ()
-           in
-           aux ()
-        )
-    }};
+    Client.fav_actions ~is_fav ~res ~del ~add ~feed_id;
     res
   in
   List.flatten
@@ -364,9 +313,7 @@ let main_style ~user ~error ~server_function content =
         let error_frame =
           base_error_frame [p [pcdata error]]
         in
-        ignore {unit{
-          display_error %error_frame
-        }};
+        Client.display_error ~error_frame;
         error_frame
     | None -> base_error_frame []
   in

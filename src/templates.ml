@@ -19,28 +19,8 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-{shared{
-  open Eliom_lib.Lwt_ops
-}}
-
-{client{
-  let waiting_for_reload server_function ~box =
-    let event = %Feeds.event in
-    let stream = Lwt_react.E.to_stream event in
-    Lwt.async
-      (fun () ->
-         Lwt_stream.iter_s
-           (fun id ->
-              (* TODO: Except for ourself *)
-              (* TODO: reload on delete *)
-              server_function 0 >|= fun feeds ->
-              Eliom_content.Html5.Manip.replaceAllChild box feeds;
-           )
-           stream
-      )
-}}
-
 open Batteries
+open Eliom_lib.Lwt_ops
 
 let main_style_aux content =
   User.get_user () >>= fun user ->
@@ -56,87 +36,8 @@ let feed_list feeds =
     feeds ~starting ~number:offset ~user:userid () >|= fun feeds ->
     let feeds = Templates_feeds.to_html ~user feeds in
     let server_function ~box =
-      let server_function =
-        let f page = content user page >|= fst in
-        server_function Json.t<int> f
-      in
-      ignore {unit{
-        let box = %box in
-        let link_next =
-          let open Eliom_content.Html5.F in
-          Eliom_content.Html5.D.aside ~a:[a_class ["row"; "post"; "mod"]] []
-        in
-        let before =
-          let open Eliom_content.Html5.F in
-          Eliom_content.Html5.D.section ~a:[a_class["line"]] [link_next]
-        in
-        let no_more_links =
-          let open Eliom_content.Html5.F in
-          Raw.a ~a:[a_class ["link_next"]] [pcdata "No more links"]
-        in
-        let default_link_next_content f =
-          let open Eliom_content.Html5.F in
-          Raw.a
-            ~a:[ a_onclick (fun _ -> Lwt.async f)
-               ; a_class ["link_next"; "link"]
-               ]
-            [pcdata "Get the next links"]
-        in
-        let loading =
-          let open Eliom_content.Html5.F in
-          img
-            ~a:[a_class ["loader"]]
-            ~alt:"loader.gif"
-            ~src:(make_uri
-                    ~service:(Eliom_service.static_dir ())
-                    ["loader.gif"]
-                 )
-            ()
-        in
-        let get_next_page =
-          let last_page = ref 0 in
-          let rec aux () =
-            let page = succ !last_page in
-            Eliom_content.Html5.Manip.replaceAllChild
-              link_next
-              [loading];
-            %server_function page >|= fun feeds ->
-            begin match feeds with
-            | [] ->
-                Eliom_content.Html5.Manip.replaceAllChild link_next [no_more_links];
-            | feeds ->
-                Eliom_content.Html5.Manip.appendChilds ~before box feeds;
-                Eliom_content.Html5.Manip.replaceAllChild
-                  link_next
-                  [default_link_next_content aux];
-            end;
-            last_page := page;
-          in
-          aux
-        in
-        Lwt.async
-          (fun () ->
-             Lwt_js_events.scrolls
-               Dom_html.document
-               (fun _ _ ->
-                  let doc = Dom_html.document##documentElement in
-                  let innerHeight = Dom_html.window##innerHeight in
-                  begin match Js.Optdef.to_option innerHeight with
-                  | None -> Lwt.return_unit
-                  | Some innerHeight ->
-                      if doc##scrollTop >= doc##scrollHeight - innerHeight then
-                        get_next_page ()
-                      else
-                        Lwt.return_unit
-                  end
-               )
-          );
-        Eliom_content.Html5.Manip.appendChild box before;
-        Eliom_content.Html5.Manip.replaceAllChild
-          link_next
-          [default_link_next_content get_next_page];
-        waiting_for_reload %server_function ~box;
-      }};
+      let content page = content user page >|= fst in
+      Client.feeds_actions ~content ~box
     in
     (feeds, server_function)
   in
