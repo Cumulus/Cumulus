@@ -116,21 +116,20 @@ let feed_list feeds =
         in
         Lwt.async
           (fun () ->
-             let rec ev () =
-               Lwt_js_events.scroll Dom_html.document >>= fun _ ->
-               let doc = Dom_html.document##documentElement in
-               let innerHeight = Dom_html.window##innerHeight in
-               begin match Js.Optdef.to_option innerHeight with
-               | None -> Lwt.return_unit
-               | Some innerHeight ->
-                   if doc##scrollTop >= doc##scrollHeight - innerHeight then
-                     get_next_page ()
-                   else
-                     Lwt.return_unit
-               end
-               >>= ev
-             in
-             ev ()
+             Lwt_js_events.scrolls
+               Dom_html.document
+               (fun _ _ ->
+                  let doc = Dom_html.document##documentElement in
+                  let innerHeight = Dom_html.window##innerHeight in
+                  begin match Js.Optdef.to_option innerHeight with
+                  | None -> Lwt.return_unit
+                  | Some innerHeight ->
+                      if doc##scrollTop >= doc##scrollHeight - innerHeight then
+                        get_next_page ()
+                      else
+                        Lwt.return_unit
+                  end
+               )
           );
         Eliom_content.Html5.Manip.appendChild box before;
         Eliom_content.Html5.Manip.replaceAllChild
