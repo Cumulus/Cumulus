@@ -19,18 +19,19 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-(* TODO ASAP: FILL A BUG FOR THIS INCONSISTENCY IN THE ELIOM BUGTRACKER *)
-
-val feeds_actions : content:(int -> 'a Lwt.t) -> box:'b -> unit
+val feeds_actions :
+  content:(int -> [`Section] Eliom_content.Html5.F.elt list Lwt.t) ->
+  box:[`Aside] Eliom_content.Html5.F.elt ->
+  unit
 
 val fav_actions :
-  is_fav:'a ->
-  res:'b ->
-  del:'c ->
-  add:'d ->
-  feed_id:'e ->
+  is_fav:bool ->
+  res:[`Div] Eliom_content.Html5.elt ->
+  del:[`A of [`Img]] Eliom_content.Html5.elt ->
+  add:[`A of [`Img]] Eliom_content.Html5.elt ->
+  feed_id:int32 ->
   unit
 
 val display_error :
-  error_frame:'a ->
+  error_frame:[`Div] Eliom_content.Html5.elt ->
   unit

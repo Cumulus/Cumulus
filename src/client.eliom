@@ -151,26 +151,51 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     aux ()
 }}
 
-let feeds_actions ~content ~box =
-  let content = server_function Json.t<int> content in
-  ignore {unit{
-     let content = %content in
-     let box = %box in
-     Lwt.async (fun () -> feeds_actions ~content ~box)
-  }}
+(* Due to a known limitation of Eliom, we have to set the type here
+ * through this module. (see: https://github.com/ocsigen/eliom/issues/51)
+ *)
+module ClientTypes : sig
+  val feeds_actions :
+    content:(int -> [`Section] Eliom_content.Html5.elt list Lwt.t) ->
+    box:[`Aside] Eliom_content.Html5.elt ->
+    unit
 
-let fav_actions ~is_fav ~res ~del ~add ~feed_id =
-  ignore {unit{
-    let is_fav = %is_fav in
-    let res = %res in
-    let del = %del in
-    let add = %add in
-    let feed_id = %feed_id in
-    Lwt.async (fun () -> fav_actions ~is_fav ~res ~del ~add ~feed_id)
-  }}
+  val fav_actions :
+    is_fav:bool ->
+    res:[`Div] Eliom_content.Html5.elt ->
+    del:[`A of [`Img]] Eliom_content.Html5.elt ->
+    add:[`A of [`Img]] Eliom_content.Html5.elt ->
+    feed_id:int32 ->
+    unit
 
-let display_error ~error_frame =
-  ignore {unit{
-    let error_frame = %error_frame in
-    display_error ~error_frame
-  }}
+  val display_error :
+    error_frame:[`Div] Eliom_content.Html5.elt ->
+    unit
+end = struct
+
+  let feeds_actions ~content ~box =
+    let content = server_function Json.t<int> content in
+    ignore {unit{
+      let content = %content in
+      let box = %box in
+      Lwt.async (fun () -> feeds_actions ~content ~box)
+    }}
+
+  let fav_actions ~is_fav ~res ~del ~add ~feed_id =
+    ignore {unit{
+      let is_fav = %is_fav in
+      let res = %res in
+      let del = %del in
+      let add = %add in
+      let feed_id = %feed_id in
+      Lwt.async (fun () -> fav_actions ~is_fav ~res ~del ~add ~feed_id)
+    }}
+
+  let display_error ~error_frame =
+    ignore {unit{
+      let error_frame = %error_frame in
+      display_error ~error_frame
+    }}
+end
+
+include ClientTypes
