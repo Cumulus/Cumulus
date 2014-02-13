@@ -21,11 +21,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 {shared{
   open Eliom_lib.Lwt_ops
+  open Eliom_content.Html5.F
+
+  let get_upvote_inner ~upon ~up ~downon ~down ~vote ~score =
+    let cl = "upvote_wrap_inner" :: (if score <= 0 then ["gray"] else []) in
+    div
+      ~a:[a_class cl]
+      [ if vote = 1 then upon else up
+      ; pcdata (string_of_int score)
+      ; if vote = -1 then downon else down
+      ]
 }}
 
 {client{
-  open Eliom_content.Html5.F
-
   let display_error ~error_frame =
     let id_timeout = ref None in
     id_timeout :=
@@ -125,15 +133,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     waiting_for_reload content ~box
 
   let fav_actions ~is_fav ~res ~del ~add ~feed_id =
-    let r = ref is_fav in
+    let is_fav = ref is_fav in
     let rec aux () =
       Lwt_js_events.click
-        (Eliom_content.Html5.To_dom.of_element (if !r then del else add))
+        (Eliom_content.Html5.To_dom.of_element (if !is_fav then del else add))
       >>= fun _ ->
       let call service =
         Eliom_client.call_ocaml_service ~service feed_id ()
       in
-      (if !r then
+      (if !is_fav then
          call %Services.del_fav_feed >|= function
          | `Ok ->
              Eliom_content.Html5.Manip.replaceAllChild res [add]
@@ -145,8 +153,41 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
          | `NotConnected -> () (* TODO: Display an error *)
       )
       >>= fun () ->
-      r := not !r;
+      is_fav := not !is_fav; (* BUG ? *)
       aux ()
+    in
+    aux ()
+
+  let upvotes_actions ~container ~upon ~up ~downon ~down ~vote ~feed_id =
+    let vote = ref vote in
+    let call service =
+      Eliom_client.call_ocaml_service ~service feed_id ()
+    in
+    let action = function
+      | `Ok (v, score) ->
+          let content = get_upvote_inner ~upon ~up ~downon ~down ~vote:v ~score in
+          Eliom_content.Html5.Manip.replaceAllChild container [content];
+          vote := v;
+      | `NoRight
+      | `NotConnected ->
+          () (* TODO: Display an error *)
+    in
+    let rec aux () =
+      let up_action =
+        Lwt_js_events.click
+          (Eliom_content.Html5.To_dom.of_element (if !vote = 1 then upon else up))
+        >>= fun _ ->
+        call (if !vote = 1 then %Services.cancelvote_feed else %Services.upvote_feed)
+      in
+      let down_action =
+        Lwt_js_events.click
+          (Eliom_content.Html5.To_dom.of_element (if !vote = -1 then downon else down))
+        >>= fun _ ->
+        call (if !vote = -1 then %Services.cancelvote_feed else %Services.downvote_feed)
+      in
+      Lwt.pick [up_action; down_action]
+      >|= action
+      >>= aux
     in
     aux ()
 }}
@@ -170,6 +211,16 @@ module ClientTypes : sig
 
   val display_error :
     error_frame:[`Div] Eliom_content.Html5.elt ->
+    unit
+
+  val upvotes_actions :
+    container:[`Div] Eliom_content.Html5.elt ->
+    upon:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
+    up:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
+    downon:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
+    down:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
+    vote:int ->
+    feed_id:int32 ->
     unit
 end = struct
 
@@ -195,6 +246,21 @@ end = struct
     ignore {unit{
       let error_frame = %error_frame in
       display_error ~error_frame
+    }}
+
+  let upvotes_actions ~container ~upon ~up ~downon ~down ~vote ~feed_id =
+    ignore {unit{
+      let container = %container in
+      let upon = %upon in
+      let up = %up in
+      let downon = %downon in
+      let down = %down in
+      let vote = %vote in
+      let feed_id = %feed_id in
+      Lwt.async
+        (fun () ->
+           upvotes_actions ~container ~upon ~up ~downon ~down ~vote ~feed_id
+        )
     }}
 end
 

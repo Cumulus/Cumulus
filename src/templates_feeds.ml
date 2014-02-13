@@ -81,6 +81,24 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
     Client.fav_actions ~is_fav ~res ~del ~add ~feed_id;
     res
   in
+  let upvotes =
+    let link name =
+      Eliom_content.Html5.D.Raw.a ~a:[a_class ["link"]] [get_image [] name]
+    in
+    let upon = link "upon.png" in
+    let up = link "up.png" in
+    let downon = link "downon.png" in
+    let down = link "down.png" in
+    let vote = self.Feed.vote in
+    let container =
+      Eliom_content.Html5.D.div
+        ~a:[a_class ["upvote_wrap"]]
+        [Client.get_upvote_inner ~upon ~up ~downon ~down ~vote ~score:self.Feed.score]
+    in
+    let feed_id = self.Feed.id in
+    Client.upvotes_actions ~container ~upon ~up ~downon ~down ~vote ~feed_id;
+    container
+  in
   List.flatten
     [
       [
@@ -137,24 +155,7 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
               pcdata (string_of_int self.Feed.count)
             ];
             fav_div;
-            let cl = if self.Feed.score <= 0 then ["upvote_wrap_inner";"gray"] else
-                ["upvote_wrap_inner"] in
-            div ~a: [a_class["upvote_wrap"]][
-              div ~a: [a_class cl][
-                if self.Feed.vote = 1 then
-                  (a ~service:Services.cancelvote_feed [
-                     get_image [] "upon.png"] self.Feed.id)
-                else
-                  (a ~service:Services.upvote_feed [
-                     get_image [] "up.png"] self.Feed.id);
-                pcdata (string_of_int self.Feed.score);
-                if self.Feed.vote = -1 then
-                  (a ~service:Services.cancelvote_feed [
-                     get_image [] "downon.png"] self.Feed.id)
-                else
-                  (a ~service:Services.downvote_feed [
-                     get_image [] "down.png"] self.Feed.id)
-              ]];
+            upvotes;
           ]
         ]
       ]

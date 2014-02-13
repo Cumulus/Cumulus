@@ -67,10 +67,10 @@ let exec_if_not_author f feedid =
   User.get_userid () >>= function
   | Some userid ->
       begin Db_feed.is_feed_author ~feedid ~userid () >>= function
-      | true -> Lwt.return ()
+      | true -> Lwt.return `NoRight
       | false -> f ~feedid ~userid ()
       end
-  | None -> Lwt.return ()
+  | None -> Lwt.return `NotConnected
 
 let get_userid f =
   User.get_userid () >>= function

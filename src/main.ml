@@ -206,13 +206,13 @@ let () =
   Eliom_registration.Ocaml.register
     ~service:Services.del_fav_feed
     (fun feedid () -> Feed.del_fav feedid);
-  Eliom_registration.Action.register
+  Eliom_registration.Ocaml.register
     ~service:Services.upvote_feed
     (fun feedid () -> Feed.upvote feedid);
-  Eliom_registration.Action.register
+  Eliom_registration.Ocaml.register
     ~service:Services.downvote_feed
     (fun feedid () -> Feed.downvote feedid);
-  Eliom_registration.Action.register
+  Eliom_registration.Ocaml.register
     ~service:Services.cancelvote_feed
     (fun feedid () -> Feed.cancel_vote feedid);
   Eliom_registration.Action.register

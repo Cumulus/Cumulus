@@ -19,6 +19,15 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
+val get_upvote_inner :
+  upon:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
+  up:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
+  downon:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
+  down:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
+  vote:int ->
+  score:int ->
+  [> Html5_types.div ] Eliom_content.Html5.F.elt
+
 val feeds_actions :
   content:(int -> [`Section] Eliom_content.Html5.F.elt list Lwt.t) ->
   box:[`Aside] Eliom_content.Html5.F.elt ->
@@ -34,4 +43,14 @@ val fav_actions :
 
 val display_error :
   error_frame:[`Div] Eliom_content.Html5.elt ->
+  unit
+
+val upvotes_actions :
+  container:[`Div] Eliom_content.Html5.elt ->
+  upon:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
+  up:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
+  downon:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
+  down:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
+  vote:int ->
+  feed_id:int32 ->
   unit

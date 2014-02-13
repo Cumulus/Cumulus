@@ -103,19 +103,19 @@ val upvote :
   feedid:int32 ->
   userid:int32 ->
   unit ->
-  unit Lwt.t
+  [> `Ok of (int * int)] Lwt.t
 
 val downvote :
   feedid:int32 ->
   userid:int32 ->
   unit ->
-  unit Lwt.t
+  [> `Ok of (int * int)] Lwt.t
 
 val cancelvote :
   feedid:int32 ->
   userid:int32 ->
   unit ->
-  unit Lwt.t
+  [> `Ok of (int * int)] Lwt.t
 
 val update :
   feedid:int32 ->

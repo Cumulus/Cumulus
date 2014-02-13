@@ -96,17 +96,20 @@ let del_fav_feed =
     ()
 
 let upvote_feed =
-  Eliom_service.Http.coservice'
+  Eliom_service.Ocaml.coservice'
+    ~rt:(Eliom_service.rt : [`Ok of (int * int) | `NotConnected | `NoRight] Eliom_service.rt)
     ~get_params: (Eliom_parameter.int32 "feed_id")
     ()
 
 let downvote_feed =
-  Eliom_service.Http.coservice'
+  Eliom_service.Ocaml.coservice'
+    ~rt:(Eliom_service.rt : [`Ok of (int * int) | `NotConnected | `NoRight] Eliom_service.rt)
     ~get_params: (Eliom_parameter.int32 "feed_id")
     ()
 
 let cancelvote_feed =
-  Eliom_service.Http.coservice'
+  Eliom_service.Ocaml.coservice'
+    ~rt:(Eliom_service.rt : [`Ok of (int * int) | `NotConnected | `NoRight] Eliom_service.rt)
     ~get_params: (Eliom_parameter.int32 "feed_id")
     ()
 
