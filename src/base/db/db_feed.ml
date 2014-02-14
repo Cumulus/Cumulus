@@ -314,15 +314,7 @@ let vote_exists ~feedid ~userid =
      >>)
   >|= Option.is_some
 
-let get_vote_and_score ~feedid ~userid =
-  Db.view_one
-    (<:view< {
-      v.score;
-    } | v in $Db_table.votes$;
-        v.id_feed = $int32:feedid$;
-        v.id_user = $int32:userid$;
-    >>)
-  >>= fun vote ->
+let get_vote_and_score vote ~feedid =
   Db.view_one
     (<:view< group {
       n = count[v.score];
@@ -330,7 +322,7 @@ let get_vote_and_score ~feedid ~userid =
         v.id_feed = $int32:feedid$;
     >>)
   >|= fun score ->
-  `Ok (Int32.to_int vote#!score, Int64.to_int score#!n)
+  `Ok (vote, Int64.to_int score#!n)
 
 let upvote ~feedid ~userid () =
   vote_exists ~feedid ~userid >>= (function
@@ -348,7 +340,7 @@ let upvote ~feedid ~userid () =
                      } >>)
   )
   >>= fun () ->
-  get_vote_and_score ~feedid ~userid
+  get_vote_and_score ~feedid 1
 
 let downvote ~feedid ~userid () =
   vote_exists ~feedid ~userid >>= (function
@@ -366,20 +358,13 @@ let downvote ~feedid ~userid () =
                      } >>)
   )
   >>= fun () ->
-  get_vote_and_score ~feedid ~userid
+  get_vote_and_score ~feedid (-1)
 
 let cancelvote ~feedid ~userid () =
   Db.query
     (<:delete< f in $Db_table.votes$ | f.id_feed = $int32:feedid$; f.id_user = $int32:userid$; >>)
   >>= fun () ->
-  Db.view_one
-    (<:view< group {
-      n = count[v.score];
-    } | v in $Db_table.votes$;
-        v.id_feed = $int32:feedid$;
-    >>)
-  >|= fun score ->
-  `Ok (0, Int64.to_int score#!n)
+  get_vote_and_score ~feedid 0
 
 (* Il faut delete tous les tags du lien et ajouter les nouveaux *)
 let update ~feedid ~url ~description ~tags () =
