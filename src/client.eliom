@@ -111,21 +111,23 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       in
       aux
     in
-    Lwt_js_events.scrolls
-      Dom_html.document
-      (fun _ _ ->
-         let doc = Dom_html.document##documentElement in
-         let innerHeight = Dom_html.window##innerHeight in
-         begin match Js.Optdef.to_option innerHeight with
-         | None -> Lwt.return_unit
-         | Some innerHeight ->
-             if doc##scrollTop >= doc##scrollHeight - innerHeight then
-               get_next_page ()
-             else
-               Lwt.return_unit
-         end
-      )
-    >|= fun () ->
+    Lwt.async
+      (fun () ->
+         Lwt_js_events.scrolls
+           Dom_html.document
+           (fun _ _ ->
+              let doc = Dom_html.document##documentElement in
+              let innerHeight = Dom_html.window##innerHeight in
+              begin match Js.Optdef.to_option innerHeight with
+              | None -> Lwt.return_unit
+              | Some innerHeight ->
+                  if doc##scrollTop >= doc##scrollHeight - innerHeight then
+                    get_next_page ()
+                  else
+                    Lwt.return_unit
+              end
+           )
+      );
     Eliom_content.Html5.Manip.appendChild box before;
     Eliom_content.Html5.Manip.replaceAllChild
       link_next
