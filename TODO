@@ -6,16 +6,5 @@ Faire en sorte que le formulaire d'inscription ne se vide pas
 
 === Clean ===
 
-* Mettre le tout le code Html séparé dans les modules Templates*
- * Séparer en modules
- * Toutes fonctions qui retournent un « [> `Html ] Html.elt Lwt.t » doivent être
-   dans Templates
-* Supprimer tout les objets en dehors des modules Db*
-  (supprimer la dépendance sur macaque{.syntax,} dans base et cumulus)
-* Ne laisser que la gestion de l'abstraction dans base/*
-* Utiliser Batteries partout
-* Ouvrir « Batteries » et « Eliom_lib.Lwt_ops » dans tous les modules
-* Ouvrir « Eliom_service » et « Eliom_parameter » dans Services ?
-* Ouvrir « Eliom_content.Html5.F » dans Templates*
-* Supprimer le module Html
-* …
+* Éviter les arguments optionnel
+* Use User.get_user{,id,…} only in Main (or Templates)
