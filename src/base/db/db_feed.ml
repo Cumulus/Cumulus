@@ -317,12 +317,12 @@ let vote_exists ~feedid ~userid =
 let get_vote_and_score vote ~feedid =
   Db.view_one
     (<:view< group {
-      n = count[v.score];
+      n = match sum[v.score] with null -> 0 | n -> n;
     } | v in $Db_table.votes$;
         v.id_feed = $int32:feedid$;
     >>)
   >|= fun score ->
-  `Ok (vote, Int64.to_int score#!n)
+  `Ok (vote, Int32.to_int score#!n)
 
 let upvote ~feedid ~userid () =
   vote_exists ~feedid ~userid >>= (function
