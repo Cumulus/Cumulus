@@ -20,6 +20,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
 open Batteries
+open Eliom_content.Html5
 open Eliom_content.Html5.F
 
 let action_to_html ~user self = match user with
@@ -85,6 +86,7 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
     let link name =
       Eliom_content.Html5.D.Raw.a ~a:[a_class ["link"]] [get_image [] name]
     in
+    let score_div = D.div [Client.get_score_div ~score:self.Feed.score] in
     let upon = link "upon.png" in
     let up = link "up.png" in
     let downon = link "downon.png" in
@@ -93,10 +95,10 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
     let container =
       Eliom_content.Html5.D.div
         ~a:[a_class ["upvote_wrap"]]
-        [Client.get_upvote_inner ~upon ~up ~downon ~down ~vote ~score:self.Feed.score]
+        [Client.get_upvote_inner ~score_div ~upon ~up ~downon ~down ~vote]
     in
     let feed_id = self.Feed.id in
-    Client.upvotes_actions ~container ~upon ~up ~downon ~down ~vote ~feed_id;
+    Client.upvotes_actions ~score_div ~container ~upon ~up ~downon ~down ~vote ~feed_id;
     container
   in
   List.flatten
@@ -171,13 +173,14 @@ let rec comments_to_html' ?(padding=5) ?(is_child=false) ~user tree =
       let childs = List.map (comments_to_html' ~padding:(padding + 75) ~is_child:true ~user) childs in
       div ~a: [a_class ["line"]] (elm @ childs)
 
-let to_html ~user data =
-  List.map
-    (fun feed ->
-       let elm = feed_to_html ~user feed in
-       section ~a: [a_class["line"]] elm
-    )
-    data
+let feed_to_html_aux ~user feed =
+  let elm = feed_to_html ~user feed in
+  D.section ~a: [a_class["line"]] elm
+
+let to_html ~user x =
+  let res = List.map (feed_to_html_aux ~user) x in
+  Client.set_first_feed (List.Exceptionless.hd res);
+  res
 
 let user_form () =
   aside

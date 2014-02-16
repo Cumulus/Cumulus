@@ -55,9 +55,19 @@ val delete_feed_check :
 
 val add_fav : int32 -> [`Ok | `NotConnected] Lwt.t
 val del_fav : int32 -> [`Ok | `NotConnected] Lwt.t
-val upvote : int32 -> [`Ok of (int * int) | `NoRight | `NotConnected] Lwt.t
-val downvote : int32 -> [`Ok of (int * int) | `NoRight | `NotConnected] Lwt.t
-val cancel_vote : int32 -> [`Ok of (int * int) | `NoRight | `NotConnected] Lwt.t
+
+val upvote :
+  update:(unit -> unit) ->
+  int32 ->
+  [`Ok | `NoRight | `NotConnected] Lwt.t
+val downvote :
+  update:(unit -> unit) ->
+  int32 ->
+  [`Ok | `NoRight | `NotConnected] Lwt.t
+val cancel_vote :
+  update:(unit -> unit) ->
+  int32 ->
+  [`Ok | `NoRight | `NotConnected] Lwt.t
 
 val is_author : feed:feed -> User.user option -> bool
 
@@ -81,3 +91,4 @@ val get_comments :
 val get_tree_feeds : int32 -> feed_generator
 val get_links_feeds : feed_generator
 val get_comments_feeds : feed_generator
+val get_score_from_id : feedid:int32 -> int Lwt.t

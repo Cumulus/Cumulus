@@ -63,12 +63,12 @@ let delete_feed_check ~feedid ~userid () =
   else
     Lwt.return ()
 
-let exec_if_not_author f feedid =
+let exec_if_not_author f ~update feedid =
   User.get_userid () >>= function
   | Some userid ->
       begin Db_feed.is_feed_author ~feedid ~userid () >>= function
       | true -> Lwt.return `NoRight
-      | false -> f ~feedid ~userid ()
+      | false -> f ~feedid ~userid () >|= fun () -> update (); `Ok
       end
   | None -> Lwt.return `NotConnected
 
@@ -103,3 +103,5 @@ let get_comments = Db_feed.get_comments
 let get_tree_feeds = Db_feed.get_tree_feeds
 let get_links_feeds = Db_feed.get_links_feeds
 let get_comments_feeds = Db_feed.get_comments_feeds
+
+let get_score_from_id = Db_feed.get_score_from_id

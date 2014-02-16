@@ -19,6 +19,11 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
+val feed_to_html_aux :
+  user:User.user option ->
+  Feed.feed ->
+  [> Html5_types.section ] Eliom_content.Html5.elt
+
 val to_html :
   user:User.user option ->
   Feed.feed list ->

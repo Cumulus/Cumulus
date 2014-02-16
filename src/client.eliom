@@ -21,17 +21,34 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 {shared{
   open Eliom_lib.Lwt_ops
+  open Eliom_content.Html5
   open Eliom_content.Html5.F
 
-  let get_upvote_inner ~upon ~up ~downon ~down ~vote ~score =
-    let cl = "upvote_wrap_inner" :: (if score <= 0 then ["gray"] else []) in
+  type obj =
+(*    | Comment of int *)
+    | Score of int
+    | Feed of Html5_types.div_content_fun elt
+
+  type t = (int32 * obj)
+
+  let get_score_div ~score =
     div
-      ~a:[a_class cl]
+      ~a:[a_class (if score <= 0 then ["gray"] else [])]
+      [pcdata (string_of_int score)]
+
+  let get_upvote_inner ~score_div ~upon ~up ~downon ~down ~vote =
+    div
+      ~a:[a_class ["upvote_wrap_inner"]]
       [ if vote = 1 then upon else up
-      ; pcdata (string_of_int score)
+      ; score_div
       ; if vote = -1 then downon else down
       ]
 }}
+
+let (event, call_event) =
+  let (private_event, call_event) = React.E.create () in
+  let event = Eliom_react.Down.of_react private_event in
+  (event, call_event)
 
 {client{
   let display_error ~error_frame =
@@ -51,17 +68,30 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
            )
         )
 
-  let waiting_for_reload get_feeds ~box =
-    let event = %Feeds.event in
-    let stream = Lwt_react.E.to_stream event in
-    Lwt_stream.iter_s
-      (fun id ->
-         (* TODO: Except for ourself *)
-         (* TODO: reload on delete *)
-         get_feeds 0 >|= fun feeds ->
-         Eliom_content.Html5.Manip.replaceAllChild box feeds;
-      )
-      stream
+  let first_feed = ref None
+
+  let set_first_feed x = first_feed := x
+
+(*  let comment_divs = Hashtbl.create 100 *)
+  let score_divs = Hashtbl.create 100
+
+  let waiting_for_reload ~box =
+    let aux = function
+(*      | id, Comment comment -> *)
+      | id, Score score ->
+          let div = Hashtbl.find score_divs id in
+          Manip.replaceAllChild div [get_score_div ~score];
+          Lwt.return_unit
+      | id, Feed content ->
+          match !first_feed with
+          | Some before ->
+              Manip.appendChilds ~before box [content];
+              first_feed := Some content;
+              Lwt.return_unit
+          | None -> Lwt.return_unit (* TODO: Display an error *)
+    in
+    let stream = Lwt_react.E.to_stream %event in
+    Lwt_stream.iter_s aux stream
 
   let feeds_actions ~content ~box =
     let link_next =
@@ -132,46 +162,46 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     Eliom_content.Html5.Manip.replaceAllChild
       link_next
       [default_link_next_content get_next_page];
-    waiting_for_reload content ~box
+    waiting_for_reload ~box
 
   let fav_actions ~is_fav ~res ~del ~add ~feed_id =
     let is_fav = ref is_fav in
+    let call service =
+      Eliom_client.call_ocaml_service ~service feed_id ()
+    in
     let rec aux () =
       Lwt_js_events.click
         (Eliom_content.Html5.To_dom.of_element (if !is_fav then del else add))
       >>= fun _ ->
-      let call service =
-        Eliom_client.call_ocaml_service ~service feed_id ()
-      in
       (if !is_fav then
          call %Services.del_fav_feed >|= function
          | `Ok ->
-             Eliom_content.Html5.Manip.replaceAllChild res [add]
+             Eliom_content.Html5.Manip.replaceAllChild res [add];
+             is_fav := not !is_fav;
          | `NotConnected -> () (* TODO: Display an error *)
        else
          call %Services.add_fav_feed >|= function
          | `Ok ->
-             Eliom_content.Html5.Manip.replaceAllChild res [del]
+             Eliom_content.Html5.Manip.replaceAllChild res [del];
+             is_fav := not !is_fav;
          | `NotConnected -> () (* TODO: Display an error *)
       )
-      >>= fun () ->
-      is_fav := not !is_fav; (* BUG ? *)
-      aux ()
+      >>= aux
     in
     aux ()
 
-  let upvotes_actions ~container ~upon ~up ~downon ~down ~vote ~feed_id =
+  let upvotes_actions ~container ~score_div ~upon ~up ~downon ~down ~vote ~feed_id =
     let vote = ref vote in
     let call service =
       Eliom_client.call_ocaml_service ~service feed_id ()
     in
     let action = function
-      | `Ok (v, score) ->
-          let content = get_upvote_inner ~upon ~up ~downon ~down ~vote:v ~score in
+      | v, `Ok ->
+          let content = get_upvote_inner ~score_div ~upon ~up ~downon ~down ~vote:v in
           Eliom_content.Html5.Manip.replaceAllChild container [content];
           vote := v;
-      | `NoRight
-      | `NotConnected ->
+      | _, `NoRight
+      | _, `NotConnected ->
           () (* TODO: Display an error *)
     in
     let rec aux () =
@@ -180,17 +210,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           (Eliom_content.Html5.To_dom.of_element (if !vote = 1 then upon else up))
         >>= fun _ ->
         call (if !vote = 1 then %Services.cancelvote_feed else %Services.upvote_feed)
+        >|= fun result ->
+        ((if !vote = 1 then 0 else 1), result)
       in
       let down_action =
         Lwt_js_events.click
           (Eliom_content.Html5.To_dom.of_element (if !vote = -1 then downon else down))
         >>= fun _ ->
         call (if !vote = -1 then %Services.cancelvote_feed else %Services.downvote_feed)
+        >|= fun result ->
+        ((if !vote = -1 then 0 else -1), result)
       in
       Lwt.pick [up_action; down_action]
       >|= action
       >>= aux
     in
+    Hashtbl.add score_divs feed_id score_div;
     aux ()
 }}
 
@@ -217,12 +252,17 @@ module ClientTypes : sig
 
   val upvotes_actions :
     container:[`Div] Eliom_content.Html5.elt ->
+    score_div:Html5_types.div_content_fun Eliom_content.Html5.elt ->
     upon:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
     up:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
     downon:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
     down:Html5_types.div_content_fun Eliom_content.Html5.F.elt ->
     vote:int ->
     feed_id:int32 ->
+    unit
+
+  val set_first_feed :
+    Html5_types.div_content_fun Eliom_content.Html5.elt option ->
     unit
 end = struct
 
@@ -250,9 +290,10 @@ end = struct
       display_error ~error_frame
     }}
 
-  let upvotes_actions ~container ~upon ~up ~downon ~down ~vote ~feed_id =
+  let upvotes_actions ~container ~score_div ~upon ~up ~downon ~down ~vote ~feed_id =
     ignore {unit{
       let container = %container in
+      let score_div = %score_div in
       let upon = %upon in
       let up = %up in
       let downon = %downon in
@@ -261,9 +302,12 @@ end = struct
       let feed_id = %feed_id in
       Lwt.async
         (fun () ->
-           upvotes_actions ~container ~upon ~up ~downon ~down ~vote ~feed_id
+           upvotes_actions ~container ~score_div ~upon ~up ~downon ~down ~vote ~feed_id
         )
     }}
+
+  let set_first_feed x =
+    ignore {unit{ set_first_feed %x }}
 end
 
 include ClientTypes

@@ -26,6 +26,25 @@ module Cumulus_appl = Eliom_registration.App (struct
   let application_name = "cumulus"
 end)
 
+let update_feed id =
+  Lwt.async
+    (fun () ->
+       Lwt_unix.sleep 1. >>= fun () ->
+       User.get_user () >>= fun user ->
+       Feed.get_feed_with_id ~user:(User.get_id user) id >|= fun feed ->
+       let content = Templates_feeds.feed_to_html_aux ~user feed in
+       Client.call_event (id, Client.Feed content);
+    );
+  Feeds.Ok
+
+let update_vote feedid () =
+  Lwt.async
+    (fun () ->
+       Lwt_unix.sleep 1. >>= fun () ->
+       Feed.get_score_from_id ~feedid >|= fun score ->
+       Client.call_event (feedid, Client.Score score)
+    )
+
 let () =
   Eliom_atom.Reg.register
     ~service: Services.atom
@@ -51,7 +70,7 @@ let () =
   Eliom_registration.Action.register
     ~service:Services.append_feed
     (fun () data ->
-       Feeds.append_feed data >>= (function
+       Feeds.append_feed ~update:update_feed data >>= (function
          | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
          | Feeds.Empty -> Lwt.return "L'un des champs est vide"
          | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
@@ -63,7 +82,7 @@ let () =
   Eliom_registration.Action.register
     ~service:Services.append_link_comment
     (fun (_, _) data ->
-       Feeds.append_link_comment data >>= (function
+       Feeds.append_link_comment ~update:update_feed data >>= (function
          | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
          | Feeds.Empty -> Lwt.return "L'un des champs est vide"
          | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
@@ -75,7 +94,7 @@ let () =
   Eliom_registration.Action.register
     ~service:Services.append_desc_comment
     (fun (_, _) data ->
-       Feeds.append_desc_comment data >>= (function
+       Feeds.append_desc_comment ~update:update_feed data >>= (function
          | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
          | Feeds.Empty -> Lwt.return "L'un des champs est vide"
          | Feeds.Invalid_url -> Lwt.return "L'Url entrée est invalide"
@@ -208,13 +227,13 @@ let () =
     (fun feedid () -> Feed.del_fav feedid);
   Eliom_registration.Ocaml.register
     ~service:Services.upvote_feed
-    (fun feedid () -> Feed.upvote feedid);
+    (fun feedid () -> Feed.upvote ~update:(update_vote feedid) feedid);
   Eliom_registration.Ocaml.register
     ~service:Services.downvote_feed
-    (fun feedid () -> Feed.downvote feedid);
+    (fun feedid () -> Feed.downvote ~update:(update_vote feedid) feedid);
   Eliom_registration.Ocaml.register
     ~service:Services.cancelvote_feed
-    (fun feedid () -> Feed.cancel_vote feedid);
+    (fun feedid () -> Feed.cancel_vote ~update:(update_vote feedid) feedid);
   Eliom_registration.Action.register
     ~service:Services.reset_password
     (fun () ->

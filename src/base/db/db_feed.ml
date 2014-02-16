@@ -284,6 +284,8 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
                    } >>)
     )
     tags
+  >|= fun () ->
+  id_feed
 
 let delete_feed ~feedid () =
   Db.query
@@ -314,16 +316,6 @@ let vote_exists ~feedid ~userid =
      >>)
   >|= Option.is_some
 
-let get_vote_and_score vote ~feedid =
-  Db.view_one
-    (<:view< group {
-      n = match sum[v.score] with null -> 0 | n -> n;
-    } | v in $Db_table.votes$;
-        v.id_feed = $int32:feedid$;
-    >>)
-  >|= fun score ->
-  `Ok (vote, Int32.to_int score#!n)
-
 let upvote ~feedid ~userid () =
   vote_exists ~feedid ~userid >>= (function
     | true ->
@@ -339,8 +331,6 @@ let upvote ~feedid ~userid () =
                      score = $int32:Int32.of_int(1)$
                      } >>)
   )
-  >>= fun () ->
-  get_vote_and_score ~feedid 1
 
 let downvote ~feedid ~userid () =
   vote_exists ~feedid ~userid >>= (function
@@ -357,14 +347,10 @@ let downvote ~feedid ~userid () =
                      score = $int32:Int32.of_int(-1)$
                      } >>)
   )
-  >>= fun () ->
-  get_vote_and_score ~feedid (-1)
 
 let cancelvote ~feedid ~userid () =
   Db.query
     (<:delete< f in $Db_table.votes$ | f.id_feed = $int32:feedid$; f.id_user = $int32:userid$; >>)
-  >>= fun () ->
-  get_vote_and_score ~feedid 0
 
 (* Il faut delete tous les tags du lien et ajouter les nouveaux *)
 let update ~feedid ~url ~description ~tags () =
@@ -404,3 +390,12 @@ let exists_with_url ~url =
   Db.view_opt
     (<:view< {} | f in $Db_table.feeds$; f.url = $string:url$; >>)
   >|= Option.is_some
+
+let get_score_from_id ~feedid =
+  Db.view_one
+    (<:view< group {
+      n = match sum[v.score] with null -> 0 | n -> n;
+    } | v in $Db_table.votes$;
+        v.id_feed = $int32:feedid$;
+    >>)
+  >|= fun n -> Int32.to_int n#!n

@@ -464,7 +464,7 @@ a.postitle{
   float: left;
 }
 
-.upvote_wrap_inner.gray {
+.upvote_wrap_inner .gray {
   color: #ddd;
 }
 

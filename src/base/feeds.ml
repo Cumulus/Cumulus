@@ -26,120 +26,78 @@ module UTF8 = CamomileLibraryDefault.Camomile.CaseMap.Make(CamomileLibrary.UTF8)
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
-let (event, call_event) =
-  let (private_event, call_event) = React.E.create () in
-  let event = Eliom_react.Down.of_react private_event in
-  (event, call_event)
-
 let strip_and_lowercase x =
-  (* (List.map (fun x -> String.lowercase (Utils.strip x)) (Str.split (Str.regexp "[,]+") tags)) *)
   UTF8.lowercase (Utils.strip x)
 
-let updating_and_ret () =
-  call_event ();
-  Lwt.return Ok
-
-let append_feed_aux_base ~description f =
+let append_feed_aux_base ~update ?root ?parent ?url ~description ~tags () =
   User.get_userid () >>= function
   | None -> Lwt.return Not_connected
-  | Some author ->
-      if Utils.string_is_empty description
-      then Lwt.return Empty
-      else f ~author ()
+  | Some userid ->
+      if Utils.string_is_empty description then
+        Lwt.return Empty
+      else
+        Db_feed.add_feed ?root ?parent ?url ~description ~tags ~userid ()
+        >|= update
 
-let append_feed_aux ~url ~description ~tags f =
-  append_feed_aux_base ~description
-    (fun ~author () ->
-       if Utils.string_is_empty tags then
-         Lwt.return Empty
-       else if Utils.is_invalid_url url then
-         Lwt.return Invalid_url
-       else
-         Db_feed.exists_with_url ~url >>= function
-         | true -> Lwt.return Already_exist
-         | false -> f ~author () >>= updating_and_ret
-    )
+let append_feed_aux ~update ?root ?parent ~url ~description ~tags () =
+  let tags = List.map strip_and_lowercase (Utils.split tags) in
+  if List.is_empty tags then
+    Lwt.return Empty
+  else if Utils.is_invalid_url url then
+    Lwt.return Invalid_url
+  else
+    Db_feed.exists_with_url ~url >>= function
+    | true -> Lwt.return Already_exist
+    | false ->
+        append_feed_aux_base ~update ?root ?parent ~url ~description ~tags ()
 
-let append_feed (url, (description, tags)) =
-  append_feed_aux ~url ~description ~tags
-    (fun ~author () ->
-       Db_feed.add_feed
-         ~url
-         ~description
-         ~tags:(List.map strip_and_lowercase (Utils.split tags))
-         ~userid:author
-         ()
-    )
+let append_feed ~update (url, (description, tags)) =
+  append_feed_aux ~update ~url ~description ~tags ()
 
 let get_root_and_parent id =
-  User.get_userid () >>= fun user ->
-  Db_feed.get_feed_with_id ~user id >>= fun feeds ->
+  Db_feed.get_feed_with_id ~user:None id >>= fun feeds ->
   let parent = feeds.Feed.id in
   let root = match feeds.Feed.root with
     | Some root -> root
     | None -> parent
   in
-  Lwt.return (Db_feed.add_feed ~root ~parent)
+  Lwt.return (root, parent)
 
-let append_link_comment (id, (url, (description, tags))) =
-  append_feed_aux ~url ~description ~tags
-    (fun ~author () ->
-       get_root_and_parent id >>= fun f ->
-       f ~url
-         ~description
-         ~tags:(List.map strip_and_lowercase (Utils.split tags))
-         ~userid:author
-         ()
-    )
+let append_link_comment ~update (id, (url, (description, tags))) =
+  get_root_and_parent id >>= fun (root, parent) ->
+  append_feed_aux ~update ~root ~parent ~url ~description ~tags ()
 
-let append_desc_comment (id, description) =
-  append_feed_aux_base ~description
-    (fun ~author () ->
-       get_root_and_parent id >>= fun f ->
-       f ~description
-         ~tags:[]
-         ~userid:author
-         ()
-       >>= updating_and_ret
-    )
+let append_desc_comment ~update (id, description) =
+  get_root_and_parent id >>= fun (root, parent) ->
+  append_feed_aux_base ~update ~root ~parent ~description ~tags:[] ()
 
-let edit_feed_aux ~id ~url ~description ~tags f =
-  User.get_userid () >>= fun user ->
-  append_feed_aux_base ~description
-    (fun ~author () ->
-       if Utils.string_is_empty tags then
-         Lwt.return Empty
-       else if Utils.is_invalid_url url then
-         Lwt.return Invalid_url
-       else
-         Db_feed.get_feed_with_id ~user id >>= (fun feeds ->
-           if feeds.Feed.url <> Some url then
-             Db_feed.exists_with_url ~url >>= function
-             | true -> Lwt.return Already_exist
-             | false -> f () >>= updating_and_ret
-           else
-             f () >>= updating_and_ret)
-    )
+let edit_feed_aux_base ~feedid ~url ~description ~tags =
+  User.get_userid () >>= function
+  | None -> Lwt.return Not_connected
+  | Some userid ->
+      if Utils.string_is_empty description then
+        Lwt.return Empty
+      else
+        Db_feed.update ~feedid ~url ~description ~tags () >|= fun () ->
+        Ok
 
-let edit_link_comment (id, (url, (description, tags))) =
-  edit_feed_aux ~id ~url ~description ~tags
-    (fun () ->
-       Db_feed.update
-         ~feedid:id
-         ~url:(Some url)
-         ~description
-         ~tags:(List.map strip_and_lowercase (Utils.split tags))
-         ()
-    )
+let edit_feed_aux ~feedid ~url ~description ~tags =
+  let tags = List.map strip_and_lowercase (Utils.split tags) in
+  if List.is_empty tags then
+    Lwt.return Empty
+  else if Utils.is_invalid_url url then
+    Lwt.return Invalid_url
+  else
+    Db_feed.get_feed_with_id ~user:None feedid >>= fun feed ->
+    if feed.Feed.url <> Some url then
+      Db_feed.exists_with_url ~url >>= function
+      | true -> Lwt.return Already_exist
+      | false -> edit_feed_aux_base ~feedid ~url:(Some url) ~description ~tags
+    else
+      edit_feed_aux_base ~feedid ~url:(Some url) ~description ~tags
 
-let edit_desc_comment (id, description) =
-  append_feed_aux_base ~description
-    (fun ~author () ->
-       Db_feed.update
-         ~feedid:id
-         ~description
-         ~tags:[]
-         ~url:None
-         ()
-       >>= updating_and_ret
-    )
+let edit_link_comment (feedid, (url, (description, tags))) =
+  edit_feed_aux ~feedid ~url ~description ~tags
+
+let edit_desc_comment (feedid, description) =
+  edit_feed_aux_base ~feedid ~url:None ~description ~tags:[]

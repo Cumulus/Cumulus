@@ -80,7 +80,7 @@ val add_feed :
   tags:string list ->
   userid:int32 ->
   unit ->
-  unit Lwt.t
+  int32 Lwt.t
 
 val delete_feed :
   feedid:int32 ->
@@ -103,19 +103,19 @@ val upvote :
   feedid:int32 ->
   userid:int32 ->
   unit ->
-  [> `Ok of (int * int)] Lwt.t
+  unit Lwt.t
 
 val downvote :
   feedid:int32 ->
   userid:int32 ->
   unit ->
-  [> `Ok of (int * int)] Lwt.t
+  unit Lwt.t
 
 val cancelvote :
   feedid:int32 ->
   userid:int32 ->
   unit ->
-  [> `Ok of (int * int)] Lwt.t
+  unit Lwt.t
 
 val update :
   feedid:int32 ->
@@ -127,3 +127,5 @@ val update :
 
 val exists : feedid:int32 -> unit -> bool Lwt.t
 val exists_with_url : url:string -> bool Lwt.t
+
+val get_score_from_id : feedid:int32 -> int Lwt.t

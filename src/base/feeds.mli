@@ -21,10 +21,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 type append_state = Ok | Not_connected | Empty | Already_exist | Invalid_url
 
-val event : unit Eliom_react.Down.t
-
-val append_feed : (string * (string * string)) -> append_state Lwt.t
-val append_link_comment : (int32 * (string * (string * string))) -> append_state Lwt.t
-val append_desc_comment : (int32 * string) -> append_state Lwt.t
+val append_feed :
+  update:(int32 -> append_state) ->
+  (string * (string * string)) ->
+  append_state Lwt.t
+val append_link_comment :
+  update:(int32 -> append_state) ->
+  (int32 * (string * (string * string))) ->
+  append_state Lwt.t
+val append_desc_comment :
+  update:(int32 -> append_state) ->
+  (int32 * string) ->
+  append_state Lwt.t
 val edit_link_comment : (int32 * (string * (string * string))) -> append_state Lwt.t
 val edit_desc_comment : (int32 * string) -> append_state Lwt.t
