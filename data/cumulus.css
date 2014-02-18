@@ -499,6 +499,20 @@ a.postitle{
     border: medium none;
 }
 
+.box .input-box
+{
+    background-color:white;
+    color: #777;
+    border-color:#ddd;
+    border-style:solid;
+    border-width:1px;
+}
+
+.box .btn-box
+{
+    background-color:#00b1be;
+}
+
 .box textarea {
   background-color: #777;
   border-radius: 4px 4px 4px 4px;
