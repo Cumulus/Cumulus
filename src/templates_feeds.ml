@@ -63,18 +63,18 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
   let is_author = Feed.is_author ~feed:self user in
   let fav_div =
     let add =
-      Eliom_content.Html5.D.Raw.a
+      D.Raw.a
         ~a:[a_class ["link"]]
         [get_image ["circled";"gray";"fav_icon"] "fav.png"]
     in
     let del =
-      Eliom_content.Html5.D.Raw.a
+      D.Raw.a
         ~a:[a_class ["link"]]
         [get_image ["circled";"highlighted";"deletable"] "fav.png"]
     in
     let is_fav = self.Feed.fav in
     let res =
-      Eliom_content.Html5.D.div
+      D.div
         ~a:[a_class ["fav_wrap"]]
         [if self.Feed.fav then del else add]
     in
@@ -84,7 +84,7 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
   in
   let upvotes =
     let link name =
-      Eliom_content.Html5.D.Raw.a ~a:[a_class ["link"]] [get_image [] name]
+      D.Raw.a ~a:[a_class ["link"]] [get_image [] name]
     in
     let score_div = D.div [Client.get_score_div ~score:self.Feed.score] in
     let upon = link "upon.png" in
@@ -93,7 +93,7 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
     let down = link "down.png" in
     let vote = self.Feed.vote in
     let container =
-      Eliom_content.Html5.D.div
+      D.div
         ~a:[a_class ["upvote_wrap"]]
         [Client.get_upvote_inner ~score_div ~upon ~up ~downon ~down ~vote]
     in
@@ -308,9 +308,7 @@ let header () =
 let main_style ~user ~error ~server_function content =
   let userbox = userbox user in
   let header = header () in
-  let base_error_frame =
-    Eliom_content.Html5.D.div ~a:[a_class ["msghandler"]]
-  in
+  let base_error_frame = D.div ~a:[a_class ["msghandler"]] in
   let error_frame =
     match error with
     | Some error ->
@@ -321,9 +319,7 @@ let main_style ~user ~error ~server_function content =
         error_frame
     | None -> base_error_frame []
   in
-  let content =
-    Eliom_content.Html5.D.aside ~a:[a_class ["col"; "w80"]] content
-  in
+  let content = D.aside ~a:[a_class ["col"; "w80"]] content in
   server_function ~box:content;
   html
     (head

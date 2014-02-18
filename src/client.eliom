@@ -27,7 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   type obj =
 (*    | Comment of int *)
     | Score of int
-    | Feed of Html5_types.div_content_fun elt
+    | Feed of Html5_types.div_content_fun Eliom_content.Html5.elt
 
   type t = (int32 * obj)
 
@@ -58,7 +58,7 @@ let (event, call_event) =
         (Dom_html.window##setTimeout
            (Js.wrap_callback
               (fun () ->
-                 Eliom_content.Html5.Manip.removeAllChild error_frame;
+                 Manip.removeAllChild error_frame;
                  match !id_timeout with
                  | None -> () (* It cannot happen *)
                  | Some id ->
@@ -94,12 +94,8 @@ let (event, call_event) =
     Lwt_stream.iter_s aux stream
 
   let feeds_actions ~content ~box =
-    let link_next =
-      Eliom_content.Html5.D.aside ~a:[a_class ["row"; "post"; "mod"]] []
-    in
-    let before =
-      Eliom_content.Html5.D.section ~a:[a_class["line"]] [link_next]
-    in
+    let link_next = D.aside ~a:[a_class ["row"; "post"; "mod"]] [] in
+    let before = D.section ~a:[a_class["line"]] [link_next] in
     let no_more_links =
       Raw.a ~a:[a_class ["link_next"]] [pcdata "No more links"]
     in
@@ -124,16 +120,14 @@ let (event, call_event) =
       let last_page = ref 0 in
       let rec aux () =
         let page = succ !last_page in
-        Eliom_content.Html5.Manip.replaceAllChild
-          link_next
-          [loading];
+        Manip.replaceAllChild link_next [loading];
         content page >|= fun feeds ->
         begin match feeds with
         | [] ->
-            Eliom_content.Html5.Manip.replaceAllChild link_next [no_more_links];
+            Manip.replaceAllChild link_next [no_more_links];
         | feeds ->
-            Eliom_content.Html5.Manip.appendChilds ~before box feeds;
-            Eliom_content.Html5.Manip.replaceAllChild
+            Manip.appendChilds ~before box feeds;
+            Manip.replaceAllChild
               link_next
               [default_link_next_content aux];
         end;
@@ -158,10 +152,8 @@ let (event, call_event) =
               end
            )
       );
-    Eliom_content.Html5.Manip.appendChild box before;
-    Eliom_content.Html5.Manip.replaceAllChild
-      link_next
-      [default_link_next_content get_next_page];
+    Manip.appendChild box before;
+    Manip.replaceAllChild link_next [default_link_next_content get_next_page];
     waiting_for_reload ~box
 
   let fav_actions ~is_fav ~res ~del ~add ~feed_id =
@@ -171,18 +163,18 @@ let (event, call_event) =
     in
     let rec aux () =
       Lwt_js_events.click
-        (Eliom_content.Html5.To_dom.of_element (if !is_fav then del else add))
+        (To_dom.of_element (if !is_fav then del else add))
       >>= fun _ ->
       (if !is_fav then
          call %Services.del_fav_feed >|= function
          | `Ok ->
-             Eliom_content.Html5.Manip.replaceAllChild res [add];
+             Manip.replaceAllChild res [add];
              is_fav := not !is_fav;
          | `NotConnected -> () (* TODO: Display an error *)
        else
          call %Services.add_fav_feed >|= function
          | `Ok ->
-             Eliom_content.Html5.Manip.replaceAllChild res [del];
+             Manip.replaceAllChild res [del];
              is_fav := not !is_fav;
          | `NotConnected -> () (* TODO: Display an error *)
       )
@@ -198,7 +190,7 @@ let (event, call_event) =
     let action = function
       | v, `Ok ->
           let content = get_upvote_inner ~score_div ~upon ~up ~downon ~down ~vote:v in
-          Eliom_content.Html5.Manip.replaceAllChild container [content];
+          Manip.replaceAllChild container [content];
           vote := v;
       | _, `NoRight
       | _, `NotConnected ->
@@ -207,7 +199,7 @@ let (event, call_event) =
     let rec aux () =
       let up_action =
         Lwt_js_events.click
-          (Eliom_content.Html5.To_dom.of_element (if !vote = 1 then upon else up))
+          (To_dom.of_element (if !vote = 1 then upon else up))
         >>= fun _ ->
         call (if !vote = 1 then %Services.cancelvote_feed else %Services.upvote_feed)
         >|= fun result ->
@@ -215,7 +207,7 @@ let (event, call_event) =
       in
       let down_action =
         Lwt_js_events.click
-          (Eliom_content.Html5.To_dom.of_element (if !vote = -1 then downon else down))
+          (To_dom.of_element (if !vote = -1 then downon else down))
         >>= fun _ ->
         call (if !vote = -1 then %Services.cancelvote_feed else %Services.downvote_feed)
         >|= fun result ->
