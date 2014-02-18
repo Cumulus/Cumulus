@@ -73,6 +73,10 @@ body {
 }
 
 
+h1 {
+    color:#777;
+}
+
 .dash textarea, .dash input[type="text"] {
     padding: 1px 1.2em;
     height: 37px;
