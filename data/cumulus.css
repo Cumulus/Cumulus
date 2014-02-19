@@ -478,17 +478,21 @@ a.postitle{
     margin-right: auto;
     left: 0;
     right: 0;
+    padding-right:10%;
 }
 
 .box {
     color: #414141;
+    margin:auto;
     text-align: center;
-    padding-right: 10%;
+    width:30%;
+    background-color:white;
+    border-radius: 5px 5px 5px 5px;
 }
 
 .box input {
     height: 37px;
-    width: 25%;
+    width: 80%;
     min-width: 100px; /* while resizing, the block cuts the text (does not work on very small size < 100px) */
     font-size: 1em;
     margin: 5px 0px;
