@@ -501,9 +501,7 @@ let private_comment ~user id branch =
     [div
        ~a:[a_class [""]]
         [ branch;
-          div
-            ~a:[a_class ["form-comment"]]
-            [ post_form
+          post_form
              ~a:[a_class ["box"]]
              ~service:Services.append_link_comment
              (fun (parent, (url, (desc, tags))) -> [
@@ -535,32 +533,30 @@ let private_comment ~user id branch =
                     Templates_common.submit_input ~value:"Envoyer !" ()
                   ]
                 ])
-             (id, "") ];
-          div
-            ~a:[a_class ["form-comment"]]
-            [ post_form
-              ~a:[a_class ["box"]]
-              ~service:Services.append_desc_comment
-             (fun (parent, desc) -> [
-                  h1 [pcdata "Commentaire"];
-                  p [
-                    textarea
-                      ~a:[a_class ["input-box"];
-                          a_placeholder "Texte"
-                         ]
-                      ~name:desc
-                      ();
-                    int32_input
-                      ~input_type:`Hidden
-                      ~name:parent
-                      ~value:id
-                      ();
-                    br ();
-                    Templates_common.submit_input ~value:"Envoyer !" ()
-                  ]
-                ])
-             (id, "")];
-       ]
+             (id, "");
+          post_form
+            ~a:[a_class ["box"]]
+            ~service:Services.append_desc_comment
+            (fun (parent, desc) -> [
+                 h1 [pcdata "Commentaire"];
+                 p [
+                   textarea
+                     ~a:[a_class ["input-box";"comment-input"];
+                         a_placeholder "Texte"
+                        ]
+                     ~name:desc
+                     ();
+                   int32_input
+                     ~input_type:`Hidden
+                     ~name:parent
+                     ~value:id
+                     ();
+                   br ();
+                   Templates_common.submit_input ~value:"Envoyer !" ()
+                 ]
+               ])
+            (id, "");
+        ]
     ]
 
 let private_edit_feed ~user ~feed (edit_desc, edit_url, edit_tags) =

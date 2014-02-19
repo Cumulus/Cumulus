@@ -535,19 +535,11 @@ a.postitle{
     border-radius: 4px;
 }
 
-.form-comment {
-  width: 25%;
-  margin: auto;
-  background-color: #FFFFFF;
-  border-radius: 5px 5px 5px 5px;
-}
-
-.form-comment .box {
-  padding-right: 0%;
-}
-
-.form-comment .input-box {
-  width: 90%;
+.comment-input
+{
+    width:80%;
+    min-height:80px;
+    height:6vw;
 }
 
 .link {
@@ -559,7 +551,7 @@ a.postitle{
     width: 100%;
     vertical-align: middle;
     font-size: 1.2em;
-    color: #414141;
+    color: #777;
 }
 
 .loader {
