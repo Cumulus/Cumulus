@@ -60,6 +60,8 @@ val links_of_tags :
   string list ->
   [> `A of [> `PCDATA ] | `PCDATA ] Eliom_content.Html5.F.elt list
 
+val static_uri : string list -> Eliom_content.Html5.uri
+
 module Markdown : module type of MarkdownHTML.Make_html5(struct
   include Eliom_content_core.Html5.F.Raw
   module Svg = Eliom_content.Svg.F.Raw

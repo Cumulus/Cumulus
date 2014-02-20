@@ -43,6 +43,8 @@ let links_of_tags tags =
     acc @ [pcdata " "; link]
   ) [] tags
 
+let static_uri name = make_uri ~service:(Eliom_service.static_dir ()) name
+
 module Markdown = MarkdownHTML.Make_html5(struct
   include Raw
   module Svg = Eliom_content.Svg.F.Raw

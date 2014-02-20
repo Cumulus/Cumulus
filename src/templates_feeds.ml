@@ -32,12 +32,12 @@ let action_to_html ~user self = match user with
 
 let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
   let get_image cls imgname =
-   img ~a: [a_class cls]
-                  ~alt: imgname
-                  ~src:(make_uri
-                    ~service: (Eliom_service.static_dir ())
-                  [imgname]
-                    )() in
+   img
+     ~a:[a_class cls]
+     ~alt:imgname
+     ~src:(Templates_common.static_uri [imgname])
+     ()
+  in
   let content = match self.Feed.url with
     | Some url -> div ~a:[a_class["line_title"]][
                     Raw.a
@@ -265,11 +265,7 @@ let header () =
               ~service:Services.main
               [ img
                   ~alt:("Cumulus Project")
-                  ~src:(
-                    make_uri
-                      ~service: (Eliom_service.static_dir ())
-                      ["logo.png"]
-                  )
+                  ~src:(Templates_common.static_uri ["logo.png"])
                   ();
               ]
               ();
@@ -323,19 +319,9 @@ let main_style ~user ~error ~server_function content =
   server_function ~box:content;
   html
     (head
-       (title
-          (pcdata "Cumulus")
-       )
-       [ css_link
-           ~uri: (make_uri
-                    ~service: (Eliom_service.static_dir ())
-                    ["knacss.css"]
-                 ) ();
-         css_link
-           ~uri: (make_uri
-                    ~service: (Eliom_service.static_dir ())
-                    ["cumulus.css"]
-                 ) ();
+       (title (pcdata "Cumulus"))
+       [ css_link ~uri:(Templates_common.static_uri ["knacss.css"]) ();
+         css_link ~uri:(Templates_common.static_uri ["cumulus.css"]) ();
        ]
     )
     (body
