@@ -373,27 +373,23 @@ let private_register () =
         (fun (username_name, (email_name, (password_name, password_check))) -> [
              h1 [pcdata "Inscription"];
              p [
-               Templates_common.string_input_box
+               Templates_common.text_input_box
                  ~a:[a_placeholder "Pseudo"]
-                 ~input_type:`Text
                  ~name:username_name
                  ();
                br ();
-               Templates_common.string_input_box
+               Templates_common.password_input_box
                  ~a:[a_placeholder "Mot de passe"]
-                 ~input_type:`Password
                  ~name:password_name
                  ();
                br ();
-               Templates_common.string_input_box
+               Templates_common.password_input_box
                  ~a:[a_placeholder "Confirmation"]
-                 ~input_type:`Password
                  ~name:password_check
                  ();
                br ();
-               Templates_common.string_input_box
+               Templates_common.text_input_box
                  ~a:[a_placeholder "Email"]
-                 ~input_type:`Text
                  ~name:email_name
                  ();
                br ();
@@ -420,15 +416,13 @@ let private_preferences ~user =
               (fun (password_name, password_check) -> [
                    h1 [pcdata "Modifier le mot de passe"] ;
                    p [
-                     Templates_common.string_input_box
+                     Templates_common.password_input_box
                        ~a:[a_placeholder "Nouveau mot de passe"]
-                       ~input_type:`Password
                        ~name:password_name
                        ();
                      br ();
-                     Templates_common.string_input_box
+                     Templates_common.password_input_box
                        ~a:[a_placeholder "Confirmer le nouveau mot de passe"]
-                       ~input_type:`Password
                        ~name:password_check
                        ();
                      br ();
@@ -442,11 +436,10 @@ let private_preferences ~user =
               (fun email_name -> [
                    h1 [pcdata "Changer d'adresse mail"];
                    p [
-                     Templates_common.string_input_box
+                     Templates_common.text_input_box
                        ~a:[a_placeholder user.User.email;
                            a_id "new_email"
                           ]
-                       ~input_type:`Text
                        ~name:email_name
                        ();
                      br ();
@@ -493,21 +486,18 @@ let private_comment ~user id branch =
              (fun (parent, (url, (desc, tags))) -> [
                   h1 [pcdata "Lien"] ;
                   p [
-                    Templates_common.string_input_box
+                    Templates_common.text_input_box
                       ~a:[a_placeholder "URL"]
-                      ~input_type:`Text
                       ~name:url
                       ();
                     br ();
-                    Templates_common.string_input_box
+                    Templates_common.text_input_box
                       ~a:[a_placeholder "Titre"]
-                      ~input_type:`Text
                       ~name:desc
                       ();
                     br ();
-                    Templates_common.string_input_box
+                    Templates_common.text_input_box
                       ~a:[a_placeholder "Tags"]
-                      ~input_type:`Text
                       ~name:tags
                       ();
                     br ();
@@ -563,23 +553,20 @@ let private_edit_feed ~user ~feed (edit_desc, edit_url, edit_tags) =
               (fun (parent, (url, (desc, tags))) -> [
                    h1 [pcdata "Lien"] ;
                    p [
-                     Templates_common.string_input_box
+                     Templates_common.text_input_box
                        ~a:[ a_placeholder "URL"]
-                       ~input_type:`Text
                        ~name:url
                        ~value:edit_url
                        ();
                      br ();
-                     Templates_common.string_input_box
+                     Templates_common.text_input_box
                        ~a:[ a_placeholder "Titre" ]
-                       ~input_type:`Text
                        ~name:desc
                        ~value:edit_desc
                        ();
                      br ();
-                     Templates_common.string_input_box
+                     Templates_common.text_input_box
                        ~a:[ a_placeholder "Tags" ]
-                       ~input_type:`Text
                        ~name:tags
                        ~value:edit_tags
                        ();
@@ -630,9 +617,8 @@ let reset_password () =
         (fun email_name -> [
              h1 [pcdata "Adresse mail associée au compte"];
              p [
-               Templates_common.string_input_box
+               Templates_common.text_input_box
                  ~a:[a_id "new_email"]
-                 ~input_type:`Text
                  ~name:email_name
                  ();
                br ();

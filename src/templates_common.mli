@@ -19,31 +19,15 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-val string_input_box :
+val text_input_box :
   ?a:Html5_types.input_attrib Eliom_content.Html5.F.attrib list ->
-  input_type:[< `Button
-             | `Checkbox
-             | `Color
-             | `Date
-             | `Datetime
-             | `Datetime_local
-             | `Email
-             | `File
-             | `Hidden
-             | `Image
-             | `Month
-             | `Number
-             | `Password
-             | `Radio
-             | `Range
-             | `Reset
-             | `Search
-             | `Submit
-             | `Tel
-             | `Text
-             | `Time
-             | `Url
-             | `Week ] ->
+  ?name:[< string Eliom_parameter.setoneradio ] Eliom_parameter.param_name ->
+  ?value:string ->
+  unit ->
+  [> Html5_types.input ] Eliom_content_core.Html5.elt
+
+val password_input_box :
+  ?a:Html5_types.input_attrib Eliom_content.Html5.F.attrib list ->
   ?name:[< string Eliom_parameter.setoneradio ] Eliom_parameter.param_name ->
   ?value:string ->
   unit ->

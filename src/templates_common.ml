@@ -23,8 +23,11 @@ open Batteries
 open Eliom_lib.Lwt_ops
 open Eliom_content.Html5.F
 
-let string_input_box ?(a=[]) =
-  string_input ~a:(a_class ["input-box"] :: a)
+let text_input_box ?(a=[]) =
+  string_input ~a:(a_class ["input-box"] :: a) ~input_type:`Text
+
+let password_input_box ?(a=[]) =
+  string_input ~a:(a_class ["input-box"] :: a) ~input_type:`Password
 
 let submit_input ?(a=[]) =
   string_input
