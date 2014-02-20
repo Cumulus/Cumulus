@@ -64,4 +64,4 @@
 <src/**/*.ml{,i}>: thread
 <src/*.ml{,i}>: -use_db
 <src/server/*.ml{,i}>: -use_db
-"src/client/cumulus.js": package(eliom.client)
+"src/client/cumulus.js": package(eliom.client), -debug, pretty, debuginfo
