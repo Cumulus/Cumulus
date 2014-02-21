@@ -50,23 +50,10 @@ let (event, call_event) =
   let event = Eliom_react.Down.of_react private_event in
   (event, call_event)
 
+let error_frame = D.div ~a:[a_class ["msghandler"]] []
+
 {client{
-  let display_error ~error_frame =
-    let id_timeout = ref None in
-    id_timeout :=
-      Some
-        (Dom_html.window##setTimeout
-           (Js.wrap_callback
-              (fun () ->
-                 Manip.removeAllChild error_frame;
-                 match !id_timeout with
-                 | None -> () (* It cannot happen *)
-                 | Some id ->
-                     Dom_html.window##clearTimeout (id)
-              ),
-            5_000.
-           )
-        )
+  let error_frame = %error_frame
 
   let first_feed = ref None
 
@@ -219,6 +206,46 @@ let (event, call_event) =
     in
     Hashtbl.add score_divs feed_id score_div;
     aux ()
+
+  let set_error_from_string x =
+    Manip.replaceAllChild error_frame [pcdata x];
+    let id_timeout = ref None in
+    id_timeout :=
+      Some
+        (Dom_html.window##setTimeout
+           (Js.wrap_callback
+              (fun () ->
+                 Manip.removeAllChild error_frame;
+                 match !id_timeout with
+                 | None -> () (* It cannot happen *)
+                 | Some id ->
+                     Dom_html.window##clearTimeout (id)
+              ),
+            5_000.
+           )
+        )
+
+  let set_error x =
+    let aux = function
+      | `Not_connected -> "Vous ne vous êtes pas authentifié"
+      | `Empty -> "L'un des champs est vide"
+      | `Invalid_url -> "L'Url entrée est invalide"
+      | `Already_exist -> "Le lien existe déjà"
+      | `Ok -> "Le lien a bien été ajouté"
+    in
+    set_error_from_string (aux x)
+
+  let actions_submit_link ~submit ~url ~title ~tags =
+    let conv = Js.to_string in
+    Lwt_js_events.clicks
+      (To_dom.of_element submit)
+      (fun _ _ ->
+         Eliom_client.call_ocaml_service
+           ~service:%Services.append_feed
+           ()
+           (conv url##value, (conv title##value, conv tags##value))
+         >|= set_error
+      )
 }}
 
 (* Due to a known limitation of Eliom, we have to set the type here
@@ -238,10 +265,6 @@ module ClientTypes : sig
     feed_id:int32 ->
     unit
 
-  val display_error :
-    error_frame:[`Div] Eliom_content.Html5.elt ->
-    unit
-
   val upvotes_actions :
     container:[`Div] Eliom_content.Html5.elt ->
     score_div:Html5_types.div_content_fun Eliom_content.Html5.elt ->
@@ -255,6 +278,15 @@ module ClientTypes : sig
 
   val set_first_feed :
     Html5_types.div_content_fun Eliom_content.Html5.elt option ->
+    unit
+
+  val set_error_from_string : string -> unit
+
+  val actions_submit_link :
+    submit:Html5_types.input Eliom_content.Html5.elt ->
+    url:Html5_types.input Eliom_content.Html5.elt ->
+    title:Html5_types.input Eliom_content.Html5.elt ->
+    tags:Html5_types.input Eliom_content.Html5.elt ->
     unit
 end = struct
 
@@ -276,12 +308,6 @@ end = struct
       Lwt.async (fun () -> fav_actions ~is_fav ~res ~del ~add ~feed_id)
     }}
 
-  let display_error ~error_frame =
-    ignore {unit{
-      let error_frame = %error_frame in
-      display_error ~error_frame
-    }}
-
   let upvotes_actions ~container ~score_div ~upon ~up ~downon ~down ~vote ~feed_id =
     ignore {unit{
       let container = %container in
@@ -300,6 +326,18 @@ end = struct
 
   let set_first_feed x =
     ignore {unit{ set_first_feed %x }}
+
+  let set_error_from_string x =
+    ignore {unit{ set_error_from_string %x }}
+
+  let actions_submit_link ~submit ~url ~title ~tags =
+    ignore {unit{
+      let submit = %submit in
+      let url = To_dom.of_input %url in
+      let title = To_dom.of_input %title in
+      let tags = To_dom.of_input %tags in
+      Lwt.async (fun () -> actions_submit_link ~submit ~url ~title ~tags)
+    }}
 end
 
 include ClientTypes

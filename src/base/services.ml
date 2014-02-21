@@ -65,7 +65,11 @@ let view_feed =
     ()
 
 let append_feed =
-  Eliom_service.Http.post_coservice'
+  Eliom_service.Ocaml.post_coservice'
+    ~rt:(Eliom_service.rt :
+           [`Not_connected | `Empty | `Invalid_url | `Already_exist | `Ok]
+             Eliom_service.rt
+        )
     ~post_params: Eliom_parameter.((string "url") **
                                      (string "desc") **
                                      (string "tags"))

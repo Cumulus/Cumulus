@@ -28,6 +28,8 @@ type t = (int32 * obj)
 
 val call_event : t -> unit
 
+val error_frame : [> Html5_types.div ] Eliom_content.Html5.elt
+
 val get_score_div : score:int -> [> Html5_types.div ] Eliom_content.Html5.F.elt
 
 val get_upvote_inner :
@@ -52,10 +54,6 @@ val fav_actions :
   feed_id:int32 ->
   unit
 
-val display_error :
-  error_frame:[`Div] Eliom_content.Html5.elt ->
-  unit
-
 val upvotes_actions :
   container:[`Div] Eliom_content.Html5.elt ->
   score_div:Html5_types.div_content_fun Eliom_content.Html5.elt ->
@@ -69,4 +67,13 @@ val upvotes_actions :
 
 val set_first_feed :
   Html5_types.div_content_fun Eliom_content.Html5.elt option ->
+  unit
+
+val set_error_from_string : string -> unit
+
+val actions_submit_link :
+  submit:Html5_types.input Eliom_content.Html5.elt ->
+  url:Html5_types.input Eliom_content.Html5.elt ->
+  title:Html5_types.input Eliom_content.Html5.elt ->
+  tags:Html5_types.input Eliom_content.Html5.elt ->
   unit

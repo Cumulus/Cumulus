@@ -37,7 +37,7 @@
 }
 
 
-.dash input[type="submit"] {
+.dash input[type="button"] {
     padding: 1px 1.2em;
     height: 37px;
     border-radius: 4px;

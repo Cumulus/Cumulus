@@ -256,6 +256,30 @@ let userbox = function
   | None -> user_form ()
 
 let header () =
+  let submit =
+    D.Raw.input
+      ~a:[a_input_type `Button; a_value "ENVOYER !"]
+      ()
+  in
+  let url =
+    D.string_input
+      ~a:[a_placeholder "URL"; a_class["url"]]
+      ~input_type:`Text
+      ()
+  in
+  let title =
+    D.string_input
+      ~a:[a_placeholder "Titre"]
+      ~input_type:`Text
+      ()
+  in
+  let tags =
+    D.string_input
+      ~a:[a_placeholder "Tags"]
+      ~input_type:`Text
+      ()
+  in
+  Client.actions_submit_link ~submit ~url ~title ~tags;
   [ section
       ~a:[a_class ["flex flex-h header"]]
       [
@@ -272,49 +296,14 @@ let header () =
           ];
         aside
           ~a:[a_class ["w75 dash"]]
-          ([ post_form
-               ~service:Services.append_feed
-               (fun (url_name, (title_name, tags_name)) -> [
-                    string_input
-                      ~a:[a_placeholder "URL"; a_class["url"]]
-                      ~input_type:`Text
-                      ~name:url_name
-                      ();
-                    string_input
-                      ~a:[a_placeholder "Titre"]
-                      ~input_type:`Text
-                      ~name:title_name
-                      ();
-                    string_input
-                      ~a:[a_placeholder "Tags"]
-                      ~input_type:`Text
-                      ~name:tags_name
-                      ();
-                    string_input
-                      ~a:[a_class [""]]
-                      ~input_type:`Submit
-                      ~value: "ENVOYER !"
-                      ()
-                  ])
-               ()
-           ])
+          [Raw.form url [title; tags; submit]];
       ];
   ]
 
 let main_style ~user ~error ~server_function content =
   let userbox = userbox user in
   let header = header () in
-  let base_error_frame = D.div ~a:[a_class ["msghandler"]] in
-  let error_frame =
-    match error with
-    | Some error ->
-        let error_frame =
-          base_error_frame [p [pcdata error]]
-        in
-        Client.display_error ~error_frame;
-        error_frame
-    | None -> base_error_frame []
-  in
+  Option.may Client.set_error_from_string error;
   let content = D.aside ~a:[a_class ["col"; "w80"]] content in
   server_function ~box:content;
   html
@@ -328,7 +317,7 @@ let main_style ~user ~error ~server_function content =
        [ div
            ~a: [a_class ["line"]]
            (header
-            @ [ error_frame;
+            @ [ Client.error_frame;
                 content;
                 userbox;
                    (*footer
