@@ -463,6 +463,7 @@ let private_preferences ~user =
                           ]
                        ~input_type:`Text
                        ~name:email_name
+                       ~value:user.User.email
                        ();
                      br ();
                      Templates_common.submit_input ~value:"Valider" ()
@@ -474,14 +475,15 @@ let private_preferences ~user =
               ~service:Services.update_user_feeds_per_page
               (fun nb_feeds_name -> [
                    h1 [pcdata "Changer le nombre de liens par page"];
+                   let nb_feeds = user.User.feeds_per_page in
                    p [
                      int32_input
                        ~a:[a_class ["input-box"];
-                           a_placeholder (Int32.to_string
-                                            user.User.feeds_per_page)
+                           a_placeholder (Int32.to_string nb_feeds)
                           ]
                        ~input_type:`Text
                        ~name:nb_feeds_name
+                       ~value:nb_feeds
                        ();
                      br ();
                      Templates_common.submit_input ~value:"Valider" ()
