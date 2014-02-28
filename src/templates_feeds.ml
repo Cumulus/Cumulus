@@ -340,7 +340,8 @@ let main_style ~user ~error ~server_function content =
        ]
     )
     (body
-       [ div
+       [ noscript (pcdata "Your browser doesn't support javascript. Please pick one which does.") [];
+         div
            ~a: [a_class ["line"]]
            (header
             @ [ error_frame;
