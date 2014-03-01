@@ -60,12 +60,6 @@ val get_comments :
   int32 ->
   feeds Lwt.t
 
-val get_root :
-  feedid:int32 ->
-  user:int32 option ->
-  unit ->
-  feed option Lwt.t
-
 val is_feed_author :
   feedid:int32 ->
   userid:int32 ->
