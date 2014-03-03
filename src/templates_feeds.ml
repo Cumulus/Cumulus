@@ -619,7 +619,7 @@ let private_edit_feed ~user ~feed (edit_desc, edit_url, edit_tags) =
                    h1 [pcdata "Commentaire"];
                    p [
                      textarea
-                       ~a:[a_class ["input-box"];
+                       ~a:[a_class ["input-box"; "comment-input"];
                            a_placeholder "Comment" ]
                        ~name:desc
                        ~value:edit_desc
