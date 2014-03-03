@@ -287,7 +287,7 @@ let header () =
                       ~name:title_name
                       ();
                     string_input
-                      ~a:[a_placeholder "Tags"]
+                      ~a:[a_placeholder "Tags (séparés par des virgules)"]
                       ~input_type:`Text
                       ~name:tags_name
                       ();
@@ -524,7 +524,7 @@ let private_comment ~user id branch =
                       ();
                     br ();
                     Templates_common.string_input_box
-                      ~a:[a_placeholder "Tags"]
+                      ~a:[a_placeholder "Tags (séparés par des virgules)"]
                       ~input_type:`Text
                       ~name:tags
                       ();
@@ -596,7 +596,7 @@ let private_edit_feed ~user ~feed (edit_desc, edit_url, edit_tags) =
                        ();
                      br ();
                      Templates_common.string_input_box
-                       ~a:[ a_placeholder "Tags" ]
+                       ~a:[ a_placeholder "Tags (séparés par des virgules)" ]
                        ~input_type:`Text
                        ~name:tags
                        ~value:edit_tags
