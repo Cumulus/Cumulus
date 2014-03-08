@@ -125,7 +125,7 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
                 ~service:Services.author_feed
                 [pcdata self.Feed.user#name]
                 self.Feed.user#name;
-              pcdata " - ";
+              pcdata " | ";
               a
                 ~service:Services.atom_feed
                 [span ~a:[a_class ["line_author_link"]]
