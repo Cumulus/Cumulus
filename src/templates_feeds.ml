@@ -25,8 +25,12 @@ open Eliom_content.Html5.F
 let action_to_html ~user self = match user with
   | None -> []
   | Some user ->
-    [
-      a ~service:Services.comment [pcdata "- Commenter "] (self.Feed.id, self.Feed.description);
+      [
+        a ~service:Services.comment
+          [pcdata " - ";
+           span ~a:[a_class ["line_author_clickable"]]
+             [pcdata "Commenter"]
+          ](self.Feed.id, self.Feed.description);
     ]
 
 let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
@@ -118,19 +122,32 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
 
               pcdata ("Publié le " ^ (Utils.string_of_calendar self.Feed.date) ^ " par ");
               a
+                ~a:[a_class ["line_author_clickable"]]
                 ~service:Services.author_feed
                 [pcdata self.Feed.user#name]
                 self.Feed.user#name;
               a
                 ~service:Services.atom_feed
-                [pcdata "  Flux Atom du lien "]
+                [pcdata " - ";
+                 span ~a:[a_class ["line_author_clickable"]]
+                   [pcdata "Flux Atom du lien"]
+                ]
                 self.Feed.id;
             ]
               @
               (if is_author then
                  [
-                   a ~service:Services.delete_feed [pcdata "- Supprimer "] self.Feed.id ;
-                   a ~service:Services.edit_feed [pcdata "- Editer "]
+                   a ~service:Services.delete_feed
+                     [pcdata " - ";
+                      span ~a:[a_class ["line_author_clickable"]]
+                        [pcdata "Supprimer"]
+                     ]
+                     self.Feed.id;
+                   a ~service:Services.edit_feed
+                     [pcdata " - ";
+                      span ~a:[a_class ["line_author_clickable"]]
+                        [pcdata "Editer"]
+                     ]
                      (self.Feed.id, Utils.troncate self.Feed.description);
                  ]
                else []
