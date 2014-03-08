@@ -25,10 +25,9 @@ open Eliom_content.Html5.F
 let action_to_html ~user self = match user with
   | None -> []
   | Some user ->
-      [
+      [ pcdata " - ";
         a ~service:Services.comment
-          [pcdata " - ";
-           span ~a:[a_class ["line_author_link"]]
+          [span ~a:[a_class ["line_author_link"]]
              [pcdata "Commenter"]
           ](self.Feed.id, self.Feed.description);
     ]
@@ -126,10 +125,10 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
                 ~service:Services.author_feed
                 [pcdata self.Feed.user#name]
                 self.Feed.user#name;
+              pcdata " - ";
               a
                 ~service:Services.atom_feed
-                [pcdata " - ";
-                 span ~a:[a_class ["line_author_link"]]
+                [span ~a:[a_class ["line_author_link"]]
                    [pcdata "Flux Atom du lien"]
                 ]
                 self.Feed.id;
@@ -137,14 +136,14 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
               @
               (if is_author then
                  [
+                   pcdata " - ";
                    a ~service:Services.delete_feed
-                     [pcdata " - ";
-                      span ~a:[a_class ["line_author_link"]]
+                     [span ~a:[a_class ["line_author_link"]]
                         [pcdata "Supprimer"]
                      ]
                      self.Feed.id;
+                   pcdata " - ";
                    a ~service:Services.edit_feed
-                     [pcdata " - ";
                      [span ~a:[a_class ["line_author_link"]]
                         [pcdata "Éditer"]
                      ]
