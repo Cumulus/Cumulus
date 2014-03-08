@@ -145,7 +145,7 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
                      self.Feed.id;
                    a ~service:Services.edit_feed
                      [pcdata " - ";
-                      span ~a:[a_class ["line_author_clickable"]]
+                     [span ~a:[a_class ["line_author_link"]]
                         [pcdata "Éditer"]
                      ]
                      (self.Feed.id, Utils.troncate self.Feed.description);
