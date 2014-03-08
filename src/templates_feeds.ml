@@ -28,7 +28,7 @@ let action_to_html ~user self = match user with
       [
         a ~service:Services.comment
           [pcdata " - ";
-           span ~a:[a_class ["line_author_clickable"]]
+           span ~a:[a_class ["line_author_link"]]
              [pcdata "Commenter"]
           ](self.Feed.id, self.Feed.description);
     ]
@@ -122,14 +122,14 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
 
               pcdata ("Publié le " ^ (Utils.string_of_calendar self.Feed.date) ^ " par ");
               a
-                ~a:[a_class ["line_author_clickable"]]
+                ~a:[a_class ["line_author_link"]]
                 ~service:Services.author_feed
                 [pcdata self.Feed.user#name]
                 self.Feed.user#name;
               a
                 ~service:Services.atom_feed
                 [pcdata " - ";
-                 span ~a:[a_class ["line_author_clickable"]]
+                 span ~a:[a_class ["line_author_link"]]
                    [pcdata "Flux Atom du lien"]
                 ]
                 self.Feed.id;
@@ -139,13 +139,13 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
                  [
                    a ~service:Services.delete_feed
                      [pcdata " - ";
-                      span ~a:[a_class ["line_author_clickable"]]
+                      span ~a:[a_class ["line_author_link"]]
                         [pcdata "Supprimer"]
                      ]
                      self.Feed.id;
                    a ~service:Services.edit_feed
                      [pcdata " - ";
-                      span ~a:[a_class ["line_author_clickable"]]
+                      span ~a:[a_class ["line_author_link"]]
                         [pcdata "Editer"]
                      ]
                      (self.Feed.id, Utils.troncate self.Feed.description);

@@ -344,9 +344,16 @@ a.postitle{
   text-decoration: none;
 }
 
-.line_author>a {
-  text-decoration: none;
-  color: #ccc;
+.line_author>a{
+    text-decoration:none;
+    color: #ccc;
+}
+
+.line_author_link
+{
+    text-decoration:none;
+    font-weight:bold;
+    color:#7fccd5!important;
 }
 
 .line_title {
@@ -564,8 +571,3 @@ a.postitle{
     color:#8a8a8a;
 }
 
-
-.line_author_clickable
-{
-    font-weight:bold;
-}
