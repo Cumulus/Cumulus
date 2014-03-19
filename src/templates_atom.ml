@@ -37,7 +37,9 @@ let feed_to_atom self =
   begin match self.Feed.root with
   | Some root_id ->
       Feed.get_feed_with_id ~user root_id >|= fun root_feed ->
-      ("[RE: " ^ (Utils.troncate root_feed.Feed.description) ^
+      let prev_desc = Utils.strip @@ Utils.troncate root_feed.Feed.description
+      in
+      ("[RE: " ^ prev_desc ^
        "] " ^ (
          match self.Feed.url with
          | Some url -> self.Feed.description
