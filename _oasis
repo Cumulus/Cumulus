@@ -11,7 +11,7 @@ Authors:
   xarch,
   Alexis Cassaigne
 License: MIT
-AlphaFeatures: ocamlbuild_more_args
+AlphaFeatures: ocamlbuild_more_args, compiled_setup_ml
 Plugins: DevFiles (0.3), META (0.3)
 BuildTools: ocamlbuild
 XOCamlbuildPluginTags: package(eliom.ocamlbuild)
