@@ -26,8 +26,11 @@ open Eliom_content.Html5.F
 let action_to_html ~user self = match user with
   | None -> []
   | Some user ->
-    [
-      a ~service:Services.comment [pcdata "- Commenter "] (self.Feed.id, self.Feed.description);
+      [ pcdata " - ";
+        a ~service:Services.comment
+          [span ~a:[a_class ["line_author_link"]]
+             [pcdata "Commenter"]
+          ](self.Feed.id, self.Feed.description);
     ]
 
 let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
@@ -120,19 +123,32 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
 
               pcdata ("Publié le " ^ (Utils.string_of_calendar self.Feed.date) ^ " par ");
               a
+                ~a:[a_class ["line_author_link"]]
                 ~service:Services.author_feed
                 [pcdata self.Feed.user#name]
                 self.Feed.user#name;
+              pcdata " | ";
               a
                 ~service:Services.atom_feed
-                [pcdata "  Flux Atom du lien "]
+                [span ~a:[a_class ["line_author_link"]]
+                   [pcdata "Flux Atom du lien"]
+                ]
                 self.Feed.id;
             ]
               @
               (if is_author then
                  [
-                   a ~service:Services.delete_feed [pcdata "- Supprimer "] self.Feed.id ;
-                   a ~service:Services.edit_feed [pcdata "- Editer "]
+                   pcdata " - ";
+                   a ~service:Services.delete_feed
+                     [span ~a:[a_class ["line_author_link"]]
+                        [pcdata "Supprimer"]
+                     ]
+                     self.Feed.id;
+                   pcdata " - ";
+                   a ~service:Services.edit_feed
+                     [span ~a:[a_class ["line_author_link"]]
+                        [pcdata "Éditer"]
+                     ]
                      (self.Feed.id, Utils.troncate self.Feed.description);
                  ]
                else []
@@ -275,7 +291,7 @@ let header () =
   in
   let tags =
     D.string_input
-      ~a:[a_placeholder "Tags"]
+      ~a:[a_placeholder "Tags (séparés par des virgules)"]
       ~input_type:`Text
       ()
   in
@@ -314,7 +330,8 @@ let main_style ~user ~error ~server_function content =
        ]
     )
     (body
-       [ div
+       [ noscript (pcdata "Your browser doesn't support javascript. Please pick one which does.") [];
+         div
            ~a: [a_class ["line"]]
            (header
             @ [ Client.error_frame;
@@ -430,6 +447,7 @@ let private_preferences ~user =
                            a_id "new_email"
                           ]
                        ~name:email_name
+                       ~value:user.User.email
                        ();
                      br ();
                      Templates_common.submit_input ~value:"Valider" ()
@@ -441,14 +459,15 @@ let private_preferences ~user =
               ~service:Services.update_user_feeds_per_page
               (fun nb_feeds_name -> [
                    h1 [pcdata "Changer le nombre de liens par page"];
+                   let nb_feeds = user.User.feeds_per_page in
                    p [
                      int32_input
                        ~a:[a_class ["input-box"];
-                           a_placeholder (Int32.to_string
-                                            user.User.feeds_per_page)
+                           a_placeholder (Int32.to_string nb_feeds)
                           ]
                        ~input_type:`Text
                        ~name:nb_feeds_name
+                       ~value:nb_feeds
                        ();
                      br ();
                      Templates_common.submit_input ~value:"Valider" ()
@@ -486,7 +505,7 @@ let private_comment ~user id branch =
                       ();
                     br ();
                     Templates_common.text_input_box
-                      ~a:[a_placeholder "Tags"]
+                      ~a:[a_placeholder "Tags (séparés par des virgules)"]
                       ~name:tags
                       ();
                     br ();
@@ -555,7 +574,7 @@ let private_edit_feed ~user ~feed (edit_desc, edit_url, edit_tags) =
                        ();
                      br ();
                      Templates_common.text_input_box
-                       ~a:[ a_placeholder "Tags" ]
+                       ~a:[ a_placeholder "Tags (séparés par des virgules)" ]
                        ~name:tags
                        ~value:edit_tags
                        ();
@@ -577,7 +596,7 @@ let private_edit_feed ~user ~feed (edit_desc, edit_url, edit_tags) =
                    h1 [pcdata "Commentaire"];
                    p [
                      textarea
-                       ~a:[a_class ["input-box"];
+                       ~a:[a_class ["input-box"; "comment-input"];
                            a_placeholder "Comment" ]
                        ~name:desc
                        ~value:edit_desc

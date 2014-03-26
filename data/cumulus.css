@@ -344,9 +344,16 @@ a.postitle{
   text-decoration: none;
 }
 
-.line_author>a {
-  text-decoration: none;
-  color: #ccc;
+.line_author>a{
+    text-decoration:none;
+    color: #ccc;
+}
+
+.line_author_link
+{
+    text-decoration:none;
+    font-weight:bold;
+    color:#7fccd5!important;
 }
 
 .line_title {
@@ -485,7 +492,7 @@ a.postitle{
     color: #414141;
     margin:auto;
     text-align: center;
-    width:30%;
+    width:40%;
     background-color:white;
     border-radius: 5px 5px 5px 5px;
 }
@@ -539,7 +546,7 @@ a.postitle{
 {
     width:80%;
     min-height:80px;
-    height:6vw;
+    height:12vw;
 }
 
 .link {
@@ -558,4 +565,8 @@ a.postitle{
     margin-left: 50%;
     margin-right: 50%;
     margin-top: 2.5%;
+}
+
+.lamalama {
+    color:#8a8a8a;
 }

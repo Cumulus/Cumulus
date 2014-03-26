@@ -97,7 +97,6 @@ let get_feeds_with_tag = Db_feed.get_feeds_with_tag
 let get_fav_with_username = Db_feed.get_fav_with_username
 let exist = Db_feed.exists
 let is_feed_author = Db_feed.is_feed_author
-let get_root = Db_feed.get_root
 let get_feed_with_id = Db_feed.get_feed_with_id
 let get_comments = Db_feed.get_comments
 let get_tree_feeds = Db_feed.get_tree_feeds

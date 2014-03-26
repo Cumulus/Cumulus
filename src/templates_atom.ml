@@ -34,21 +34,25 @@ let string_uri_of_tag tag =
 
 let feed_to_atom self =
   User.get_userid () >>= fun user ->
-  Feed.get_root ~feedid:self.Feed.id ~user () >>= fun root_feed ->
-  let title, root_infos = match root_feed with
-    | Some root_feed' -> ("[RE: " ^ (Utils.troncate root_feed'.Feed.description) ^
-                            "] " ^ (
-                            match self.Feed.url with
-                            | Some url -> self.Feed.description
-                            | None -> Utils.troncate self.Feed.description
-                          ),
-                          [Html.pcdata "ce message est une réponse à : ";
-                           Html.a ~service:Services.view_feed
-                             [Html.pcdata root_feed'.Feed.description]
-                             (root_feed'.Feed.id,
-                              Utils.troncate root_feed'.Feed.description)])
-    | None -> (Utils.troncate' 200 self.Feed.description, [])
-  in
+  begin match self.Feed.root with
+  | Some root_id ->
+      Feed.get_feed_with_id ~user root_id >|= fun root_feed ->
+      let prev_desc = Utils.strip @@ Utils.troncate root_feed.Feed.description
+      in
+      ("[RE: " ^ prev_desc ^
+       "] " ^ (
+         match self.Feed.url with
+         | Some url -> self.Feed.description
+         | None -> Utils.troncate self.Feed.description
+       ),
+       [Html.pcdata "ce message est une réponse à : ";
+        Html.a ~service:Services.view_feed
+          [Html.pcdata root_feed.Feed.description]
+          (root_feed.Feed.id,
+           Utils.troncate root_feed.Feed.description)])
+  | None -> Lwt.return (Utils.troncate' 200 self.Feed.description, [])
+  end
+  >>= fun (title, root_infos) ->
   Lwt.return (
     Atom_feed.entry
       ~updated: self.Feed.date
