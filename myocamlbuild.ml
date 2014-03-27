@@ -617,14 +617,6 @@ let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 # 618 "myocamlbuild.ml"
 (* OASIS_STOP *)
 
-(* Copy pasted from ocamlbuild.
- * It fixes a bug on cmxs (see the offensive comment below)
- *)
-let ext_lib = !Options.ext_lib
-let ext_dll = !Options.ext_dll
-let x_a = "%"-.-ext_lib
-let x_dll = "%"-.-ext_dll
-
 module M = Ocamlbuild_eliom.Make(struct
   let client_dir = "client"
   let server_dir = "server"
@@ -643,12 +635,5 @@ let () =
                | x -> x
              in
              Options.targets := List.map f !Options.targets
-         | After_rules ->
-             (* SON OF A BIATCH !!!!!!!!!!!!!!!!! *)
-             rule "ocaml: cmxa & a -> cmxs & so SON OF A BIATCH"
-               ~insert:`top
-               ~prods:["%.cmxs"; x_dll]
-               ~deps:["%.cmxa"; x_a]
-               (Ocamlbuild_pack.Ocaml_compiler.native_shared_library_link ~tags:["linkall"] "%.cmxa" "%.cmxs")
          | _ -> ()
     )
