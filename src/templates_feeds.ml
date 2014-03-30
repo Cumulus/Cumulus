@@ -318,7 +318,7 @@ let header () =
       ];
   ]
 
-let main_style ~user ~error ~server_function content =
+let main_style ~user ~error ~server_function ~page_title content =
   let userbox = userbox user in
   let header = header () in
   let base_error_frame =
@@ -341,7 +341,12 @@ let main_style ~user ~error ~server_function content =
   html
     (head
        (title
-          (pcdata "Cumulus")
+          (pcdata
+             (match page_title with
+             | None -> "Cumulus"
+             | Some t -> "Cumulus — " ^ t
+             )
+          )
        )
        [ css_link
            ~uri: (make_uri

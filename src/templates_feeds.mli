@@ -27,6 +27,7 @@ val main_style :
   user:User.user option ->
   error:string option ->
   server_function:(box:[> Html5_types.aside ] Eliom_content.Html5.D.elt ->unit) ->
+  page_title:string option ->
   [< Html5_types.aside_content_fun > `Section ] Eliom_content.Html5.F.elt list ->
   [> `Html ] Eliom_content.Html5.F.elt
 val comments_to_html' :

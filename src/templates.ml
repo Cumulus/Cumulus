@@ -22,11 +22,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 open Batteries
 open Eliom_lib.Lwt_ops
 
-let main_style_aux content =
+let main_style_aux page_title content =
   User.get_user () >>= fun user ->
   Errors.get_error () >>= fun error ->
   content user 0 >|= fun (content, server_function) ->
-  Templates_feeds.main_style ~user ~error ~server_function content
+  Templates_feeds.main_style ~user ~error ~server_function ~page_title content
 
 let feed_list feeds =
   let rec content user page =
@@ -41,18 +41,18 @@ let feed_list feeds =
     in
     (feeds, server_function)
   in
-  main_style_aux content
+  main_style_aux None content
 
-let main_style content =
+let main_style title content =
   let content user page =
     content user page >|= fun content ->
     (content, fun ~box:_ -> ())
   in
-  main_style_aux content
+  main_style_aux title content
 
 let main_style_pure content =
   let content user _ = Lwt.return (content user) in
-  main_style content
+  main_style None content
 
 (* see TODO [1] *)
 let main () = feed_list Feed.get_root_feeds
@@ -94,7 +94,9 @@ let view_feed id =
       Lwt.return
         (Templates_feeds.error_content "Ce lien n'existe pas.")
   in
-  main_style content
+  let title = "Feed " ^ (Int32.to_string id)
+  in
+  main_style (Some title) content
 
 let register () =
   let content _ = Templates_feeds.private_register () in
@@ -113,7 +115,9 @@ let comment id =
       feeds_branch_to_html ~user id >|= fun branch ->
       Templates_feeds.private_comment ~user id branch
   in
-  main_style content
+  let title = "Comment feed " ^ (Int32.to_string id)
+  in
+  main_style (Some title) content
 
 let edit_feed id =
   let content user _ =
@@ -126,7 +130,9 @@ let edit_feed id =
     else
       Templates_feeds.private_edit_feed ~user ~feed infos
   in
-  main_style content
+  let title = "Edit feed " ^ (Int32.to_string id)
+  in
+  main_style (Some title) content
 
 let reset_password () =
   let form _ = Templates_feeds.reset_password () in
