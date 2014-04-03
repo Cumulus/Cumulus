@@ -343,8 +343,8 @@ let main_style ~user ~error ~server_function ~page_title content =
        (title
           (pcdata
              (match page_title with
-             | None -> "Cumulus"
-             | Some t -> "Cumulus — " ^ t
+              | None -> "Cumulus"
+              | Some t -> "Cumulus — " ^ t
              )
           )
        )
