@@ -114,13 +114,13 @@ let feed_to_atom self =
   )
 
 (* TODO: Remove duplicate *)
-let to_somthing f data =
+let to_something f data =
   Lwt_list.map_p (fun feed -> f feed) data
 
 let tree_to_atom id () =
   User.get_userid () >>= fun user ->
   Feed.get_tree_feeds ~user id ~starting:0l ~number:Utils.offset ()
-  >>= to_somthing feed_to_atom
+  >>= to_something feed_to_atom
   >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
@@ -134,7 +134,7 @@ let tree_to_atom id () =
 let tag_to_atom tag () =
   User.get_userid () >>= fun user ->
   Feed.get_feeds_with_tag ~user tag ~starting:0l ~number:Utils.offset ()
-  >>= to_somthing feed_to_atom
+  >>= to_something feed_to_atom
   >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
@@ -149,7 +149,7 @@ let tag_to_atom tag () =
 let to_atom () =
   User.get_userid () >>= fun user ->
   Feed.get_links_feeds ~user ~starting:0l ~number:Utils.offset ()
-  >>= to_somthing feed_to_atom
+  >>= to_something feed_to_atom
   >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
@@ -163,7 +163,7 @@ let to_atom () =
 let comments_to_atom () =
   User.get_userid () >>= fun user ->
   Feed.get_comments_feeds ~user ~starting:0l ~number:Utils.offset ()
-  >>= to_somthing feed_to_atom
+  >>= to_something feed_to_atom
   >>= (fun tmp ->
     Lwt.return (
       Atom_feed.feed
