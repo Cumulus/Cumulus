@@ -29,7 +29,7 @@ let action_to_html ~user self = match user with
         a ~service:Services.comment
           [span ~a:[a_class ["line_author_link"]]
              [pcdata "Commenter"]
-          ](self.Feed.id, self.Feed.description);
+          ](self.Feed.id, Utils.troncate self.Feed.description);
     ]
 
 let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
