@@ -36,7 +36,7 @@ let string_is_empty =
 
 let is_invalid_url =
   let regexp_match_url =
-    let legit_chars = "[]0-9A-Za-z_~().,+=&%-|]" in
+    let legit_chars = "[]0-9A-Za-z_~().,+=!&%-|]" in
     let num = "[0-9]?" in
     "^\\(https?\\|ftp\\)://" ^                         (* Protocol *)
       "\\(" ^ legit_chars ^ "*?" ^                     (* Username *)
@@ -57,7 +57,7 @@ let is_invalid_email =
   )
 
 let get_gravatar md5_email =
-  Eliom_service.external_service
+  Eliom_service.Http.external_service
     ~prefix:"http://www.gravatar.com"
     ~path:[ "avatar"; md5_email ]
     ~get_params:Eliom_parameter.((int "s") ** (string "d"))

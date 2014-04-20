@@ -30,7 +30,7 @@ let action_to_html ~user self = match user with
         a ~service:Services.comment
           [span ~a:[a_class ["line_author_link"]]
              [pcdata "Commenter"]
-          ](self.Feed.id, self.Feed.description);
+          ](self.Feed.id, Utils.troncate self.Feed.description);
     ]
 
 let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
@@ -316,7 +316,7 @@ let header () =
       ];
   ]
 
-let main_style ~user ~error ~server_function content =
+let main_style ~user ~error ~server_function ~page_title content =
   let userbox = userbox user in
   let header = header () in
   Option.may Client.set_error_from_string error;
@@ -324,7 +324,14 @@ let main_style ~user ~error ~server_function content =
   server_function ~box:content;
   html
     (head
-       (title (pcdata "Cumulus"))
+       (title
+          (pcdata
+             (match page_title with
+              | None -> "Cumulus"
+              | Some t -> "Cumulus — " ^ t
+             )
+          )
+       )
        [ css_link ~uri:(Templates_common.static_uri ["knacss.css"]) ();
          css_link ~uri:(Templates_common.static_uri ["cumulus.css"]) ();
        ]
