@@ -57,7 +57,7 @@ let is_invalid_email =
   )
 
 let get_gravatar md5_email =
-  Eliom_service.external_service
+  Eliom_service.Http.external_service
     ~prefix:"http://www.gravatar.com"
     ~path:[ "avatar"; md5_email ]
     ~get_params:Eliom_parameter.((int "s") ** (string "d"))
