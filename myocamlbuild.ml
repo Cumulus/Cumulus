@@ -627,13 +627,7 @@ let () =
   dispatch
     (fun hook ->
        dispatch_default hook;
-       M.dispatcher hook;
-       match hook with
-       | After_options ->
-           let f = function
-             | "src/client/cumulus.byte" -> "src/client/cumulus.js"
-             | x -> x
-           in
-           Options.targets := List.map f !Options.targets;
-       | _ -> ()
+       M.dispatcher
+         ~oasis_executables:["src/client/cumulus.byte"]
+         hook;
     )
