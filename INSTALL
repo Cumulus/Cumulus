@@ -16,6 +16,7 @@ You will still need to install with your packages manager
    * libpcre3-dev
    * libssl-dev
    * libsqlite3-dev
+   * libdbm-ocaml-dev
    * And maybe I forgot some deps
 
 How to setup the database and build
