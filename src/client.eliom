@@ -41,7 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         (Dom_html.window##setTimeout
            (Js.wrap_callback
               (fun () ->
-                 Eliom_content.Html5.Manip.removeAllChildren error_frame;
+                 Eliom_content.Html5.Manip.removeChildren error_frame;
                  match !id_timeout with
                  | None -> () (* It cannot happen *)
                  | Some id ->
@@ -59,7 +59,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
          (* TODO: Except for ourself *)
          (* TODO: reload on delete *)
          get_feeds 0 >|= fun feeds ->
-         Eliom_content.Html5.Manip.replaceAllChildren box feeds;
+         Eliom_content.Html5.Manip.replaceChildren box feeds;
       )
       stream
 
@@ -94,16 +94,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       let last_page = ref 0 in
       let rec aux () =
         let page = succ !last_page in
-        Eliom_content.Html5.Manip.replaceAllChildren
+        Eliom_content.Html5.Manip.replaceChildren
           link_next
           [loading];
         content page >|= fun feeds ->
         begin match feeds with
         | [] ->
-            Eliom_content.Html5.Manip.replaceAllChildren link_next [no_more_links];
+            Eliom_content.Html5.Manip.replaceChildren link_next [no_more_links];
         | feeds ->
             Eliom_content.Html5.Manip.appendChildren ~before box feeds;
-            Eliom_content.Html5.Manip.replaceAllChildren
+            Eliom_content.Html5.Manip.replaceChildren
               link_next
               [default_link_next_content aux];
         end;
@@ -129,7 +129,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
            )
       );
     Eliom_content.Html5.Manip.appendChild box before;
-    Eliom_content.Html5.Manip.replaceAllChildren
+    Eliom_content.Html5.Manip.replaceChildren
       link_next
       [default_link_next_content get_next_page];
     waiting_for_reload content ~box
@@ -146,12 +146,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       (if !is_fav then
          call %Services.del_fav_feed >|= function
          | `Ok ->
-             Eliom_content.Html5.Manip.replaceAllChildren res [add]
+             Eliom_content.Html5.Manip.replaceChildren res [add]
          | `NotConnected -> () (* TODO: Display an error *)
        else
          call %Services.add_fav_feed >|= function
          | `Ok ->
-             Eliom_content.Html5.Manip.replaceAllChildren res [del]
+             Eliom_content.Html5.Manip.replaceChildren res [del]
          | `NotConnected -> () (* TODO: Display an error *)
       )
       >>= fun () ->
@@ -168,7 +168,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     let action = function
       | `Ok (v, score) ->
           let content = get_upvote_inner ~upon ~up ~downon ~down ~vote:v ~score in
-          Eliom_content.Html5.Manip.replaceAllChildren container [content];
+          Eliom_content.Html5.Manip.replaceChildren container [content];
           vote := v;
       | `NoRight
       | `NotConnected ->
