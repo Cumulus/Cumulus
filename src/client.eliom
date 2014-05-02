@@ -141,7 +141,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         (Eliom_content.Html5.To_dom.of_element (if !is_fav then del else add))
       >>= fun _ ->
       let call service =
-        Eliom_client.call_ocaml_service ~service feed_id ()
+        Eliom_client.call_ocaml_service ~service () feed_id
       in
       (if !is_fav then
          call %Services.del_fav_feed >|= function
@@ -163,7 +163,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   let upvotes_actions ~container ~upon ~up ~downon ~down ~vote ~feed_id =
     let vote = ref vote in
     let call service =
-      Eliom_client.call_ocaml_service ~service feed_id ()
+      Eliom_client.call_ocaml_service ~service () feed_id
     in
     let action = function
       | `Ok (v, score) ->

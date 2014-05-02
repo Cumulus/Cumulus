@@ -558,7 +558,7 @@ let private_comment ~user id branch =
                     Templates_common.submit_input ~value:"Envoyer !" ()
                   ]
                 ])
-             (id, "");
+             id;
           post_form
             ~a:[a_class ["box"]]
             ~service:Services.append_desc_comment
@@ -580,7 +580,7 @@ let private_comment ~user id branch =
                    Templates_common.submit_input ~value:"Envoyer !" ()
                  ]
                ])
-            (id, "");
+            id;
         ]
     ]
 
@@ -631,7 +631,7 @@ let private_edit_feed ~user ~feed (edit_desc, edit_url, edit_tags) =
                      Templates_common.submit_input ~value:"Envoyer !" ()
                    ]
                  ])
-              (feed.Feed.id, "")
+              feed.Feed.id
         | None ->
             post_form
               ~a:[a_class ["box"]]
@@ -654,7 +654,7 @@ let private_edit_feed ~user ~feed (edit_desc, edit_url, edit_tags) =
                      Templates_common.submit_input ~value:"Envoyer !" ()
                    ]
                  ])
-              (feed.Feed.id, "")
+              feed.Feed.id
        ]
     ]
 

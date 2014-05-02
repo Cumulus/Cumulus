@@ -62,7 +62,7 @@ let () =
     );
   Eliom_registration.Action.register
     ~service:Services.append_link_comment
-    (fun (_, _) data ->
+    (fun _ data ->
        Feeds.append_link_comment data >>= (function
          | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
          | Feeds.Empty -> Lwt.return "L'un des champs est vide"
@@ -74,7 +74,7 @@ let () =
     );
   Eliom_registration.Action.register
     ~service:Services.append_desc_comment
-    (fun (_, _) data ->
+    (fun _ data ->
        Feeds.append_desc_comment data >>= (function
          | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
          | Feeds.Empty -> Lwt.return "L'un des champs est vide"
@@ -86,7 +86,7 @@ let () =
     );
   Eliom_registration.Action.register
     ~service:Services.edit_link_comment
-    (fun (_, _) data ->
+    (fun _ data ->
        Feeds.edit_link_comment data >>= (function
          | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
          | Feeds.Empty -> Lwt.return "L'un des champs est vide"
@@ -98,7 +98,7 @@ let () =
     );
   Eliom_registration.Action.register
     ~service:Services.edit_desc_comment
-    (fun (_, _) data ->
+    (fun _ data ->
        Feeds.edit_desc_comment data >>= (function
          | Feeds.Not_connected -> Lwt.return "Vous ne vous êtes pas authentifié"
          | Feeds.Empty -> Lwt.return "L'un des champs est vide"
@@ -129,13 +129,18 @@ let () =
        >>= Errors.set_error
     );
   Cumulus_appl.register
-    ~service: Services.view_feed'
-    (fun ((id, _), _) () ->
+    ~service: Services.view_feed
+    (fun (id, _) () ->
        Templates.view_feed id
     );
   Cumulus_appl.register
-    ~service: Services.view_feed
-    (fun (id, _) () ->
+    ~service: Services.view_feed'
+    (fun id () ->
+       Templates.view_feed id
+    );
+  Cumulus_appl.register
+    ~service: Services.view_feed''
+    (fun ((id, _), _) () ->
        Templates.view_feed id
     );
   Eliom_registration.Action.register
@@ -202,19 +207,19 @@ let () =
     );
   Eliom_registration.Ocaml.register
     ~service:Services.add_fav_feed
-    (fun feedid () -> Feed.add_fav feedid);
+    (fun () feedid -> Feed.add_fav feedid);
   Eliom_registration.Ocaml.register
     ~service:Services.del_fav_feed
-    (fun feedid () -> Feed.del_fav feedid);
+    (fun () feedid -> Feed.del_fav feedid);
   Eliom_registration.Ocaml.register
     ~service:Services.upvote_feed
-    (fun feedid () -> Feed.upvote feedid);
+    (fun () feedid -> Feed.upvote feedid);
   Eliom_registration.Ocaml.register
     ~service:Services.downvote_feed
-    (fun feedid () -> Feed.downvote feedid);
+    (fun () feedid -> Feed.downvote feedid);
   Eliom_registration.Ocaml.register
     ~service:Services.cancelvote_feed
-    (fun feedid () -> Feed.cancel_vote feedid);
+    (fun () feedid -> Feed.cancel_vote feedid);
   Eliom_registration.Action.register
     ~service:Services.reset_password
     (fun () ->

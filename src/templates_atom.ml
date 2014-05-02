@@ -48,8 +48,9 @@ let feed_to_atom self =
        [Html.pcdata "ce message est une réponse à : ";
         Html.a ~service:Services.view_feed
           [Html.pcdata root_feed.Feed.description]
-          (root_feed.Feed.id,
-           Utils.troncate root_feed.Feed.description)])
+          (root_feed.Feed.id, Utils.troncate root_feed.Feed.description)
+       ]
+      )
   | None -> Lwt.return (Utils.troncate' 200 self.Feed.description, [])
   end
   >>= fun (title, root_infos) ->
@@ -58,8 +59,8 @@ let feed_to_atom self =
       ~updated: self.Feed.date
       ~id:(Uri.make_string_uri
              ~absolute:true
-             ~service:Services.view_feed
-             (self.Feed.id, "")
+             ~service:Services.view_feed'
+             self.Feed.id
           )
       ~title: (Atom_feed.plain (title))
       [Atom_feed.authors [Atom_feed.author self.Feed.user#name];
@@ -67,8 +68,8 @@ let feed_to_atom self =
          Atom_feed.link (
            Uri.make_string_uri
              ~absolute:true
-             ~service:Services.view_feed
-             (self.Feed.id, "")
+             ~service:Services.view_feed'
+             self.Feed.id
          )
        ];
        Atom_feed.categories (
