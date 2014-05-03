@@ -38,13 +38,15 @@ let feed_to_atom (root_feed, self) =
   let (title, root_infos) =
     match root_feed with
     | Some root_feed ->
-        let prev_desc = Utils.strip (Utils.troncate root_feed.Feed.description) in
-        ("[RE: " ^ prev_desc ^
-         "] " ^ (
-           match self.Feed.url with
-           | Some url -> self.Feed.description
-           | None -> Utils.troncate self.Feed.description
-         ),
+        let prev_desc =
+          Utils.strip (Utils.troncate root_feed.Feed.description)
+        in
+        let current_desc =
+          match self.Feed.url with
+          | Some url -> self.Feed.description
+          | None -> Utils.troncate self.Feed.description
+        in
+        (fmt "[RE: %s] %s" prev_desc current_desc,
          [Html.pcdata "ce message est une réponse à : ";
           Html.a ~service:Services.view_feed
             [Html.pcdata root_feed.Feed.description]
@@ -53,62 +55,71 @@ let feed_to_atom (root_feed, self) =
         )
     | None -> (Utils.troncate' 200 self.Feed.description, [])
   in
+  let link =
+    Uri.make_string_uri
+      ~absolute:true
+      ~service:Services.view_feed'
+      self.Feed.id
+  in
   Atom_feed.entry
-    ~updated: self.Feed.date
-    ~id:(Uri.make_string_uri
-           ~absolute:true
-           ~service:Services.view_feed'
-           self.Feed.id
-        )
-    ~title: (Atom_feed.plain (title))
+    ~updated:self.Feed.date
+    ~id:link
+    ~title:(Atom_feed.plain title)
     [Atom_feed.authors [Atom_feed.author self.Feed.user#name];
-     Atom_feed.links [
-       Atom_feed.link (
-         Uri.make_string_uri
-           ~absolute:true
-           ~service:Services.view_feed'
-           self.Feed.id
+     Atom_feed.links [Atom_feed.link link];
+     Atom_feed.categories
+       (List.map
+          (fun tag ->
+             Atom_feed.category
+               ~scheme:(string_uri_of_tag tag)
+               ~label:tag
+               tag
+               []
+          )
+          self.Feed.tags
+       );
+     Atom_feed.summary
+       (Atom_feed.html5
+          ((match self.Feed.url with
+             | Some url ->
+                 Html.Raw.a
+                   ~a:[Html.a_href (Html.Raw.uri_of_string url)]
+                   [Html.pcdata self.Feed.description]
+             | None ->
+                 let markdown = Markdown.parse_text self.Feed.description in
+                 let render_pre ~kind s = Html.Raw.pre [Html.Raw.pcdata s] in
+                 let render_link {Markdown.href_target; href_desc} =
+                   Html.Raw.a
+                     ~a:[Html.Raw.a_href (Html.Raw.uri_of_string href_target)]
+                     [Html.Raw.pcdata href_desc]
+                 in
+                 let render_img {Markdown.img_src; img_alt} =
+                   Html.Raw.img
+                     ~src:(Html.Raw.uri_of_string img_src)
+                     ~alt:img_alt
+                     ()
+                 in
+                 Html.div
+                   ~a:[Html.a_class ["lamalama"]]
+                   (Templates_common.Markdown.to_html
+                      ~render_pre
+                      ~render_link
+                      ~render_img
+                      markdown
+                   )
+           )
+           :: Html.br ()
+           :: Html.a
+                ~service:Services.atom_feed
+                [Html.pcdata "Flux atom du lien"]
+                self.Feed.id
+           :: Html.br ()
+           :: Html.pcdata "Tags : "
+           :: Templates_common.links_of_tags self.Feed.tags
+           @ [Html.br ()]
+           @ root_infos
+          )
        )
-     ];
-     Atom_feed.categories (
-       List.map (fun tag ->
-         Atom_feed.category
-           ~scheme:(string_uri_of_tag tag)
-           ~label:tag
-           tag
-           [])
-         self.Feed.tags);
-     Atom_feed.summary (Atom_feed.html5 (
-       (match self.Feed.url with
-        | Some url -> Html.Raw.a ~a:
-                        [Html.a_href
-                           (Html.uri_of_string
-                              (fun () -> url)
-                           )
-                        ]
-                        [Html.pcdata self.Feed.description]
-        | None ->
-            let markdown = Markdown.parse_text self.Feed.description in
-            let render_pre ~kind s = Html.Raw.pre [Html.Raw.pcdata s] in
-            let render_link {Markdown.href_target; href_desc} =
-              Html.Raw.a ~a:[Html.Raw.a_href (Html.Raw.uri_of_string href_target)] [Html.Raw.pcdata href_desc]
-            in
-            let render_img {Markdown.img_src; img_alt} =
-              Html.Raw.img ~src:(Html.Raw.uri_of_string img_src) ~alt:img_alt ()
-            in
-            Html.div ~a:[Html.a_class ["lamalama"]] (Templates_common.Markdown.to_html ~render_pre
-                                                       ~render_link ~render_img markdown)
-       )
-       :: (Html.br ())
-       :: (Html.a ~service:Services.atom_feed [Html.pcdata "Flux atom du lien"]
-             self.Feed.id)
-       :: (Html.br ())
-       :: (Html.pcdata "Tags : ")
-       :: (Templates_common.links_of_tags self.Feed.tags)
-       @ [(Html.br ())]
-       @ root_infos
-     )
-     )
     ]
 
 let to_atom_aux ~title feeds =
