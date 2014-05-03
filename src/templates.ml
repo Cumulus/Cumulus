@@ -137,3 +137,39 @@ let edit_feed id =
 let reset_password () =
   let form _ = Templates_feeds.reset_password () in
   main_style_pure form
+
+let atom_aux feeds =
+  let user = None in
+  let aux self =
+    match self.Feed.root with
+    | Some root_id ->
+        Feed.get_feed_with_id ~user root_id >|= fun root_feed ->
+        (Some root_feed, self)
+    | None ->
+        Lwt.return (None, self)
+  in
+  Lwt_list.map_p aux feeds
+
+let to_atom () =
+  let user = None in
+  Feed.get_links_feeds ~user ~starting:0l ~number:Utils.offset ()
+  >>= atom_aux
+  >|= Templates_atom.to_atom
+
+let comments_to_atom () =
+  let user = None in
+  Feed.get_comments_feeds ~user ~starting:0l ~number:Utils.offset ()
+  >>= atom_aux
+  >|= Templates_atom.comments_to_atom
+
+let tag_to_atom tag =
+  let user = None in
+  Feed.get_feeds_with_tag ~user tag ~starting:0l ~number:Utils.offset ()
+  >>= atom_aux
+  >|= Templates_atom.tag_to_atom tag
+
+let tree_to_atom id =
+  let user = None in
+  Feed.get_tree_feeds ~user id ~starting:0l ~number:Utils.offset ()
+  >>= atom_aux
+  >|= Templates_atom.tree_to_atom id

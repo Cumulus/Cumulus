@@ -37,3 +37,11 @@ val preferences : unit -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t
 val comment : int32 -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t
 val edit_feed : int32 -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t
 val reset_password : unit -> [> `Html ] Eliom_content.Html5.F.elt Lwt.t
+
+val to_atom : unit -> Atom_feed.feed Lwt.t
+
+val comments_to_atom : unit -> Atom_feed.feed Lwt.t
+
+val tree_to_atom : int32 -> Atom_feed.feed Lwt.t
+
+val tag_to_atom : string -> Atom_feed.feed Lwt.t

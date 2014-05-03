@@ -19,7 +19,20 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
-val to_atom : unit -> Atom_feed.feed Lwt.t
-val comments_to_atom : unit -> Atom_feed.feed Lwt.t
-val tree_to_atom : int32 -> unit -> Atom_feed.feed Lwt.t
-val tag_to_atom: string -> unit -> Atom_feed.feed Lwt.t
+val to_atom :
+  (Feed.feed option * Feed.feed) list ->
+  Atom_feed.feed
+
+val comments_to_atom :
+  (Feed.feed option * Feed.feed) list ->
+  Atom_feed.feed
+
+val tree_to_atom :
+  int32 ->
+  (Feed.feed option * Feed.feed) list ->
+  Atom_feed.feed
+
+val tag_to_atom :
+  string ->
+  (Feed.feed option * Feed.feed) list ->
+  Atom_feed.feed
