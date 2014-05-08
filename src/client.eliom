@@ -55,7 +55,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     let event = %Feeds.event in
     let stream = Lwt_react.E.to_stream event in
     Lwt_stream.iter_s
-      (fun id ->
+      (fun () ->
          (* TODO: Except for ourself *)
          (* TODO: reload on delete *)
          get_feeds 0 >|= fun feeds ->

@@ -28,7 +28,7 @@ let rec init_fun data = function
         Configfile.fail_content ~tag;
       let data =
         List.fold_left
-          (fun data -> function
+          (fun _data -> function
              | "email", x -> Some x
              | x, _ -> Configfile.fail_attrib ~tag x
           )

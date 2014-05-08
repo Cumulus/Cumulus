@@ -22,15 +22,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 open Batteries
 open Eliom_content.Html5.F
 
-let action_to_html ~user self = match user with
-  | None -> []
-  | Some user ->
-      [ pcdata " - ";
-        a ~service:Services.comment
-          [span ~a:[a_class ["line_author_link"]]
-             [pcdata "Commenter"]
-          ](self.Feed.id, Utils.troncate self.Feed.description);
+let action_to_html ~user self =
+  if Option.is_some user then
+    [ pcdata " - ";
+      a
+        ~service:Services.comment
+        [ span
+            ~a:[a_class ["line_author_link"]]
+            [pcdata "Commenter"]
+        ]
+        (self.Feed.id, Utils.troncate self.Feed.description);
     ]
+  else
+    []
 
 let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
   let get_image cls imgname =
@@ -49,7 +53,7 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
                     [pcdata self.Feed.description]]
     | None ->
         let markdown = Markdown.parse_text self.Feed.description in
-        let render_pre ~kind s = Raw.pre [Raw.pcdata s] in
+        let render_pre ~kind:_ s = Raw.pre [Raw.pcdata s] in
         let render_link {Markdown.href_target; href_desc} =
           Raw.a ~a:[Raw.a_href (Raw.uri_of_string href_target)] [Raw.pcdata href_desc]
         in

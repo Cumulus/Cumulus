@@ -42,9 +42,10 @@ let feed_to_atom (root_feed, self) =
           Utils.strip (Utils.troncate root_feed.Feed.description)
         in
         let current_desc =
-          match self.Feed.url with
-          | Some url -> self.Feed.description
-          | None -> Utils.troncate self.Feed.description
+          if Option.is_some self.Feed.url then
+            self.Feed.description
+          else
+            Utils.troncate self.Feed.description
         in
         (fmt "[RE: %s] %s" prev_desc current_desc,
          [Html.pcdata "ce message est une réponse à : ";
@@ -87,7 +88,7 @@ let feed_to_atom (root_feed, self) =
                    [Html.pcdata self.Feed.description]
              | None ->
                  let markdown = Markdown.parse_text self.Feed.description in
-                 let render_pre ~kind s = Html.Raw.pre [Html.Raw.pcdata s] in
+                 let render_pre ~kind:_ s = Html.Raw.pre [Html.Raw.pcdata s] in
                  let render_link {Markdown.href_target; href_desc} =
                    Html.Raw.a
                      ~a:[Html.Raw.a_href (Html.Raw.uri_of_string href_target)]

@@ -106,7 +106,7 @@ let append_desc_comment (id, description) =
 let edit_feed_aux ~id ~url ~description ~tags f =
   User.get_userid () >>= fun user ->
   append_feed_aux_base ~description
-    (fun ~author () ->
+    (fun ~author:_ () ->
        if Utils.string_is_empty tags then
          Lwt.return Empty
        else if Utils.is_invalid_url url then
@@ -134,7 +134,7 @@ let edit_link_comment (id, (url, (description, tags))) =
 
 let edit_desc_comment (id, description) =
   append_feed_aux_base ~description
-    (fun ~author () ->
+    (fun ~author:_ () ->
        Db_feed.update
          ~feedid:id
          ~description
