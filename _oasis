@@ -11,7 +11,7 @@ Authors:
   xarch,
   Alexis Cassaigne
 License: MIT
-AlphaFeatures: ocamlbuild_more_args, compiled_setup_ml
+AlphaFeatures: ocamlbuild_more_args, compiled_setup_ml, no_automatic_syntax
 Plugins: DevFiles (0.3), META (0.3)
 BuildTools: ocamlbuild
 XOCamlbuildPluginTags: package(eliom.ocamlbuild)
@@ -28,8 +28,7 @@ Library cumulus
     Main
   BuildDepends:
     cumulus.base
-#  ByteOpt: -w A
-#  NativeOpt: -w A
+  ByteOpt: -w A-44-33-41
   DataFiles:
     ../data/*.ico,
     ../data/*.css,
@@ -53,8 +52,7 @@ Library base
     cumulus.db,
     camomile,
     markdown.html (>= 0.1.1)
-#  ByteOpt: -w A
-#  NativeOpt: -w A
+  ByteOpt: -w A-44-33-41
 
 Library db
   Path: src/base/db
@@ -77,8 +75,7 @@ Library db
     lwt (>= 2.4),
     safepass (>= 1.2),
     markdown.html (>= 0.1.1)
-#  ByteOpt: -w A
-#  NativeOpt: -w A
+  ByteOpt: -w A-44-33-41
 
 Executable cumulus
   Install: false
@@ -87,5 +84,4 @@ Executable cumulus
   BuildDepends:
     eliom.client
   CompiledObject: byte
-#  ByteOpt: -w A
-#  NativeOpt: -w A
+  ByteOpt: -w A-44-33-41

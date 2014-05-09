@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: c8421898a04c234c2f4f7e5378e83a28)
+# DO NOT EDIT (digest: f8eea0d50dccd2a029743277f4c19efc)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -15,6 +15,8 @@
 "_darcs": not_hygienic
 # Library db
 "src/base/db/db.cmxs": use_db
+<src/base/db/db.{cma,cmxa}>: oasis_library_db_byte
+<src/base/db/*.ml{,i}>: oasis_library_db_byte
 <src/base/db/*.ml{,i}>: package(batteries)
 <src/base/db/*.ml{,i}>: package(camomile)
 <src/base/db/*.ml{,i}>: package(eliom.server)
@@ -25,6 +27,8 @@
 <src/base/db/*.ml{,i}>: package(safepass)
 # Library base
 "src/base/base.cmxs": use_base
+<src/base/base.{cma,cmxa}>: oasis_library_base_byte
+<src/base/*.ml{,i}>: oasis_library_base_byte
 <src/base/*.ml{,i}>: package(batteries)
 <src/base/*.ml{,i}>: package(camomile)
 <src/base/*.ml{,i}>: package(eliom.server)
@@ -36,6 +40,9 @@
 <src/base/*.ml{,i}>: use_db
 # Library cumulus
 "src/cumulus.cmxs": use_cumulus
+<src/cumulus.{cma,cmxa}>: oasis_library_cumulus_byte
+<src/*.ml{,i}>: oasis_library_cumulus_byte
+<src/server/*.ml{,i}>: oasis_library_cumulus_byte
 <src/*.ml{,i}>: package(batteries)
 <src/*.ml{,i}>: package(camomile)
 <src/*.ml{,i}>: package(eliom.server)
@@ -57,6 +64,8 @@
 <src/server/*.ml{,i}>: use_base
 <src/server/*.ml{,i}>: use_db
 # Executable cumulus
+"src/client/cumulus.byte": oasis_executable_cumulus_byte
+<src/client/*.ml{,i}>: oasis_executable_cumulus_byte
 "src/client/cumulus.byte": package(eliom.client)
 <src/client/*.ml{,i}>: package(eliom.client)
 # OASIS_STOP
