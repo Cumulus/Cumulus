@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 85b3776933c13cd2ee6b47a04e5a9f63) *)
+(* DO NOT EDIT (digest: 59d282a4d4a908427d8885b46f225121) *)
 module OASISGettext = struct
 (* # 22 "src/oasis/OASISGettext.ml" *)
 
@@ -557,12 +557,13 @@ module MyOCamlbuildBase = struct
 
                    (* When ocaml link something that use the C library, then one
                       need that file to be up to date.
+                      This holds both for programs and for libraries.
                     *)
-                   dep ["link"; "ocaml"; "program"; tag_libstubs lib]
-                     [dir/"lib"^(nm_libstubs lib)^"."^(!Options.ext_lib)];
+  		 dep ["link"; "ocaml"; tag_libstubs lib]
+  		     [dir/"lib"^(nm_libstubs lib)^"."^(!Options.ext_lib)];
 
-                   dep  ["compile"; "ocaml"; "program"; tag_libstubs lib]
-                     [dir/"lib"^(nm_libstubs lib)^"."^(!Options.ext_lib)];
+  		 dep  ["compile"; "ocaml"; tag_libstubs lib]
+  		      [dir/"lib"^(nm_libstubs lib)^"."^(!Options.ext_lib)];
 
                    (* TODO: be more specific about what depends on headers *)
                    (* Depends on .h files *)
@@ -602,7 +603,7 @@ module MyOCamlbuildBase = struct
 end
 
 
-# 605 "myocamlbuild.ml"
+# 606 "myocamlbuild.ml"
 open Ocamlbuild_plugin;;
 let package_default =
   {
@@ -653,7 +654,7 @@ let conf = {MyOCamlbuildFindlib.no_automatic_syntax = true}
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default conf package_default;;
 
-# 657 "myocamlbuild.ml"
+# 658 "myocamlbuild.ml"
 (* OASIS_STOP *)
 
 module M = Ocamlbuild_eliom.Make(struct
