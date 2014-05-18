@@ -59,7 +59,7 @@ Library db
   FindlibParent: cumulus
   Modules:
     Configfile,
-    Db_config,
+    Config_db,
     Db,
     Db_table,
     Db_update,

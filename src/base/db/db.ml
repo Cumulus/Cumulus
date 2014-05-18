@@ -30,7 +30,7 @@ module Lwt_PGOCaml = PGOCaml_generic.Make(Lwt_thread)
 module Lwt_Query = Query.Make_with_Db(Lwt_thread)(Lwt_PGOCaml)
 
 let connect =
-  let open Db_config in
+  let open Config_db in
   Lwt_PGOCaml.connect
     ?database
     ?host
