@@ -69,7 +69,7 @@ let view_feed' =
 let view_feed'' =
   App.service
     ~path:["view"]
-    ~get_params:(suffix_prod (int32 "id" ** string "name") any)
+    ~get_params:(suffix_prod (int32 "id") any)
     ()
 
 let append_feed =

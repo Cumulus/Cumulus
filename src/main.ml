@@ -140,7 +140,7 @@ let () =
     );
   Cumulus_appl.register
     ~service: Services.view_feed''
-    (fun ((id, _), _) () ->
+    (fun (id, _) () ->
        Templates.view_feed id
     );
   Eliom_registration.Action.register
