@@ -66,10 +66,18 @@ let view_feed' =
     ~get_params:(suffix (int32 "id"))
     ()
 
+(* Twitter hack. Not used internally *)
 let view_feed'' =
   App.service
     ~path:["view"]
     ~get_params:(suffix_prod (int32 "id") any)
+    ()
+
+(* Twitter hack. Not used internally *)
+let view_feed''' =
+  App.service
+    ~path:["view"]
+    ~get_params:(suffix_prod (int32 "id" ** string "name") any)
     ()
 
 let append_feed =
