@@ -48,7 +48,10 @@ val get_offset : unit -> int32 Lwt.t
 
 val send_reset_email :
   service:((Db_user.user ->
-            (unit, unit, [< Eliom_service.get_service_kind ],
+            (unit, unit,
+             [< Eliom_service.get_service_kind ],
+             [< Eliom_service.attached ],
+             [< Eliom_service.service_kind ],
              [< Eliom_service.suff ], 'a, unit,
              [< Eliom_service.registrable ], 'b)
               Eliom_service.service)) ->
