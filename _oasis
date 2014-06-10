@@ -27,6 +27,7 @@ Library cumulus
     Templates_atom,
     Main
   BuildDepends:
+    eliom.server.ext,
     cumulus.base
   ByteOpt: -w A-44-33-41
   DataFiles:
@@ -66,15 +67,12 @@ Library db
     Db_feed,
     Db_user
   BuildDepends:
-    eliom.server (>= 3.0.3),
-    batteries (>= 2.0),
+    eliom.server (>= 4.0),
+    batteries (>= 2.2),
     macaque (>= 0.6),
-    batteries (>= 2.0),
-    camomile,
-    pgocaml (>= 1.7),
+    pgocaml (>= 2.0),
     lwt (>= 2.4),
-    safepass (>= 1.2),
-    markdown.html (>= 0.1.1)
+    safepass (>= 1.2)
   ByteOpt: -w A-44-33-41
 
 Executable cumulus

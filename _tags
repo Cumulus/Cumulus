@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: d6c75f9286f3a16f4a905b8920cab3f9)
+# DO NOT EDIT (digest: edbd6f50020650edbaced77acae8efe2)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -18,11 +18,9 @@
 <src/base/db/db.{cma,cmxa}>: oasis_library_db_byte
 <src/base/db/*.ml{,i}>: oasis_library_db_byte
 <src/base/db/*.ml{,i}>: package(batteries)
-<src/base/db/*.ml{,i}>: package(camomile)
 <src/base/db/*.ml{,i}>: package(eliom.server)
 <src/base/db/*.ml{,i}>: package(lwt)
 <src/base/db/*.ml{,i}>: package(macaque)
-<src/base/db/*.ml{,i}>: package(markdown.html)
 <src/base/db/*.ml{,i}>: package(pgocaml)
 <src/base/db/*.ml{,i}>: package(safepass)
 # Library base
@@ -46,6 +44,7 @@
 <src/*.ml{,i}>: package(batteries)
 <src/*.ml{,i}>: package(camomile)
 <src/*.ml{,i}>: package(eliom.server)
+<src/*.ml{,i}>: package(eliom.server.ext)
 <src/*.ml{,i}>: package(lwt)
 <src/*.ml{,i}>: package(macaque)
 <src/*.ml{,i}>: package(markdown.html)
@@ -56,6 +55,7 @@
 <src/server/*.ml{,i}>: package(batteries)
 <src/server/*.ml{,i}>: package(camomile)
 <src/server/*.ml{,i}>: package(eliom.server)
+<src/server/*.ml{,i}>: package(eliom.server.ext)
 <src/server/*.ml{,i}>: package(lwt)
 <src/server/*.ml{,i}>: package(macaque)
 <src/server/*.ml{,i}>: package(markdown.html)

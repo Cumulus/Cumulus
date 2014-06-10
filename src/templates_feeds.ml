@@ -365,7 +365,7 @@ let main_style ~user ~error ~server_function ~page_title content =
        ]
     )
     (body
-       [ noscript (pcdata "Your browser doesn't support javascript. Please pick one which does.") [];
+       [ noscript [pcdata "Your browser doesn't support javascript. Please pick one which does."];
          div
            ~a: [a_class ["line"]]
            (header

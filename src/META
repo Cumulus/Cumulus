@@ -1,8 +1,8 @@
 # OASIS_START
-# DO NOT EDIT (digest: e08486d5a5b4d4fcf18acff51f027c2b)
+# DO NOT EDIT (digest: 450b2bdaf839fd5b17678d5255358aea)
 version = "1.0"
 description = "Buzz erl^WOCaml, le retour"
-requires = "cumulus.base"
+requires = "eliom.server.ext cumulus.base"
 archive(byte) = "cumulus.cma"
 archive(byte, plugin) = "cumulus.cma"
 archive(native) = "cumulus.cmxa"
@@ -11,8 +11,7 @@ exists_if = "cumulus.cma"
 package "db" (
  version = "1.0"
  description = "Buzz erl^WOCaml, le retour"
- requires =
- "eliom.server batteries macaque batteries camomile pgocaml lwt safepass markdown.html"
+ requires = "eliom.server batteries macaque pgocaml lwt safepass"
  archive(byte) = "db.cma"
  archive(byte, plugin) = "db.cma"
  archive(native) = "db.cmxa"

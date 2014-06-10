@@ -1,6 +1,7 @@
 _build
 setup.data
 setup.log
+setup.exe
 
 data/cumulus.js
 password
