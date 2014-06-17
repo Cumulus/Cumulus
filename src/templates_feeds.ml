@@ -76,7 +76,7 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
     let del =
       Eliom_content.Html5.D.Raw.a
         ~a:[a_class ["link"]]
-        [get_image ["circled";"highlighted";"deletable"] "fav.png"]
+        [get_image ["circled";"highlighted";"fav_icon";"deletable"] "fav.png"]
     in
     let is_fav = self.Feed.fav in
     let res =
