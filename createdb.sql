@@ -22,7 +22,9 @@ CREATE TABLE feeds (
     timedate timestamp NOT NULL,
     author integer NOT NULL REFERENCES users (id),
     parent integer REFERENCES feeds (id) ON DELETE CASCADE,
-    root integer REFERENCES feeds (id) ON DELETE CASCADE
+    root integer REFERENCES feeds (id) ON DELETE CASCADE,
+    leftBound integer NOT NULL,
+    rightBound integer NOT NULL
 );
 
 CREATE TABLE feeds_tags (

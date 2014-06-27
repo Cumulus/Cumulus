@@ -1,22 +1,22 @@
 (*
-Copyright (c) 2012 Enguerrand Decorne
+   Copyright (c) 2012 Enguerrand Decorne
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+   Permission is hereby granted, free of charge, to any person obtaining a copy of
+   this software and associated documentation files (the "Software"), to deal in
+   the Software without restriction, including without limitation the rights to
+   use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+   the Software, and to permit persons to whom the Software is furnished to do so,
+   subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+   The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+   COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+   IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
 
@@ -49,51 +49,55 @@ type feed_generator =
   feeds Lwt.t
 
 let get_feeds_aux ?range
-  ~feeds_filter
-  ~users_filter
-  ~user
-  () =
+      ~feeds_filter
+      ~users_filter
+      ~user
+      () =
   begin match range with
   | Some (limit, offset) ->
       Db.view
         (<:view< group {
-          email_digest = md5[u.email];
-        }
-        by {
-          f.id;
-          f.url;
-          f.description;
-          f.timedate;
-          f.author;
-          f.parent;
-          f.root;
-          u.name;
-          u.email;
-        } order by f.id desc limit $int32:limit$ offset $int32:offset$
-        | f in $Db_table.feeds$; $feeds_filter$ f;
-          u in $Db_table.users$; $users_filter$ f u;
-          f.author = u.id;
-        >>)
+                 email_digest = md5[u.email];
+                 }
+                 by {
+                 f.id;
+                 f.url;
+                 f.description;
+                 f.timedate;
+                 f.author;
+                 f.parent;
+                 f.root;
+                 f.leftBound;
+                 f.rightBound;
+                 u.name;
+                 u.email;
+                 } order by f.id desc limit $int32:limit$ offset $int32:offset$
+                 | f in $Db_table.feeds$; $feeds_filter$ f;
+                 u in $Db_table.users$; $users_filter$ f u;
+                 f.author = u.id;
+         >>)
   | None ->
       Db.view
         (<:view< group {
-          email_digest = md5[u.email];
-        }
-        by {
-          f.id;
-          f.url;
-          f.description;
-          f.timedate;
-          f.author;
-          f.parent;
-          f.root;
-          u.name;
-          u.email;
-        } order by f.id desc
-        | f in $Db_table.feeds$; $feeds_filter$ f;
-          u in $Db_table.users$; $users_filter$ f u;
-          f.author = u.id;
-        >>)
+                 email_digest = md5[u.email];
+                 }
+                 by {
+                 f.id;
+                 f.url;
+                 f.description;
+                 f.timedate;
+                 f.author;
+                 f.parent;
+                 f.root;
+                 f.leftBound;
+                 f.rightBound;
+                 u.name;
+                 u.email;
+                 } order by f.id desc
+                 | f in $Db_table.feeds$; $feeds_filter$ f;
+                 u in $Db_table.users$; $users_filter$ f u;
+                 f.author = u.id;
+         >>)
   end
   >>= fun feeds ->
   let ids = List.map (fun x -> x#id) feeds in
@@ -108,35 +112,25 @@ let get_feeds_aux ?range
     >>)
   >>= fun tags ->
   Db.view
-    (<:view<
-      group { c = count[f.parent] } by { f.parent }
-      | f in $Db_table.feeds$;
-      (match f.parent with
-       | null -> false
-       | parent -> in' parent $ids$
-      )
-    >>)
-  >>= fun count ->
-  Db.view
     (<:view< {
-            f.id_feed;
-            f.id_user;
-            f.score;
-            } | f in $Db_table.votes$;
-            in' f.id_feed $ids$
+             f.id_feed;
+             f.id_user;
+             f.score;
+             } | f in $Db_table.votes$;
+             in' f.id_feed $ids$
      >>)
   >>= fun votes ->
   begin match user with
-    | Some user_id ->
-        Db.view
-          (<:view< {
-                  f.id_feed;
-                  } | f in $Db_table.favs$;
-                  f.id_user = $int32:user_id$; in' f.id_feed $ids$
-           >>)
-        >|= fun favs ->
-        (favs, List.filter (fun x -> Int32.equal x#!id_user user_id) votes)
-    | None ->
+  | Some user_id ->
+      Db.view
+        (<:view< {
+                 f.id_feed;
+                 } | f in $Db_table.favs$;
+                 f.id_user = $int32:user_id$; in' f.id_feed $ids$
+         >>)
+      >|= fun favs ->
+      (favs, List.filter (fun x -> Int32.equal x#!id_user user_id) votes)
+  | None ->
       Lwt.return ([], [])
   end
   >>= fun (favs, user_votes) ->
@@ -161,16 +155,8 @@ let get_feeds_aux ?range
     ; user = object method name = o#!name method email_digest = o#!email_digest end
     ; fav = List.exists (Int32.equal id) favs
     ; vote = map (fun x -> Int32.to_int x#!score) 0 user_votes
-    ; count = find_and_map (fun e -> match e#?parent with Some x -> Int32.equal x id | None -> assert false) (fun x -> Int64.to_int x#!c) 0 count
-      (*
-       * On ne comptais (avec l'ancienne version) que le nombre de commentaires
-       * pour les roots.
-       *
-       * Maintenant, nous comptons le nombre de commentaires pour tout les feeds
-       * mais nous prennons en compte que les commentaires de premier niveau.
-       *
-       * TODO: compter la totalité des commentaires
-       *)
+    ; count =
+        (let open Int32 in to_int ((o#!rightBound - Int32.one - o#!leftBound) / (of_int 2)))
     }
   in
   Lwt.return (List.map new_object feeds)
@@ -256,8 +242,34 @@ let get_fav_with_username name ~starting ~number ~user () =
   get_fav_aux ~starting ~number ~feeds_filter ~user ()
 
 let add_feed ?root ?parent ?url ~description ~tags ~userid () =
+  (match parent with
+   | Some parent_id ->
+       (Db.view_one
+          (<:view< { f.rightBound; }
+                   | f in $Db_table.feeds$;
+                   f.id = $int32:parent_id$;
+           >>))
+       >|= (fun data -> data#!rightBound)
+   | None ->
+       (Db.view_one
+          (<:view< group { rightBound = max[f.rightBound] }
+                   | f in $Db_table.feeds$;
+           >>)
+        >|= (fun opt -> opt#?rightBound)
+        >|= Option.default Int32.zero))
+  >>= fun right_bound ->
   Db.value (<:value< $Db_table.feeds$?id >>)
   >>= fun id_feed ->
+  Db.query
+    (<:update< row in $Db_table.feeds$ :=
+               { leftBound = row.leftBound + 2 }
+               | row.leftBound >= $int32:right_bound$ >>)
+  >>= fun () ->
+  Db.query
+    (<:update< row in $Db_table.feeds$ :=
+               { rightBound = row.rightBound + 2 }
+               | row.rightBound >= $int32:right_bound$ >>)
+  >>= fun () ->
   Db.query
     (<:insert< $Db_table.feeds$ := {
                 id = $int32:id_feed$;
@@ -267,34 +279,55 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
                 author = $int32:userid$;
                 parent = of_option $Option.map Sql.Value.int32 parent$;
                 root = of_option $Option.map Sql.Value.int32 root$;
+                leftBound = $int32:right_bound$;
+                rightBound = $int32:(Int32.add right_bound Int32.one)$;
                 } >>)
   >>= fun () ->
   Lwt_list.iter_p
     (fun tag ->
        Db.query
          (<:insert< $Db_table.feeds_tags$ := {
-                   tag = $string:tag$;
-                   id_feed = $int32:id_feed$;
-                   } >>)
+                    tag = $string:tag$;
+                    id_feed = $int32:id_feed$;
+                    } >>)
     )
     tags
 
 let delete_feed ~feedid () =
+  Db.view_one
+    (<:view< { f.leftBound; }
+             | f in $Db_table.feeds$;
+             f.id = $int32:feedid$;
+     >>)
+  >|= (fun data -> data#!leftBound)
+  >>= fun left_bound ->
+  Db.query
+    (<:update< row in $Db_table.feeds$ :=
+               { leftBound = row.leftBound - 2 }
+               | row.leftBound >= $int32:left_bound$ >>)
+
+  >>= fun () ->
+  Db.query
+    (<:update< row in $Db_table.feeds$ :=
+               { rightBound = row.rightBound - 2 }
+               | row.rightBound >= $int32:left_bound$ >>)
+
+  >>= fun () ->
   Db.query
     (<:delete< f in $Db_table.feeds$ | f.id = $int32:feedid$ >>)
 
 let add_fav ~feedid ~userid () =
   Db.view_opt
     (<:view< {} | f in $Db_table.favs$;
-            f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
+             f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
      >>) >>= function
   | Some _ -> Lwt.return ()
   | None ->
       Db.query
         (<:insert< $Db_table.favs$ := {
-                  id_user = $int32:userid$;
-                  id_feed = $int32:feedid$;
-                  } >>)
+                   id_user = $int32:userid$;
+                   id_feed = $int32:feedid$;
+                   } >>)
 
 let del_fav ~feedid ~userid () =
   Db.query
@@ -303,18 +336,18 @@ let del_fav ~feedid ~userid () =
 let vote_exists ~feedid ~userid =
   Db.view_opt
     (<:view< {}
-            | f in $Db_table.votes$;
-            f.id_user = $int32:userid$; f.id_feed = $int32:feedid$;
+             | f in $Db_table.votes$;
+             f.id_user = $int32:userid$; f.id_feed = $int32:feedid$;
      >>)
   >|= Option.is_some
 
 let get_vote_and_score vote ~feedid =
   Db.view_one
     (<:view< group {
-      n = match sum[v.score] with null -> 0 | n -> n;
-    } | v in $Db_table.votes$;
-        v.id_feed = $int32:feedid$;
-    >>)
+             n = match sum[v.score] with null -> 0 | n -> n;
+             } | v in $Db_table.votes$;
+             v.id_feed = $int32:feedid$;
+     >>)
   >|= fun score ->
   `Ok (vote, Int32.to_int score#!n)
 
@@ -366,9 +399,9 @@ let update ~feedid ~url ~description ~tags () =
   | Some u ->
       (Db.query
          (<:update< f in $Db_table.feeds$ := {
-                   description = $string:description$;
-                   url = $string:u$;
-                   } | f.id = $int32:feedid$; >>)
+                    description = $string:description$;
+                    url = $string:u$;
+                    } | f.id = $int32:feedid$; >>)
        >>= fun () ->
        Db.query
          (<:delete< t in $Db_table.feeds_tags$ | t.id_feed = $int32:feedid$ >>)
@@ -377,17 +410,17 @@ let update ~feedid ~url ~description ~tags () =
          (fun tag ->
             Db.query
               (<:insert< $Db_table.feeds_tags$ := {
-                        tag = $string:tag$;
-                        id_feed = $int32:feedid$;
-                        } >>)
+                         tag = $string:tag$;
+                         id_feed = $int32:feedid$;
+                         } >>)
          )
          tags
       )
   | None ->
       Db.query
         (<:update< f in $Db_table.feeds$ := {
-                  description = $string:description$;
-                  } | f.id = $int32:feedid$; >>)
+                   description = $string:description$;
+                   } | f.id = $int32:feedid$; >>)
 
 let exists ~feedid () =
   Db.view_opt
