@@ -285,7 +285,7 @@ let header () =
                   ~src:(
                     make_uri
                       ~service: (Eliom_service.static_dir ())
-                      ["CUMULUS_Logo.svg"]
+                      ["CUMULUS_Logo.png"]
                   )
                   ();
               ]
