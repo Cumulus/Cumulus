@@ -362,6 +362,18 @@ let main_style ~user ~error ~server_function ~page_title content =
                     ~service: (Eliom_service.static_dir ())
                     ["cumulus.css"]
                  ) ();
+         link
+           ~rel:[`Alternate]
+           ~href:(make_uri ~service:Services.atom ())
+           ~a:[ a_title "Flux atom du site";
+                a_mime_type "application/atom+xml"; ]
+           ();
+         link
+           ~rel:[`Alternate]
+           ~href:(make_uri ~service:Services.comments_atom ())
+           ~a:[ a_title "Flux atom des commentaires";
+                a_mime_type "application/atom+xml"; ]
+           ();
        ]
     )
     (body
