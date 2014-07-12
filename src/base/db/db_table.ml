@@ -31,7 +31,9 @@ let feeds = (<:table< feeds (
                      timedate timestamp NOT NULL DEFAULT(localtimestamp ()),
                      author integer NOT NULL,
                      parent integer,
-                     root integer
+                     root integer,
+                     leftBound integer NOT NULL,
+                     rightBound integer NOT NULL
                      ) >>)
 
 let feeds_tags = (<:table< feeds_tags (

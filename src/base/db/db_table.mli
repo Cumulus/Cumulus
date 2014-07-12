@@ -25,6 +25,8 @@ val feeds : (
     id : Sql.int32_t Sql.non_nullable_data;
     parent : Sql.int32_t Sql.nullable_data;
     root : Sql.int32_t Sql.nullable_data;
+    leftBound : Sql.int32_t Sql.non_nullable_data;
+    rightBound : Sql.int32_t Sql.non_nullable_data;
     timedate : Sql.timestamp_t Sql.non_nullable_data;
     url : Sql.string_t Sql.nullable_data >,
     < id : < nul : Sql.non_nullable; t : Sql.int32_t > Sql.t;

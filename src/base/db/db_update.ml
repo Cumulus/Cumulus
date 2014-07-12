@@ -54,6 +54,53 @@ let update version f =
       update_version version
   | _ -> Lwt.return ()
 
+let compute_interval_representation () =
+  let open Int32 in
+  Db.view
+    (<:view< {
+             f.id;
+             f.root;
+             f.parent;
+             }
+             | f in $Db_table.feeds$;
+             is_null f.root || is_null f.parent; >>)
+  >>= fun feeds ->
+  let rec update_child ~leftBound parent =
+    Db.view
+      (<:view< {
+               f.id;
+               f.root;
+               f.parent;
+               } order by f.id
+               | f in $Db_table.feeds$;
+                 f.parent = $int32:parent$ >>)
+    >>= fun childs ->
+    let rec aux bound = function
+      | [] -> Lwt.return (bound)
+      | x :: r ->
+          update_child ~leftBound:(bound + one) x#!id
+          >>= fun rightBound ->
+          Db.query
+            (<:update< row in $Db_table.feeds$ :=
+                       { leftBound = $int32:leftBound$;
+                         rightBound = $int32:rightBound$ }
+                       | row.id = $int32:x#!id$ >>)
+          >>= fun () -> aux (rightBound + one) r
+    in aux leftBound childs
+  in
+  let rec update_root ?(leftBound = zero) = function
+    | [] -> Lwt.return ()
+    | x :: r ->
+        update_child ~leftBound:(leftBound + one) x#!id
+        >>= fun rightBound ->
+        Db.query
+          (<:update< row in $Db_table.feeds$ :=
+                     { leftBound = $int32:leftBound$;
+                       rightBound = $int32:rightBound$ }
+                     | row.id = $int32:x#!id$ >>)
+        >>= fun () -> update_root ~leftBound:(rightBound + one) r
+  in update_root feeds
+
 let () =
   Lwt_main.run begin
     update 2
@@ -119,5 +166,13 @@ let () =
          Db.alter "DELETE FROM feeds AS f WHERE f.parent NOT IN (SELECT id FROM feeds)" >>= fun () ->
          Db.alter "ALTER TABLE feeds ADD FOREIGN KEY (parent) REFERENCES feeds (id) ON DELETE CASCADE" >>= fun () ->
          Db.alter "ALTER TABLE feeds ADD FOREIGN KEY (root) REFERENCES feeds (id) ON DELETE CASCADE"
+      )
+    >>= fun () ->
+    update 8
+      (fun () ->
+         Db.alter "ALTER TABLE feeds ADD COLUMN leftbound integer NOT NULL DEFAULT(0)" >>= fun () ->
+         Db.alter "ALTER TABLE feeds ADD COLUMN rightbound integer NOT NULL DEFAULT(0)"
+         >>= compute_interval_representation >>= fun () ->
+         Db.alter "ALTER TABLE feeds ADD CHECK (rightBound > leftBound)"
       )
   end

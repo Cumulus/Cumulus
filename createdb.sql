@@ -22,7 +22,9 @@ CREATE TABLE feeds (
     timedate timestamp NOT NULL,
     author integer NOT NULL REFERENCES users (id),
     parent integer REFERENCES feeds (id) ON DELETE CASCADE,
-    root integer REFERENCES feeds (id) ON DELETE CASCADE
+    root integer REFERENCES feeds (id) ON DELETE CASCADE,
+    leftBound integer NOT NULL,
+    rightBound integer NOT NULL CHECK (rightBound > leftBound)
 );
 
 CREATE TABLE feeds_tags (
@@ -44,4 +46,4 @@ CREATE TABLE votes (
 CREATE SEQUENCE users_id_seq;
 CREATE SEQUENCE feeds_id_seq;
 
-INSERT INTO options VALUES ('dbversion', '7');
+INSERT INTO options VALUES ('dbversion', '8');

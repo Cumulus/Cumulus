@@ -49,10 +49,10 @@ type feed_generator =
   feeds Lwt.t
 
 let get_feeds_aux ?range
-  ~feeds_filter
-  ~users_filter
-  ~user
-  () =
+      ~feeds_filter
+      ~users_filter
+      ~user
+      () =
   begin match range with
   | Some (limit, offset) ->
       Db.view
@@ -67,6 +67,8 @@ let get_feeds_aux ?range
           f.author;
           f.parent;
           f.root;
+          f.leftBound;
+          f.rightBound;
           u.name;
           u.email;
         } order by f.id desc limit $int32:limit$ offset $int32:offset$
@@ -87,6 +89,8 @@ let get_feeds_aux ?range
           f.author;
           f.parent;
           f.root;
+          f.leftBound;
+          f.rightBound;
           u.name;
           u.email;
         } order by f.id desc
@@ -108,16 +112,6 @@ let get_feeds_aux ?range
     >>)
   >>= fun tags ->
   Db.view
-    (<:view<
-      group { c = count[f.parent] } by { f.parent }
-      | f in $Db_table.feeds$;
-      (match f.parent with
-       | null -> false
-       | parent -> in' parent $ids$
-      )
-    >>)
-  >>= fun count ->
-  Db.view
     (<:view< {
             f.id_feed;
             f.id_user;
@@ -127,16 +121,16 @@ let get_feeds_aux ?range
      >>)
   >>= fun votes ->
   begin match user with
-    | Some user_id ->
-        Db.view
-          (<:view< {
-                  f.id_feed;
-                  } | f in $Db_table.favs$;
-                  f.id_user = $int32:user_id$; in' f.id_feed $ids$
-           >>)
-        >|= fun favs ->
-        (favs, List.filter (fun x -> Int32.equal x#!id_user user_id) votes)
-    | None ->
+  | Some user_id ->
+      Db.view
+        (<:view< {
+                 f.id_feed;
+                 } | f in $Db_table.favs$;
+                 f.id_user = $int32:user_id$; in' f.id_feed $ids$
+         >>)
+      >|= fun favs ->
+      (favs, List.filter (fun x -> Int32.equal x#!id_user user_id) votes)
+  | None ->
       Lwt.return ([], [])
   end
   >>= fun (favs, user_votes) ->
@@ -161,16 +155,8 @@ let get_feeds_aux ?range
     ; user = object method name = o#!name method email_digest = o#!email_digest end
     ; fav = List.exists (Int32.equal id) favs
     ; vote = map (fun x -> Int32.to_int x#!score) 0 user_votes
-    ; count = find_and_map (fun e -> match e#?parent with Some x -> Int32.equal x id | None -> assert false) (fun x -> Int64.to_int x#!c) 0 count
-      (*
-       * On ne comptais (avec l'ancienne version) que le nombre de commentaires
-       * pour les roots.
-       *
-       * Maintenant, nous comptons le nombre de commentaires pour tout les feeds
-       * mais nous prennons en compte que les commentaires de premier niveau.
-       *
-       * TODO: compter la totalité des commentaires
-       *)
+    ; count =
+        (let open Int32 in to_int ((o#!rightBound - Int32.one - o#!leftBound) / (of_int 2)))
     }
   in
   Lwt.return (List.map new_object feeds)
@@ -256,8 +242,34 @@ let get_fav_with_username name ~starting ~number ~user () =
   get_fav_aux ~starting ~number ~feeds_filter ~user ()
 
 let add_feed ?root ?parent ?url ~description ~tags ~userid () =
+  (match parent with
+   | Some parent_id ->
+       (Db.view_one
+          (<:view< { f.rightBound; }
+                   | f in $Db_table.feeds$;
+                   f.id = $int32:parent_id$;
+           >>))
+       >|= (fun data -> data#!rightBound)
+   | None ->
+       (Db.view_one
+          (<:view< group { rightBound = max[f.rightBound] }
+                   | f in $Db_table.feeds$;
+           >>)
+        >|= (fun opt -> opt#?rightBound)
+        >|= Option.default Int32.zero))
+  >>= fun right_bound ->
   Db.value (<:value< $Db_table.feeds$?id >>)
   >>= fun id_feed ->
+  Db.query
+    (<:update< row in $Db_table.feeds$ :=
+               { leftBound = row.leftBound + 2 }
+               | row.leftBound >= $int32:right_bound$ >>)
+  >>= fun () ->
+  Db.query
+    (<:update< row in $Db_table.feeds$ :=
+               { rightBound = row.rightBound + 2 }
+               | row.rightBound >= $int32:right_bound$ >>)
+  >>= fun () ->
   Db.query
     (<:insert< $Db_table.feeds$ := {
                 id = $int32:id_feed$;
@@ -267,6 +279,8 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
                 author = $int32:userid$;
                 parent = of_option $Option.map Sql.Value.int32 parent$;
                 root = of_option $Option.map Sql.Value.int32 root$;
+                leftBound = $int32:right_bound$;
+                rightBound = $int32:(Int32.add right_bound Int32.one)$;
                 } >>)
   >>= fun () ->
   Lwt_list.iter_p
@@ -280,6 +294,25 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
     tags
 
 let delete_feed ~feedid () =
+  Db.view_one
+    (<:view< { f.leftBound; }
+             | f in $Db_table.feeds$;
+             f.id = $int32:feedid$;
+     >>)
+  >|= (fun data -> data#!leftBound)
+  >>= fun left_bound ->
+  Db.query
+    (<:update< row in $Db_table.feeds$ :=
+               { leftBound = row.leftBound - 2 }
+               | row.leftBound >= $int32:left_bound$ >>)
+
+  >>= fun () ->
+  Db.query
+    (<:update< row in $Db_table.feeds$ :=
+               { rightBound = row.rightBound - 2 }
+               | row.rightBound >= $int32:left_bound$ >>)
+
+  >>= fun () ->
   Db.query
     (<:delete< f in $Db_table.feeds$ | f.id = $int32:feedid$ >>)
 
