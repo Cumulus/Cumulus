@@ -24,7 +24,7 @@ CREATE TABLE feeds (
     parent integer REFERENCES feeds (id) ON DELETE CASCADE,
     root integer REFERENCES feeds (id) ON DELETE CASCADE,
     leftBound integer NOT NULL,
-    rightBound integer NOT NULL
+    rightBound integer NOT NULL CHECK (rightBound > leftBound)
 );
 
 CREATE TABLE feeds_tags (

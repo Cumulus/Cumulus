@@ -172,6 +172,7 @@ let () =
       (fun () ->
          Db.alter "ALTER TABLE feeds ADD COLUMN leftbound integer NOT NULL DEFAULT(0)" >>= fun () ->
          Db.alter "ALTER TABLE feeds ADD COLUMN rightbound integer NOT NULL DEFAULT(0)"
-         >>= compute_interval_representation
+         >>= compute_interval_representation >>= fun () ->
+         Db.alter "ALTER TABLE feeds ADD CHECK (rightBound > leftBound)"
       )
   end
