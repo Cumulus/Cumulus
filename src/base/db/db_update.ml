@@ -175,4 +175,8 @@ let () =
          >>= compute_interval_representation >>= fun () ->
          Db.alter "ALTER TABLE feeds ADD CHECK (rightBound > leftBound)"
       )
+    >>= fun () ->
+    update 9 compute_interval_representation
+    (* this update refer to fix of compute_interval_representation in this
+     * commit: 3fc7051 *)
   end
