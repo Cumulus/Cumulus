@@ -46,4 +46,4 @@ CREATE TABLE votes (
 CREATE SEQUENCE users_id_seq;
 CREATE SEQUENCE feeds_id_seq;
 
-INSERT INTO options VALUES ('dbversion', '8');
+INSERT INTO options VALUES ('dbversion', '9');
