@@ -25,41 +25,41 @@ open Eliom_lib.Lwt_ops
 let feeds_id_seq = (<:sequence< serial "feeds_id_seq" >>)
 
 let feeds = (<:table< feeds (
-                      id integer NOT NULL DEFAULT(nextval $feeds_id_seq$),
-                      url text,
-                      description text NOT NULL,
-                      timedate timestamp NOT NULL DEFAULT(localtimestamp ()),
-                      author integer NOT NULL,
-                      parent integer,
-                      root integer,
-                      leftBound integer NOT NULL,
-                      rightBound integer NOT NULL
-                      ) >>)
+                     id integer NOT NULL DEFAULT(nextval $feeds_id_seq$),
+                     url text,
+                     description text NOT NULL,
+                     timedate timestamp NOT NULL DEFAULT(localtimestamp ()),
+                     author integer NOT NULL,
+                     parent integer,
+                     root integer,
+                     leftBound integer NOT NULL,
+                     rightBound integer NOT NULL
+                     ) >>)
 
 let feeds_tags = (<:table< feeds_tags (
-                           tag text NOT NULL,
-                           id_feed integer NOT NULL
-                           ) >>)
+                          tag text NOT NULL,
+                          id_feed integer NOT NULL
+                          ) >>)
 
 let votes = (<:table< votes (
-                      id_user integer NOT NULL,
-                      id_feed integer NOT NULL,
-                      score integer NOT NULL
-                      ) >>)
+                     id_user integer NOT NULL,
+                     id_feed integer NOT NULL,
+                     score integer NOT NULL
+                     ) >>)
 
 let users_id_seq = (<:sequence< serial "users_id_seq" >>)
 
 let users = (<:table< users (
-                      id integer NOT NULL DEFAULT(nextval $users_id_seq$),
-                      name text NOT NULL,
-                      password text NOT NULL,
-                      email text NOT NULL,
-                      is_admin boolean NOT NULL DEFAULT(false),
-                      feeds_per_page integer NOT NULL DEFAULT(10)
-                      ) >>)
+                     id integer NOT NULL DEFAULT(nextval $users_id_seq$),
+                     name text NOT NULL,
+                     password text NOT NULL,
+                     email text NOT NULL,
+                     is_admin boolean NOT NULL DEFAULT(false),
+                     feeds_per_page integer NOT NULL DEFAULT(10)
+                     ) >>)
 
 let favs = (<:table< favs (
-                     (* id integer NOT NULL DEFAULT(nextval $favs_id_seq$), *)
-                     id_user integer NOT NULL,
-                     id_feed integer NOT NULL
-                     ) >>)
+                    (* id integer NOT NULL DEFAULT(nextval $favs_id_seq$), *)
+                    id_user integer NOT NULL,
+                    id_feed integer NOT NULL
+                    ) >>)

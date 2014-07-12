@@ -23,18 +23,18 @@ open Batteries
 open Eliom_lib.Lwt_ops
 
 let options = (<:table< options (
-                        name text NOT NULL,
-                        value text NOT NULL
-                        ) >>)
+                       name text NOT NULL,
+                       value text NOT NULL
+                       ) >>)
 
 let name = (<:value< "dbversion" >>)
 
 let current_version () =
   Db.view_one
     (<:view< {
-             o.value;
-             } | o in $options$;
-             o.name = $name$;
+            o.value;
+            } | o in $options$;
+            o.name = $name$;
      >>)
   >>= fun version ->
   Lwt.return (int_of_string version#!value)
@@ -43,8 +43,8 @@ let update_version value =
   let value = string_of_int value in
   Db.query
     (<:update< o in $options$ := {
-               value = $string:value$;
-               } | o.name = $name$; >>)
+              value = $string:value$;
+              } | o.name = $name$; >>)
 
 let update version f =
   current_version () >>= function

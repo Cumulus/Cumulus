@@ -57,47 +57,47 @@ let get_feeds_aux ?range
   | Some (limit, offset) ->
       Db.view
         (<:view< group {
-                 email_digest = md5[u.email];
-                 }
-                 by {
-                 f.id;
-                 f.url;
-                 f.description;
-                 f.timedate;
-                 f.author;
-                 f.parent;
-                 f.root;
-                 f.leftBound;
-                 f.rightBound;
-                 u.name;
-                 u.email;
-                 } order by f.id desc limit $int32:limit$ offset $int32:offset$
-                 | f in $Db_table.feeds$; $feeds_filter$ f;
-                 u in $Db_table.users$; $users_filter$ f u;
-                 f.author = u.id;
-         >>)
+          email_digest = md5[u.email];
+        }
+        by {
+          f.id;
+          f.url;
+          f.description;
+          f.timedate;
+          f.author;
+          f.parent;
+          f.root;
+          f.leftBound;
+          f.rightBound;
+          u.name;
+          u.email;
+        } order by f.id desc limit $int32:limit$ offset $int32:offset$
+        | f in $Db_table.feeds$; $feeds_filter$ f;
+          u in $Db_table.users$; $users_filter$ f u;
+          f.author = u.id;
+        >>)
   | None ->
       Db.view
         (<:view< group {
-                 email_digest = md5[u.email];
-                 }
-                 by {
-                 f.id;
-                 f.url;
-                 f.description;
-                 f.timedate;
-                 f.author;
-                 f.parent;
-                 f.root;
-                 f.leftBound;
-                 f.rightBound;
-                 u.name;
-                 u.email;
-                 } order by f.id desc
-                 | f in $Db_table.feeds$; $feeds_filter$ f;
-                 u in $Db_table.users$; $users_filter$ f u;
-                 f.author = u.id;
-         >>)
+          email_digest = md5[u.email];
+        }
+        by {
+          f.id;
+          f.url;
+          f.description;
+          f.timedate;
+          f.author;
+          f.parent;
+          f.root;
+          f.leftBound;
+          f.rightBound;
+          u.name;
+          u.email;
+        } order by f.id desc
+        | f in $Db_table.feeds$; $feeds_filter$ f;
+          u in $Db_table.users$; $users_filter$ f u;
+          f.author = u.id;
+        >>)
   end
   >>= fun feeds ->
   let ids = List.map (fun x -> x#id) feeds in
@@ -113,11 +113,11 @@ let get_feeds_aux ?range
   >>= fun tags ->
   Db.view
     (<:view< {
-             f.id_feed;
-             f.id_user;
-             f.score;
-             } | f in $Db_table.votes$;
-             in' f.id_feed $ids$
+            f.id_feed;
+            f.id_user;
+            f.score;
+            } | f in $Db_table.votes$;
+            in' f.id_feed $ids$
      >>)
   >>= fun votes ->
   begin match user with
@@ -287,9 +287,9 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
     (fun tag ->
        Db.query
          (<:insert< $Db_table.feeds_tags$ := {
-                    tag = $string:tag$;
-                    id_feed = $int32:id_feed$;
-                    } >>)
+                   tag = $string:tag$;
+                   id_feed = $int32:id_feed$;
+                   } >>)
     )
     tags
 
@@ -319,15 +319,15 @@ let delete_feed ~feedid () =
 let add_fav ~feedid ~userid () =
   Db.view_opt
     (<:view< {} | f in $Db_table.favs$;
-             f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
+            f.id_user = $int32:userid$ && f.id_feed = $int32:feedid$;
      >>) >>= function
   | Some _ -> Lwt.return ()
   | None ->
       Db.query
         (<:insert< $Db_table.favs$ := {
-                   id_user = $int32:userid$;
-                   id_feed = $int32:feedid$;
-                   } >>)
+                  id_user = $int32:userid$;
+                  id_feed = $int32:feedid$;
+                  } >>)
 
 let del_fav ~feedid ~userid () =
   Db.query
@@ -336,18 +336,18 @@ let del_fav ~feedid ~userid () =
 let vote_exists ~feedid ~userid =
   Db.view_opt
     (<:view< {}
-             | f in $Db_table.votes$;
-             f.id_user = $int32:userid$; f.id_feed = $int32:feedid$;
+            | f in $Db_table.votes$;
+            f.id_user = $int32:userid$; f.id_feed = $int32:feedid$;
      >>)
   >|= Option.is_some
 
 let get_vote_and_score vote ~feedid =
   Db.view_one
     (<:view< group {
-             n = match sum[v.score] with null -> 0 | n -> n;
-             } | v in $Db_table.votes$;
-             v.id_feed = $int32:feedid$;
-     >>)
+      n = match sum[v.score] with null -> 0 | n -> n;
+    } | v in $Db_table.votes$;
+        v.id_feed = $int32:feedid$;
+    >>)
   >|= fun score ->
   `Ok (vote, Int32.to_int score#!n)
 
@@ -399,9 +399,9 @@ let update ~feedid ~url ~description ~tags () =
   | Some u ->
       (Db.query
          (<:update< f in $Db_table.feeds$ := {
-                    description = $string:description$;
-                    url = $string:u$;
-                    } | f.id = $int32:feedid$; >>)
+                   description = $string:description$;
+                   url = $string:u$;
+                   } | f.id = $int32:feedid$; >>)
        >>= fun () ->
        Db.query
          (<:delete< t in $Db_table.feeds_tags$ | t.id_feed = $int32:feedid$ >>)
@@ -410,17 +410,17 @@ let update ~feedid ~url ~description ~tags () =
          (fun tag ->
             Db.query
               (<:insert< $Db_table.feeds_tags$ := {
-                         tag = $string:tag$;
-                         id_feed = $int32:feedid$;
-                         } >>)
+                        tag = $string:tag$;
+                        id_feed = $int32:feedid$;
+                        } >>)
          )
          tags
       )
   | None ->
       Db.query
         (<:update< f in $Db_table.feeds$ := {
-                   description = $string:description$;
-                   } | f.id = $int32:feedid$; >>)
+                  description = $string:description$;
+                  } | f.id = $int32:feedid$; >>)
 
 let exists ~feedid () =
   Db.view_opt
