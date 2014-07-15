@@ -262,13 +262,13 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
   >>= fun id_feed ->
   Db.query
     (<:update< row in $Db_table.feeds$ :=
-               { leftBound = row.leftBound + 2 }
-               | row.leftBound >= $int32:right_bound$ >>)
+               { rightBound = row.rightBound + 2 }
+               | row.rightBound >= $int32:right_bound$ >>)
   >>= fun () ->
   Db.query
     (<:update< row in $Db_table.feeds$ :=
-               { rightBound = row.rightBound + 2 }
-               | row.rightBound >= $int32:right_bound$ >>)
+               { leftBound = row.leftBound + 2 }
+               | row.leftBound >= $int32:right_bound$ >>)
   >>= fun () ->
   Db.query
     (<:insert< $Db_table.feeds$ := {
