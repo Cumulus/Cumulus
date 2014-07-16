@@ -279,8 +279,8 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
                 author = $int32:userid$;
                 parent = of_option $Option.map Sql.Value.int32 parent$;
                 root = of_option $Option.map Sql.Value.int32 root$;
-                leftBound = $int32:right_bound$;
-                rightBound = $int32:(Int32.add right_bound Int32.one)$;
+                leftBound = $int32:(Int32.add right_bound Int32.one)$;
+                rightBound = $int32:(Int32.succ (Int32.succ right_bound))$;
                 } >>)
   >>= fun () ->
   Lwt_list.iter_p
