@@ -270,6 +270,11 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
                { leftBound = row.leftBound + 2 }
                | row.leftBound >= $int32:right_bound$ >>)
   >>= fun () ->
+  let left_bound = match root with
+    | Some _ -> right_bound (* Replace old rightBound by new feed *)
+    | None -> Int32.add right_bound (Int32.of_int 3) in
+  (* All of the right_bound is increment with 2, so add 3 for last feed *)
+  let right_bound = Int32.add left_bound Int32.one in
   Db.query
     (<:insert< $Db_table.feeds$ := {
                 id = $int32:id_feed$;
@@ -279,8 +284,8 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
                 author = $int32:userid$;
                 parent = of_option $Option.map Sql.Value.int32 parent$;
                 root = of_option $Option.map Sql.Value.int32 root$;
-                leftBound = $int32:(Int32.add right_bound Int32.one)$;
-                rightBound = $int32:(Int32.succ (Int32.succ right_bound))$;
+                leftBound = $int32:left_bound$;
+                rightBound = $int32:right_bound$;
                 } >>)
   >>= fun () ->
   Lwt_list.iter_p
