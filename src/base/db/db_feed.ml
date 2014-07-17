@@ -256,7 +256,7 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
                    | f in $Db_table.feeds$;
            >>)
         >|= (fun opt -> opt#?rightBound)
-        >|= Option.default Int32.zero))
+        >|= Option.map_default Int32.succ Int32.zero))
   >>= fun right_bound ->
   Db.value (<:value< $Db_table.feeds$?id >>)
   >>= fun id_feed ->
@@ -270,10 +270,7 @@ let add_feed ?root ?parent ?url ~description ~tags ~userid () =
                { leftBound = row.leftBound + 2 }
                | row.leftBound >= $int32:right_bound$ >>)
   >>= fun () ->
-  let left_bound = match root with
-    | Some _ -> right_bound (* Replace old rightBound by new feed *)
-    | None -> Int32.add right_bound (Int32.of_int 3) in
-  (* All of the right_bound is increment with 2, so add 3 for last feed *)
+  let left_bound = right_bound in
   let right_bound = Int32.add left_bound Int32.one in
   Db.query
     (<:insert< $Db_table.feeds$ := {
