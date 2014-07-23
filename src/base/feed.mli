@@ -35,6 +35,8 @@ type feed = Db_feed.feed =
   ; fav : bool
   ; vote : int
   ; count : int
+  ; leftBound : int32
+  ; rightBound : int32
   }
 
 type feed_generator =
@@ -76,3 +78,7 @@ val get_comments :
 val get_tree_feeds : int32 -> feed_generator
 val get_links_feeds : feed_generator
 val get_comments_feeds : feed_generator
+val get_feeds_of_interval :
+  user:int32 option ->
+  int32 -> int32 ->
+  feed list Lwt.t
