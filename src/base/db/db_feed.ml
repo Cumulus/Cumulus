@@ -37,6 +37,8 @@ type feed =
   ; fav : bool
   ; vote : int
   ; count : int
+  ; leftBound : int32
+  ; rightBound : int32
   }
 
 type feeds = feed list
@@ -157,6 +159,9 @@ let get_feeds_aux ?range
     ; vote = map (fun x -> Int32.to_int x#!score) 0 user_votes
     ; count =
         (let open Int32 in to_int ((o#!rightBound - Int32.one - o#!leftBound) / (of_int 2)))
+
+    ; leftBound = o#!leftBound
+    ; rightBound = o#!rightBound
     }
   in
   Lwt.return (List.map new_object feeds)
@@ -216,6 +221,13 @@ let get_feed_with_id ~user id =
 let get_comments ~user root =
   let feeds_filter f =
     (<:value< f.root = $int32:root$ || f.parent = $int32:root$ >>) in
+  let users_filter _ _ = (<:value< true >>) in
+  get_feeds_aux ~feeds_filter ~users_filter ~user ()
+
+let get_feeds_of_interval ~user leftBound rightBound =
+  let feeds_filter f =
+    (<:value< f.leftBound > $int32:leftBound$
+              && f.rightBound < $int32:rightBound$ >>) in
   let users_filter _ _ = (<:value< true >>) in
   get_feeds_aux ~feeds_filter ~users_filter ~user ()
 

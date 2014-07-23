@@ -33,6 +33,8 @@ type feed =
   ; fav : bool
   ; vote : int
   ; count : int
+  ; leftBound : int32
+  ; rightBound : int32
   }
 
 type feeds = feed list
@@ -58,6 +60,11 @@ val get_fav_with_username : string -> feed_generator
 val get_comments :
   user:int32 option ->
   int32 ->
+  feeds Lwt.t
+
+val get_feeds_of_interval :
+  user:int32 option ->
+  int32 -> int32 ->
   feeds Lwt.t
 
 val is_feed_author :
