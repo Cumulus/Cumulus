@@ -71,10 +71,6 @@ val get_fav_with_username : string -> feed_generator
 val exist : feedid:int32 -> unit -> bool Lwt.t
 val is_feed_author : feedid:int32 -> userid:int32 -> unit -> bool Lwt.t
 val get_feed_with_id : user:int32 option -> int32 -> feed Lwt.t
-val get_comments :
-  user:int32 option ->
-  int32 ->
-  feed list Lwt.t
 val get_tree_feeds : int32 -> feed_generator
 val get_links_feeds : feed_generator
 val get_comments_feeds : feed_generator

@@ -29,7 +29,3 @@ type tree = Sheet of Feed.feed | Node of Feed.feed * tree list
 
 val make : Feed.feed -> node
 val tree_of_node : user:int32 option -> node -> tree Lwt.t
-
-val tree_comments : tree list -> Feed.feed list -> tree option
-val branch_comments : tree -> Feed.feed list -> tree
-val string_of_tree : tree -> string
