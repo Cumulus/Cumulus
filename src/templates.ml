@@ -65,23 +65,17 @@ let fav_feed username = feed_list (Feed.get_fav_with_username username)
 
 let feeds_comments_to_html ~user id =
   let userid = User.get_id user in
-  Feed.get_feed_with_id ~user:userid id >>= fun root ->
-  Feed.get_comments ~user:userid id >|= fun comments ->
-  let result = Comments.tree_comments [Comments.Sheet root] comments
-  in match result with
-  | Some tree -> Templates_feeds.comments_to_html' ~user tree
-  | None -> Templates_feeds.comments_to_html' ~user (Comments.Sheet root)
+  Feed.get_feed_with_id ~user:userid id
+  >|= Comments.make
+  >>= Comments.tree_of_node ~user:userid
+  >|= Templates_feeds.comments_to_html' ~user
 
 (* TODO: Fix it (doesn't seems to work) *)
 let feeds_branch_to_html ~user id =
   let userid = User.get_id user in
-  Feed.get_feed_with_id ~user:userid id >>= fun target ->
-  (match target.Feed.root with
-    | None -> Lwt.return (Comments.Sheet target)
-    | Some root ->
-      Feed.get_feed_with_id ~user:userid root >>= fun root ->
-      Feed.get_comments ~user:userid root.Feed.id >|= fun comments ->
-      (Comments.branch_comments (Comments.Sheet target) (root :: comments)))
+  Feed.get_feed_with_id ~user:userid id
+  >|= Comments.make
+  >>= Comments.tree_of_node ~user:userid
 
 (* Shows a specific link (TODO: and its comments) *)
 let view_feed id =

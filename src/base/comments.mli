@@ -19,8 +19,13 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *)
 
+type node =
+  { id : int32
+  ; leftBound : int32
+  ; rightBound : int32
+  }
+
 type tree = Sheet of Feed.feed | Node of Feed.feed * tree list
 
-val tree_comments : tree list -> Feed.feed list -> tree option
-val branch_comments : tree -> Feed.feed list -> tree
-val string_of_tree : tree -> string
+val make : Feed.feed -> node
+val tree_of_node : user:int32 option -> node -> tree Lwt.t
