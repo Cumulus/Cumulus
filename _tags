@@ -70,7 +70,7 @@
 <src/client/*.ml{,i}>: package(eliom.client)
 # OASIS_STOP
 
-true: bin_annot
+true: bin_annot, safe_string
 
 <src/base/db/db_*.ml>: package(macaque.syntax), syntax(camlp4o)
 <src/**/*.ml{,i}>: thread
