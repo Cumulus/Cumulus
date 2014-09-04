@@ -31,8 +31,6 @@ val main_style :
   [< Html5_types.aside_content_fun > `Section ] Eliom_content.Html5.F.elt list ->
   [> `Html ] Eliom_content.Html5.F.elt
 val comments_to_html' :
-	?padding:int ->
-	?is_child:bool ->
   user:User.user option ->
   Comments.tree ->
   [< Html5_types.div_content_fun > `Aside `Div ] Eliom_content.Html5.F.elt

@@ -181,15 +181,17 @@ let feed_to_html ?(padding=5) ?(is_child=false) ~user self =
       ]
     ]
 
-let rec comments_to_html' ?(padding=5) ?(is_child=false) ~user tree =
-  match tree with
-  | Comments.Sheet feed ->
-      let elm = feed_to_html ~padding ~is_child ~user feed in
-      div ~a: [a_class ["line"]] elm
-  | Comments.Node (feed, childs) ->
-      let elm = feed_to_html ~padding ~is_child ~user feed in
-      let childs = List.map (comments_to_html' ~padding:(padding + 75) ~is_child:true ~user) childs in
-      div ~a: [a_class ["line"]] (elm @ childs)
+let comments_to_html' ~user =
+  let rec aux ~padding ~is_child = function
+    | Comments.Sheet feed ->
+        let elm = feed_to_html ~padding ~is_child ~user feed in
+        div ~a: [a_class ["line"]] elm
+    | Comments.Node (feed, childs) ->
+        let elm = feed_to_html ~padding ~is_child ~user feed in
+        let childs = List.map (aux ~padding:(padding + 75) ~is_child:true) childs in
+        div ~a: [a_class ["line"]] (elm @ childs)
+  in
+  aux ~padding:5 ~is_child:false
 
 let to_html ~user data =
   List.map
