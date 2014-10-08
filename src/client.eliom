@@ -227,7 +227,12 @@ module ClientTypes : sig
 end = struct
 
   let feeds_actions ~content ~box =
-    let content = server_function Json.t<int> content in
+    let content =
+      server_function
+        ~scope:Eliom_common.comet_client_process_scope
+        Json.t<int>
+        content
+    in
     ignore {unit{
       let content = %content in
       let box = %box in
