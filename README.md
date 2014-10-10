@@ -2,19 +2,19 @@ Build Requirements
 ==================
 
  * OCaml >= 4.01
- * Eliom >= dev
+ * Eliom >= 4.0
  * Lwt >= 2.4
  * OCaml-safepass >= 1.2
- * PG'OCaml >= dev
+ * PG'OCaml >= 2.0
  * MaCaQue >= dev
- * OCaml-markdown >= 0.1.1
+ * OCaml-markdown >= dev
+ * Batteries >= 2.2
  * Camomile
- * sqlite3-ocaml
 
 Run Requirements
 ================
 
- * Ocsigenserver
+ * Ocsigenserver with dbm
  * PostgreSQL
 
 See the INSTALL file to know how to get them.
