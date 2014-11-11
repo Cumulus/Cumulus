@@ -9,7 +9,7 @@ case $OCSIGENSERVER3 in
     true)
         opam repository add cumulus https://github.com/Cumulus/opam-cumulus.git;;
     false)
-        git clone https://github.com/ocsigen/ocsigenserver.git#3.0.0-cohttp
+        git clone -b 3.0.0-cohttp https://github.com/ocsigen/ocsigenserver.git
         cd ocsigenserver
         opam repository add 3.0.0-cohttp ./opam-3.0.0-cohttp/
         opam update
