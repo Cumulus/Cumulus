@@ -9,7 +9,13 @@ case $OCSIGENSERVER3 in
     true)
         opam repository add cumulus https://github.com/Cumulus/opam-cumulus.git;;
     false)
-        opam repository add cumulus https://github.com/Cumulus/opam-cumulus.git#ocsigenserver-3.0.0;;
+        git clone https://github.com/ocsigen/ocsigenserver.git#3.0.0-cohttp
+        cd ocsigenserver
+        opam repository add 3.0.0-cohttp ./opam-3.0.0-cohttp/
+        opam update
+        opam pin add --no-action ocsigenserver .
+        cd ..
+        ;;
     *)
         echo Unknown variable '$OCSIGENSERVER3': $OCSIGENSERVER3
 esac
