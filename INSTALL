@@ -31,6 +31,10 @@ then add the following line in /etc/postgresql/<maybe sub-dir>/pg_hba.conf
 
 local cumulus cumulus password
 
+then, restart the postgresql daemon. On old debian-like systems:
+
+ $ service postgres restart
+
 and then execute (with the user postgres):
 
  $ psql -U cumulus -d cumulus -f createdb.sql
