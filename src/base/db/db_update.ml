@@ -179,4 +179,14 @@ let () =
     update 9 compute_interval_representation
     (* this update refer to fix of compute_interval_representation in this
      * commit: 3fc7051 *)
+    >>= fun () ->
+    update 10
+      (fun () ->
+         Db.alter "ALTER TABLE users ADD UNIQUE (name)" >>= fun () ->
+         (* Cannot do that now because it was allowed in the past and people
+            used that. New DB versions (DB created from scratch) have
+            uniqueness. *)
+(*         Db.alter "ALTER TABLE users ADD UNIQUE (email)" >>= fun () -> *)
+         Db.alter "ALTER TABLE feeds ADD UNIQUE (url)"
+      )
   end

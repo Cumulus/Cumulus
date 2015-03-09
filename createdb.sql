@@ -8,16 +8,16 @@ CREATE TABLE options (
 
 CREATE TABLE users (
   id integer PRIMARY KEY,
-  name text NOT NULL,
+  name text NOT NULL UNIQUE,
   password text NOT NULL,
-  email text NOT NULL,
+  email text NOT NULL UNIQUE,
   is_admin boolean NOT NULL,
   feeds_per_page integer NOT NULL CHECK (feeds_per_page > 0)
 );
 
 CREATE TABLE feeds (
     id integer PRIMARY KEY,
-    url text,
+    url text UNIQUE,
     description text NOT NULL,
     timedate timestamp NOT NULL,
     author integer NOT NULL REFERENCES users (id),
@@ -46,4 +46,4 @@ CREATE TABLE votes (
 CREATE SEQUENCE users_id_seq;
 CREATE SEQUENCE feeds_id_seq;
 
-INSERT INTO options VALUES ('dbversion', '9');
+INSERT INTO options VALUES ('dbversion', '10');
