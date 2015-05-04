@@ -21,26 +21,27 @@ You will still need to install with your packages manager
 How to setup the database and build
 ===================================
 
-For init the database, just execute (with the user postgres):
+To init the database, just execute:
 
- $ createuser -P cumulus
- $ createdb -E UTF-8 -O cumulus cumulus
+ $ sudo -u postgres psql -f createdb.sql
 
-then add the following line in /etc/postgresql/<maybe sub-dir>/pg_hba.conf
-(just after the line « # TYPE DATABASE USER ADDRESS METHOD »):
+By default the password is 'cumulus', if you want to change that, then execute:
 
-local cumulus cumulus password
+ $ sudo -u postgres psql
+ postgres=# \password cumulus
+ <type your password>
 
-then, restart the postgresql daemon. On old debian-like systems:
+The final part is about to create a file named 'password' filled with the password you just gave,
+and recompile the project with:
 
- $ service postgres restart
+ $ make
 
-and then execute (with the user postgres):
+Then either you can do:
 
- $ psql -U cumulus -d cumulus -f createdb.sql
+ $ make install
 
-The final part is to create a file named password filled with the password you gave,
-and recompile the project with « make »
+and setuping your server or do:
 
-Then either you can do « make install » and setuping your server or do
-« make run » for testing.
+ $ make run »
+
+for testing.
