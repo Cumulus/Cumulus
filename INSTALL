@@ -15,7 +15,7 @@ You will still need to install with your packages manager
  * All the system packages needed by the opam packages (debian naming convension):
    * libpcre3-dev
    * libssl-dev
-   * libdbm-ocaml-dev
+   * libgdbm-dev
    * And maybe I forgot some deps
 
 How to setup the database and build
